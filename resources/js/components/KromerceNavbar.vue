@@ -34,11 +34,10 @@ const isOpen = ref<boolean>(false);
 <template>
   <header class="w-[90%] md:w-[70%] lg:w-[75%] lg:max-w-screen-xl top-5 mx-auto sticky border z-40 rounded-2xl flex justify-between items-center p-2 bg-card shadow-md">
     <!-- Logo -->
-    <a href="/" class="font-bold text-lg flex items-center">
-      <div class="bg-gradient-to-tr from-blue-600 via-blue-500 to-blue-600 rounded-lg w-9 h-9 mr-2 border border-blue-400 flex items-center justify-center">
-        <span class="text-white font-bold text-lg">K</span>
+    <a href="/" class="font-bold text-lg flex items-center group">
+      <div class="mr-3 transition-transform duration-300 group-hover:scale-110">
+        <img src="/resources/svg/logos/kromerce-logo-horizontal.svg" alt="Kromerce" class="h-10 w-auto" />
       </div>
-      Kromerce
     </a>
 
     <!-- Mobile Menu -->
