@@ -1,0 +1,28 @@
+{
+  "name": "server",
+  "version": "3.3.0",
+  "private": true,
+  "license": "MIT",
+  "main": "src/index.js",
+  "scripts": {
+    "debug": "node --inspect-brk src/index.js",
+    "dev": "cross-env NODE_ENV=development nodemon src/index.js --ignore ../client",
+    "serve": "cross-env NODE_ENV=production node src/index.js"
+  },
+  "type": "module",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "@shopify/shopify-app-express": "^6.0.4",
+    "@shopify/shopify-app-session-storage-sqlite": "^5.0.4",
+    "compression": "^1.8.1",
+    "cross-env": "^10.1.0",
+    "serve-static": "^2.2.1",
+    "sqlite3": "^5.1.7"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.11",
+    "pretty-quick": "^4.2.2"
+  }
+}

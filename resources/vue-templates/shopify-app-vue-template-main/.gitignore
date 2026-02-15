@@ -1,0 +1,47 @@
+# Environment Configuration
+.env
+.env.*
+
+node_modules
+.DS_Store
+dist
+dist-ssr
+coverage
+*.local
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+/cypress/videos/
+/cypress/screenshots/
+
+# ngrok tunnel file
+config/tunnel.pid
+
+# vite build output
+dist/
+
+# extensions build output
+extensions/*/build
+
+# Node library SQLite database
+web/server/src/database/database.sqlite
+shopify.app.toml
+*.sqlite
+*.sqlite3
+*.db
+web/server/src/database/database.sqlite
+
+# Editor directories and files
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.shopify
