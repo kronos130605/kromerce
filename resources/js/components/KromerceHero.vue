@@ -1,6 +1,6 @@
-<script setup lang="ts">
-import { Button } from '@/components/ui/Button';
-import { Badge } from '@/components/ui/Badge';
+<script setup>
+import Button from '@/components/ui/Button.vue';
+import Badge from '@/components/ui/Badge.vue';
 </script>
 
 <template>
@@ -13,9 +13,12 @@ import { Badge } from '@/components/ui/Badge';
           <span>Plataforma para MiPYMES</span>
         </Badge>
 
-        <!-- Main Title -->
-        <div class="max-w-screen-md mx-auto text-center text-5xl md:text-6xl font-bold">
-          <h1>
+        <!-- Main Title with Logo -->
+        <div class="max-w-screen-md mx-auto text-center space-y-6">
+          <div class="flex justify-center">
+            <img src="/resources/images/logos/kromerce-business-text.png" alt="Kromerce" class="h-16 w-auto" />
+          </div>
+          <h1 class="text-5xl md:text-6xl font-bold">
             Vende tus productos y
             <span class="text-transparent bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text">
               servicios

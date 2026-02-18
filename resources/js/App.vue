@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup>
 import KromerceNavbar from './components/KromerceNavbar.vue';
 import KromerceHero from './components/KromerceHero.vue';
 </script>

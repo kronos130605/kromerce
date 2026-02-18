@@ -7,8 +7,8 @@ Route::get('/', function () {
 });
 
 Route::get('/kromerce', function () {
-    return view('kromerce-preview');
-})->name('kromerce.preview');
+    return view('kromerce');
+})->name('kromerce.app');
 
 Route::get('/kromerce-full', function () {
     return view('kromerce-full-preview');
