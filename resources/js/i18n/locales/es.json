@@ -1,0 +1,253 @@
+{
+  "nav": {
+    "features": "Características",
+    "testimonials": "Testimonios",
+    "pricing": "Precios",
+    "contact": "Contacto",
+    "start_free": "Comenzar Gratis",
+    "new": "Nuevo",
+    "toggle_dark": "Cambiar a modo oscuro",
+    "toggle_light": "Cambiar a modo claro"
+  },
+  "hero": {
+    "badge": "Plataforma para negocios",
+    "title_line1": "El futuro del",
+    "title_line2": "está aquí",
+    "subtitle": "Transforma tu negocio con la plataforma más avanzada del mercado. Pagos globales, analytics en tiempo real y crecimiento ilimitado.",
+    "cta": "Comenzar Gratis",
+    "learn_more": "Ver Demo",
+    "social_proof": {
+      "active_businesses": "10K+ negocios activos",
+      "processed": "$2M+ procesados",
+      "countries": "150+ países"
+    },
+    "floating_cards": {
+      "dashboard_analytics": {
+        "title": "Dashboard Analytics",
+        "value": "$24,500",
+        "change": "+12%"
+      },
+      "active_users": {
+        "title": "Usuarios Activos",
+        "value": "1,234",
+        "change": "+8%"
+      },
+      "conversion_rate": {
+        "title": "Tasa de Conversión",
+        "value": "3.2%",
+        "change": "+15%"
+      }
+    }
+  },
+  "cta": {
+    "title": "¿Listo para transformar tu",
+    "title_highlight": "negocio hoy?",
+    "subtitle": "Únete a miles de negocios que ya están vendiendo más, gestionando mejor y creciendo más rápido con Kromerce.",
+    "benefits": {
+      "setup": "Configuración en menos de 5 minutos",
+      "no_card": "Sin tarjetas de crédito requeridas",
+      "cancel": "Cancela cuando quieras",
+      "support": "Soporte 24/7 desde día 1"
+    },
+    "form": {
+      "title": "Comienza tu prueba gratuita",
+      "name_label": "Nombre Completo",
+      "name_placeholder": "Tu nombre",
+      "email_label": "Email",
+      "email_placeholder": "tu@email.com",
+      "business_label": "Nombre del Negocio",
+      "business_placeholder": "Tu negocio",
+      "message_label": "Mensaje (Opcional)",
+      "message_placeholder": "Cuéntanos sobre tu negocio...",
+      "submitting": "Enviando...",
+      "submit": "Comenzar Gratis →",
+      "success": "¡Gracias por contactarnos! Te responderemos en menos de 24 horas."
+    },
+    "trust": {
+      "secure": "Seguro y encriptado",
+      "response": "Respuesta en 24h",
+      "commitment": "Sin compromiso"
+    }
+  },
+  "pricing": {
+    "title": "Precios simples para",
+    "title_highlight": "todos los negocios",
+    "subtitle": "Crece con nosotros. Desde emprendimientos individuales hasta grandes empresas, tenemos el plan perfecto para ti.",
+    "monthly": "Mensual",
+    "yearly": "Anual",
+    "yearly_discount": "-20%",
+    "most_popular": "Más Popular",
+    "save": "Ahorra",
+    "per_month": "mes",
+    "per_year": "año",
+    "free": "Gratis",
+    "plans": {
+      "starter": {
+        "name": "Starter",
+        "description": "Perfecto para negocios que empiezan",
+        "features": [
+          "Hasta 100 productos",
+          "Pagos básicos",
+          "Dashboard simple",
+          "Soporte por email",
+          "1% comisión por venta",
+          "Kromerce branding"
+        ],
+        "cta": "Comenzar Gratis"
+      },
+      "professional": {
+        "name": "Professional",
+        "description": "Ideal para negocios en crecimiento",
+        "features": [
+          "Productos ilimitados",
+          "Pagos avanzados",
+          "Analytics completo",
+          "Soporte prioritario",
+          "0.5% comisión por venta",
+          "Sin branding",
+          "API básica",
+          "Integraciones populares"
+        ],
+        "cta": "Comenzar Trial"
+      },
+      "enterprise": {
+        "name": "Enterprise",
+        "description": "Para grandes operaciones y personalización",
+        "features": [
+          "Todo lo de Professional",
+          "API completa",
+          "Integraciones personalizadas",
+          "Dedicated account manager",
+          "SLA garantizado",
+          "Onboarding personalizado",
+          "White label disponible",
+          "Servidores dedicados"
+        ],
+        "cta": "Contactar Ventas"
+      }
+    },
+    "questions": {
+      "title": "¿Preguntas sobre nuestros planes?",
+      "subtitle": "Nuestro equipo está listo para ayudarte a encontrar el plan perfecto para tu negocio.",
+      "talk_sales": "Hablar con Ventas",
+      "documentation": "Ver Documentación"
+    }
+  },
+  "features": {
+    "title": "Todo lo que necesitas para",
+    "title_highlight": "crecer tu negocio",
+    "subtitle": "Herramientas profesionales diseñadas para ayudarte a vender más, gestionar mejor y tomar decisiones inteligentes.",
+    "list": [
+      {
+        "title": "Dashboard Intuitivo",
+        "description": "Gestiona tu negocio con una interfaz diseñada para maximizar tu productividad y tomar decisiones inteligentes."
+      },
+      {
+        "title": "Pagos Globales",
+        "description": "Acepta pagos de cualquier parte del mundo con múltiples métodos y monedas, sin complicaciones técnicas."
+      },
+      {
+        "title": "Seguridad Enterprise",
+        "description": "Protección de nivel bancario con encriptación SSL, cumplimiento PCI y monitoreo 24/7 de tu negocio."
+      },
+      {
+        "title": "Rendimiento Rápido",
+        "description": "Tiempo de carga optimizado y experiencia fluida para tus clientes, aumentando conversiones hasta un 40%."
+      },
+      {
+        "title": "Soporte 24/7",
+        "description": "Equipo de expertos disponible siempre que lo necesites. Chat, email y teléfono para resolver cualquier duda."
+      },
+      {
+        "title": "Analytics Avanzado",
+        "description": "Insights detallados sobre ventas, clientes y tendencias. Toma decisiones basadas en datos reales."
+      }
+    ],
+    "cta": {
+      "question": "¿Listo para transformar tu negocio?",
+      "button": "Explorar todas las características"
+    }
+  },
+  "testimonials": {
+    "title": "Lo que dicen nuestros",
+    "title_highlight": "clientes",
+    "subtitle": "Miles de negocios ya están creciendo con Kromerce. Descubre sus historias de éxito.",
+    "industries": {
+      "retail": "Retail",
+      "services": "Servicios",
+      "technology": "Technology",
+      "creative": "Creative"
+    },
+    "cta": {
+      "title": "¿Listo para unirte a miles de negocios exitosos?",
+      "subtitle": "Comienza gratis y escala según creces. Sin tarjetas de crédito, sin compromiso.",
+      "start_free": "Comenzar Gratis",
+      "case_studies": "Ver Casos de Éxito"
+    }
+  },
+  "stats": {
+    "title": "Números que hablan por",
+    "title_highlight": "sí solos",
+    "subtitle": "El crecimiento de nuestra plataforma refleja el éxito de nuestros clientes. Únete a miles de negocios que ya están transformando su futuro.",
+    "businesses": {
+      "label": "Negocios Activos",
+      "description": "Confían en Kromerce para crecer"
+    },
+    "countries": {
+      "label": "Países",
+      "description": "Presencia global con soporte local"
+    },
+    "uptime": {
+      "label": "Uptime",
+      "description": "Disponibilidad garantizada"
+    },
+    "support": {
+      "label": "Soporte",
+      "description": "Ayuda cuando la necesitas"
+    },
+    "additional": {
+      "processed": "Procesados en transacciones",
+      "rating": "Calificación promedio de clientes",
+      "response_time": "Tiempo de respuesta promedio"
+    }
+  },
+  "pwa": {
+    "install_title": "Instalar Kromerce",
+    "install_description": "Instala nuestra aplicación para un acceso rápido y mejor experiencia",
+    "install_button": "Instalar",
+    "offline_message": "Estás navegando sin conexión",
+    "content_cached": "Contenido guardado para uso offline"
+  },
+  "footer": {
+    "description": "Plataforma e-commerce para negocios modernos",
+    "links": {
+      "about": "Acerca de",
+      "features": "Características",
+      "pricing": "Precios", 
+      "contact": "Contacto",
+      "blog": "Blog",
+      "careers": "Carreras",
+      "privacy": "Privacidad",
+      "terms": "Términos",
+      "integrations": "Integraciones",
+      "api": "API"
+    },
+    "social": {
+      "twitter": "Síguenos en Twitter",
+      "linkedin": "Conecta en LinkedIn",
+      "github": "Ver en GitHub"
+    },
+    "copyright": "© 2024 Kromerce. Todos los derechos reservados."
+  },
+  "common": {
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito",
+    "close": "Cerrar",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "edit": "Editar",
+    "delete": "Eliminar"
+  }
+}
+

@@ -1,31 +1,35 @@
 <script setup>
+import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import Button from '@/components/ui/Button.vue';
 import Badge from '@/components/ui/Badge.vue';
 import { Sun, Moon, Star } from 'lucide-vue-next';
 
-const floatingCards = [
+const { t } = useI18n();
+
+const floatingCards = computed(() => [
   {
-    title: 'Dashboard Analytics',
-    value: '$24,500',
-    change: '+12%',
+    title: t('hero.floating_cards.dashboard_analytics.title'),
+    value: t('hero.floating_cards.dashboard_analytics.value'),
+    change: t('hero.floating_cards.dashboard_analytics.change'),
     icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z',
     color: 'blue'
   },
   {
-    title: 'Active Users',
-    value: '1,234',
-    change: '+8%',
+    title: t('hero.floating_cards.active_users.title'),
+    value: t('hero.floating_cards.active_users.value'),
+    change: t('hero.floating_cards.active_users.change'),
     icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z',
     color: 'purple'
   },
   {
-    title: 'Conversion Rate',
-    value: '3.2%',
-    change: '+15%',
+    title: t('hero.floating_cards.conversion_rate.title'),
+    value: t('hero.floating_cards.conversion_rate.value'),
+    change: t('hero.floating_cards.conversion_rate.change'),
     icon: 'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6',
     color: 'green'
   }
-];
+]);
 
 const particles = Array.from({ length: 20 }, (_, i) => ({
   id: i,
@@ -113,24 +117,23 @@ const stars = Array.from({ length: 50 }, (_, i) => ({
           ]"
         >
           <span class="mr-2 text-yellow-500 dark:text-yellow-400">🚀</span>
-          <span>Plataforma para negocios</span>
+          <span>{{ t('hero.badge', 'Plataforma para negocios') }}</span>
         </Badge>
 
         <!-- Main Title -->
         <h1 class="text-3xl sm:text-4xl md:text-6xl lg:text-7xl xl:text-8xl font-bold mb-6">
-          <span class="text-gray-900 dark:text-gray-100">El futuro del</span>
+          <span class="text-gray-900 dark:text-gray-100">{{ t('hero.title_line1', 'El futuro del') }}</span>
           <br />
           <span class="text-transparent bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text">
             e-commerce
           </span>
           <br />
-          <span class="text-gray-900 dark:text-gray-100">está aquí</span>
+          <span class="text-gray-900 dark:text-gray-100">{{ t('hero.title_line2', 'está aquí') }}</span>
         </h1>
 
         <!-- Description -->
         <p class="text-lg sm:text-xl md:text-2xl mb-8 sm:mb-12 max-w-3xl mx-auto leading-relaxed px-4 text-gray-700 dark:text-gray-300">
-          Transforma tu negocio con la plataforma más avanzada del mercado.
-          Pagos globales, analytics en tiempo real y crecimiento ilimitado.
+          {{ t('hero.subtitle', 'Transforma tu negocio con la plataforma más avanzada del mercado. Pagos globales, analytics en tiempo real y crecimiento ilimitado.') }}
         </p>
 
         <!-- CTA Buttons -->
@@ -141,7 +144,7 @@ const stars = Array.from({ length: 50 }, (_, i) => ({
               'bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 border-0'
             ]"
           >
-            Comenzar Gratis
+            {{ t('hero.cta', 'Comenzar Gratis') }}
           </Button>
           <Button
             variant="secondary"
@@ -150,7 +153,7 @@ const stars = Array.from({ length: 50 }, (_, i) => ({
               'bg-white hover:bg-gray-50 text-gray-800 border border-gray-300 dark:bg-gray-900 dark:hover:bg-gray-800 dark:text-gray-200 dark:border-gray-700'
             ]"
           >
-            Ver Demo
+            {{ t('hero.learn_more', 'Ver Demo') }}
           </Button>
         </div>
 
@@ -158,15 +161,15 @@ const stars = Array.from({ length: 50 }, (_, i) => ({
         <div class="flex flex-wrap justify-center items-center gap-4 sm:gap-8 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
           <div class="flex items-center gap-2">
             <div class="w-2 h-2 rounded-full animate-pulse bg-green-500 dark:bg-green-400" />
-            <span class="text-xs sm:text-sm">10K+ negocios activos</span>
+            <span class="text-xs sm:text-sm">{{ t('hero.social_proof.active_businesses') }}</span>
           </div>
           <div class="flex items-center gap-2">
             <div class="w-2 h-2 rounded-full animate-pulse bg-blue-500 dark:bg-blue-400" />
-            <span class="text-xs sm:text-sm">$2M+ procesados</span>
+            <span class="text-xs sm:text-sm">{{ t('hero.social_proof.processed') }}</span>
           </div>
           <div class="flex items-center gap-2">
             <div class="w-2 h-2 rounded-full animate-pulse bg-purple-500 dark:bg-purple-400" />
-            <span class="text-xs sm:text-sm">150+ países</span>
+            <span class="text-xs sm:text-sm">{{ t('hero.social_proof.countries') }}</span>
           </div>
         </div>
       </div>

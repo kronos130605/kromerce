@@ -1,11 +1,14 @@
 <script setup>
 import { ref } from 'vue';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 const benefits = [
-  'Configuración en menos de 5 minutos',
-  'Sin tarjetas de crédito requeridas',
-  'Cancela cuando quieras',
-  'Soporte 24/7 desde día 1'
+  t('cta.benefits.setup'),
+  t('cta.benefits.no_card'),
+  t('cta.benefits.cancel'),
+  t('cta.benefits.support')
 ];
 
 const formData = ref({
@@ -34,7 +37,7 @@ const submitForm = async () => {
   isSubmitting.value = false;
 
   // Show success message (in real app, would use toast/notification)
-  alert('¡Gracias por contactarnos! Te responderemos en menos de 24 horas.');
+  alert(t('cta.form.success'));
 };
 </script>
 
@@ -45,14 +48,13 @@ const submitForm = async () => {
         <!-- Header -->
         <div class="text-center mb-12">
           <h2 class="text-3xl md:text-4xl font-bold mb-4 text-white dark:text-gray-100">
-            ¿Listo para transformar tu
+            {{ t('cta.title') }}
             <span class="text-yellow-300 dark:text-yellow-400">
-              negocio hoy?
+              {{ t('cta.title_highlight') }}
             </span>
           </h2>
           <p class="text-xl max-w-2xl mx-auto text-white/90 dark:text-gray-300">
-            Únete a miles de negocios que ya están vendiendo más,
-            gestionando mejor y creciendo más rápido con Kromerce.
+            {{ t('cta.subtitle') }}
           </p>
         </div>
 
@@ -75,52 +77,52 @@ const submitForm = async () => {
         <!-- Contact Form -->
         <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/20 dark:bg-black/20 dark:border-white/10">
           <h3 class="text-2xl font-bold mb-6 text-center text-white dark:text-gray-100">
-            Comienza tu prueba gratuita
+            {{ t('cta.form.title') }}
           </h3>
 
           <form @submit.prevent="submitForm" class="space-y-6">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label class="block text-sm font-medium mb-2 text-white dark:text-gray-100">Nombre Completo</label>
+                <label class="block text-sm font-medium mb-2 text-white dark:text-gray-100">{{ t('cta.form.name_label') }}</label>
                 <input
                   v-model="formData.name"
                   type="text"
                   required
                   class="w-full px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:border-transparent bg-white/20 border border-white/30 text-white placeholder-white/60 focus:ring-yellow-300 dark:bg-gray-900/50 dark:border-gray-800 dark:text-gray-100 dark:placeholder-gray-400 dark:focus:ring-yellow-400"
-                  placeholder="Tu nombre"
+                  :placeholder="t('cta.form.name_placeholder')"
                 />
               </div>
 
               <div>
-                <label class="block text-sm font-medium mb-2 text-white dark:text-gray-100">Email</label>
+                <label class="block text-sm font-medium mb-2 text-white dark:text-gray-100">{{ t('cta.form.email_label') }}</label>
                 <input
                   v-model="formData.email"
                   type="email"
                   required
                   class="w-full px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:border-transparent bg-white/20 border border-white/30 text-white placeholder-white/60 focus:ring-yellow-300 dark:bg-gray-900/50 dark:border-gray-800 dark:text-gray-100 dark:placeholder-gray-400 dark:focus:ring-yellow-400"
-                  placeholder="tu@email.com"
+                  :placeholder="t('cta.form.email_placeholder')"
                 />
               </div>
             </div>
 
             <div>
-              <label class="block text-sm font-medium mb-2 text-white dark:text-gray-100">Nombre del Negocio</label>
+              <label class="block text-sm font-medium mb-2 text-white dark:text-gray-100">{{ t('cta.form.business_label') }}</label>
               <input
                 v-model="formData.business"
                 type="text"
                 required
                 class="w-full px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:border-transparent bg-white/20 border border-white/30 text-white placeholder-white/60 focus:ring-yellow-300 dark:bg-gray-900/50 dark:border-gray-800 dark:text-gray-100 dark:placeholder-gray-400 dark:focus:ring-yellow-400"
-                placeholder="Tu negocio"
+                :placeholder="t('cta.form.business_placeholder')"
               />
             </div>
 
             <div>
-              <label class="block text-sm font-medium mb-2 text-white dark:text-gray-100">Mensaje (Opcional)</label>
+              <label class="block text-sm font-medium mb-2 text-white dark:text-gray-100">{{ t('cta.form.message_label') }}</label>
               <textarea
                 v-model="formData.message"
                 rows="4"
                 class="w-full px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:border-transparent resize-none bg-white/20 border border-white/30 text-white placeholder-white/60 focus:ring-yellow-300 dark:bg-gray-900/50 dark:border-gray-800 dark:text-gray-100 dark:placeholder-gray-400 dark:focus:ring-yellow-400"
-                placeholder="Cuéntanos sobre tu negocio..."
+                :placeholder="t('cta.form.message_placeholder')"
               />
             </div>
 
@@ -129,8 +131,8 @@ const submitForm = async () => {
               :disabled="isSubmitting"
               class="w-full py-4 px-6 rounded-lg transition-colors font-bold text-lg disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer bg-yellow-400 text-gray-900 hover:bg-yellow-300 dark:bg-yellow-500 dark:hover:bg-yellow-400"
             >
-              <span v-if="isSubmitting">Enviando...</span>
-              <span v-else>Comenzar Gratis →</span>
+              <span v-if="isSubmitting">{{ t('cta.form.submitting') }}</span>
+              <span v-else>{{ t('cta.form.submit') }}</span>
             </button>
           </form>
 
@@ -141,20 +143,20 @@ const submitForm = async () => {
                 <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                   <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
                 </svg>
-                <span>Seguro y encriptado</span>
+                <span>{{ t('cta.trust.secure') }}</span>
               </div>
               <div class="flex items-center gap-2">
                 <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
                   <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
                 </svg>
-                <span>Respuesta en 24h</span>
+                <span>{{ t('cta.trust.response') }}</span>
               </div>
               <div class="flex items-center gap-2">
                 <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                   <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
                 </svg>
-                <span class="text-white dark:text-gray-300">Sin compromiso</span>
+                <span class="text-white dark:text-gray-300">{{ t('cta.trust.commitment') }}</span>
               </div>
             </div>
           </div>

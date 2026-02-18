@@ -1,30 +1,33 @@
 <script setup>
 import { ref, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 const stats = [
   {
     number: 10000,
     suffix: '+',
-    label: 'Negocios Activos',
-    description: 'Confían en Kromerce para crecer'
+    label: t('stats.businesses.label'),
+    description: t('stats.businesses.description')
   },
   {
     number: 50,
     suffix: '+',
-    label: 'Países',
-    description: 'Presencia global con soporte local'
+    label: t('stats.countries.label'),
+    description: t('stats.countries.description')
   },
   {
     number: 99.9,
     suffix: '%',
-    label: 'Uptime',
-    description: 'Disponibilidad garantizada'
+    label: t('stats.uptime.label'),
+    description: t('stats.uptime.description')
   },
   {
     number: 24,
     suffix: '/7',
-    label: 'Soporte',
-    description: 'Ayuda cuando la necesitas'
+    label: t('stats.support.label'),
+    description: t('stats.support.description')
   }
 ];
 
@@ -59,14 +62,13 @@ onMounted(() => {
       <!-- Header -->
       <div class="text-center mb-16">
         <h2 class="text-3xl md:text-4xl font-bold mb-4 text-foreground">
-          Números que hablan por
+          {{ t('stats.title') }}
           <span class="text-transparent bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text">
-            sí solos
+            {{ t('stats.title_highlight') }}
           </span>
         </h2>
         <p class="text-xl max-w-3xl mx-auto text-muted-foreground">
-          El crecimiento de nuestra plataforma refleja el éxito de nuestros clientes.
-          Únete a miles de negocios que ya están transformando su futuro.
+          {{ t('stats.subtitle') }}
         </p>
       </div>
 
@@ -102,15 +104,15 @@ onMounted(() => {
           <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div>
               <div class="text-3xl font-bold mb-2 text-green-600 dark:text-green-400">$2M+</div>
-              <p class="leading-relaxed text-muted-foreground">Procesados en transacciones</p>
+              <p class="leading-relaxed text-muted-foreground">{{ t('stats.additional.processed') }}</p>
             </div>
             <div>
               <div class="text-3xl font-bold mb-2 text-blue-600 dark:text-blue-400">4.9★</div>
-              <p class="leading-relaxed text-muted-foreground">Calificación promedio de clientes</p>
+              <p class="leading-relaxed text-muted-foreground">{{ t('stats.additional.rating') }}</p>
             </div>
             <div>
               <div class="text-3xl font-bold mb-2 text-purple-600 dark:text-purple-400">150ms</div>
-              <p class="leading-relaxed text-muted-foreground">Tiempo de respuesta promedio</p>
+              <p class="leading-relaxed text-muted-foreground">{{ t('stats.additional.response_time') }}</p>
             </div>
           </div>
         </div>

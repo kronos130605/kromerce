@@ -1,26 +1,31 @@
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
+import { useI18n } from 'vue-i18n';
 import Button from '@/components/ui/Button.vue';
 import Badge from '@/components/ui/Badge.vue';
+import LanguageSelector from '@/components/LanguageSelector.vue';
+import PWAInstaller from '@/components/PWAInstaller.vue';
 
-const routeList = [
+const { t } = useI18n();
+
+const routeList = computed(() => [
   {
     href: "#features",
-    label: "Características",
+    label: t('nav.features'),
   },
   {
     href: "#testimonials",
-    label: "Testimonios",
+    label: t('nav.testimonials'),
   },
   {
     href: "#pricing",
-    label: "Precios",
+    label: t('nav.pricing'),
   },
   {
     href: "#contact",
-    label: "Contacto",
+    label: t('nav.contact'),
   },
-];
+]);
 
 const isOpen = ref(false);
 const isDarkTheme = ref(false);
@@ -147,31 +152,37 @@ onBeforeUnmount(() => {
                 : 'bg-muted text-foreground'
             ]"
           >
-            Nuevo
+            {{ t('nav.new') }}
           </Badge>
+
+          <!-- Language Selector -->
+          <LanguageSelector />
 
           <!-- Dark Mode Toggle -->
           <button
             @click="toggleDarkMode"
             class="p-2 rounded-lg hover:bg-accent transition-colors cursor-pointer"
-            :title="isDarkTheme ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'"
+            :title="isDarkTheme ? t('nav.toggle_light') : t('nav.toggle_dark')"
           >
             <span v-if="!isDarkTheme" class="text-xl">🌙</span>
             <span v-else class="text-xl">☀️</span>
           </button>
 
           <Button class="cursor-pointer">
-            Comenzar Gratis
+            {{ t('nav.start_free') }}
           </Button>
         </div>
 
         <!-- Mobile Menu -->
         <div class="flex items-center lg:hidden gap-2">
+          <!-- Language Selector Mobile -->
+          <LanguageSelector />
+          
           <!-- Dark Mode Toggle Mobile -->
           <button
             @click="toggleDarkMode"
             class="p-2 rounded-lg hover:bg-accent transition-colors cursor-pointer"
-            :title="isDarkTheme ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'"
+            :title="isDarkTheme ? t('nav.toggle_light') : t('nav.toggle_dark')"
           >
             <span v-if="!isDarkTheme" class="text-xl">🌙</span>
             <span v-else class="text-xl">☀️</span>
@@ -219,11 +230,14 @@ onBeforeUnmount(() => {
             <Button
               class="w-full cursor-pointer"
             >
-              Comenzar Gratis
+              {{ t('nav.start_free') }}
             </Button>
           </div>
         </div>
       </div>
     </div>
   </header>
+  
+  <!-- PWA Installer -->
+  <PWAInstaller />
 </template>

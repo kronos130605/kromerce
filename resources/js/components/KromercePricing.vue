@@ -1,62 +1,64 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 
+const { t } = useI18n();
 const billingCycle = ref('monthly');
 
-const plans = [
+const plans = computed(() => [
   {
-    name: 'Starter',
-    description: 'Perfecto para negocios que empiezan',
+    name: t('pricing.plans.starter.name'),
+    description: t('pricing.plans.starter.description'),
     price: { monthly: 0, yearly: 0 },
     features: [
-      'Hasta 100 productos',
-      'Pagos básicos',
-      'Dashboard simple',
-      'Soporte por email',
-      '1% comisión por venta',
-      'Kromerce branding'
+      t('pricing.plans.starter.features.0'),
+      t('pricing.plans.starter.features.1'),
+      t('pricing.plans.starter.features.2'),
+      t('pricing.plans.starter.features.3'),
+      t('pricing.plans.starter.features.4'),
+      t('pricing.plans.starter.features.5')
     ],
-    cta: 'Comenzar Gratis',
+    cta: t('pricing.plans.starter.cta'),
     popular: false,
     color: 'gray'
   },
   {
-    name: 'Professional',
-    description: 'Ideal para negocios en crecimiento',
+    name: t('pricing.plans.professional.name'),
+    description: t('pricing.plans.professional.description'),
     price: { monthly: 49, yearly: 39 },
     features: [
-      'Productos ilimitados',
-      'Pagos avanzados',
-      'Analytics completo',
-      'Soporte prioritario',
-      '0.5% comisión por venta',
-      'Sin branding',
-      'API básica',
-      'Integraciones populares'
+      t('pricing.plans.professional.features.0'),
+      t('pricing.plans.professional.features.1'),
+      t('pricing.plans.professional.features.2'),
+      t('pricing.plans.professional.features.3'),
+      t('pricing.plans.professional.features.4'),
+      t('pricing.plans.professional.features.5'),
+      t('pricing.plans.professional.features.6'),
+      t('pricing.plans.professional.features.7')
     ],
-    cta: 'Comenzar Trial',
+    cta: t('pricing.plans.professional.cta'),
     popular: true,
     color: 'blue'
   },
   {
-    name: 'Enterprise',
-    description: 'Para grandes operaciones y personalización',
+    name: t('pricing.plans.enterprise.name'),
+    description: t('pricing.plans.enterprise.description'),
     price: { monthly: 199, yearly: 159 },
     features: [
-      'Todo lo de Professional',
-      'API completa',
-      'Integraciones personalizadas',
-      'Dedicated account manager',
-      'SLA garantizado',
-      'Onboarding personalizado',
-      'White label disponible',
-      'Servidores dedicados'
+      t('pricing.plans.enterprise.features.0'),
+      t('pricing.plans.enterprise.features.1'),
+      t('pricing.plans.enterprise.features.2'),
+      t('pricing.plans.enterprise.features.3'),
+      t('pricing.plans.enterprise.features.4'),
+      t('pricing.plans.enterprise.features.5'),
+      t('pricing.plans.enterprise.features.6'),
+      t('pricing.plans.enterprise.features.7')
     ],
-    cta: 'Contactar Ventas',
+    cta: t('pricing.plans.enterprise.cta'),
     popular: false,
     color: 'purple'
   }
-];
+]);
 
 const toggleBilling = () => {
   billingCycle.value = billingCycle.value === 'monthly' ? 'yearly' : 'monthly';
@@ -64,11 +66,11 @@ const toggleBilling = () => {
 
 const getDisplayPrice = (plan) => {
   const price = plan.price[billingCycle.value];
-  return price === 0 ? 'Gratis' : `$${price}`;
+  return price === 0 ? t('pricing.free') : `$${price}`;
 };
 
 const getBillingText = () => {
-  return billingCycle.value === 'monthly' ? 'mes' : 'año';
+  return billingCycle.value === 'monthly' ? t('pricing.per_month') : t('pricing.per_year');
 };
 
 const getYearlySavings = (plan) => {
@@ -86,20 +88,19 @@ const getYearlySavings = (plan) => {
       <!-- Header -->
       <div class="text-center mb-16">
         <h2 class="text-3xl md:text-4xl font-bold mb-4 text-foreground">
-          Precios simples para
+          {{ t('pricing.title') }}
           <span class="text-transparent bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text">
-            todos los negocios
+            {{ t('pricing.title_highlight') }}
           </span>
         </h2>
         <p class="text-xl max-w-3xl mx-auto mb-8 text-muted-foreground">
-          Crece con nosotros. Desde emprendimientos individuales hasta grandes empresas,
-          tenemos el plan perfecto para ti.
+          {{ t('pricing.subtitle') }}
         </p>
 
         <!-- Billing Toggle -->
         <div class="flex items-center justify-center gap-4">
           <span :class="['font-medium transition-colors', billingCycle === 'monthly' ? 'text-foreground' : 'text-muted-foreground']">
-            Mensual
+            {{ t('pricing.monthly') }}
           </span>
           <button
             @click="toggleBilling"
@@ -110,8 +111,8 @@ const getYearlySavings = (plan) => {
             />
           </button>
           <span :class="['font-medium transition-colors', billingCycle === 'yearly' ? 'text-foreground' : 'text-muted-foreground']">
-            Anual
-            <span class="text-green-600 ml-1">-20%</span>
+            {{ t('pricing.yearly') }}
+            <span class="text-green-600 ml-1">{{ t('pricing.yearly_discount') }}</span>
           </span>
         </div>
       </div>
@@ -133,7 +134,7 @@ const getYearlySavings = (plan) => {
             v-if="plan.popular"
             class="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-blue-600 to-cyan-500 text-white px-4 py-1 rounded-full text-sm font-medium"
           >
-            Más Popular
+            {{ t('pricing.most_popular') }}
           </div>
 
           <!-- Plan Header -->
@@ -155,7 +156,7 @@ const getYearlySavings = (plan) => {
                 v-if="getYearlySavings(plan) && billingCycle === 'yearly'"
                 class="text-sm mt-1 font-medium text-green-600 dark:text-green-400"
               >
-                Ahorra {{ getYearlySavings(plan) }}%
+                {{ t('pricing.save') }} {{ getYearlySavings(plan) }}%
               </div>
             </div>
           </div>
@@ -163,8 +164,8 @@ const getYearlySavings = (plan) => {
           <!-- Features -->
           <ul class="space-y-2 lg:space-y-3 mb-6 lg:mb-8">
             <li
-              v-for="feature in plan.features"
-              :key="feature"
+              v-for="(feature, index) in plan.features"
+              :key="index"
               class="flex items-start gap-3"
             >
               <svg
@@ -198,16 +199,16 @@ const getYearlySavings = (plan) => {
       <!-- Additional Info -->
       <div class="mt-16 text-center">
         <div class="rounded-2xl p-8 shadow-lg max-w-4xl mx-auto bg-card text-card-foreground">
-          <h3 class="text-xl font-bold mb-4 text-foreground">¿Preguntas sobre nuestros planes?</h3>
+          <h3 class="text-xl font-bold mb-4 text-foreground">{{ t('pricing.questions.title') }}</h3>
           <p class="mb-6 leading-relaxed text-muted-foreground">
-            Nuestro equipo está listo para ayudarte a encontrar el plan perfecto para tu negocio.
+            {{ t('pricing.questions.subtitle') }}
           </p>
           <div class="flex flex-col sm:flex-row gap-4 justify-center">
             <button class="px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium cursor-pointer">
-              Hablar con Ventas
+              {{ t('pricing.questions.talk_sales') }}
             </button>
             <button class="px-6 py-3 border border-border rounded-lg hover:bg-accent transition-colors font-medium cursor-pointer text-foreground">
-              Ver Documentación
+              {{ t('pricing.questions.documentation') }}
             </button>
           </div>
         </div>
