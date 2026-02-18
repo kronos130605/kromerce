@@ -30,8 +30,8 @@ const isOpen = ref(false);
   <header class="w-[90%] md:w-[70%] lg:w-[75%] lg:max-w-screen-xl top-5 mx-auto sticky border z-40 rounded-2xl flex justify-between items-center p-2 bg-card shadow-md">
     <!-- Logo -->
     <a href="/" class="font-bold text-lg flex items-center group">
-      <div class="mr-3 h-12 w-40 bg-card/80 flex items-center justify-center overflow-hidden transition-transform duration-300 group-hover:scale-110">
-        <img src="/resources/images/logos/kromerce-business-text.png" alt="Kromerce" class="h-8 w-8 object-contain" />
+      <div class="mr-3 transition-transform duration-300 group-hover:scale-110">
+        <img src="/resources/images/logos/kromerce-business-text.png" alt="Kromerce" class="h-12 w-auto object-contain" />
       </div>
     </a>
 

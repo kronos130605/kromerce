@@ -11,7 +11,8 @@
     <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700" rel="stylesheet" />
     
     <!-- Favicon -->
-    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
+    <link rel="icon" type="image/png" href="{{ asset('images/logos/kromerce-business-icon-logo.png') }}">
+    <link rel="shortcut icon" href="{{ asset('images/logos/kromerce-business-icon-logo.png') }}">
 
     <!-- Styles -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
