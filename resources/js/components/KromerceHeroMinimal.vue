@@ -13,7 +13,7 @@ const stats = [
 <template>
   <section class="relative py-20 md:py-32 overflow-hidden">
     <!-- Background Gradient -->
-    <div class="absolute inset-0 bg-gradient-to-br from-blue-50 via-white to-cyan-50 dark:from-blue-950/20 dark:via-background dark:to-cyan-950/20" />
+    <div class="absolute inset-0 bg-gradient-to-br from-blue-50 via-white to-cyan-50" />
     
     <!-- Floating Elements -->
     <div class="absolute top-20 left-10 w-20 h-20 bg-blue-500/10 rounded-full blur-xl animate-pulse" />

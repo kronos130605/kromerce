@@ -144,7 +144,7 @@ const industries = [
 
       <!-- CTA -->
       <div class="text-center mt-16">
-        <div class="bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-950/20 dark:to-cyan-950/20 rounded-2xl p-8 max-w-4xl mx-auto">
+        <div class="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-2xl p-8 max-w-4xl mx-auto">
           <h3 class="text-2xl font-bold mb-4">
             ¿Listo para unirte a miles de negocios exitosos?
           </h3>

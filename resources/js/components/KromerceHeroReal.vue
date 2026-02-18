@@ -10,7 +10,7 @@ const features = [
 </script>
 
 <template>
-  <section class="py-20 md:py-32 bg-gradient-to-b from-background to-blue-50/50 dark:to-blue-950/20">
+  <section class="py-20 md:py-32 bg-gradient-to-b from-background to-blue-50/50">
     <div class="container mx-auto px-4">
       <div class="grid lg:grid-cols-2 gap-12 items-center">
         <!-- Left Content -->
@@ -72,7 +72,7 @@ const features = [
         <!-- Right Content - Real Interface -->
         <div class="relative">
           <!-- Main Interface Card -->
-          <div class="relative bg-white dark:bg-card rounded-2xl shadow-2xl border border-border overflow-hidden">
+          <div class="relative bg-white rounded-2xl shadow-2xl border border-border overflow-hidden">
             <!-- Header -->
             <div class="bg-gradient-to-r from-blue-600 to-cyan-600 p-4">
               <div class="flex items-center justify-between">
@@ -156,13 +156,13 @@ const features = [
             <!-- Quick Actions -->
             <div class="p-4 border-t border-border bg-muted/50">
               <div class="grid grid-cols-3 gap-2">
-                <button class="p-2 bg-white dark:bg-card rounded-lg text-xs font-medium hover:bg-accent transition-colors">
+                <button class="p-2 bg-white rounded-lg text-xs font-medium hover:bg-accent transition-colors">
                   + Producto
                 </button>
-                <button class="p-2 bg-white dark:bg-card rounded-lg text-xs font-medium hover:bg-accent transition-colors">
+                <button class="p-2 bg-white rounded-lg text-xs font-medium hover:bg-accent transition-colors">
                   Ver Reportes
                 </button>
-                <button class="p-2 bg-white dark:bg-card rounded-lg text-xs font-medium hover:bg-accent transition-colors">
+                <button class="p-2 bg-white rounded-lg text-xs font-medium hover:bg-accent transition-colors">
                   Configurar
                 </button>
               </div>
