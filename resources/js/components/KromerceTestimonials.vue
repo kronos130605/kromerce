@@ -144,18 +144,18 @@ const industries = [
 
       <!-- CTA -->
       <div class="text-center mt-16">
-        <div class="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-2xl p-8 max-w-4xl mx-auto">
-          <h3 class="text-2xl font-bold mb-4">
+        <div class="bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-gray-950 dark:to-slate-950 rounded-2xl p-8 max-w-4xl mx-auto border border-border">
+          <h3 class="text-2xl font-bold mb-4 text-foreground dark:text-gray-100">
             ¿Listo para unirte a miles de negocios exitosos?
           </h3>
-          <p class="text-muted-foreground mb-6">
+          <p class="text-muted-foreground mb-6 dark:text-gray-300">
             Comienza gratis y escala según creces. Sin tarjetas de crédito, sin compromiso.
           </p>
           <div class="flex flex-col sm:flex-row gap-4 justify-center">
             <button class="px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium">
               Comenzar Gratis
             </button>
-            <button class="px-6 py-3 border border-border rounded-lg hover:bg-accent transition-colors font-medium">
+            <button class="px-6 py-3 border border-border rounded-lg hover:bg-accent transition-colors font-medium text-foreground dark:text-gray-100">
               Ver Casos de Éxito
             </button>
           </div>

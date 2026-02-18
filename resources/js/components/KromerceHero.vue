@@ -1,24 +1,6 @@
 <script setup>
-import { ref, onMounted } from 'vue';
 import Button from '@/components/ui/Button.vue';
 import Badge from '@/components/ui/Badge.vue';
-
-const isDarkTheme = ref(false);
-
-// Check for dark mode changes
-const checkDarkMode = () => {
-  isDarkTheme.value = document.documentElement.classList.contains('dark');
-};
-
-onMounted(() => {
-  checkDarkMode();
-  // Listen for dark mode changes
-  const observer = new MutationObserver(checkDarkMode);
-  observer.observe(document.documentElement, {
-    attributes: true,
-    attributeFilter: ['class']
-  });
-});
 
 const floatingCards = [
   {
@@ -54,12 +36,15 @@ const particles = Array.from({ length: 20 }, (_, i) => ({
 </script>
 
 <template>
-  <section id="hero" :class="['relative min-h-screen flex items-center justify-center overflow-hidden', isDarkTheme ? 'bg-gray-900' : 'bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900']">
+  <section
+    id="hero"
+    class="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-blue-50 via-white to-cyan-50 dark:from-gray-950 dark:via-slate-950 dark:to-gray-950"
+  >
     <!-- Particle Effects -->
     <div
       v-for="particle in particles"
       :key="particle.id"
-      :class="['absolute rounded-full', isDarkTheme ? 'bg-gray-700/30' : 'bg-white/20']"
+      class="absolute rounded-full bg-blue-500/10 dark:bg-gray-700/30"
       :style="{
         width: `${particle.size}px`,
         height: `${particle.size}px`,
@@ -70,7 +55,7 @@ const particles = Array.from({ length: 20 }, (_, i) => ({
     />
 
     <!-- Grid Pattern -->
-    <div :class="['absolute inset-0', isDarkTheme ? 'bg-gray-800/20' : 'bg-grid-white/5']" :style="`background-size: 50px 50px`" />
+    <div class="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,hsl(var(--border))_1px,transparent_0)] opacity-40 dark:bg-gray-800/20 dark:opacity-100" :style="`background-size: 32px 32px`" />
 
     <!-- Content -->
     <div class="relative z-10 container mx-auto px-4">
@@ -80,28 +65,26 @@ const particles = Array.from({ length: 20 }, (_, i) => ({
           variant="outline"
           :class="[
             'text-sm py-2 mb-8',
-            isDarkTheme
-              ? 'bg-gray-800/50 border-gray-700 text-gray-300'
-              : 'bg-white/10 border-white/20 text-white'
+            'bg-white/80 border-border text-foreground dark:bg-gray-900/50 dark:border-gray-800 dark:text-gray-200'
           ]"
         >
-          <span class="mr-2 text-yellow-400">🚀</span>
+          <span class="mr-2 text-blue-600 dark:text-yellow-400">🚀</span>
           <span>Plataforma para negocios</span>
         </Badge>
 
         <!-- Main Title -->
         <h1 class="text-3xl sm:text-4xl md:text-6xl lg:text-7xl xl:text-8xl font-bold mb-6">
-          <span :class="isDarkTheme ? 'text-gray-100' : 'text-white'">El futuro del</span>
+          <span class="text-foreground dark:text-gray-100">El futuro del</span>
           <br />
           <span class="text-transparent bg-gradient-to-r from-blue-400 via-cyan-400 to-blue-400 bg-clip-text">
             e-commerce
           </span>
           <br />
-          <span :class="isDarkTheme ? 'text-gray-100' : 'text-white'">está aquí</span>
+          <span class="text-foreground dark:text-gray-100">está aquí</span>
         </h1>
 
         <!-- Description -->
-        <p :class="['text-lg sm:text-xl md:text-2xl mb-8 sm:mb-12 max-w-3xl mx-auto leading-relaxed px-4', isDarkTheme ? 'text-gray-300' : 'text-white/80']">
+        <p class="text-lg sm:text-xl md:text-2xl mb-8 sm:mb-12 max-w-3xl mx-auto leading-relaxed px-4 text-muted-foreground dark:text-gray-300">
           Transforma tu negocio con la plataforma más avanzada del mercado.
           Pagos globales, analytics en tiempo real y crecimiento ilimitado.
         </p>
@@ -111,9 +94,7 @@ const particles = Array.from({ length: 20 }, (_, i) => ({
           <Button
             :class="[
               'px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-semibold w-full sm:w-auto',
-              isDarkTheme
-                ? 'bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 border-0'
-                : 'bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 border-0'
+              'bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 border-0'
             ]"
           >
             Comenzar Gratis
@@ -122,9 +103,7 @@ const particles = Array.from({ length: 20 }, (_, i) => ({
             variant="secondary"
             :class="[
               'px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-semibold w-full sm:w-auto',
-              isDarkTheme
-                ? 'bg-gray-800/50 hover:bg-gray-700 text-gray-300 border-gray-700'
-                : 'bg-white/10 hover:bg-white/20 text-white border-white/20'
+              'bg-white hover:bg-accent text-foreground border border-border dark:bg-gray-900/50 dark:hover:bg-gray-800/60 dark:text-gray-200 dark:border-gray-800'
             ]"
           >
             Ver Demo
@@ -132,17 +111,17 @@ const particles = Array.from({ length: 20 }, (_, i) => ({
         </div>
 
         <!-- Social Proof -->
-        <div :class="['flex flex-wrap justify-center items-center gap-4 sm:gap-8 text-xs sm:text-sm', isDarkTheme ? 'text-gray-400' : 'text-white/60']">
+        <div class="flex flex-wrap justify-center items-center gap-4 sm:gap-8 text-xs sm:text-sm text-muted-foreground dark:text-gray-400">
           <div class="flex items-center gap-2">
-            <div :class="['w-2 h-2 rounded-full animate-pulse', isDarkTheme ? 'bg-green-600' : 'bg-green-400']" />
+            <div class="w-2 h-2 rounded-full animate-pulse bg-green-400 dark:bg-green-600" />
             <span class="text-xs sm:text-sm">10K+ negocios activos</span>
           </div>
           <div class="flex items-center gap-2">
-            <div :class="['w-2 h-2 rounded-full animate-pulse', isDarkTheme ? 'bg-blue-600' : 'bg-blue-400']" />
+            <div class="w-2 h-2 rounded-full animate-pulse bg-blue-400 dark:bg-blue-600" />
             <span class="text-xs sm:text-sm">$2M+ procesados</span>
           </div>
           <div class="flex items-center gap-2">
-            <div :class="['w-2 h-2 rounded-full animate-pulse', isDarkTheme ? 'bg-purple-600' : 'bg-purple-400']" />
+            <div class="w-2 h-2 rounded-full animate-pulse bg-purple-400 dark:bg-purple-600" />
             <span class="text-xs sm:text-sm">150+ países</span>
           </div>
         </div>
@@ -150,41 +129,41 @@ const particles = Array.from({ length: 20 }, (_, i) => ({
 
       <!-- Floating Cards - Hidden on mobile -->
       <div class="hidden lg:block absolute top-20 left-10 animate-float">
-        <div :class="['bg-white/10 backdrop-blur-md rounded-xl p-4 border', isDarkTheme ? 'border-gray-700' : 'border-white/20']">
+        <div class="bg-white/80 backdrop-blur-md rounded-xl p-4 border border-border dark:bg-gray-950/40 dark:border-gray-800">
           <div class="flex items-center gap-3 mb-2">
-            <svg :class="['w-5 h-5', isDarkTheme ? 'text-blue-400' : 'text-blue-400']" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="floatingCards[0].icon" />
             </svg>
-            <div :class="['text-sm', isDarkTheme ? 'text-gray-300' : 'text-white']">{{ floatingCards[0].title }}</div>
+            <div class="text-sm text-foreground dark:text-gray-200">{{ floatingCards[0].title }}</div>
           </div>
-          <div :class="['text-xl font-bold', isDarkTheme ? 'text-gray-100' : 'text-white']">{{ floatingCards[0].value }}</div>
-          <div :class="['text-sm', isDarkTheme ? 'text-green-400' : 'text-green-400']">{{ floatingCards[0].change }}</div>
+          <div class="text-xl font-bold text-foreground dark:text-gray-100">{{ floatingCards[0].value }}</div>
+          <div class="text-sm text-green-400">{{ floatingCards[0].change }}</div>
         </div>
       </div>
 
       <div class="hidden lg:block absolute top-40 right-10 animate-float-delayed">
-        <div :class="['bg-white/10 backdrop-blur-md rounded-xl p-4 border', isDarkTheme ? 'border-gray-700' : 'border-white/20']">
+        <div class="bg-white/80 backdrop-blur-md rounded-xl p-4 border border-border dark:bg-gray-950/40 dark:border-gray-800">
           <div class="flex items-center gap-3 mb-2">
-            <svg :class="['w-5 h-5', isDarkTheme ? 'text-purple-400' : 'text-purple-400']" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="floatingCards[1].icon" />
             </svg>
-            <div :class="['text-sm', isDarkTheme ? 'text-gray-300' : 'text-white']">{{ floatingCards[1].title }}</div>
+            <div class="text-sm text-foreground dark:text-gray-200">{{ floatingCards[1].title }}</div>
           </div>
-          <div :class="['text-xl font-bold', isDarkTheme ? 'text-gray-100' : 'text-white']">{{ floatingCards[1].value }}</div>
-          <div :class="['text-sm', isDarkTheme ? 'text-green-400' : 'text-green-400']">{{ floatingCards[1].change }}</div>
+          <div class="text-xl font-bold text-foreground dark:text-gray-100">{{ floatingCards[1].value }}</div>
+          <div class="text-sm text-green-400">{{ floatingCards[1].change }}</div>
         </div>
       </div>
 
       <div class="hidden lg:block absolute bottom-20 left-20 animate-float">
-        <div :class="['bg-white/10 backdrop-blur-md rounded-xl p-4 border', isDarkTheme ? 'border-gray-700' : 'border-white/20']">
+        <div class="bg-white/80 backdrop-blur-md rounded-xl p-4 border border-border dark:bg-gray-950/40 dark:border-gray-800">
           <div class="flex items-center gap-3 mb-2">
             <svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="floatingCards[2].icon" />
             </svg>
-            <div :class="['text-sm', isDarkTheme ? 'text-gray-300' : 'text-white']">{{ floatingCards[2].title }}</div>
+            <div class="text-sm text-foreground dark:text-gray-200">{{ floatingCards[2].title }}</div>
           </div>
-          <div :class="['text-xl font-bold', isDarkTheme ? 'text-gray-100' : 'text-white']">{{ floatingCards[2].value }}</div>
-          <div :class="['text-sm', isDarkTheme ? 'text-green-400' : 'text-green-400']">{{ floatingCards[2].change }}</div>
+          <div class="text-xl font-bold text-foreground dark:text-gray-100">{{ floatingCards[2].value }}</div>
+          <div class="text-sm text-green-400">{{ floatingCards[2].change }}</div>
         </div>
       </div>
     </div>

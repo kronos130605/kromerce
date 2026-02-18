@@ -1,23 +1,6 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 
-const isDarkTheme = ref(false);
-
-// Check for dark mode changes
-const checkDarkMode = () => {
-  isDarkTheme.value = document.documentElement.classList.contains('dark');
-};
-
-onMounted(() => {
-  checkDarkMode();
-  // Listen for dark mode changes
-  const observer = new MutationObserver(checkDarkMode);
-  observer.observe(document.documentElement, {
-    attributes: true,
-    attributeFilter: ['class']
-  });
-});
-
 const stats = [
   {
     number: 10000,
@@ -64,14 +47,6 @@ const animateNumber = (index, target) => {
 };
 
 onMounted(() => {
-  checkDarkMode();
-  // Listen for dark mode changes
-  const observer = new MutationObserver(checkDarkMode);
-  observer.observe(document.documentElement, {
-    attributes: true,
-    attributeFilter: ['class']
-  });
-
   stats.forEach((stat, index) => {
     animateNumber(index, stat.number);
   });
@@ -79,17 +54,17 @@ onMounted(() => {
 </script>
 
 <template>
-  <section :class="['py-20', isDarkTheme ? 'bg-gray-900' : 'bg-gradient-to-br from-blue-50 to-cyan-50']">
+  <section class="py-20 bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-gray-950 dark:to-slate-950">
     <div class="container mx-auto px-4">
       <!-- Header -->
       <div class="text-center mb-16">
-        <h2 :class="['text-3xl md:text-4xl font-bold mb-4', isDarkTheme ? 'text-gray-100' : 'text-foreground']">
+        <h2 class="text-3xl md:text-4xl font-bold mb-4 text-foreground">
           Números que hablan por
           <span class="text-transparent bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text">
             sí solos
           </span>
         </h2>
-        <p :class="['text-xl max-w-3xl mx-auto', isDarkTheme ? 'text-gray-300' : 'text-muted-foreground']">
+        <p class="text-xl max-w-3xl mx-auto text-muted-foreground">
           El crecimiento de nuestra plataforma refleja el éxito de nuestros clientes.
           Únete a miles de negocios que ya están transformando su futuro.
         </p>
@@ -102,19 +77,19 @@ onMounted(() => {
           :key="stat.label"
           class="text-center group"
         >
-          <div :class="['rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 group-hover:-translate-y-2', isDarkTheme ? 'bg-gray-800' : 'bg-white']">
+          <div class="rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 group-hover:-translate-y-2 bg-card text-card-foreground border border-border">
             <!-- Number -->
-            <div :class="['text-4xl md:text-5xl font-bold mb-2', isDarkTheme ? 'text-blue-400' : 'text-primary']">
+            <div class="text-4xl md:text-5xl font-bold mb-2 text-primary">
               {{ animatedNumbers[index] }}{{ stat.suffix }}
             </div>
 
             <!-- Label -->
-            <h3 :class="['text-xl font-semibold mb-2', isDarkTheme ? 'text-white' : 'text-gray-900']">
+            <h3 class="text-xl font-semibold mb-2 text-foreground">
               {{ stat.label }}
             </h3>
 
             <!-- Description -->
-            <p :class="['leading-relaxed', isDarkTheme ? 'text-gray-200' : 'text-gray-600']">
+            <p class="leading-relaxed text-muted-foreground">
               {{ stat.description }}
             </p>
           </div>
@@ -123,19 +98,19 @@ onMounted(() => {
 
       <!-- Additional Context -->
       <div class="mt-16 text-center">
-        <div :class="['rounded-2xl p-8 shadow-lg max-w-4xl mx-auto', isDarkTheme ? 'bg-gray-800' : 'bg-white']">
+        <div class="rounded-2xl p-8 shadow-lg max-w-4xl mx-auto bg-card text-card-foreground border border-border">
           <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div>
-              <div :class="['text-3xl font-bold mb-2', isDarkTheme ? 'text-green-400' : 'text-green-600']">$2M+</div>
-              <p :class="['leading-relaxed', isDarkTheme ? 'text-gray-200' : 'text-gray-600']">Procesados en transacciones</p>
+              <div class="text-3xl font-bold mb-2 text-green-600 dark:text-green-400">$2M+</div>
+              <p class="leading-relaxed text-muted-foreground">Procesados en transacciones</p>
             </div>
             <div>
-              <div :class="['text-3xl font-bold mb-2', isDarkTheme ? 'text-blue-400' : 'text-blue-600']">4.9★</div>
-              <p :class="['leading-relaxed', isDarkTheme ? 'text-gray-200' : 'text-gray-600']">Calificación promedio de clientes</p>
+              <div class="text-3xl font-bold mb-2 text-blue-600 dark:text-blue-400">4.9★</div>
+              <p class="leading-relaxed text-muted-foreground">Calificación promedio de clientes</p>
             </div>
             <div>
-              <div :class="['text-3xl font-bold mb-2', isDarkTheme ? 'text-purple-400' : 'text-purple-600']">150ms</div>
-              <p :class="['leading-relaxed', isDarkTheme ? 'text-gray-200' : 'text-gray-600']">Tiempo de respuesta promedio</p>
+              <div class="text-3xl font-bold mb-2 text-purple-600 dark:text-purple-400">150ms</div>
+              <p class="leading-relaxed text-muted-foreground">Tiempo de respuesta promedio</p>
             </div>
           </div>
         </div>
