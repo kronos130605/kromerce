@@ -1,4 +1,23 @@
 <script setup>
+import { ref, onMounted, onUnmounted } from 'vue';
+
+const isDarkTheme = ref(false);
+
+// Check for dark mode changes
+const checkDarkMode = () => {
+  isDarkTheme.value = document.documentElement.classList.contains('dark');
+};
+
+onMounted(() => {
+  checkDarkMode();
+  // Listen for dark mode changes
+  const observer = new MutationObserver(checkDarkMode);
+  observer.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ['class']
+  });
+});
+
 const features = [
   {
     icon: 'M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z',
@@ -56,22 +75,22 @@ const features = [
           v-for="feature in features"
           :key="feature.title"
           :class="[
-            'group relative p-6 rounded-xl border border-border bg-card hover:shadow-lg transition-all duration-300 hover:-translate-y-1',
-            isDarkTheme ? 'bg-gray-800 border-gray-700' : 'bg-card'
+            'group relative p-6 rounded-xl border hover:shadow-lg transition-all duration-300 hover:-translate-y-1',
+            isDarkTheme ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
           ]"
         >
           <!-- Icon -->
-          <div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
-            <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div :class="['w-12 h-12 rounded-lg flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors', isDarkTheme ? 'bg-blue-900/30' : 'bg-primary/10']">
+            <svg :class="['w-6 h-6', isDarkTheme ? 'text-blue-400' : 'text-primary']" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="feature.icon" />
             </svg>
           </div>
 
           <!-- Content -->
-          <h3 :class="['text-xl font-semibold mb-2', isDarkTheme ? 'text-gray-100' : 'text-foreground']">
+          <h3 :class="['text-xl font-semibold mb-2', isDarkTheme ? 'text-white' : 'text-gray-900']">
             {{ feature.title }}
           </h3>
-          <p :class="['leading-relaxed', isDarkTheme ? 'text-gray-300' : 'text-muted-foreground']">
+          <p :class="['leading-relaxed', isDarkTheme ? 'text-gray-200' : 'text-gray-600']">
             {{ feature.description }}
           </p>
 
@@ -85,7 +104,7 @@ const features = [
         <p class="text-muted-foreground mb-4">
           ¿Listo para transformar tu negocio?
         </p>
-        <button class="px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium">
+        <button class="px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium cursor-pointer">
           Explorar todas las características
         </button>
       </div>

@@ -144,7 +144,7 @@ const submitForm = async () => {
             <button
               type="submit"
               :disabled="isSubmitting"
-              :class="['w-full py-4 px-6 rounded-lg transition-colors font-bold text-lg disabled:opacity-50 disabled:cursor-not-allowed', isDarkTheme ? 'bg-yellow-500 text-gray-900 hover:bg-yellow-400' : 'bg-yellow-400 text-gray-900 hover:bg-yellow-300']"
+              :class="['w-full py-4 px-6 rounded-lg transition-colors font-bold text-lg disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer', isDarkTheme ? 'bg-yellow-500 text-gray-900 hover:bg-yellow-400' : 'bg-yellow-400 text-gray-900 hover:bg-yellow-300']"
             >
               <span v-if="isSubmitting">Enviando...</span>
               <span v-else>Comenzar Gratis →</span>

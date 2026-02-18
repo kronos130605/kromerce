@@ -64,7 +64,7 @@ onMounted(() => {
     <div class="container mx-auto px-4">
       <div class="flex justify-between items-center h-16">
         <!-- Logo -->
-        <a href="/" class="flex items-center group">
+        <a href="/" class="flex items-center group cursor-pointer">
           <div class="mr-3 transition-transform duration-300 group-hover:scale-110">
             <img 
               src="/resources/images/logos/kromerce-business-text.png" 
@@ -84,7 +84,7 @@ onMounted(() => {
             :key="label"
             @click="smoothScroll(href)"
             :class="[
-              'font-medium transition-colors relative group',
+              'font-medium transition-colors relative group cursor-pointer',
               isDarkTheme 
                 ? 'text-gray-300 hover:text-white' 
                 : 'text-foreground hover:text-foreground'
@@ -115,14 +115,14 @@ onMounted(() => {
           <!-- Dark Mode Toggle -->
           <button
             @click="toggleDarkMode"
-            class="p-2 rounded-lg hover:bg-accent transition-colors"
+            class="p-2 rounded-lg hover:bg-accent transition-colors cursor-pointer"
             :title="isDarkTheme ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'"
           >
             <span v-if="!isDarkTheme" class="text-xl">🌙</span>
             <span v-else class="text-xl">☀️</span>
           </button>
           
-          <Button>
+          <Button class="cursor-pointer">
             Comenzar Gratis
           </Button>
         </div>
@@ -132,7 +132,7 @@ onMounted(() => {
           <!-- Dark Mode Toggle Mobile -->
           <button
             @click="toggleDarkMode"
-            class="p-2 rounded-lg hover:bg-accent transition-colors"
+            class="p-2 rounded-lg hover:bg-accent transition-colors cursor-pointer"
             :title="isDarkTheme ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'"
           >
             <span v-if="!isDarkTheme" class="text-xl">🌙</span>
@@ -143,7 +143,7 @@ onMounted(() => {
             @click="isOpen = !isOpen" 
             variant="ghost" 
             size="icon"
-            class="text-foreground hover:bg-accent"
+            class="text-foreground hover:bg-accent cursor-pointer"
           >
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
@@ -169,7 +169,7 @@ onMounted(() => {
             @click="smoothScroll(href)"
             variant="ghost"
             :class="[
-              'w-full justify-start transition-colors',
+              'w-full justify-start transition-colors cursor-pointer',
               isDarkTheme 
                 ? 'text-gray-300 hover:text-white hover:bg-gray-800' 
                 : 'text-foreground/80 hover:text-foreground hover:bg-accent'
@@ -179,7 +179,7 @@ onMounted(() => {
           </Button>
           <div :class="['pt-4 border-t', isDarkTheme ? 'border-gray-800' : 'border-border']">
             <Button 
-              class="w-full"
+              class="w-full cursor-pointer"
             >
               Comenzar Gratis
             </Button>

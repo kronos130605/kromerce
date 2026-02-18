@@ -2,8 +2,27 @@
 import { cva } from 'class-variance-authority';
 import { cn } from '@/lib/utils.js';
 
+const props = defineProps({
+  variant: {
+    type: String,
+    default: 'default'
+  },
+  size: {
+    type: String,
+    default: 'default'
+  },
+  as: {
+    type: String,
+    default: 'button'
+  },
+  class: {
+    type: String,
+    default: ''
+  }
+});
+
 const buttonVariants = cva(
-  'inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
+  'inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 cursor-pointer',
   {
     variants: {
       variant: {
@@ -31,15 +50,11 @@ const buttonVariants = cva(
   }
 );
 
-const props = withDefaults(defineProps(), {
-  variant: 'default',
-  size: 'default',
-  as: 'button',
-});
+const { variant, size, as, className } = props;
 </script>
 
 <template>
-  <component :is="as" :class="cn(buttonVariants({ variant, size }), $attrs.class)">
+  <component :is="as" :class="cn(buttonVariants({ variant, size }), className, $attrs.class)">
     <slot />
   </component>
 </template>

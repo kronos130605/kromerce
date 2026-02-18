@@ -119,7 +119,7 @@ const getYearlySavings = (plan) => {
           </span>
           <button
             @click="toggleBilling"
-            class="relative inline-flex h-6 w-11 items-center rounded-full bg-primary transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+            class="relative inline-flex h-6 w-11 items-center rounded-full bg-primary transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 cursor-pointer"
           >
             <span
               :class="['inline-block h-4 w-4 transform rounded-full bg-white transition-transform', billingCycle === 'monthly' ? 'translate-x-1' : 'translate-x-6']"
@@ -141,7 +141,7 @@ const getYearlySavings = (plan) => {
             'relative rounded-2xl p-8 transition-all duration-300 hover:-translate-y-1',
             plan.popular 
               ? 'bg-primary text-primary-foreground shadow-xl ring-2 ring-primary/20' 
-              : (isDarkTheme ? 'bg-gray-800 border-gray-700' : 'bg-card border-border hover:shadow-lg')
+              : (isDarkTheme ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200 hover:shadow-lg')
           ]"
         >
           <!-- Popular Badge -->
@@ -154,22 +154,22 @@ const getYearlySavings = (plan) => {
 
           <!-- Plan Header -->
           <div class="text-center mb-8">
-            <h3 :class="['text-2xl font-bold mb-2', plan.popular ? 'text-primary-foreground' : (isDarkTheme ? 'text-gray-100' : 'text-foreground')]">{{ plan.name }}</h3>
-            <p :class="['mb-4', plan.popular ? 'text-primary-foreground/80' : (isDarkTheme ? 'text-gray-300' : 'text-muted-foreground')]">
+            <h3 :class="['text-2xl font-bold mb-2', plan.popular ? 'text-primary-foreground' : (isDarkTheme ? 'text-white' : 'text-gray-900')]">{{ plan.name }}</h3>
+            <p :class="['mb-4 leading-relaxed', plan.popular ? 'text-primary-foreground/80' : (isDarkTheme ? 'text-gray-200' : 'text-gray-600')]">
               {{ plan.description }}
             </p>
             
             <!-- Price -->
             <div class="mb-4">
-              <div :class="['text-4xl font-bold', plan.popular ? 'text-primary-foreground' : (isDarkTheme ? 'text-gray-100' : 'text-foreground')]">
+              <div :class="['text-4xl font-bold', plan.popular ? 'text-primary-foreground' : (isDarkTheme ? 'text-white' : 'text-gray-900')]">
                 {{ getDisplayPrice(plan) }}
               </div>
-              <div :class="['text-sm', plan.popular ? 'text-primary-foreground/70' : (isDarkTheme ? 'text-gray-300' : 'text-muted-foreground')]">
+              <div :class="['text-sm', plan.popular ? 'text-primary-foreground/70' : (isDarkTheme ? 'text-gray-200' : 'text-gray-600')]">
                 por {{ getBillingText() }}
               </div>
               <div
                 v-if="getYearlySavings(plan) && billingCycle === 'yearly'"
-                class="text-green-600 text-sm mt-1"
+                :class="['text-sm mt-1 font-medium', isDarkTheme ? 'text-green-400' : 'text-green-600']"
               >
                 Ahorra {{ getYearlySavings(plan) }}%
               </div>
@@ -185,13 +185,13 @@ const getYearlySavings = (plan) => {
             >
               <svg
                 class="w-5 h-5 mt-0.5 flex-shrink-0"
-                :class="plan.popular ? 'text-primary-foreground' : 'text-green-600'"
+                :class="plan.popular ? 'text-primary-foreground' : (isDarkTheme ? 'text-green-400' : 'text-green-600')"
                 fill="currentColor"
                 viewBox="0 0 20 20"
               >
                 <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
               </svg>
-              <span :class="plan.popular ? 'text-primary-foreground/90' : (isDarkTheme ? 'text-gray-100' : 'text-foreground')">
+              <span :class="plan.popular ? 'text-primary-foreground/90' : (isDarkTheme ? 'text-gray-100' : 'text-gray-900')">
                 {{ feature }}
               </span>
             </li>
@@ -200,10 +200,10 @@ const getYearlySavings = (plan) => {
           <!-- CTA Button -->
           <button
             :class="[
-              'w-full py-3 px-6 rounded-lg font-medium transition-colors',
+              'w-full py-3 px-6 rounded-lg font-medium transition-colors cursor-pointer',
               plan.popular
-                ? 'bg-white text-primary hover:bg-gray-100'
-                : (isDarkTheme ? 'bg-gray-700 text-gray-100 hover:bg-gray-600' : 'bg-primary text-primary-foreground hover:bg-primary/90')
+                ? (isDarkTheme ? 'bg-gray-100 text-gray-900 hover:bg-gray-200' : 'bg-white text-primary hover:bg-gray-100')
+                : (isDarkTheme ? 'bg-gray-700 text-white hover:bg-gray-600' : 'bg-primary text-primary-foreground hover:bg-primary/90')
             ]"
           >
             {{ plan.cta }}
@@ -213,16 +213,16 @@ const getYearlySavings = (plan) => {
 
       <!-- Additional Info -->
       <div class="mt-16 text-center">
-        <div :class="['bg-white dark:bg-card rounded-2xl p-8 shadow-lg max-w-4xl mx-auto', isDarkTheme ? 'bg-gray-800' : 'bg-white']">
-          <h3 :class="['text-xl font-bold mb-4', isDarkTheme ? 'text-gray-100' : 'text-foreground']">¿Preguntas sobre nuestros planes?</h3>
-          <p :class="['mb-6', isDarkTheme ? 'text-gray-300' : 'text-muted-foreground']">
+        <div :class="['rounded-2xl p-8 shadow-lg max-w-4xl mx-auto', isDarkTheme ? 'bg-gray-800' : 'bg-white']">
+          <h3 :class="['text-xl font-bold mb-4', isDarkTheme ? 'text-white' : 'text-gray-900']">¿Preguntas sobre nuestros planes?</h3>
+          <p :class="['mb-6 leading-relaxed', isDarkTheme ? 'text-gray-200' : 'text-gray-600']">
             Nuestro equipo está listo para ayudarte a encontrar el plan perfecto para tu negocio.
           </p>
           <div class="flex flex-col sm:flex-row gap-4 justify-center">
-            <button class="px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium">
+            <button class="px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium cursor-pointer">
               Hablar con Ventas
             </button>
-            <button :class="['px-6 py-3 border rounded-lg hover:bg-accent transition-colors font-medium', isDarkTheme ? 'border-gray-700 text-gray-100 hover:bg-gray-700' : 'border-border text-foreground hover:bg-accent']">
+            <button :class="['px-6 py-3 border rounded-lg hover:bg-accent transition-colors font-medium cursor-pointer', isDarkTheme ? 'border-gray-600 text-white hover:bg-gray-700' : 'border-gray-300 text-gray-900 hover:bg-gray-50']">
               Ver Documentación
             </button>
           </div>

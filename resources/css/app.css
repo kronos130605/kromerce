@@ -65,4 +65,14 @@
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
   }
+  
+  /* Interactive element cursor styles */
+  a, button, [role="button"], input[type="submit"], input[type="button"], label {
+    cursor: pointer;
+  }
+  
+  /* Disabled elements */
+  button:disabled, [disabled] {
+    cursor: not-allowed;
+  }
 }

@@ -102,19 +102,19 @@ onMounted(() => {
           :key="stat.label"
           class="text-center group"
         >
-          <div :class="['bg-white dark:bg-card rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 group-hover:-translate-y-2', isDarkTheme ? 'bg-gray-800' : 'bg-white']">
+          <div :class="['rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 group-hover:-translate-y-2', isDarkTheme ? 'bg-gray-800' : 'bg-white']">
             <!-- Number -->
-            <div class="text-4xl md:text-5xl font-bold text-primary mb-2">
+            <div :class="['text-4xl md:text-5xl font-bold mb-2', isDarkTheme ? 'text-blue-400' : 'text-primary']">
               {{ animatedNumbers[index] }}{{ stat.suffix }}
             </div>
             
             <!-- Label -->
-            <h3 :class="['text-xl font-semibold mb-2', isDarkTheme ? 'text-gray-100' : 'text-foreground']">
+            <h3 :class="['text-xl font-semibold mb-2', isDarkTheme ? 'text-white' : 'text-gray-900']">
               {{ stat.label }}
             </h3>
             
             <!-- Description -->
-            <p :class="[isDarkTheme ? 'text-gray-300' : 'text-muted-foreground']">
+            <p :class="['leading-relaxed', isDarkTheme ? 'text-gray-200' : 'text-gray-600']">
               {{ stat.description }}
             </p>
           </div>
@@ -123,19 +123,19 @@ onMounted(() => {
 
       <!-- Additional Context -->
       <div class="mt-16 text-center">
-        <div :class="['bg-white dark:bg-card rounded-2xl p-8 shadow-lg max-w-4xl mx-auto', isDarkTheme ? 'bg-gray-800' : 'bg-white']">
+        <div :class="['rounded-2xl p-8 shadow-lg max-w-4xl mx-auto', isDarkTheme ? 'bg-gray-800' : 'bg-white']">
           <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div>
-              <div class="text-3xl font-bold text-green-600 mb-2">$2M+</div>
-              <p :class="[isDarkTheme ? 'text-gray-300' : 'text-muted-foreground']">Procesados en transacciones</p>
+              <div :class="['text-3xl font-bold mb-2', isDarkTheme ? 'text-green-400' : 'text-green-600']">$2M+</div>
+              <p :class="['leading-relaxed', isDarkTheme ? 'text-gray-200' : 'text-gray-600']">Procesados en transacciones</p>
             </div>
             <div>
-              <div class="text-3xl font-bold text-blue-600 mb-2">4.9★</div>
-              <p :class="[isDarkTheme ? 'text-gray-300' : 'text-muted-foreground']">Calificación promedio de clientes</p>
+              <div :class="['text-3xl font-bold mb-2', isDarkTheme ? 'text-blue-400' : 'text-blue-600']">4.9★</div>
+              <p :class="['leading-relaxed', isDarkTheme ? 'text-gray-200' : 'text-gray-600']">Calificación promedio de clientes</p>
             </div>
             <div>
-              <div class="text-3xl font-bold text-purple-600 mb-2">150ms</div>
-              <p :class="[isDarkTheme ? 'text-gray-300' : 'text-muted-foreground']">Tiempo de respuesta promedio</p>
+              <div :class="['text-3xl font-bold mb-2', isDarkTheme ? 'text-purple-400' : 'text-purple-600']">150ms</div>
+              <p :class="['leading-relaxed', isDarkTheme ? 'text-gray-200' : 'text-gray-600']">Tiempo de respuesta promedio</p>
             </div>
           </div>
         </div>
