@@ -105,7 +105,7 @@ onBeforeUnmount(() => {
         <a href="/" class="flex items-center group cursor-pointer">
           <div class="mr-3 transition-transform duration-300 group-hover:scale-110">
             <img
-              src="/resources/images/logos/kromerce-business-text.png"
+              src="/images/kromerce-business-text.png"
               alt="Kromerce"
               :class="[
                 'h-8 w-auto object-contain transition-transform duration-300 group-hover:scale-110',
