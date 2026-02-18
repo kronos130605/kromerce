@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onBeforeUnmount } from 'vue';
 import Button from '@/components/ui/Button.vue';
 import Badge from '@/components/ui/Badge.vue';
 
@@ -25,13 +25,27 @@ const routeList = [
 const isOpen = ref(false);
 const isDarkTheme = ref(false);
 
-const toggleDarkMode = () => {
-  isDarkTheme.value = !isDarkTheme.value;
-  // Apply dark mode to document
-  if (isDarkTheme.value) {
+let observer;
+
+const applyDarkClass = (enabled) => {
+  if (enabled) {
     document.documentElement.classList.add('dark');
   } else {
     document.documentElement.classList.remove('dark');
+  }
+};
+
+const syncDarkThemeFromDom = () => {
+  isDarkTheme.value = document.documentElement.classList.contains('dark');
+};
+
+const toggleDarkMode = () => {
+  isDarkTheme.value = !isDarkTheme.value;
+  applyDarkClass(isDarkTheme.value);
+  try {
+    localStorage.setItem('kromerce_theme', isDarkTheme.value ? 'dark' : 'light');
+  } catch {
+    // ignore
   }
 };
 
@@ -44,10 +58,34 @@ const smoothScroll = (href) => {
 };
 
 onMounted(() => {
+  try {
+    const stored = localStorage.getItem('kromerce_theme');
+    if (stored === 'dark' || stored === 'light') {
+      applyDarkClass(stored === 'dark');
+    }
+  } catch {
+    // ignore
+  }
+
+  syncDarkThemeFromDom();
+
+  observer = new MutationObserver(syncDarkThemeFromDom);
+  observer.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ['class'],
+  });
+
   // Add ID to hero section for navigation
   const hero = document.querySelector('section');
   if (hero) {
     hero.id = 'hero';
+  }
+});
+
+onBeforeUnmount(() => {
+  if (observer) {
+    observer.disconnect();
+    observer = undefined;
   }
 });
 </script>

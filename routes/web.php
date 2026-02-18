@@ -14,6 +14,14 @@ Route::get('/', function () {
     ]);
 });
 
+Route::get('/kromerce', function () {
+    return Inertia::render('Kromerce');
+})->name('kromerce.app');
+
+Route::get('/kromerce-full', function () {
+    return view('kromerce-full-preview');
+})->name('kromerce.full');
+
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
