@@ -1,21 +1,20 @@
 <script setup>
-import { ref } from 'vue';
-
+import { ref, onMounted, onUnmounted } from 'vue';
 import Button from '@/components/ui/Button.vue';
 import Badge from '@/components/ui/Badge.vue';
 
 const routeList = [
   {
-    href: "#products",
-    label: "Productos",
+    href: "#features",
+    label: "Características",
   },
   {
-    href: "#services",
-    label: "Servicios",
+    href: "#testimonials",
+    label: "Testimonios",
   },
   {
     href: "#pricing",
-    label: "Planes",
+    label: "Precios",
   },
   {
     href: "#contact",
@@ -24,68 +23,169 @@ const routeList = [
 ];
 
 const isOpen = ref(false);
+const isDarkTheme = ref(false);
+
+const toggleDarkMode = () => {
+  isDarkTheme.value = !isDarkTheme.value;
+  // Apply dark mode to document
+  if (isDarkTheme.value) {
+    document.documentElement.classList.add('dark');
+  } else {
+    document.documentElement.classList.remove('dark');
+  }
+};
+
+const smoothScroll = (href) => {
+  const element = document.querySelector(href);
+  if (element) {
+    element.scrollIntoView({ behavior: 'smooth' });
+  }
+  isOpen.value = false;
+};
+
+onMounted(() => {
+  // Add ID to hero section for navigation
+  const hero = document.querySelector('section');
+  if (hero) {
+    hero.id = 'hero';
+  }
+});
 </script>
 
 <template>
-  <header class="w-[90%] md:w-[70%] lg:w-[75%] lg:max-w-screen-xl top-5 mx-auto sticky border z-40 rounded-2xl flex justify-between items-center p-2 bg-card shadow-md">
-    <!-- Logo -->
-    <a href="/" class="font-bold text-lg flex items-center group">
-      <div class="mr-3 transition-transform duration-300 group-hover:scale-110">
-        <img src="/resources/images/logos/kromerce-business-text.png" alt="Kromerce" class="h-12 w-auto object-contain" />
-      </div>
-    </a>
+  <header 
+    :class="[
+      'fixed top-0 left-0 right-0 z-50 backdrop-blur-md transition-all duration-300',
+      isDarkTheme 
+        ? 'bg-gray-900/95 border-b border-gray-800' 
+        : 'bg-white/95 border-b border-border shadow-sm'
+    ]"
+  >
+    <div class="container mx-auto px-4">
+      <div class="flex justify-between items-center h-16">
+        <!-- Logo -->
+        <a href="/" class="flex items-center group">
+          <div class="mr-3 transition-transform duration-300 group-hover:scale-110">
+            <img 
+              src="/resources/images/logos/kromerce-business-text.png" 
+              alt="Kromerce" 
+              :class="[
+                'h-8 w-auto object-contain transition-transform duration-300 group-hover:scale-110',
+                isDarkTheme ? 'filter brightness-0 invert' : ''
+              ]" 
+            />
+          </div>
+        </a>
 
-    <!-- Mobile Menu -->
-    <div class="flex items-center lg:hidden">
-      <Button @click="isOpen = !isOpen" variant="ghost" size="icon">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-        </svg>
-      </Button>
-    </div>
-
-    <!-- Mobile Menu Content -->
-    <div v-if="isOpen" class="absolute top-full left-0 right-0 bg-card border rounded-b-2xl p-4 lg:hidden">
-      <div class="flex flex-col gap-2">
-        <Button
-          v-for="{ href, label } in routeList"
-          :key="label"
-          as-child
-          variant="ghost"
-          class="justify-start text-base"
-        >
-          <a @click="isOpen = false" :href="href">
+        <!-- Desktop Menu -->
+        <nav class="hidden lg:flex items-center gap-8">
+          <button
+            v-for="{ href, label } in routeList"
+            :key="label"
+            @click="smoothScroll(href)"
+            :class="[
+              'font-medium transition-colors relative group',
+              isDarkTheme 
+                ? 'text-gray-300 hover:text-white' 
+                : 'text-foreground hover:text-foreground'
+            ]"
+          >
             {{ label }}
-          </a>
-        </Button>
-      </div>
-      <div class="mt-4 pt-4 border-t">
-        <Button class="w-full">
-          Comenzar Gratis
-        </Button>
-      </div>
-    </div>
+            <span 
+              class="absolute bottom-0 left-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"
+              style="width: 0;"
+            ></span>
+          </button>
+        </nav>
 
-    <!-- Desktop Menu -->
-    <nav class="hidden lg:flex items-center gap-6">
-      <a
-        v-for="{ href, label } in routeList"
-        :key="label"
-        :href="href"
-        class="text-sm font-medium hover:text-primary transition-colors"
+        <!-- Desktop CTA -->
+        <div class="hidden lg:flex items-center gap-4">
+          <Badge 
+            variant="secondary" 
+            :class="[
+              'text-xs',
+              isDarkTheme 
+                ? 'bg-gray-800 text-gray-300 border-gray-700' 
+                : 'bg-muted text-foreground'
+            ]"
+          >
+            Nuevo
+          </Badge>
+          
+          <!-- Dark Mode Toggle -->
+          <button
+            @click="toggleDarkMode"
+            class="p-2 rounded-lg hover:bg-accent transition-colors"
+            :title="isDarkTheme ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'"
+          >
+            <span v-if="!isDarkTheme" class="text-xl">🌙</span>
+            <span v-else class="text-xl">☀️</span>
+          </button>
+          
+          <Button>
+            Comenzar Gratis
+          </Button>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div class="flex items-center lg:hidden gap-2">
+          <!-- Dark Mode Toggle Mobile -->
+          <button
+            @click="toggleDarkMode"
+            class="p-2 rounded-lg hover:bg-accent transition-colors"
+            :title="isDarkTheme ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'"
+          >
+            <span v-if="!isDarkTheme" class="text-xl">🌙</span>
+            <span v-else class="text-xl">☀️</span>
+          </button>
+          
+          <Button 
+            @click="isOpen = !isOpen" 
+            variant="ghost" 
+            size="icon"
+            class="text-foreground hover:bg-accent"
+          >
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </Button>
+        </div>
+      </div>
+
+      <!-- Mobile Menu Content -->
+      <div 
+        v-if="isOpen" 
+        :class="[
+          'lg:hidden transition-all duration-300',
+          isDarkTheme 
+            ? 'bg-gray-900 border-t border-gray-800' 
+            : 'bg-background border-t border-border'
+        ]"
       >
-        {{ label }}
-      </a>
-    </nav>
-
-    <!-- Desktop CTA -->
-    <div class="hidden lg:flex items-center gap-4">
-      <Badge variant="secondary" class="text-xs">
-        Nuevo
-      </Badge>
-      <Button>
-        Comenzar Gratis
-      </Button>
+        <div class="py-4 space-y-2">
+          <Button
+            v-for="{ href, label } in routeList"
+            :key="label"
+            @click="smoothScroll(href)"
+            variant="ghost"
+            :class="[
+              'w-full justify-start transition-colors',
+              isDarkTheme 
+                ? 'text-gray-300 hover:text-white hover:bg-gray-800' 
+                : 'text-foreground/80 hover:text-foreground hover:bg-accent'
+            ]"
+          >
+            {{ label }}
+          </Button>
+          <div :class="['pt-4 border-t', isDarkTheme ? 'border-gray-800' : 'border-border']">
+            <Button 
+              class="w-full"
+            >
+              Comenzar Gratis
+            </Button>
+          </div>
+        </div>
+      </div>
     </div>
   </header>
 </template>
