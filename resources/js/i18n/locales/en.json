@@ -54,7 +54,7 @@
       "name_label": "Full Name",
       "name_placeholder": "Your name",
       "email_label": "Email",
-      "email_placeholder": "your@email.com",
+      "email_placeholder": "your email address",
       "business_label": "Business Name",
       "business_placeholder": "Your business",
       "message_label": "Message (Optional)",
@@ -223,14 +223,19 @@
     "links": {
       "about": "About",
       "features": "Features",
-      "pricing": "Pricing", 
+      "pricing": "Pricing",
       "contact": "Contact",
       "blog": "Blog",
       "careers": "Careers",
       "privacy": "Privacy",
       "terms": "Terms",
       "integrations": "Integrations",
-      "api": "API"
+      "api": "API",
+      "cookies": "Cookies",
+      "gdpr": "GDPR",
+      "product": "Product",
+      "company": "Company",
+      "legal": "Legal"
     },
     "social": {
       "twitter": "Follow us on Twitter",

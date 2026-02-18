@@ -54,7 +54,7 @@
       "name_label": "Nombre Completo",
       "name_placeholder": "Tu nombre",
       "email_label": "Email",
-      "email_placeholder": "tu@email.com",
+      "email_placeholder": "tu correo electrónico",
       "business_label": "Nombre del Negocio",
       "business_placeholder": "Tu negocio",
       "message_label": "Mensaje (Opcional)",
@@ -223,14 +223,19 @@
     "links": {
       "about": "Acerca de",
       "features": "Características",
-      "pricing": "Precios", 
+      "pricing": "Precios",
       "contact": "Contacto",
       "blog": "Blog",
       "careers": "Carreras",
       "privacy": "Privacidad",
       "terms": "Términos",
       "integrations": "Integraciones",
-      "api": "API"
+      "api": "API",
+      "cookies": "Cookies",
+      "gdpr": "GDPR",
+      "product": "Producto",
+      "company": "Empresa",
+      "legal": "Legal"
     },
     "social": {
       "twitter": "Síguenos en Twitter",

@@ -63,7 +63,7 @@ const socialLinks = [
 
         <!-- Product Links -->
         <div>
-          <h3 class="font-semibold text-foreground mb-4">Producto</h3>
+          <h3 class="font-semibold text-foreground mb-4">{{ t('footer.links.product') }}</h3>
           <ul class="space-y-2">
             <li v-for="link in footerLinks.product" :key="link.key">
               <a :href="link.href" class="text-muted-foreground hover:text-foreground transition-colors">
@@ -75,7 +75,7 @@ const socialLinks = [
 
         <!-- Company Links -->
         <div>
-          <h3 class="font-semibold text-foreground mb-4">Empresa</h3>
+          <h3 class="font-semibold text-foreground mb-4">{{ t('footer.links.company') }}</h3>
           <ul class="space-y-2">
             <li v-for="link in footerLinks.company" :key="link.key">
               <a :href="link.href" class="text-muted-foreground hover:text-foreground transition-colors">
@@ -87,7 +87,7 @@ const socialLinks = [
 
         <!-- Legal Links -->
         <div>
-          <h3 class="font-semibold text-foreground mb-4">Legal</h3>
+          <h3 class="font-semibold text-foreground mb-4">{{ t('footer.links.legal') }}</h3>
           <ul class="space-y-2">
             <li v-for="link in footerLinks.legal" :key="link.key">
               <a :href="link.href" class="text-muted-foreground hover:text-foreground transition-colors">
