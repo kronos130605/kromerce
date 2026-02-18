@@ -1,6 +1,6 @@
 <script setup>
 import { cva } from 'class-variance-authority';
-import { cn } from '@/lib/utils.js';
+import { cn } from '@/lib/utils';
 
 const props = defineProps({
   variant: {

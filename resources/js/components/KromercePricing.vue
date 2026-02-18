@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted } from 'vue';
 
 const billingCycle = ref('monthly');
 const isDarkTheme = ref(false);
@@ -108,7 +108,7 @@ const getYearlySavings = (plan) => {
           </span>
         </h2>
         <p :class="['text-xl max-w-3xl mx-auto mb-8', isDarkTheme ? 'text-gray-300' : 'text-muted-foreground']">
-          Crece con nosotros. Desde emprendimientos individuales hasta grandes empresas, 
+          Crece con nosotros. Desde emprendimientos individuales hasta grandes empresas,
           tenemos el plan perfecto para ti.
         </p>
 
@@ -139,8 +139,8 @@ const getYearlySavings = (plan) => {
           :key="plan.name"
           :class="[
             'relative rounded-2xl p-6 lg:p-8 transition-all duration-300 hover:-translate-y-1',
-            plan.popular 
-              ? 'bg-primary text-primary-foreground shadow-xl ring-2 ring-primary/20' 
+            plan.popular
+              ? 'bg-primary text-primary-foreground shadow-xl ring-2 ring-primary/20'
               : (isDarkTheme ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200 hover:shadow-lg')
           ]"
         >
@@ -158,7 +158,7 @@ const getYearlySavings = (plan) => {
             <p :class="['mb-4 leading-relaxed text-sm lg:text-base', plan.popular ? 'text-primary-foreground/80' : (isDarkTheme ? 'text-gray-200' : 'text-gray-600')]">
               {{ plan.description }}
             </p>
-            
+
             <!-- Price -->
             <div class="mb-4">
               <div :class="['text-3xl lg:text-4xl font-bold', plan.popular ? 'text-primary-foreground' : (isDarkTheme ? 'text-white' : 'text-gray-900')]">
