@@ -90,7 +90,7 @@ const particles = Array.from({ length: 20 }, (_, i) => ({
         </Badge>
 
         <!-- Main Title -->
-        <h1 class="text-5xl md:text-7xl lg:text-8xl font-bold mb-6">
+        <h1 class="text-3xl sm:text-4xl md:text-6xl lg:text-7xl xl:text-8xl font-bold mb-6">
           <span :class="isDarkTheme ? 'text-gray-100' : 'text-white'">El futuro del</span>
           <br />
           <span class="text-transparent bg-gradient-to-r from-blue-400 via-cyan-400 to-blue-400 bg-clip-text">
@@ -101,16 +101,16 @@ const particles = Array.from({ length: 20 }, (_, i) => ({
         </h1>
 
         <!-- Description -->
-        <p :class="['text-xl md:text-2xl mb-12 max-w-3xl mx-auto leading-relaxed', isDarkTheme ? 'text-gray-300' : 'text-white/80']">
+        <p :class="['text-lg sm:text-xl md:text-2xl mb-8 sm:mb-12 max-w-3xl mx-auto leading-relaxed px-4', isDarkTheme ? 'text-gray-300' : 'text-white/80']">
           Transforma tu negocio con la plataforma más avanzada del mercado.
           Pagos globales, analytics en tiempo real y crecimiento ilimitado.
         </p>
 
         <!-- CTA Buttons -->
-        <div class="flex flex-col sm:flex-row gap-4 justify-center mb-16">
+        <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center mb-12 sm:mb-16 px-4">
           <Button
             :class="[
-              'px-8 py-4 text-lg font-semibold',
+              'px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-semibold w-full sm:w-auto',
               isDarkTheme
                 ? 'bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 border-0'
                 : 'bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 border-0'
@@ -121,7 +121,7 @@ const particles = Array.from({ length: 20 }, (_, i) => ({
           <Button
             variant="secondary"
             :class="[
-              'px-8 py-4 text-lg font-semibold',
+              'px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-semibold w-full sm:w-auto',
               isDarkTheme
                 ? 'bg-gray-800/50 hover:bg-gray-700 text-gray-300 border-gray-700'
                 : 'bg-white/10 hover:bg-white/20 text-white border-white/20'
@@ -132,24 +132,24 @@ const particles = Array.from({ length: 20 }, (_, i) => ({
         </div>
 
         <!-- Social Proof -->
-        <div :class="['flex flex-wrap justify-center items-center gap-8 text-sm', isDarkTheme ? 'text-gray-400' : 'text-white/60']">
+        <div :class="['flex flex-wrap justify-center items-center gap-4 sm:gap-8 text-xs sm:text-sm', isDarkTheme ? 'text-gray-400' : 'text-white/60']">
           <div class="flex items-center gap-2">
             <div :class="['w-2 h-2 rounded-full animate-pulse', isDarkTheme ? 'bg-green-600' : 'bg-green-400']" />
-            <span>10K+ negocios activos</span>
+            <span class="text-xs sm:text-sm">10K+ negocios activos</span>
           </div>
           <div class="flex items-center gap-2">
             <div :class="['w-2 h-2 rounded-full animate-pulse', isDarkTheme ? 'bg-blue-600' : 'bg-blue-400']" />
-            <span>$2M+ procesados</span>
+            <span class="text-xs sm:text-sm">$2M+ procesados</span>
           </div>
           <div class="flex items-center gap-2">
             <div :class="['w-2 h-2 rounded-full animate-pulse', isDarkTheme ? 'bg-purple-600' : 'bg-purple-400']" />
-            <span>150+ países</span>
+            <span class="text-xs sm:text-sm">150+ países</span>
           </div>
         </div>
       </div>
 
-      <!-- Floating Cards -->
-      <div class="absolute top-20 left-10 animate-float">
+      <!-- Floating Cards - Hidden on mobile -->
+      <div class="hidden lg:block absolute top-20 left-10 animate-float">
         <div :class="['bg-white/10 backdrop-blur-md rounded-xl p-4 border', isDarkTheme ? 'border-gray-700' : 'border-white/20']">
           <div class="flex items-center gap-3 mb-2">
             <svg :class="['w-5 h-5', isDarkTheme ? 'text-blue-400' : 'text-blue-400']" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -162,7 +162,7 @@ const particles = Array.from({ length: 20 }, (_, i) => ({
         </div>
       </div>
 
-      <div class="absolute top-40 right-10 animate-float-delayed">
+      <div class="hidden lg:block absolute top-40 right-10 animate-float-delayed">
         <div :class="['bg-white/10 backdrop-blur-md rounded-xl p-4 border', isDarkTheme ? 'border-gray-700' : 'border-white/20']">
           <div class="flex items-center gap-3 mb-2">
             <svg :class="['w-5 h-5', isDarkTheme ? 'text-purple-400' : 'text-purple-400']" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -175,16 +175,16 @@ const particles = Array.from({ length: 20 }, (_, i) => ({
         </div>
       </div>
 
-      <div class="absolute bottom-20 left-20 animate-float">
+      <div class="hidden lg:block absolute bottom-20 left-20 animate-float">
         <div :class="['bg-white/10 backdrop-blur-md rounded-xl p-4 border', isDarkTheme ? 'border-gray-700' : 'border-white/20']">
           <div class="flex items-center gap-3 mb-2">
             <svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="floatingCards[2].icon" />
             </svg>
-            <div class="text-white text-sm">{{ floatingCards[2].title }}</div>
+            <div :class="['text-sm', isDarkTheme ? 'text-gray-300' : 'text-white']">{{ floatingCards[2].title }}</div>
           </div>
-          <div class="text-white text-xl font-bold">{{ floatingCards[2].value }}</div>
-          <div class="text-green-400 text-sm">{{ floatingCards[2].change }}</div>
+          <div :class="['text-xl font-bold', isDarkTheme ? 'text-gray-100' : 'text-white']">{{ floatingCards[2].value }}</div>
+          <div :class="['text-sm', isDarkTheme ? 'text-green-400' : 'text-green-400']">{{ floatingCards[2].change }}</div>
         </div>
       </div>
     </div>

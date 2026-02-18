@@ -1,5 +1,4 @@
 <script setup>
-import { ref } from 'vue';
 import KromerceNavbar from './components/KromerceNavbar.vue';
 import KromerceHero from './components/KromerceHero.vue';
 import KromerceFeatures from './components/KromerceFeatures.vue';

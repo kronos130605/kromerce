@@ -1,7 +1,6 @@
 <script setup>
 import { ref } from 'vue';
 import Button from '@/components/ui/Button.vue';
-import Badge from '@/components/ui/Badge.vue';
 import KromerceHeroMinimal from './KromerceHeroMinimal.vue';
 import KromerceHeroReal from './KromerceHeroReal.vue';
 import KromerceHeroSaaS from './KromerceHeroSaaS.vue';
@@ -10,7 +9,7 @@ const selectedHero = ref('minimal');
 
 const heroes = {
   minimal: 'KromerceHeroMinimal',
-  real: 'KromerceHeroReal', 
+  real: 'KromerceHeroReal',
   saas: 'KromerceHeroSaaS'
 };
 
@@ -26,7 +25,7 @@ const selectHero = (hero) => {
       <div class="container mx-auto px-4">
         <div class="flex flex-wrap gap-4 justify-center">
           <button
-            v-for="(component, name) in heroes"
+            v-for="name in Object.keys(heroes)"
             :key="name"
             @click="selectHero(name)"
             :class="[
@@ -46,10 +45,10 @@ const selectHero = (hero) => {
     <div class="relative">
       <!-- Minimal Hero -->
       <KromerceHeroMinimal v-if="selectedHero === 'minimal'" />
-      
+
       <!-- Real Interface Hero -->
       <KromerceHeroReal v-if="selectedHero === 'real'" />
-      
+
       <!-- SaaS Modern Hero -->
       <KromerceHeroSaaS v-if="selectedHero === 'saas'" />
     </div>

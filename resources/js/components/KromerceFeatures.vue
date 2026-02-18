@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted } from 'vue';
 
 const isDarkTheme = ref(false);
 
@@ -64,7 +64,7 @@ const features = [
           </span>
         </h2>
         <p class="text-xl text-muted-foreground max-w-3xl mx-auto">
-          Herramientas profesionales diseñadas para ayudarte a vender más, 
+          Herramientas profesionales diseñadas para ayudarte a vender más,
           gestionar mejor y tomar decisiones inteligentes.
         </p>
       </div>

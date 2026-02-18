@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted } from 'vue';
 import Button from '@/components/ui/Button.vue';
 import Badge from '@/components/ui/Badge.vue';
 
@@ -53,11 +53,11 @@ onMounted(() => {
 </script>
 
 <template>
-  <header 
+  <header
     :class="[
       'fixed top-0 left-0 right-0 z-50 backdrop-blur-md transition-all duration-300',
-      isDarkTheme 
-        ? 'bg-gray-900/95 border-b border-gray-800' 
+      isDarkTheme
+        ? 'bg-gray-900/95 border-b border-gray-800'
         : 'bg-white/95 border-b border-border shadow-sm'
     ]"
   >
@@ -66,13 +66,13 @@ onMounted(() => {
         <!-- Logo -->
         <a href="/" class="flex items-center group cursor-pointer">
           <div class="mr-3 transition-transform duration-300 group-hover:scale-110">
-            <img 
-              src="/resources/images/logos/kromerce-business-text.png" 
-              alt="Kromerce" 
+            <img
+              src="/resources/images/logos/kromerce-business-text.png"
+              alt="Kromerce"
               :class="[
                 'h-8 w-auto object-contain transition-transform duration-300 group-hover:scale-110',
                 isDarkTheme ? 'filter brightness-0 invert' : ''
-              ]" 
+              ]"
             />
           </div>
         </a>
@@ -85,13 +85,13 @@ onMounted(() => {
             @click="smoothScroll(href)"
             :class="[
               'font-medium transition-colors relative group cursor-pointer',
-              isDarkTheme 
-                ? 'text-gray-300 hover:text-white' 
+              isDarkTheme
+                ? 'text-gray-300 hover:text-white'
                 : 'text-foreground hover:text-foreground'
             ]"
           >
             {{ label }}
-            <span 
+            <span
               class="absolute bottom-0 left-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"
               style="width: 0;"
             ></span>
@@ -100,18 +100,18 @@ onMounted(() => {
 
         <!-- Desktop CTA -->
         <div class="hidden lg:flex items-center gap-4">
-          <Badge 
-            variant="secondary" 
+          <Badge
+            variant="secondary"
             :class="[
               'text-xs',
-              isDarkTheme 
-                ? 'bg-gray-800 text-gray-300 border-gray-700' 
+              isDarkTheme
+                ? 'bg-gray-800 text-gray-300 border-gray-700'
                 : 'bg-muted text-foreground'
             ]"
           >
             Nuevo
           </Badge>
-          
+
           <!-- Dark Mode Toggle -->
           <button
             @click="toggleDarkMode"
@@ -121,7 +121,7 @@ onMounted(() => {
             <span v-if="!isDarkTheme" class="text-xl">🌙</span>
             <span v-else class="text-xl">☀️</span>
           </button>
-          
+
           <Button class="cursor-pointer">
             Comenzar Gratis
           </Button>
@@ -138,10 +138,10 @@ onMounted(() => {
             <span v-if="!isDarkTheme" class="text-xl">🌙</span>
             <span v-else class="text-xl">☀️</span>
           </button>
-          
-          <Button 
-            @click="isOpen = !isOpen" 
-            variant="ghost" 
+
+          <Button
+            @click="isOpen = !isOpen"
+            variant="ghost"
             size="icon"
             class="text-foreground hover:bg-accent cursor-pointer"
           >
@@ -153,12 +153,12 @@ onMounted(() => {
       </div>
 
       <!-- Mobile Menu Content -->
-      <div 
-        v-if="isOpen" 
+      <div
+        v-if="isOpen"
         :class="[
           'lg:hidden transition-all duration-300',
-          isDarkTheme 
-            ? 'bg-gray-900 border-t border-gray-800' 
+          isDarkTheme
+            ? 'bg-gray-900 border-t border-gray-800'
             : 'bg-background border-t border-border'
         ]"
       >
@@ -170,15 +170,15 @@ onMounted(() => {
             variant="ghost"
             :class="[
               'w-full justify-start transition-colors cursor-pointer',
-              isDarkTheme 
-                ? 'text-gray-300 hover:text-white hover:bg-gray-800' 
+              isDarkTheme
+                ? 'text-gray-300 hover:text-white hover:bg-gray-800'
                 : 'text-foreground/80 hover:text-foreground hover:bg-accent'
             ]"
           >
             {{ label }}
           </Button>
           <div :class="['pt-4 border-t', isDarkTheme ? 'border-gray-800' : 'border-border']">
-            <Button 
+            <Button
               class="w-full cursor-pointer"
             >
               Comenzar Gratis

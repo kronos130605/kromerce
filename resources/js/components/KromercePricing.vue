@@ -133,12 +133,12 @@ const getYearlySavings = (plan) => {
       </div>
 
       <!-- Pricing Cards -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 max-w-6xl mx-auto px-4">
         <div
           v-for="plan in plans"
           :key="plan.name"
           :class="[
-            'relative rounded-2xl p-8 transition-all duration-300 hover:-translate-y-1',
+            'relative rounded-2xl p-6 lg:p-8 transition-all duration-300 hover:-translate-y-1',
             plan.popular 
               ? 'bg-primary text-primary-foreground shadow-xl ring-2 ring-primary/20' 
               : (isDarkTheme ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200 hover:shadow-lg')
@@ -153,18 +153,18 @@ const getYearlySavings = (plan) => {
           </div>
 
           <!-- Plan Header -->
-          <div class="text-center mb-8">
-            <h3 :class="['text-2xl font-bold mb-2', plan.popular ? 'text-primary-foreground' : (isDarkTheme ? 'text-white' : 'text-gray-900')]">{{ plan.name }}</h3>
-            <p :class="['mb-4 leading-relaxed', plan.popular ? 'text-primary-foreground/80' : (isDarkTheme ? 'text-gray-200' : 'text-gray-600')]">
+          <div class="text-center mb-6 lg:mb-8">
+            <h3 :class="['text-xl lg:text-2xl font-bold mb-2', plan.popular ? 'text-primary-foreground' : (isDarkTheme ? 'text-white' : 'text-gray-900')]">{{ plan.name }}</h3>
+            <p :class="['mb-4 leading-relaxed text-sm lg:text-base', plan.popular ? 'text-primary-foreground/80' : (isDarkTheme ? 'text-gray-200' : 'text-gray-600')]">
               {{ plan.description }}
             </p>
             
             <!-- Price -->
             <div class="mb-4">
-              <div :class="['text-4xl font-bold', plan.popular ? 'text-primary-foreground' : (isDarkTheme ? 'text-white' : 'text-gray-900')]">
+              <div :class="['text-3xl lg:text-4xl font-bold', plan.popular ? 'text-primary-foreground' : (isDarkTheme ? 'text-white' : 'text-gray-900')]">
                 {{ getDisplayPrice(plan) }}
               </div>
-              <div :class="['text-sm', plan.popular ? 'text-primary-foreground/70' : (isDarkTheme ? 'text-gray-200' : 'text-gray-600')]">
+              <div :class="['text-sm lg:text-base', plan.popular ? 'text-primary-foreground/70' : (isDarkTheme ? 'text-gray-200' : 'text-gray-600')]">
                 por {{ getBillingText() }}
               </div>
               <div
@@ -177,21 +177,21 @@ const getYearlySavings = (plan) => {
           </div>
 
           <!-- Features -->
-          <ul class="space-y-3 mb-8">
+          <ul class="space-y-2 lg:space-y-3 mb-6 lg:mb-8">
             <li
               v-for="feature in plan.features"
               :key="feature"
               class="flex items-start gap-3"
             >
               <svg
-                class="w-5 h-5 mt-0.5 flex-shrink-0"
+                class="w-4 h-4 lg:w-5 lg:h-5 mt-0.5 flex-shrink-0"
                 :class="plan.popular ? 'text-primary-foreground' : (isDarkTheme ? 'text-green-400' : 'text-green-600')"
                 fill="currentColor"
                 viewBox="0 0 20 20"
               >
                 <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
               </svg>
-              <span :class="plan.popular ? 'text-primary-foreground/90' : (isDarkTheme ? 'text-gray-100' : 'text-gray-900')">
+              <span :class="['text-sm lg:text-base', plan.popular ? 'text-primary-foreground/90' : (isDarkTheme ? 'text-gray-100' : 'text-gray-900')]">
                 {{ feature }}
               </span>
             </li>

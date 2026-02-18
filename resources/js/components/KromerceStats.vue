@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted } from 'vue';
 
 const isDarkTheme = ref(false);
 
@@ -19,28 +19,28 @@ onMounted(() => {
 });
 
 const stats = [
-  { 
-    number: 10000, 
-    suffix: '+', 
-    label: 'Negocios Activos', 
+  {
+    number: 10000,
+    suffix: '+',
+    label: 'Negocios Activos',
     description: 'Confían en Kromerce para crecer'
   },
-  { 
-    number: 50, 
-    suffix: '+', 
-    label: 'Países', 
+  {
+    number: 50,
+    suffix: '+',
+    label: 'Países',
     description: 'Presencia global con soporte local'
   },
-  { 
-    number: 99.9, 
-    suffix: '%', 
-    label: 'Uptime', 
+  {
+    number: 99.9,
+    suffix: '%',
+    label: 'Uptime',
     description: 'Disponibilidad garantizada'
   },
-  { 
-    number: 24, 
-    suffix: '/7', 
-    label: 'Soporte', 
+  {
+    number: 24,
+    suffix: '/7',
+    label: 'Soporte',
     description: 'Ayuda cuando la necesitas'
   }
 ];
@@ -52,7 +52,7 @@ const animateNumber = (index, target) => {
   const steps = 60;
   const increment = target / steps;
   let current = 0;
-  
+
   const timer = setInterval(() => {
     current += increment;
     if (current >= target) {
@@ -71,7 +71,7 @@ onMounted(() => {
     attributes: true,
     attributeFilter: ['class']
   });
-  
+
   stats.forEach((stat, index) => {
     animateNumber(index, stat.number);
   });
@@ -90,7 +90,7 @@ onMounted(() => {
           </span>
         </h2>
         <p :class="['text-xl max-w-3xl mx-auto', isDarkTheme ? 'text-gray-300' : 'text-muted-foreground']">
-          El crecimiento de nuestra plataforma refleja el éxito de nuestros clientes. 
+          El crecimiento de nuestra plataforma refleja el éxito de nuestros clientes.
           Únete a miles de negocios que ya están transformando su futuro.
         </p>
       </div>
@@ -107,12 +107,12 @@ onMounted(() => {
             <div :class="['text-4xl md:text-5xl font-bold mb-2', isDarkTheme ? 'text-blue-400' : 'text-primary']">
               {{ animatedNumbers[index] }}{{ stat.suffix }}
             </div>
-            
+
             <!-- Label -->
             <h3 :class="['text-xl font-semibold mb-2', isDarkTheme ? 'text-white' : 'text-gray-900']">
               {{ stat.label }}
             </h3>
-            
+
             <!-- Description -->
             <p :class="['leading-relaxed', isDarkTheme ? 'text-gray-200' : 'text-gray-600']">
               {{ stat.description }}
