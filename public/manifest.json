@@ -8,48 +8,32 @@
   "theme_color": "#3b82f6",
   "orientation": "portrait-primary",
   "scope": "/",
-  "lang": "en",
+  "lang": "es",
   "categories": ["business", "shopping", "productivity"],
   "icons": [
     {
-      "src": "/favicon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
+      "src": "/images/icons/kromerce-business-icon-app-100.png",
+      "sizes": "100x100",
+      "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgdmlld0JveD0iMCAwIDE5MiAxOTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIj48cmVjdCB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgZmlsbD0iIzNiODJmNiIgcngPSI4Ii8+PC9zdmc+",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgdmlld0JveD0iMCAwIDUxMiA1MTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIj48cmVjdCB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgZmlsbD0iIzNiODJmNiIgcng9IjIxIi8+PC9zdmc+",
-      "sizes": "512x512",
-      "type": "image/png"
+      "src": "/images/icons/kromerce-business-icon-logo-32.png",
+      "sizes": "32x32",
+      "type": "image/png",
+      "purpose": "any"
     }
   ],
   "shortcuts": [
     {
-      "name": "View Products",
-      "short_name": "Products",
-      "description": "Explore our product catalog",
-      "url": "/products",
+      "name": "Inicio",
+      "short_name": "Inicio",
+      "description": "Página principal de Kromerce",
+      "url": "/",
       "icons": [
         {
-          "src": "/favicon.svg",
-          "sizes": "any"
-        }
-      ]
-    },
-    {
-      "name": "Contact",
-      "short_name": "Contact",
-      "description": "Contact our team",
-      "url": "/contact",
-      "icons": [
-        {
-          "src": "/favicon.svg",
-          "sizes": "any"
+          "src": "/images/icons/kromerce-business-icon-logo-32.png",
+          "sizes": "32x32"
         }
       ]
     }

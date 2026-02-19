@@ -12,8 +12,9 @@
         <meta name="apple-mobile-web-app-title" content="Kromerce">
         
         <!-- Favicon -->
-        <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
-        <link rel="apple-touch-icon" href="{{ asset('favicon.svg') }}">
+        <link rel="icon" type="image/png" href="{{ asset('images/icons/kromerce-business-icon-logo-32.png') }}" sizes="32x32">
+        <link rel="icon" type="image/png" href="{{ asset('images/icons/kromerce-business-icon-app-100.png') }}" sizes="100x100">
+        <link rel="apple-touch-icon" href="{{ asset('images/icons/kromerce-business-icon-app-100.png') }}">
         
         <!-- PWA Manifest -->
         <link rel="manifest" href="{{ asset('manifest.json') }}">

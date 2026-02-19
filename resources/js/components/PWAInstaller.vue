@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { ref, onMounted, onBeforeUnmount, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
@@ -10,15 +10,15 @@ const showInstallBanner = ref(false); // controls visibility of the banner
 const isInstalled = ref(false); // app already installed / standalone
 const beforeInstallPromptHandled = ref(false); // ensure we only handle first event
 
+// Computed properties
+const isFirefox = computed(() => {
+  return navigator.userAgent.toLowerCase().includes('firefox');
+});
+
 const installApp = async () => {
-  const isFirefox = navigator.userAgent.toLowerCase().includes('firefox');
-  
-  if (isFirefox) {
-    // Firefox no dispara beforeinstallprompt de forma estándar.
-    alert('Para instalar en Firefox:\n1. Haz clic en el ícono de página (📄) en la barra de direcciones.\n2. Elige "Instalar" o "Instalar aplicación".');
-    // Ocultamos el banner para no molestar.
-    showInstallBanner.value = false;
-    localStorage.setItem('pwa_banner_dismissed', 'true');
+  if (isFirefox.value) {
+    // Firefox: mostrar instrucciones claras
+    alert('Para instalar Kromerce en Firefox:\n\nOpción 1: Haz clic en el menú de tres puntos (⋮) → "Instalar esta página"\n\nOpción 2: Haz clic en el ícono de página (📄) en la barra de direcciones y selecciona "Instalar aplicación"\n\nSi no ves estas opciones, intenta recargar la página y volver a intentarlo.');
     return;
   }
 
@@ -61,14 +61,15 @@ const checkInstallStatus = () => {
     return;
   }
 
-  const ua = navigator.userAgent.toLowerCase();
-  const isFirefox = ua.includes('firefox');
+  console.log('🔍 checkInstallStatus', {
+    isFirefox: isFirefox.value,
+    dismissed,
+    standalone: window.matchMedia('(display-mode: standalone)').matches
+  });
 
-  console.log('🔍 checkInstallStatus', { isFirefox, dismissed });
-
-  // 3) En Firefox, no hay beforeinstallprompt estándar.
-  //    Mostramos un banner manual siempre que no esté instalado ni descartado.
-  if (isFirefox && !isInstalled.value) {
+  // 3) En Firefox, siempre mostrar banner si no está instalado ni descartado
+  if (isFirefox.value && !isInstalled.value && !dismissed) {
+    console.log('🦊 Firefox detected - showing install banner');
     showInstallBanner.value = true;
   }
 };
@@ -102,7 +103,7 @@ onMounted(() => {
       hasDeferredPrompt: !!deferredPrompt.value,
     });
   });
-  
+
   // Listen for app installed event
   window.addEventListener('appinstalled', () => {
     console.log('PWA was installed');
@@ -110,7 +111,7 @@ onMounted(() => {
     showInstallBanner.value = false;
     deferredPrompt.value = null;
   });
-  
+
   // Listen for display mode changes
   window.matchMedia('(display-mode: standalone)').addEventListener('change', (e) => {
     if (e.matches) {
@@ -140,7 +141,7 @@ onBeforeUnmount(() => {
           </svg>
         </div>
       </div>
-      
+
       <div class="flex-1 min-w-0">
         <h3 class="text-sm font-semibold text-white mb-1">
           {{ t('pwa.install_title', 'Instalar Kromerce') }}
@@ -148,7 +149,7 @@ onBeforeUnmount(() => {
         <p class="text-xs text-gray-300 mb-3">
           {{ t('pwa.install_description', 'Instala nuestra aplicación para un acceso rápido y mejor experiencia') }}
         </p>
-        
+
         <div class="flex gap-2">
           <button
             @click="installApp"
@@ -164,7 +165,7 @@ onBeforeUnmount(() => {
           </button>
         </div>
       </div>
-      
+
       <button
         @click="dismissBanner"
         class="flex-shrink-0 p-1 rounded hover:bg-gray-700 transition-colors"
@@ -174,5 +175,21 @@ onBeforeUnmount(() => {
         </svg>
       </button>
     </div>
+  </div>
+
+  <!-- Firefox Manual Install Button (siempre visible en Firefox) -->
+  <div
+    v-if="isFirefox && !isInstalled"
+    class="fixed top-20 right-4 bg-orange-600 text-white p-3 rounded-lg shadow-lg z-[9998]"
+  >
+    <button
+      @click="installApp"
+      class="flex items-center gap-2 text-sm font-medium hover:bg-orange-700 transition-colors"
+    >
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+      </svg>
+      Instalar App
+    </button>
   </div>
 </template>
