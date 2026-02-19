@@ -2,9 +2,7 @@ const CACHE_NAME = 'kromerce-v1';
 const urlsToCache = [
   '/',
   '/manifest.json',
-  '/images/kromerce-business-text.png',
-  '/images/icons/icon-192x192.png',
-  '/images/icons/icon-512x512.png'
+  '/favicon.svg'
 ];
 
 // Install event - cache resources

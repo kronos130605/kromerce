@@ -4,7 +4,6 @@ import { useI18n } from 'vue-i18n';
 import Button from '@/components/ui/Button.vue';
 import Badge from '@/components/ui/Badge.vue';
 import LanguageSelector from '@/components/LanguageSelector.vue';
-import PWAInstaller from '@/components/PWAInstaller.vue';
 
 const { t } = useI18n();
 
@@ -177,7 +176,7 @@ onBeforeUnmount(() => {
         <div class="flex items-center lg:hidden gap-2">
           <!-- Language Selector Mobile -->
           <LanguageSelector />
-          
+
           <!-- Dark Mode Toggle Mobile -->
           <button
             @click="toggleDarkMode"
@@ -237,7 +236,4 @@ onBeforeUnmount(() => {
       </div>
     </div>
   </header>
-  
-  <!-- PWA Installer -->
-  <PWAInstaller />
 </template>

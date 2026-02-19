@@ -3,6 +3,20 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        
+        <!-- PWA Meta Tags -->
+        <meta name="theme-color" content="#3b82f6">
+        <meta name="description" content="E-commerce platform for modern businesses">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="default">
+        <meta name="apple-mobile-web-app-title" content="Kromerce">
+        
+        <!-- Favicon -->
+        <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
+        <link rel="apple-touch-icon" href="{{ asset('favicon.svg') }}">
+        
+        <!-- PWA Manifest -->
+        <link rel="manifest" href="{{ asset('manifest.json') }}">
 
         <title>{{ config('app.name', 'Laravel') }}</title>
 

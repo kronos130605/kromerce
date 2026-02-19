@@ -9,7 +9,7 @@ const languages = [
   { code: 'en', name: 'English', flag: '🇺🇸' }
 ];
 
-const currentLanguage = computed(() => 
+const currentLanguage = computed(() =>
   languages.find(lang => lang.code === locale.value) || languages[0]
 );
 
@@ -31,7 +31,7 @@ const changeLanguage = (langCode) => {
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
       </svg>
     </button>
-    
+
     <div class="absolute right-0 mt-2 w-48 bg-background border border-border rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
       <div class="py-1">
         <button
@@ -46,11 +46,11 @@ const changeLanguage = (langCode) => {
             <div class="font-medium">{{ language.name }}</div>
             <div class="text-xs text-muted-foreground">{{ language.code.toUpperCase() }}</div>
           </div>
-          <svg 
-            v-if="language.code === locale" 
-            class="w-4 h-4 text-primary" 
-            fill="none" 
-            stroke="currentColor" 
+          <svg
+            v-if="language.code === locale"
+            class="w-4 h-4 text-primary"
+            fill="none"
+            stroke="currentColor"
             viewBox="0 0 24 24"
           >
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />

@@ -1,87 +1,55 @@
 {
   "name": "Kromerce - E-commerce Platform",
   "short_name": "Kromerce",
-  "description": "Plataforma E-commerce para tu Negocio",
+  "description": "E-commerce platform for modern businesses",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#3b82f6",
   "orientation": "portrait-primary",
   "scope": "/",
-  "lang": "es",
+  "lang": "en",
   "categories": ["business", "shopping", "productivity"],
   "icons": [
     {
-      "src": "/images/icons/icon-72x72.png",
-      "sizes": "72x72",
-      "type": "image/png",
-      "purpose": "maskable any"
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
     },
     {
-      "src": "/images/icons/icon-96x96.png",
-      "sizes": "96x96",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "/images/icons/icon-128x128.png",
-      "sizes": "128x128",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "/images/icons/icon-144x144.png",
-      "sizes": "144x144",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "/images/icons/icon-152x152.png",
-      "sizes": "152x152",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "/images/icons/icon-192x192.png",
+      "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgdmlld0JveD0iMCAwIDE5MiAxOTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIj48cmVjdCB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgZmlsbD0iIzNiODJmNiIgcngPSI4Ii8+PC9zdmc+",
       "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "maskable any"
+      "type": "image/png"
     },
     {
-      "src": "/images/icons/icon-384x384.png",
-      "sizes": "384x384",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "/images/icons/icon-512x512.png",
+      "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgdmlld0JveD0iMCAwIDUxMiA1MTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIj48cmVjdCB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgZmlsbD0iIzNiODJmNiIgcng9IjIxIi8+PC9zdmc+",
       "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable any"
+      "type": "image/png"
     }
   ],
   "shortcuts": [
     {
-      "name": "Ver Productos",
-      "short_name": "Productos",
-      "description": "Explora nuestro catálogo de productos",
+      "name": "View Products",
+      "short_name": "Products",
+      "description": "Explore our product catalog",
       "url": "/products",
       "icons": [
         {
-          "src": "/images/icons/icon-96x96.png",
-          "sizes": "96x96"
+          "src": "/favicon.svg",
+          "sizes": "any"
         }
       ]
     },
     {
-      "name": "Contacto",
-      "short_name": "Contacto",
-      "description": "Contacta con nuestro equipo",
+      "name": "Contact",
+      "short_name": "Contact",
+      "description": "Contact our team",
       "url": "/contact",
       "icons": [
         {
-          "src": "/images/icons/icon-96x96.png",
-          "sizes": "96x96"
+          "src": "/favicon.svg",
+          "sizes": "any"
         }
       ]
     }

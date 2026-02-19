@@ -9,6 +9,7 @@ import KromerceTestimonials from '@/components/KromerceTestimonials.vue';
 import KromercePricing from '@/components/KromercePricing.vue';
 import KromerceCTA from '@/components/KromerceCTA.vue';
 import KromerceFooter from '@/components/KromerceFooter.vue';
+import PWAInstaller from '@/components/PWAInstaller.vue';
 </script>
 
 <template>
@@ -25,5 +26,6 @@ import KromerceFooter from '@/components/KromerceFooter.vue';
             <KromerceCTA />
         </main>
         <KromerceFooter />
+        <PWAInstaller />
     </div>
 </template>
