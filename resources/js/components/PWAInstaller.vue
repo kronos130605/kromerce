@@ -17,21 +17,31 @@ const isFirefox = computed(() => {
 
 const installApp = async () => {
   if (isFirefox.value) {
-    // Firefox: mostrar instrucciones claras
-    alert('Para instalar Kromerce en Firefox:\n\nOpción 1: Haz clic en el menú de tres puntos (⋮) → "Instalar esta página"\n\nOpción 2: Haz clic en el ícono de página (📄) en la barra de direcciones y selecciona "Instalar aplicación"\n\nSi no ves estas opciones, intenta recargar la página y volver a intentarlo.');
+    // Firefox: mostrar instrucciones detalladas
+    const message = `${t('pwa.firefox_install_title', 'Para instalar Kromerce en Firefox:')}
+
+${t('pwa.firefox_method_1_title', '📋 MÉTODO 1 - Menú de Firefox:')}
+1. ${t('pwa.firefox_method_1_step_1', 'Haz clic en el menú de tres puntos (⋮) arriba a la derecha')}
+2. ${t('pwa.firefox_method_1_step_2', 'Selecciona "Instalar esta página como aplicación"')}
+3. ${t('pwa.firefox_method_1_step_3', 'Confirma haciendo clic en "Instalar"')}
+
+${t('pwa.firefox_method_2_title', '📋 MÉTODO 2 - Icono de página:')}
+1. ${t('pwa.firefox_method_2_step_1', 'Haz clic en el ícono de página (📄) en la barra de direcciones')}
+2. ${t('pwa.firefox_method_2_step_2', 'Selecciona "Instalar aplicación" o "Instalar"')}
+
+💡 ${t('pwa.firefox_note', 'NOTA: Firefox no muestra automáticamente el banner de instalación. Debes instalarlo manualmente usando uno de los métodos anteriores.')}`;
+
+    alert(message);
     return;
   }
 
   if (!deferredPrompt.value) {
-    console.log('⚠️ No hay beforeinstallprompt diferido disponible.');
     return;
   }
 
   // Chrome / Brave: mostrar el prompt nativo
   deferredPrompt.value.prompt();
   const { outcome } = await deferredPrompt.value.userChoice;
-
-  console.log('📱 Resultado de userChoice:', outcome);
 
   if (outcome === 'accepted') {
     isInstalled.value = true;
@@ -61,15 +71,8 @@ const checkInstallStatus = () => {
     return;
   }
 
-  console.log('🔍 checkInstallStatus', {
-    isFirefox: isFirefox.value,
-    dismissed,
-    standalone: window.matchMedia('(display-mode: standalone)').matches
-  });
-
   // 3) En Firefox, siempre mostrar banner si no está instalado ni descartado
   if (isFirefox.value && !isInstalled.value && !dismissed) {
-    console.log('🦊 Firefox detected - showing install banner');
     showInstallBanner.value = true;
   }
 };
@@ -79,17 +82,12 @@ onMounted(() => {
 
   // Navegadores tipo Chrome/Brave: gestionan beforeinstallprompt
   window.addEventListener('beforeinstallprompt', (e) => {
-    console.log('📱 beforeinstallprompt event fired');
     e.preventDefault();
 
     const dismissed = localStorage.getItem('pwa_banner_dismissed') === 'true';
 
     // Si ya manejamos el primer evento o el usuario lo descartó, no hacemos nada
     if (beforeInstallPromptHandled.value || dismissed) {
-      console.log('📱 Ignored beforeinstallprompt', {
-        beforeInstallPromptHandled: beforeInstallPromptHandled.value,
-        dismissed,
-      });
       return;
     }
 
@@ -97,16 +95,10 @@ onMounted(() => {
     deferredPrompt.value = e;
     beforeInstallPromptHandled.value = true;
     showInstallBanner.value = true;
-
-    console.log('📱 Banner ON from beforeinstallprompt', {
-      showInstallBanner: showInstallBanner.value,
-      hasDeferredPrompt: !!deferredPrompt.value,
-    });
   });
 
   // Listen for app installed event
   window.addEventListener('appinstalled', () => {
-    console.log('PWA was installed');
     isInstalled.value = true;
     showInstallBanner.value = false;
     deferredPrompt.value = null;
@@ -189,7 +181,7 @@ onBeforeUnmount(() => {
       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
       </svg>
-      Instalar App
+      {{ t('pwa.install_app_button', 'Instalar App') }}
     </button>
   </div>
 </template>
