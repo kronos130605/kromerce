@@ -1,11 +1,15 @@
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
+import { usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import Button from '@/components/ui/Button.vue';
 import Badge from '@/components/ui/Badge.vue';
 import LanguageSelector from '@/components/LanguageSelector.vue';
 
 const { t } = useI18n();
+const page = usePage();
+
+const user = computed(() => page.props.auth?.user);
 
 const routeList = computed(() => [
   {
@@ -142,17 +146,36 @@ onBeforeUnmount(() => {
 
         <!-- Desktop CTA -->
         <div class="hidden lg:flex items-center gap-4">
-          <Badge
-            variant="secondary"
-            :class="[
-              'text-xs',
-              isDarkTheme
-                ? 'bg-gray-800 text-gray-300 border-gray-700'
-                : 'bg-muted text-foreground'
-            ]"
-          >
-            {{ t('nav.new') }}
-          </Badge>
+          <!-- Authenticated User -->
+          <div v-if="user" class="flex items-center gap-4">
+            <Badge
+              variant="secondary"
+              :class="[
+                'text-xs',
+                isDarkTheme
+                  ? 'bg-gray-800 text-gray-300 border-gray-700'
+                  : 'bg-muted text-foreground'
+              ]"
+            >
+              {{ user.name }}
+            </Badge>
+            <Button variant="outline" @click="$inertia.visit('/dashboard')">
+              Dashboard
+            </Button>
+            <Button variant="ghost" @click="$inertia.post('/logout')">
+              Logout
+            </Button>
+          </div>
+
+          <!-- Guest User -->
+          <div v-else class="flex items-center gap-4">
+            <Button variant="ghost" @click="$inertia.visit('/login')">
+              {{ t('nav.login') }}
+            </Button>
+            <Button @click="$inertia.visit('/register')">
+              {{ t('nav.register') }}
+            </Button>
+          </div>
 
           <!-- Language Selector -->
           <LanguageSelector />
@@ -166,10 +189,6 @@ onBeforeUnmount(() => {
             <span v-if="!isDarkTheme" class="text-xl">🌙</span>
             <span v-else class="text-xl">☀️</span>
           </button>
-
-          <Button class="cursor-pointer">
-            {{ t('nav.start_free') }}
-          </Button>
         </div>
 
         <!-- Mobile Menu -->
@@ -226,11 +245,43 @@ onBeforeUnmount(() => {
             {{ label }}
           </Button>
           <div :class="['pt-4 border-t', isDarkTheme ? 'border-gray-800' : 'border-border']">
-            <Button
-              class="w-full cursor-pointer"
-            >
-              {{ t('nav.start_free') }}
-            </Button>
+            <!-- Authenticated User Mobile -->
+            <div v-if="user" class="space-y-2">
+              <div class="px-2 py-1 text-sm text-muted-foreground">
+                {{ user.name }}
+              </div>
+              <Button
+                @click="$inertia.visit('/dashboard')"
+                variant="outline"
+                class="w-full justify-start"
+              >
+                Dashboard
+              </Button>
+              <Button
+                @click="$inertia.post('/logout')"
+                variant="ghost"
+                class="w-full justify-start"
+              >
+                Logout
+              </Button>
+            </div>
+
+            <!-- Guest User Mobile -->
+            <div v-else class="space-y-2">
+              <Button
+                @click="$inertia.visit('/login')"
+                variant="ghost"
+                class="w-full justify-start"
+              >
+                {{ t('nav.login') }}
+              </Button>
+              <Button
+                @click="$inertia.visit('/register')"
+                class="w-full"
+              >
+                {{ t('nav.register') }}
+              </Button>
+            </div>
           </div>
         </div>
       </div>

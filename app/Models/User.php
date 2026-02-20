@@ -6,11 +6,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Spatie\Permission\Traits\HasRoles;
+use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, HasRoles, BelongsToTenant;
 
     /**
      * The attributes that are mass assignable.
@@ -21,6 +22,9 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'phone',
+        'avatar_url',
+        'is_active',
     ];
 
     /**
@@ -43,6 +47,39 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_active' => 'boolean',
         ];
+    }
+
+    public function ownedTenants()
+    {
+        return $this->hasMany(Tenant::class, 'owner_id');
+    }
+
+    public function tenants()
+    {
+        return $this->belongsToMany(Tenant::class, 'tenant_users')
+            ->withPivot('role')
+            ->withTimestamps();
+    }
+
+    public function currentTenant()
+    {
+        return $this->tenants()->first();
+    }
+
+    public function isSuperAdmin()
+    {
+        return $this->hasRole('super_admin');
+    }
+
+    public function isBusinessOwner()
+    {
+        return $this->hasRole('business_owner');
+    }
+
+    public function isCustomer()
+    {
+        return $this->hasRole('customer');
     }
 }

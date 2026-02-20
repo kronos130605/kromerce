@@ -34,6 +34,12 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user(),
             ],
+            'current_tenant' => function () use ($request) {
+                if (tenancy()->initialized) {
+                    return tenant();
+                }
+                return null;
+            },
         ];
     }
 }

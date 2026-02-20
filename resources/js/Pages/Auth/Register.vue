@@ -9,8 +9,11 @@ import { Head, Link, useForm } from '@inertiajs/vue3';
 const form = useForm({
     name: '',
     email: '',
+    phone: '',
     password: '',
     password_confirmation: '',
+    user_type: 'customer', // customer, business_owner
+    tenant_name: '', // solo para business_owner
 });
 
 const submit = () => {
@@ -25,6 +28,46 @@ const submit = () => {
         <Head title="Register" />
 
         <form @submit.prevent="submit">
+            <!-- User Type Selection -->
+            <div class="mb-6">
+                <InputLabel value="I want to:" />
+                <div class="mt-2 space-y-2">
+                    <label class="flex items-center">
+                        <input
+                            type="radio"
+                            v-model="form.user_type"
+                            value="customer"
+                            class="mr-2"
+                        />
+                        <span>Buy products and services</span>
+                    </label>
+                    <label class="flex items-center">
+                        <input
+                            type="radio"
+                            v-model="form.user_type"
+                            value="business_owner"
+                            class="mr-2"
+                        />
+                        <span>Sell products and services</span>
+                    </label>
+                </div>
+                <InputError class="mt-2" :message="form.errors.user_type" />
+            </div>
+
+            <!-- Business Name (only for business owners) -->
+            <div v-if="form.user_type === 'business_owner'" class="mb-4">
+                <InputLabel for="tenant_name" value="Business Name" />
+                <TextInput
+                    id="tenant_name"
+                    type="text"
+                    class="mt-1 block w-full"
+                    v-model="form.tenant_name"
+                    required
+                    placeholder="My Awesome Business"
+                />
+                <InputError class="mt-2" :message="form.errors.tenant_name" />
+            </div>
+
             <div>
                 <InputLabel for="name" value="Name" />
 
@@ -54,6 +97,20 @@ const submit = () => {
                 />
 
                 <InputError class="mt-2" :message="form.errors.email" />
+            </div>
+
+            <div class="mt-4">
+                <InputLabel for="phone" value="Phone (optional)" />
+
+                <TextInput
+                    id="phone"
+                    type="tel"
+                    class="mt-1 block w-full"
+                    v-model="form.phone"
+                    autocomplete="tel"
+                />
+
+                <InputError class="mt-2" :message="form.errors.phone" />
             </div>
 
             <div class="mt-4">

@@ -4,8 +4,8 @@
     "testimonials": "Testimonials",
     "pricing": "Pricing",
     "contact": "Contact",
-    "start_free": "Start Free",
-    "new": "New",
+    "login": "Login",
+    "register": "Register",
     "toggle_dark": "Switch to dark mode",
     "toggle_light": "Switch to light mode"
   },
