@@ -5,22 +5,10 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
+// Landing page - Kromerce como página principal
 Route::get('/', function () {
-    return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
-    ]);
-});
-
-Route::get('/kromerce', function () {
     return Inertia::render('Kromerce');
 })->name('kromerce.app');
-
-Route::get('/kromerce-full', function () {
-    return view('kromerce-full-preview');
-})->name('kromerce.full');
 
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
