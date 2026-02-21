@@ -7,12 +7,23 @@ export default defineConfig({
     server: {
         host: '0.0.0.0',
         port: 5173,
-        cors: true,
+        cors: {
+            origin: '*',
+            methods: ['GET', 'POST'],
+            allowedHeaders: ['Content-Type', 'Authorization'],
+        },
+        hmr: {
+            overlay: true,
+        },
     },
     plugins: [
         laravel({
             input: 'resources/js/app.js',
             refresh: true,
+            refreshPaths: ['resources/views', 'resources/lang', 'routes'],
+            ssr: {
+                noExternal: ['@inertiajs/server'],
+            },
         }),
         vue({
             template: {
