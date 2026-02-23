@@ -25,6 +25,13 @@ createInertiaApp({
             import.meta.glob('./Pages/**/*.vue'),
         ),
     setup({ el, App, props, plugin }) {
+        // Set locale from backend
+        const currentLocale = props.initialPage.props.currentLocale || 'en';
+        const translations = props.initialPage.props.translations || {};
+        
+        i18n.global.locale = currentLocale;
+        i18n.global.setLocaleMessage(currentLocale, translations[currentLocale] || {});
+        
         return createApp({ render: () => h(App, props) })
             .use(plugin)
             .use(ZiggyVue)

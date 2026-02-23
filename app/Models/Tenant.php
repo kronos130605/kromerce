@@ -3,13 +3,14 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Stancl\Tenancy\Database\Concerns\HasTenantDatabase;
+use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
+use Stancl\Tenancy\Database\Concerns\HasDatabase;
 use Stancl\Tenancy\Database\Concerns\HasDomains;
 use Stancl\Tenancy\Contracts\TenantWithDatabase;
 
 class Tenant extends Model implements TenantWithDatabase
 {
-    use HasTenantDatabase, HasDomains;
+    use HasDatabase, HasDomains, BelongsToTenant;
 
     protected $fillable = [
         'name',
@@ -25,6 +26,8 @@ class Tenant extends Model implements TenantWithDatabase
         'branding_config' => 'array',
         'is_active' => 'boolean',
     ];
+
+    protected $internal;
 
     public function owner()
     {
@@ -65,5 +68,32 @@ class Tenant extends Model implements TenantWithDatabase
                 $tenant->slug = str()->slug($tenant->name);
             }
         });
+    }
+
+    // Required methods from TenantWithDatabase contract
+    public function getTenantKey()
+    {
+        return $this->getKey();
+    }
+
+    public function getTenantKeyName()
+    {
+        return $this->getKeyName();
+    }
+
+    public function getInternal()
+    {
+        return $this->internal;
+    }
+
+    public function setInternal($internal)
+    {
+        $this->internal = $internal;
+    }
+
+    public function run()
+    {
+        // This method is called when the tenant is initialized
+        // You can add custom logic here if needed
     }
 }

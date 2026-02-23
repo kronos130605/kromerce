@@ -32,7 +32,15 @@ class HandleInertiaRequests extends Middleware
         return [
             ...parent::share($request),
             'auth' => [
-                'user' => $request->user(),
+                'user' => function () use ($request) {
+                    $user = $request->user();
+                    if ($user) {
+                        // Load roles with the user
+                        $user->load('roles');
+                        return $user;
+                    }
+                    return null;
+                },
             ],
             'current_tenant' => function () use ($request) {
                 if (tenancy()->initialized) {
