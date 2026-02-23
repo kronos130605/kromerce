@@ -294,7 +294,15 @@
     "sign_in_here": "Sign in here",
     "terms_of_service": "Terms of Service",
     "privacy_policy": "Privacy Policy",
-    "agree_terms": "By creating an account, you agree to our"
+    "agree_terms": "By creating an account, you agree to our",
+    "join_future_title": "Join the Future of Business",
+    "join_future_subtitle": "Transform your business with our cutting-edge platform. Whether you're selling or buying, we've got you covered.",
+    "feature_global_payments": "Global payment processing",
+    "feature_analytics": "Real-time analytics",
+    "feature_branding": "Custom branding for businesses",
+    "stats_businesses": "Businesses",
+    "stats_processed": "Processed",
+    "stats_countries": "Countries"
   },
   "common": {
     "loading": "Loading...",
@@ -317,7 +325,8 @@
     "ok": "OK",
     "confirm": "Confirm",
     "warning": "Warning",
-    "info": "Information"
+    "info": "Information",
+    "and": "and"
   }
 }
 

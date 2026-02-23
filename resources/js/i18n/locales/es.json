@@ -294,7 +294,15 @@
     "sign_in_here": "Inicia sesión aquí",
     "terms_of_service": "Términos de Servicio",
     "privacy_policy": "Política de Privacidad",
-    "agree_terms": "Al crear una cuenta, aceptas nuestros"
+    "agree_terms": "Al crear una cuenta, aceptas nuestros",
+    "join_future_title": "Únete al Futuro de los Negocios",
+    "join_future_subtitle": "Transforma tu negocio con nuestra plataforma de vanguardia. Ya sea que vendas o compres, te tenemos cubierto.",
+    "feature_global_payments": "Procesamiento de pagos globales",
+    "feature_analytics": "Análisis en tiempo real",
+    "feature_branding": "Branding personalizado para negocios",
+    "stats_businesses": "Negocios",
+    "stats_processed": "Procesado",
+    "stats_countries": "Países"
   },
   "common": {
     "loading": "Cargando...",
@@ -317,7 +325,8 @@
     "cancel": "Cancelar",
     "confirm": "Confirmar",
     "warning": "Advertencia",
-    "info": "Información"
+    "info": "Información",
+    "and": "y"
   }
 }
 
