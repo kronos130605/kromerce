@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Models\LoginAttempt;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -14,23 +15,29 @@ use Inertia\Response;
 class AuthenticatedSessionController extends Controller
 {
     /**
-     * Display the login view.
+     * Display login view.
      */
-    public function create(): Response
+    public function create(Request $request): Response
     {
-        // Get login attempts from session
-        $loginAttempts = session('login_attempts', 5);
-        $maxAttempts = 5;
-        $lockoutTime = session('login_lockout_time', 0);
-        $isLocked = $lockoutTime > now()->timestamp;
+        // Get email from session or query parameter
+        $email = session('login_email') || $request->get('email', '');
+        
+        // Check if email is currently locked
+        $isLocked = $email ? LoginAttempt::isEmailLocked($email) : false;
+        $lockoutTime = $isLocked ? LoginAttempt::getRemainingLockoutTime($email) : 0;
+        
+        // Get failed attempts count for display
+        $failedAttempts = $email ? LoginAttempt::getFailedAttemptsCount($email, 60) : 0;
+        $remainingAttempts = max(0, 5 - $failedAttempts);
 
         return Inertia::render('Auth/Login', [
             'canResetPassword' => Route::has('password.request'),
             'status' => session('status'),
-            'loginAttempts' => $loginAttempts,
-            'maxAttempts' => $maxAttempts,
-            'lockoutTime' => $isLocked ? $lockoutTime - now()->timestamp : 0,
+            'loginAttempts' => $remainingAttempts,
+            'maxAttempts' => 5,
+            'lockoutTime' => $lockoutTime,
             'isLocked' => $isLocked,
+            'email' => $email,
         ]);
     }
 

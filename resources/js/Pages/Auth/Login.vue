@@ -1,7 +1,9 @@
 <script setup>
-import { Head, Link, useForm } from '@inertiajs/vue3';
+import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
+import LoginAttempts from '@/Components/LoginAttempts.vue';
+import LanguageSelector from '@/components/LanguageSelector.vue';
 
 defineProps({
     canResetPassword: {
@@ -10,11 +12,29 @@ defineProps({
     status: {
         type: String,
     },
+    loginAttempts: {
+        type: Number,
+        default: 5
+    },
+    maxAttempts: {
+        type: Number,
+        default: 5
+    },
+    lockoutTime: {
+        type: Number,
+        default: 0
+    },
+    isLocked: {
+        type: Boolean,
+        default: false
+    }
 });
 
 const { t } = useI18n();
 const { locale } = useI18n();
+const page = usePage();
 const isDarkMode = ref(false);
+const showPassword = ref(false);
 
 // Detect dark mode from localStorage or system preference
 const detectDarkMode = () => {
@@ -57,8 +77,6 @@ const form = useForm({
     remember: false,
 });
 
-const showPassword = ref(false);
-
 const submit = () => {
     form.post(route('login'), {
         onFinish: () => form.reset('password'),
@@ -73,6 +91,12 @@ const toggleDarkMode = () => {
     } catch {
         // ignore
     }
+};
+
+const handleLockoutEnded = () => {
+    // Actualizar las props para mostrar el formulario
+    page.props.value.isLocked = false;
+    page.props.value.lockoutTime = 0;
 };
 </script>
 
@@ -100,19 +124,7 @@ const toggleDarkMode = () => {
         <!-- Language & Theme Controls -->
         <div class="absolute top-4 right-4 flex items-center gap-2">
             <!-- Language Selector -->
-            <select 
-                v-model="$i18n.locale" 
-                @change="localStorage.setItem('kromerce_locale', $i18n.locale)"
-                :class="[
-                    'px-3 py-2 rounded-lg border text-sm transition-colors',
-                    isDarkMode 
-                        ? 'bg-gray-800 border-gray-700 text-gray-200 hover:bg-gray-700' 
-                        : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
-                ]"
-            >
-                <option value="es">🇪🇸 ES</option>
-                <option value="en">🇬🇧 EN</option>
-            </select>
+            <LanguageSelector />
 
             <!-- Theme Toggle -->
             <button
@@ -228,109 +240,121 @@ const toggleDarkMode = () => {
                         </div>
 
                         <!-- Form -->
-                        <form @submit.prevent="submit" class="space-y-6">
-                            <div>
-                                <label :class="[
-                                    'block text-sm font-medium mb-2',
-                                    isDarkMode ? 'text-gray-300' : 'text-gray-700'
-                                ]">{{ t('auth.email_address') }}</label>
-                                <input
-                                    type="email"
-                                    v-model="form.email"
-                                    :class="[
-                                        'w-full px-4 py-3 border rounded-xl transition-colors',
-                                        isDarkMode 
-                                            ? 'bg-gray-700 border-gray-600 text-white focus:ring-blue-500 focus:border-blue-500' 
-                                            : 'bg-white border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500'
-                                    ]"
-                                    :placeholder="t('auth.email_placeholder')"
-                                    required
-                                    autofocus
-                                />
-                                <div v-if="form.errors.email" class="mt-1 text-sm text-red-600">
-                                    {{ form.errors.email }}
-                                </div>
-                            </div>
-
-                            <div>
-                                <label :class="[
-                                    'block text-sm font-medium mb-2',
-                                    isDarkMode ? 'text-gray-300' : 'text-gray-700'
-                                ]">{{ t('auth.password') }}</label>
-                                <div class="relative">
+                        <form @submit.prevent="submit" class="space-y-8">
+                            <div v-if="!page.props.isLocked">
+                                <div class="mb-6">
+                                    <label :class="[
+                                        'block text-sm font-medium mb-2',
+                                        isDarkMode ? 'text-gray-300' : 'text-gray-700'
+                                    ]">{{ t('auth.email_address') }}</label>
                                     <input
-                                        :type="showPassword ? 'text' : 'password'"
-                                        v-model="form.password"
+                                        type="email"
+                                        v-model="form.email"
                                         :class="[
-                                            'w-full px-4 py-3 pr-12 border rounded-xl transition-colors',
+                                            'w-full px-4 py-3 border rounded-xl transition-colors',
                                             isDarkMode 
                                                 ? 'bg-gray-700 border-gray-600 text-white focus:ring-blue-500 focus:border-blue-500' 
                                                 : 'bg-white border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500'
                                         ]"
-                                        placeholder="•••••••"
+                                        :placeholder="t('auth.email_placeholder')"
                                         required
+                                        autofocus
                                     />
-                                    <button
-                                        type="button"
-                                        @click="showPassword = !showPassword"
-                                        :class="[
-                                            'absolute right-3 top-1/2 -translate-y-1/2 transition-colors',
-                                            isDarkMode ? 'text-gray-400 hover:text-gray-300' : 'text-gray-400 hover:text-gray-600'
-                                        ]"
-                                    >
-                                        <svg v-if="showPassword" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-                                        </svg>
-                                        <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                        </svg>
-                                    </button>
+                                    <div v-if="form.errors.email" class="mt-1 text-sm text-red-600">
+                                        {{ form.errors.email }}
+                                    </div>
                                 </div>
-                                <div v-if="form.errors.password" class="mt-1 text-sm text-red-600">
-                                    {{ form.errors.password }}
-                                </div>
-                            </div>
 
-                            <!-- Remember Me -->
-                            <div class="flex items-center justify-between">
-                                <label class="flex items-center">
-                                    <input
-                                        type="checkbox"
-                                        v-model="form.remember"
-                                        class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                                    />
-                                    <span :class="[
-                                        'ml-2 text-sm',
+                                <div>
+                                    <label :class="[
+                                        'block text-sm font-medium mb-2',
                                         isDarkMode ? 'text-gray-300' : 'text-gray-700'
-                                    ]">{{ t('auth.remember_me') }}</span>
-                                </label>
+                                    ]">{{ t('auth.password') }}</label>
+                                    <div class="relative">
+                                        <input
+                                            :type="showPassword ? 'text' : 'password'"
+                                            v-model="form.password"
+                                            :class="[
+                                                'w-full px-4 py-3 pr-12 border rounded-xl transition-colors',
+                                                isDarkMode 
+                                                    ? 'bg-gray-700 border-gray-600 text-white focus:ring-blue-500 focus:border-blue-500' 
+                                                    : 'bg-white border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500'
+                                            ]"
+                                            placeholder="•••••••"
+                                            required
+                                        />
+                                        <button
+                                            type="button"
+                                            @click="showPassword = !showPassword"
+                                            :class="[
+                                                'absolute right-3 top-1/2 -translate-y-1/2 transition-colors',
+                                                isDarkMode ? 'text-gray-400 hover:text-gray-300' : 'text-gray-400 hover:text-gray-600'
+                                            ]"
+                                        >
+                                            <svg v-if="showPassword" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                                            </svg>
+                                            <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <div v-if="form.errors.password" class="mt-1 text-sm text-red-600">
+                                        {{ form.errors.password }}
+                                    </div>
+                                </div>
 
-                                <Link
-                                    v-if="canResetPassword"
-                                    :href="route('password.request')"
-                                    class="text-sm text-blue-600 hover:text-blue-700 transition-colors"
+                                <!-- Remember Me -->
+                                <div class="flex items-center justify-between mb-8">
+                                    <label class="flex items-center">
+                                        <input
+                                            type="checkbox"
+                                            v-model="form.remember"
+                                            class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                                        />
+                                        <span :class="[
+                                            'ml-2 text-sm',
+                                            isDarkMode ? 'text-gray-300' : 'text-gray-700'
+                                        ]">{{ t('auth.remember_me') }}</span>
+                                    </label>
+
+                                    <Link
+                                        v-if="canResetPassword"
+                                        :href="route('password.request')"
+                                        class="text-sm text-blue-600 hover:text-blue-700 transition-colors"
+                                    >
+                                        {{ t('auth.forgot_password') }}
+                                    </Link>
+                                </div>
+
+                                <!-- Submit Button -->
+                                <button
+                                    type="submit"
+                                    :disabled="form.processing || page.props.isLocked"
+                                    class="w-full bg-gradient-to-r from-blue-600 to-emerald-600 text-white py-3 px-4 rounded-xl font-medium hover:from-blue-700 hover:to-emerald-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
                                 >
-                                    {{ t('auth.forgot_password') }}
-                                </Link>
+                                    <span v-if="form.processing" class="flex items-center justify-center">
+                                        <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        {{ t('auth.signing_in') }}...
+                                    </span>
+                                    <span v-else>{{ t('auth.sign_in') }}</span>
+                                </button>
                             </div>
-
-                            <!-- Submit Button -->
-                            <button
-                                type="submit"
-                                :disabled="form.processing"
-                                class="w-full bg-gradient-to-r from-blue-600 to-emerald-600 text-white py-3 px-4 rounded-xl font-medium hover:from-blue-700 hover:to-emerald-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
-                            >
-                                <span v-if="form.processing" class="flex items-center justify-center">
-                                    <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                    </svg>
-                                    {{ t('auth.signing_in') }}...
-                                </span>
-                                <span v-else>{{ t('auth.sign_in') }}</span>
-                            </button>
                         </form>
+
+                        <!-- Login Attempts Indicator -->
+                        <LoginAttempts 
+                            :attempts="page.props.loginAttempts || 5"
+                            :max-attempts="page.props.maxAttempts || 5"
+                            :lockout-time="page.props.lockoutTime || 0"
+                            :is-locked="page.props.isLocked || false"
+                            @lockout-ended="handleLockoutEnded"
+                            class="mb-6"
+                        />
 
                         <!-- Footer Links -->
                         <div class="mt-8 text-center">

@@ -3,9 +3,13 @@ import { Head, Link, useForm } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import LanguageSelector from '@/components/LanguageSelector.vue';
+import PasswordStrength from '@/Components/PasswordStrength.vue';
 
 const { t } = useI18n();
 const isDarkMode = ref(false);
+const showPassword = ref(false);
+const showPasswordConfirm = ref(false);
+const showPasswordStrength = ref(false);
 
 // Detect dark mode from localStorage or system preference
 const detectDarkMode = () => {
@@ -52,8 +56,12 @@ const form = useForm({
     tenant_name: '', // solo para business_owner
 });
 
-const showPassword = ref(false);
-const showPasswordConfirm = ref(false);
+const passwordValue = ref('');
+
+const updatePassword = (value) => {
+    passwordValue.value = value;
+    form.password = value;
+};
 
 const submit = () => {
     form.post(route('register'), {
@@ -80,8 +88,8 @@ const toggleDarkMode = () => {
 <template>
     <div :class="[
         'min-h-screen flex items-center justify-center p-4',
-        isDarkMode 
-            ? 'bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900' 
+        isDarkMode
+            ? 'bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900'
             : 'bg-gradient-to-br from-blue-50 via-white to-emerald-50'
     ]">
         <Head :title="t('auth.create_account')" />
@@ -108,8 +116,8 @@ const toggleDarkMode = () => {
                 @click="toggleDarkMode"
                 :class="[
                     'p-2 rounded-lg transition-colors',
-                    isDarkMode 
-                        ? 'bg-gray-800 text-yellow-400 hover:bg-gray-700' 
+                    isDarkMode
+                        ? 'bg-gray-800 text-yellow-400 hover:bg-gray-700'
                         : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
                 ]"
                 :title="isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'"
@@ -121,12 +129,12 @@ const toggleDarkMode = () => {
         <!-- Main Container -->
         <div :class="[
             'w-full max-w-5xl backdrop-blur-xl rounded-3xl shadow-2xl border overflow-hidden',
-            isDarkMode 
-                ? 'bg-gray-800/80 border-gray-700' 
+            isDarkMode
+                ? 'bg-gray-800/80 border-gray-700'
                 : 'bg-white/80 border-white/20'
         ]">
             <div class="flex flex-col lg:flex-row">
-                
+
                 <!-- Left Panel - Hero Section -->
                 <div class="lg:w-1/2 bg-gradient-to-br from-blue-600 to-emerald-600 p-12 text-white relative overflow-hidden">
                     <!-- Background Pattern -->
@@ -135,19 +143,19 @@ const toggleDarkMode = () => {
                         <div class="absolute bottom-10 right-10 w-24 h-24 border-4 border-white/20 rounded-lg rotate-45"></div>
                         <div class="absolute top-1/2 left-1/2 w-40 h-40 border-4 border-white/10 rounded-full -translate-x-1/2 -translate-y-1/2"></div>
                     </div>
-                    
+
                     <div class="relative z-10">
                         <!-- Logo -->
                         <div class="mb-8">
                             <img src="/images/kromerce-business-text.png" alt="Kromerce" class="h-12 w-auto filter brightness-0 invert" />
                         </div>
-                        
+
                         <!-- Content -->
                         <h1 class="text-4xl font-bold mb-6">{{ t('auth.join_future_title') }}</h1>
                         <p class="text-xl text-white/90 mb-8">
                             {{ t('auth.join_future_subtitle') }}
                         </p>
-                        
+
                         <!-- Features -->
                         <div class="space-y-4">
                             <div class="flex items-center space-x-3">
@@ -175,7 +183,7 @@ const toggleDarkMode = () => {
                                 <span class="text-white/90">{{ t('auth.feature_branding') }}</span>
                             </div>
                         </div>
-                        
+
                         <!-- Stats -->
                         <div class="mt-12 grid grid-cols-3 gap-6">
                             <div class="text-center">
@@ -227,8 +235,8 @@ const toggleDarkMode = () => {
                                             ? isDarkMode
                                                 ? 'border-blue-400 bg-blue-900/50 shadow-lg'
                                                 : 'border-blue-500 bg-blue-50 shadow-lg'
-                                            : isDarkMode 
-                                                ? 'border-gray-600 bg-gray-700 hover:border-gray-500' 
+                                            : isDarkMode
+                                                ? 'border-gray-600 bg-gray-700 hover:border-gray-500'
                                                 : 'border-gray-200 bg-white hover:border-gray-300'
                                     ]"
                                 >
@@ -254,7 +262,7 @@ const toggleDarkMode = () => {
                                         </div>
                                     </div>
                                 </button>
-                                
+
                                 <button
                                     type="button"
                                     @click="form.user_type = 'business_owner'"
@@ -264,8 +272,8 @@ const toggleDarkMode = () => {
                                             ? isDarkMode
                                                 ? 'border-emerald-400 bg-emerald-900/50 shadow-lg'
                                                 : 'border-emerald-500 bg-emerald-50 shadow-lg'
-                                            : isDarkMode 
-                                                ? 'border-gray-600 bg-gray-700 hover:border-gray-500' 
+                                            : isDarkMode
+                                                ? 'border-gray-600 bg-gray-700 hover:border-gray-500'
                                                 : 'border-gray-200 bg-white hover:border-gray-300'
                                     ]"
                                 >
@@ -305,8 +313,8 @@ const toggleDarkMode = () => {
                                 v-model="form.tenant_name"
                                 :class="[
                                     'w-full px-4 py-3 border rounded-xl transition-colors',
-                                    isDarkMode 
-                                        ? 'bg-gray-700 border-gray-600 text-white focus:ring-emerald-500 focus:border-emerald-500' 
+                                    isDarkMode
+                                        ? 'bg-gray-700 border-gray-600 text-white focus:ring-emerald-500 focus:border-emerald-500'
                                         : 'bg-white border-gray-300 text-gray-900 focus:ring-emerald-500 focus:border-emerald-500'
                                 ]"
                                 :placeholder="t('auth.business_name_placeholder')"
@@ -329,8 +337,8 @@ const toggleDarkMode = () => {
                                     v-model="form.name"
                                     :class="[
                                         'w-full px-4 py-3 border rounded-xl transition-colors',
-                                        isDarkMode 
-                                            ? 'bg-gray-700 border-gray-600 text-white focus:ring-blue-500 focus:border-blue-500' 
+                                        isDarkMode
+                                            ? 'bg-gray-700 border-gray-600 text-white focus:ring-blue-500 focus:border-blue-500'
                                             : 'bg-white border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500'
                                     ]"
                                     :placeholder="t('auth.full_name_placeholder')"
@@ -352,8 +360,8 @@ const toggleDarkMode = () => {
                                     v-model="form.email"
                                     :class="[
                                         'w-full px-4 py-3 border rounded-xl transition-colors',
-                                        isDarkMode 
-                                            ? 'bg-gray-700 border-gray-600 text-white focus:ring-blue-500 focus:border-blue-500' 
+                                        isDarkMode
+                                            ? 'bg-gray-700 border-gray-600 text-white focus:ring-blue-500 focus:border-blue-500'
                                             : 'bg-white border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500'
                                     ]"
                                     :placeholder="t('auth.email_placeholder')"
@@ -374,8 +382,8 @@ const toggleDarkMode = () => {
                                     v-model="form.phone"
                                     :class="[
                                         'w-full px-4 py-3 border rounded-xl transition-colors',
-                                        isDarkMode 
-                                            ? 'bg-gray-700 border-gray-600 text-white focus:ring-blue-500 focus:border-blue-500' 
+                                        isDarkMode
+                                            ? 'bg-gray-700 border-gray-600 text-white focus:ring-blue-500 focus:border-blue-500'
                                             : 'bg-white border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500'
                                     ]"
                                     :placeholder="t('auth.phone_placeholder')"
@@ -394,10 +402,11 @@ const toggleDarkMode = () => {
                                     <input
                                         :type="showPassword ? 'text' : 'password'"
                                         v-model="form.password"
+                                        @input="showPasswordStrength = form.password.length > 0"
                                         :class="[
                                             'w-full px-4 py-3 pr-12 border rounded-xl transition-colors',
-                                            isDarkMode 
-                                                ? 'bg-gray-700 border-gray-600 text-white focus:ring-blue-500 focus:border-blue-500' 
+                                            isDarkMode
+                                                ? 'bg-gray-700 border-gray-600 text-white focus:ring-blue-500 focus:border-blue-500'
                                                 : 'bg-white border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500'
                                         ]"
                                         placeholder="••••••••"
@@ -420,6 +429,15 @@ const toggleDarkMode = () => {
                                         </svg>
                                     </button>
                                 </div>
+
+                                <!-- Password Strength Indicator -->
+                                <PasswordStrength
+                                    v-if="showPasswordStrength"
+                                    :model-value="form.password"
+                                    @update:model-value="updatePassword"
+                                    class="mt-2"
+                                />
+
                                 <div v-if="form.errors.password" class="mt-1 text-sm text-red-600">
                                     {{ form.errors.password }}
                                 </div>
@@ -436,8 +454,8 @@ const toggleDarkMode = () => {
                                         v-model="form.password_confirmation"
                                         :class="[
                                             'w-full px-4 py-3 pr-12 border rounded-xl transition-colors',
-                                            isDarkMode 
-                                                ? 'bg-gray-700 border-gray-600 text-white focus:ring-blue-500 focus:border-blue-500' 
+                                            isDarkMode
+                                                ? 'bg-gray-700 border-gray-600 text-white focus:ring-blue-500 focus:border-blue-500'
                                                 : 'bg-white border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500'
                                         ]"
                                         placeholder="••••••••"

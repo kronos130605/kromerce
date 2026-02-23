@@ -43,6 +43,16 @@ class LoginRequest extends FormRequest
 
         if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey());
+            
+            // Update session with attempt count for frontend
+            $attempts = RateLimiter::attempts($this->throttleKey());
+            session(['login_attempts' => 5 - $attempts]);
+            
+            // If locked, set lockout time
+            if (RateLimiter::tooManyAttempts($this->throttleKey(), 5)) {
+                $lockoutTime = now()->addSeconds(RateLimiter::availableIn($this->throttleKey()));
+                session(['login_lockout_time' => $lockoutTime->timestamp]);
+            }
 
             throw ValidationException::withMessages([
                 'email' => trans('auth.failed'),
@@ -50,6 +60,9 @@ class LoginRequest extends FormRequest
         }
 
         RateLimiter::clear($this->throttleKey());
+        // Reset attempts on successful login
+        session(['login_attempts' => 5]);
+        session()->forget('login_lockout_time');
     }
 
     /**
@@ -60,12 +73,19 @@ class LoginRequest extends FormRequest
     public function ensureIsNotRateLimited(): void
     {
         if (! RateLimiter::tooManyAttempts($this->throttleKey(), 5)) {
+            // Update session with current attempts
+            $attempts = RateLimiter::attempts($this->throttleKey());
+            session(['login_attempts' => 5 - $attempts]);
             return;
         }
 
         event(new Lockout($this));
 
         $seconds = RateLimiter::availableIn($this->throttleKey());
+        
+        // Set lockout time in session
+        $lockoutTime = now()->addSeconds($seconds);
+        session(['login_lockout_time' => $lockoutTime->timestamp]);
 
         throw ValidationException::withMessages([
             'email' => trans('auth.throttle', [
