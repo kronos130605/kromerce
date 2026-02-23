@@ -1,6 +1,6 @@
 <script setup>
 import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import LoginAttempts from '@/Components/LoginAttempts.vue';
 import LanguageSelector from '@/components/LanguageSelector.vue';
@@ -35,6 +35,20 @@ const { locale } = useI18n();
 const page = usePage();
 const isDarkMode = ref(false);
 const showPassword = ref(false);
+const isFormLocked = ref(page.props.isLocked || false);
+
+// Watch for changes in page.props.isLocked from backend
+watch(() => page.props.isLocked, (newValue) => {
+    isFormLocked.value = newValue;
+});
+
+// Watch for changes in page.props.lockoutTime from backend
+watch(() => page.props.lockoutTime, (newValue) => {
+    // If backend sends new lockout time, update local state
+    if (newValue > 0) {
+        isFormLocked.value = true;
+    }
+});
 
 // Detect dark mode from localStorage or system preference
 const detectDarkMode = () => {
@@ -94,9 +108,8 @@ const toggleDarkMode = () => {
 };
 
 const handleLockoutEnded = () => {
-    // Actualizar las props para mostrar el formulario
-    page.props.value.isLocked = false;
-    page.props.value.lockoutTime = 0;
+    // Actualizar el estado local para mostrar el formulario
+    isFormLocked.value = false;
 };
 </script>
 
@@ -241,7 +254,7 @@ const handleLockoutEnded = () => {
 
                         <!-- Form -->
                         <form @submit.prevent="submit" class="space-y-8">
-                            <div v-if="!page.props.isLocked">
+                            <div v-if="!isFormLocked">
                                 <div class="mb-6">
                                     <label :class="[
                                         'block text-sm font-medium mb-2',
@@ -331,7 +344,7 @@ const handleLockoutEnded = () => {
                                 <!-- Submit Button -->
                                 <button
                                     type="submit"
-                                    :disabled="form.processing || page.props.isLocked"
+                                    :disabled="form.processing || isFormLocked"
                                     class="w-full bg-gradient-to-r from-blue-600 to-emerald-600 text-white py-3 px-4 rounded-xl font-medium hover:from-blue-700 hover:to-emerald-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
                                 >
                                     <span v-if="form.processing" class="flex items-center justify-center">
@@ -351,7 +364,7 @@ const handleLockoutEnded = () => {
                             :attempts="page.props.loginAttempts || 5"
                             :max-attempts="page.props.maxAttempts || 5"
                             :lockout-time="page.props.lockoutTime || 0"
-                            :is-locked="page.props.isLocked || false"
+                            :is-locked="isFormLocked"
                             @lockout-ended="handleLockoutEnded"
                             class="mb-6"
                         />

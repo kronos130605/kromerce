@@ -11,10 +11,10 @@ const passwordStrength = ref(0);
 const passwordFeedback = ref('');
 
 const strengthLevels = [
-    { min: 0, max: 20, color: 'bg-red-500', text: 'password_strength_weak' },
-    { min: 21, max: 40, color: 'bg-orange-500', text: 'password_strength_fair' },
-    { min: 41, max: 60, color: 'bg-yellow-500', text: 'password_strength_good' },
-    { min: 61, max: 100, color: 'bg-green-500', text: 'password_strength_strong' }
+    { min: 0, max: 40, color: 'bg-red-500', text: 'password_strength_weak' },
+    { min: 41, max: 60, color: 'bg-orange-500', text: 'password_strength_fair' },
+    { min: 61, max: 80, color: 'bg-yellow-500', text: 'password_strength_good' },
+    { min: 81, max: 100, color: 'bg-green-500', text: 'password_strength_strong' }
 ];
 
 const checkPasswordStrength = (password) => {
@@ -94,9 +94,9 @@ const updatePassword = (value) => {
         <div class="flex items-center justify-between text-xs">
             <span :class="[
                 'font-medium',
-                passwordStrength > 60 ? 'text-green-600' : 
-                passwordStrength > 40 ? 'text-yellow-600' : 
-                passwordStrength > 20 ? 'text-orange-600' : 'text-red-600'
+                passwordStrength > 80 ? 'text-green-600' : 
+                passwordStrength > 60 ? 'text-yellow-600' : 
+                passwordStrength > 40 ? 'text-orange-600' : 'text-red-600'
             ]">
                 {{ getStrengthText }}
             </span>
