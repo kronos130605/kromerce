@@ -29,8 +29,10 @@ const isSuperAdmin = computed(() => {
 const isOpen = ref(false);
 const isDarkTheme = ref(false);
 const showUserDropdown = ref(false);
+const userDropdownRef = ref(null);
 
 let observer;
+let onDocumentClick;
 
 const applyDarkClass = (enabled) => {
   if (enabled) {
@@ -111,12 +113,28 @@ onMounted(() => {
     attributes: true,
     attributeFilter: ['class'],
   });
+
+  onDocumentClick = (event) => {
+    if (!showUserDropdown.value) return;
+    const el = userDropdownRef.value;
+    if (!el) return;
+    if (event.target instanceof Node && !el.contains(event.target)) {
+      showUserDropdown.value = false;
+    }
+  };
+
+  document.addEventListener('click', onDocumentClick, true);
 });
 
 onBeforeUnmount(() => {
   if (observer) {
     observer.disconnect();
     observer = undefined;
+  }
+
+  if (onDocumentClick) {
+    document.removeEventListener('click', onDocumentClick, true);
+    onDocumentClick = undefined;
   }
 });
 </script>
@@ -184,7 +202,7 @@ onBeforeUnmount(() => {
           <!-- User Dropdown -->
           <div class="relative">
             <button
-              @click="showUserDropdown = !showUserDropdown"
+              @click.stop="showUserDropdown = !showUserDropdown"
               :class="[
                 'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer',
                 isDarkTheme
@@ -204,7 +222,7 @@ onBeforeUnmount(() => {
             <!-- Dropdown Menu -->
             <div
               v-if="showUserDropdown"
-              @click.away="showUserDropdown = false"
+              ref="userDropdownRef"
               :class="[
                 'absolute right-0 top-full mt-2 w-56 rounded-lg border shadow-lg py-2 z-50',
                 isDarkTheme

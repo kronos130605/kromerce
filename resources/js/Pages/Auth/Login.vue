@@ -1,11 +1,11 @@
 <script setup>
-import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
-import { ref, computed, watch } from 'vue';
+import { Head, Link, useForm, usePage, router } from '@inertiajs/vue3';
+import { ref, computed, watch, onUnmounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import LoginAttempts from '@/Components/LoginAttempts.vue';
 import LanguageSelector from '@/components/LanguageSelector.vue';
 
-defineProps({
+const props = defineProps({
     canResetPassword: {
         type: Boolean,
     },
@@ -91,9 +91,20 @@ const form = useForm({
     remember: false,
 });
 
+watch(() => page.props.email, (newValue) => {
+    if (typeof newValue === 'string') {
+        form.email = newValue;
+    }
+}, { immediate: true });
+
 const submit = () => {
     form.post(route('login'), {
         onFinish: () => form.reset('password'),
+        onError: () => {
+            router.reload({
+                only: ['loginAttempts', 'maxAttempts', 'lockoutTime', 'isLocked', 'email'],
+            });
+        },
     });
 };
 
@@ -111,6 +122,11 @@ const handleLockoutEnded = () => {
     // Actualizar el estado local para mostrar el formulario
     isFormLocked.value = false;
 };
+
+onUnmounted(() => {
+    form.reset();
+    form.clearErrors();
+});
 </script>
 
 <template>
@@ -361,9 +377,9 @@ const handleLockoutEnded = () => {
 
                         <!-- Login Attempts Indicator -->
                         <LoginAttempts 
-                            :attempts="page.props.loginAttempts || 5"
-                            :max-attempts="page.props.maxAttempts || 5"
-                            :lockout-time="page.props.lockoutTime || 0"
+                            :attempts="page.props.loginAttempts ?? props.loginAttempts ?? 5"
+                            :max-attempts="page.props.maxAttempts ?? props.maxAttempts ?? 5"
+                            :lockout-time="page.props.lockoutTime ?? props.lockoutTime ?? 0"
                             :is-locked="isFormLocked"
                             @lockout-ended="handleLockoutEnded"
                             class="mb-6"

@@ -1,6 +1,6 @@
 <script setup>
 import { Head, Link, useForm } from '@inertiajs/vue3';
-import { computed, ref } from 'vue';
+import { computed, ref, onUnmounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import LanguageSelector from '@/components/LanguageSelector.vue';
 import PasswordStrength from '@/Components/PasswordStrength.vue';
@@ -83,6 +83,12 @@ const toggleDarkMode = () => {
         // ignore
     }
 };
+
+onUnmounted(() => {
+    form.reset();
+    form.clearErrors();
+    passwordValue.value = '';
+});
 </script>
 
 <template>

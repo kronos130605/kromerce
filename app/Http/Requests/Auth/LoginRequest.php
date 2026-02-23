@@ -38,9 +38,12 @@ class LoginRequest extends FormRequest
      */
     public function authenticate(): void
     {
-        $email = $this->string('email');
+        $email = $this->string('email')->toString();
         $ipAddress = $this->ip();
         $userAgent = $this->userAgent();
+
+        // Persist email to session so the login page can show remaining attempts on reload
+        $this->session()->put('login_email', $email);
 
         // Check if email is locked
         if (LoginAttempt::isEmailLocked($email)) {
@@ -77,6 +80,9 @@ class LoginRequest extends FormRequest
         // Record successful attempt and clear previous failures
         LoginAttempt::recordAttempt($email, $ipAddress, true, $userAgent);
         LoginAttempt::clearAttemptsForEmail($email);
+
+        // Clear persisted email on successful login
+        $this->session()->forget('login_email');
     }
 
     /**

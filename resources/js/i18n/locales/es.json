@@ -254,6 +254,26 @@
     },
     "copyright": "© 2024 Kromerce. Todos los derechos reservados."
   },
+  "dashboard": {
+    "welcome": "Bienvenido",
+    "discover_products": "Descubre productos increíbles adaptados para ti",
+    "available_balance": "Saldo Disponible",
+    "vip_member": "Miembro VIP",
+    "exclusive_access": "Acceso Exclusivo",
+    "featured_products": "Productos Destacados",
+    "handpicked_items": "Artículos seleccionados para ti",
+    "view_all_products": "Ver todos los productos",
+    "reviews": "reseñas",
+    "add_to_cart": "Agregar al Carrito",
+    "flash_sale": "Oferta Flash",
+    "limited_time": "Tiempo Limitado",
+    "up_to_50_off": "Hasta 50% de descuento",
+    "ends_in": "Termina en",
+    "shop_now": "Comprar Ahora",
+    "shop_by_category": "Comprar por Categoría",
+    "browse_collections": "Explora nuestras colecciones",
+    "quick_actions": "Acciones Rápidas"
+  },
   "auth": {
     "welcome_back": "Bienvenido de nuevo",
     "login_subtitle": "Accede a tu dashboard de negocio o portal de cliente. Gestiona tus operaciones, rastrea ventas y crece con insights basados en datos.",

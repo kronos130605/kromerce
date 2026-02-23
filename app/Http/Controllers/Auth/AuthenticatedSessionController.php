@@ -20,12 +20,15 @@ class AuthenticatedSessionController extends Controller
     public function create(Request $request): Response
     {
         // Get email from session or query parameter
-        $email = session('login_email') || $request->get('email', '');
-        
+        $email = session('login_email') ?? $request->get('email', '');
+        if (!is_string($email)) {
+            $email = '';
+        }
+
         // Check if email is currently locked
         $isLocked = $email ? LoginAttempt::isEmailLocked($email) : false;
         $lockoutTime = $isLocked ? LoginAttempt::getRemainingLockoutTime($email) : 0;
-        
+
         // Get failed attempts count for display
         $failedAttempts = $email ? LoginAttempt::getFailedAttemptsCount($email, 60) : 0;
         $remainingAttempts = max(0, 5 - $failedAttempts);
