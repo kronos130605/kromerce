@@ -41,7 +41,7 @@ const progressPercentage = computed(() => {
 
 const getProgressColor = computed(() => {
     const percentage = (props.attempts / props.maxAttempts) * 100;
-    if (percentage >= 80) return 'bg-green-500';  // 5/5, 4/5
+    if (percentage >= 80) return 'bg-green-500';  // 4/5 or 5/5
     if (percentage >= 60) return 'bg-yellow-500'; // 3/5
     if (percentage >= 40) return 'bg-orange-500'; // 2/5
     return 'bg-red-500';  // 1/5 or less
@@ -106,11 +106,11 @@ onUnmounted(() => {
             <span class="text-gray-600">{{ t('auth.login_attempts_remaining') }}</span>
             <span :class="[
                 'font-medium',
-                attempts >= 4 ? 'text-green-600' : 
-                attempts >= 3 ? 'text-yellow-600' : 
-                attempts >= 2 ? 'text-orange-600' : 'text-red-600'
+                props.attempts >= 4 ? 'text-green-600' : 
+                props.attempts >= 3 ? 'text-yellow-600' : 
+                props.attempts >= 2 ? 'text-orange-600' : 'text-red-600'
             ]">
-                {{ attempts }}/{{ maxAttempts }}
+                {{ props.attempts }}/{{ props.maxAttempts }}
             </span>
         </div>
         

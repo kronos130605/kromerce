@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\File;
+use Inertia\Inertia;
 
 class SetLocale
 {
@@ -20,8 +21,8 @@ class SetLocale
     public function handle(Request $request, Closure $next)
     {
         // Get locale from request header, session, or cookie
-        $locale = $request->header('Accept-Language') 
-            ?? session('locale') 
+        $locale = $request->header('Accept-Language')
+            ?? session('locale')
             ?? $request->cookie('locale')
             ?? config('app.locale', 'en');
 
@@ -40,17 +41,17 @@ class SetLocale
         // Load translations for frontend
         $translations = [];
         foreach ($supportedLocales as $localeCode => $localeName) {
-            $translationPath = config('i18n.translation_files.path', resource_path('js/locales')) . "/{$localeCode}/dashboard.json";
-            
+            $translationPath = config('i18n.translation_files.path', resource_path('js/i18n/locales')) . "/{$localeCode}.json";
+
             if (File::exists($translationPath)) {
                 $translations[$localeCode] = json_decode(File::get($translationPath), true);
             }
         }
 
         // Share translations with Inertia
-        view()->share('translations', $translations);
-        view()->share('currentLocale', $locale);
-        view()->share('supportedLocales', $supportedLocales);
+        Inertia::share('translations', $translations);
+        Inertia::share('currentLocale', $locale);
+        Inertia::share('supportedLocales', $supportedLocales);
 
         return $next($request);
     }

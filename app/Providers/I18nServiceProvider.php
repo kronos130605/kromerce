@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\File;
+use Inertia\Inertia;
 
 class I18nServiceProvider extends ServiceProvider
 {
@@ -31,22 +32,22 @@ class I18nServiceProvider extends ServiceProvider
     {
         $locale = app()->getLocale();
         $fallbackLocale = config('i18n.fallback_locale', 'en');
-        
+
         // Load translations from JSON files
         $translations = [];
         $locales = config('i18n.supported_locales', ['en' => 'English']);
-        
+
         foreach ($locales as $localeCode => $localeName) {
-            $translationPath = config('i18n.translation_files.path', resource_path('js/locales')) . "/{$localeCode}/dashboard.json";
-            
+            $translationPath = config('i18n.translation_files.path', resource_path('js/i18n/locales')) . "/{$localeCode}.json";
+
             if (File::exists($translationPath)) {
                 $translations[$localeCode] = json_decode(File::get($translationPath), true);
             }
         }
-        
+
         // Share with Inertia
-        view()->share('translations', $translations);
-        view()->share('currentLocale', $locale);
-        view()->share('supportedLocales', $locales);
+        Inertia::share('translations', $translations);
+        Inertia::share('currentLocale', $locale);
+        Inertia::share('supportedLocales', $locales);
     }
 }

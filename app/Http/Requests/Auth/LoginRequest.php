@@ -2,17 +2,16 @@
 
 namespace App\Http\Requests\Auth;
 
-use Illuminate\Auth\Events\Lockout;
+use App\Models\LoginAttempt;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class LoginRequest extends FormRequest
 {
     /**
-     * Determine if the user is authorized to make this request.
+     * Determine if user is authorized to make this request.
      */
     public function authorize(): bool
     {
@@ -20,7 +19,7 @@ class LoginRequest extends FormRequest
     }
 
     /**
-     * Get the validation rules that apply to the request.
+     * Get validation rules that apply to request.
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
@@ -33,25 +32,41 @@ class LoginRequest extends FormRequest
     }
 
     /**
-     * Attempt to authenticate the request's credentials.
+     * Attempt to authenticate request's credentials.
      *
      * @throws \Illuminate\Validation\ValidationException
      */
     public function authenticate(): void
     {
-        $this->ensureIsNotRateLimited();
+        $email = $this->string('email');
+        $ipAddress = $this->ip();
+        $userAgent = $this->userAgent();
 
+        // Check if email is locked
+        if (LoginAttempt::isEmailLocked($email)) {
+            $remainingTime = LoginAttempt::getRemainingLockoutTime($email);
+            
+            throw ValidationException::withMessages([
+                'email' => trans('auth.account_locked', [
+                    'minutes' => ceil($remainingTime / 60),
+                ]),
+            ]);
+        }
+
+        // Attempt authentication
         if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
-            RateLimiter::hit($this->throttleKey());
+            // Record failed attempt
+            LoginAttempt::recordAttempt($email, $ipAddress, false, $userAgent);
             
-            // Update session with attempt count for frontend
-            $attempts = RateLimiter::attempts($this->throttleKey());
-            session(['login_attempts' => 5 - $attempts]);
-            
-            // If locked, set lockout time
-            if (RateLimiter::tooManyAttempts($this->throttleKey(), 5)) {
-                $lockoutTime = now()->addSeconds(RateLimiter::availableIn($this->throttleKey()));
-                session(['login_lockout_time' => $lockoutTime->timestamp]);
+            // Check if this attempt triggers a lockout
+            if (LoginAttempt::isEmailLocked($email)) {
+                $remainingTime = LoginAttempt::getRemainingLockoutTime($email);
+                
+                throw ValidationException::withMessages([
+                    'email' => trans('auth.account_locked', [
+                        'minutes' => ceil($remainingTime / 60),
+                    ]),
+                ]);
             }
 
             throw ValidationException::withMessages([
@@ -59,47 +74,16 @@ class LoginRequest extends FormRequest
             ]);
         }
 
-        RateLimiter::clear($this->throttleKey());
-        // Reset attempts on successful login
-        session(['login_attempts' => 5]);
-        session()->forget('login_lockout_time');
+        // Record successful attempt and clear previous failures
+        LoginAttempt::recordAttempt($email, $ipAddress, true, $userAgent);
+        LoginAttempt::clearAttemptsForEmail($email);
     }
 
     /**
-     * Ensure the login request is not rate limited.
-     *
-     * @throws \Illuminate\Validation\ValidationException
-     */
-    public function ensureIsNotRateLimited(): void
-    {
-        if (! RateLimiter::tooManyAttempts($this->throttleKey(), 5)) {
-            // Update session with current attempts
-            $attempts = RateLimiter::attempts($this->throttleKey());
-            session(['login_attempts' => 5 - $attempts]);
-            return;
-        }
-
-        event(new Lockout($this));
-
-        $seconds = RateLimiter::availableIn($this->throttleKey());
-        
-        // Set lockout time in session
-        $lockoutTime = now()->addSeconds($seconds);
-        session(['login_lockout_time' => $lockoutTime->timestamp]);
-
-        throw ValidationException::withMessages([
-            'email' => trans('auth.throttle', [
-                'seconds' => $seconds,
-                'minutes' => ceil($seconds / 60),
-            ]),
-        ]);
-    }
-
-    /**
-     * Get the rate limiting throttle key for the request.
+     * Get the rate limiting throttle key for request.
      */
     public function throttleKey(): string
     {
-        return Str::transliterate(Str::lower($this->string('email')).'|'.$this->ip());
+        return Str::transliterate(Str::lower($this->string('email')));
     }
 }

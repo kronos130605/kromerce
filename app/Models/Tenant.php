@@ -27,8 +27,6 @@ class Tenant extends Model implements TenantWithDatabase
         'is_active' => 'boolean',
     ];
 
-    protected $internal;
-
     public function owner()
     {
         return $this->belongsTo(User::class, 'owner_id');
@@ -68,32 +66,5 @@ class Tenant extends Model implements TenantWithDatabase
                 $tenant->slug = str()->slug($tenant->name);
             }
         });
-    }
-
-    // Required methods from TenantWithDatabase contract
-    public function getTenantKey()
-    {
-        return $this->getKey();
-    }
-
-    public function getTenantKeyName()
-    {
-        return $this->getKeyName();
-    }
-
-    public function getInternal()
-    {
-        return $this->internal;
-    }
-
-    public function setInternal($internal)
-    {
-        $this->internal = $internal;
-    }
-
-    public function run()
-    {
-        // This method is called when the tenant is initialized
-        // You can add custom logic here if needed
     }
 }
