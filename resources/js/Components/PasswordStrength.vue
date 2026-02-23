@@ -1,12 +1,16 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue';
-import { usePage } from '@inertiajs/vue3';
+import { ref, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
-const page = usePage();
 
-const password = ref('');
+const props = defineProps({
+    modelValue: {
+        type: String,
+        default: ''
+    }
+});
+
 const passwordStrength = ref(0);
 const passwordFeedback = ref('');
 
@@ -76,17 +80,13 @@ const getStrengthText = computed(() => {
 
 const emit = defineEmits(['update:modelValue']);
 
-onMounted(() => {
-    if (password.value) {
-        checkPasswordStrength(password.value);
-    }
+// Watch for changes in props.modelValue
+watch(() => props.modelValue, (newValue) => {
+    checkPasswordStrength(newValue);
 });
 
-const updatePassword = (value) => {
-    password.value = value;
-    checkPasswordStrength(value);
-    emit('update:modelValue', value);
-};
+// Initialize on mount
+checkPasswordStrength(props.modelValue);
 </script>
 
 <template>
