@@ -7,16 +7,11 @@ import { createApp, h } from 'vue';
 import { ZiggyVue } from 'ziggy-js';
 import i18n from './i18n';
 
-// PWA Service Worker Registration
+// PWA Service Worker Registration - manejado por VitePWA
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js')
-            .then((registration) => {
-                console.log('SW registered: ', registration);
-            })
-            .catch((registrationError) => {
-                console.log('SW registration failed: ', registrationError);
-            });
+        // VitePWA se encarga del registro automáticamente
+        console.log('PWA: Service Worker registration handled by VitePWA');
     });
 }
 

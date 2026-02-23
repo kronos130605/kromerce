@@ -5,25 +5,18 @@ import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
     server: {
-        host: '0.0.0.0',
+        host: true,
         port: 5173,
-        cors: {
-            origin: '*',
-            methods: ['GET', 'POST'],
-            allowedHeaders: ['Content-Type', 'Authorization'],
-        },
+        cors: true,
         hmr: {
-            overlay: true,
+            host: 'localhost',
+            port: 5173,
         },
     },
     plugins: [
         laravel({
             input: 'resources/js/app.js',
             refresh: true,
-            refreshPaths: ['resources/views', 'resources/lang', 'routes'],
-            ssr: {
-                noExternal: ['@inertiajs/server'],
-            },
         }),
         vue({
             template: {
