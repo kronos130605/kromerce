@@ -35,6 +35,7 @@ RUN chown -R www-data:www-data public/build
 # Install Node.js dependencies and build assets
 RUN npm install \
     && npm run build \
+    && cp public/build/.vite/manifest.json public/build/manifest.json \
     && ls -R public/build
 
 
