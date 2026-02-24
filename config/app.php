@@ -56,6 +56,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Application URL Scheme
+    |--------------------------------------------------------------------------
+    |
+    | This option determines the URL scheme (http/https) that should be used
+    | when generating URLs. In production, we force HTTPS regardless of the
+    | APP_URL setting to avoid mixed content issues.
+    |
+    */
+
+    'force_https' => env('APP_ENV') === 'production',
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Timezone
     |--------------------------------------------------------------------------
     |
