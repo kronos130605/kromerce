@@ -34,7 +34,9 @@ RUN chown -R www-data:www-data public/build
 
 # Install Node.js dependencies and build assets
 RUN npm install \
-    && npm run build
+    && npm run build \
+    && ls -R public/build
+
 
 # Clear Laravel log file for fresh deploy
 RUN mkdir -p storage/logs \
