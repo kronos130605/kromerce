@@ -20,6 +20,7 @@ export default defineConfig({
         rollupOptions: {
             input: 'resources/js/app.js',
         },
+        assetsDir: 'assets',
     },
     define: {
         __VUE_OPTIONS_API__: true,
