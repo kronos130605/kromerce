@@ -89,7 +89,7 @@ export default defineConfig({
             }
         }),
         laravel({
-            input: 'resources/js/app.js',
+            input: ['resources/js/app.js'],
             refresh: true,
         }),
     ],
