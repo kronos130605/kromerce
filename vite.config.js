@@ -47,7 +47,7 @@ export default defineConfig({
                 orientation: 'portrait-primary',
                 scope: '/',
                 start_url: '/',
-                filename: 'manifest.json',
+                filename: 'pwa.manifest.json',
                 icons: [
                     {
                         src: 'favicon.svg',
