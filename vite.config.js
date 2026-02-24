@@ -13,6 +13,11 @@ export default defineConfig({
             port: 5173,
         },
     },
+    build: {
+        outDir: 'public/build',
+        emptyOutDir: true,
+        manifest: true,
+    },
     plugins: [
         laravel({
             input: 'resources/js/app.js',
