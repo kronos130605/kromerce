@@ -28,10 +28,6 @@ export default defineConfig({
     },
     base: process.env.APP_ENV === 'production' ? '/' : '/',
     plugins: [
-        laravel({
-            input: 'resources/js/app.js',
-            refresh: true,
-        }),
         vue({
             template: {
                 transformAssetUrls: {
@@ -91,6 +87,10 @@ export default defineConfig({
                     }
                 ]
             }
+        }),
+        laravel({
+            input: 'resources/js/app.js',
+            refresh: true,
         }),
     ],
 });
