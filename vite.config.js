@@ -21,6 +21,11 @@ export default defineConfig({
             input: 'resources/js/app.js',
         },
     },
+    define: {
+        __VUE_OPTIONS_API__: true,
+        __VUE_PROD_DEVTOOLS__: false,
+    },
+    base: process.env.APP_ENV === 'production' ? '/' : '/',
     plugins: [
         laravel({
             input: 'resources/js/app.js',
