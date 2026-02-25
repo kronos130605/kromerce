@@ -38,7 +38,7 @@ class RegisteredUserController extends Controller
             'phone' => 'nullable|string|max:20',
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'user_type' => 'required|in:customer,business_owner',
-            'tenant_name' => 'required_if:user_type,business_owner|string|max:255',
+            'tenant_name' => 'required_if:user_type,business_owner|string|max:255|nullable',
         ]);
 
         $user = User::create([

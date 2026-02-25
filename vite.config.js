@@ -3,7 +3,7 @@ import laravel from 'laravel-vite-plugin';
 import vue from '@vitejs/plugin-vue';
 import { VitePWA } from 'vite-plugin-pwa';
 
-export default defineConfig({
+export default defineConfig(({ command }) => ({
     server: {
         host: true,
         port: 5173,
@@ -26,7 +26,9 @@ export default defineConfig({
         __VUE_OPTIONS_API__: true,
         __VUE_PROD_DEVTOOLS__: false,
     },
-    base: process.env.APP_ENV === 'production' ? '/' : '/',
+    // When building for Laravel (public/build), chunks must be loaded from /build/...
+    // otherwise dynamic imports will try to fetch from /assets/... and 404.
+    base: command === 'build' ? '/build/' : '/',
     plugins: [
         vue({
             template: {
@@ -100,4 +102,4 @@ export default defineConfig({
             buildDirectory: 'build',
         }),
     ],
-});
+}));

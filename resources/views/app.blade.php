@@ -29,6 +29,9 @@
         @routes
         @vite(['resources/js/app.js'])
         @inertiaHead
+        
+        <!-- CSRF Token -->
+        <meta name="csrf-token" content="{{ csrf_token() }}">
     </head>
     <body class="font-sans antialiased bg-background text-foreground">
         @inertia
