@@ -50,4 +50,4 @@ COPY ./supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 EXPOSE 80
 
-CMD php artisan migrate --force && supervisord -n
+CMD php artisan migrate --force && php artisan db:seed --force && supervisord -n

@@ -21,5 +21,8 @@ class DatabaseSeeder extends Seeder
             'name' => 'Test User',
             'email' => 'test@example.com',
         ]);
+
+        // Run role and permission seeder
+        $this->call(RolePermissionSeeder::class);
     }
 }
