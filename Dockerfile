@@ -36,6 +36,7 @@ RUN chown -R www-data:www-data public/build
 RUN npm install \
     && rm -rf public/build \
     && npm run build \
+    && rm -f public/build/manifest.webmanifest \
     && ls -R public/build
 
 
