@@ -38,7 +38,7 @@ export default defineConfig({
         }),
         VitePWA({
             registerType: 'autoUpdate',
-            includeAssets: ['favicon.svg', 'robots.txt', 'images/kromerce-business-text.png'],
+            includeAssets: ['favicon.svg', 'robots.txt', 'images/kromerce-business-text.png', 'images/icons/kromerce-business-icon-app-100.png', 'images/icons/kromerce-business-icon-logo-32.png'],
             manifest: {
                 name: 'Kromerce - E-commerce Platform',
                 short_name: 'Kromerce',
@@ -52,10 +52,16 @@ export default defineConfig({
                 filename: 'pwa.manifest.json',
                 icons: [
                     {
-                        src: 'favicon.svg',
-                        sizes: 'any',
-                        type: 'image/svg+xml',
+                        src: 'images/icons/kromerce-business-icon-app-100.png',
+                        sizes: '100x100',
+                        type: 'image/png',
                         purpose: 'any maskable'
+                    },
+                    {
+                        src: 'images/icons/kromerce-business-icon-logo-32.png',
+                        sizes: '32x32',
+                        type: 'image/png',
+                        purpose: 'any'
                     }
                 ]
             },
@@ -91,6 +97,7 @@ export default defineConfig({
         laravel({
             input: ['resources/js/app.js'],
             refresh: true,
+            buildDirectory: 'build',
         }),
     ],
 });
