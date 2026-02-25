@@ -34,6 +34,7 @@ RUN chown -R www-data:www-data public/build
 
 # Install Node.js dependencies and build assets
 RUN npm install \
+    && rm -rf public/build \
     && npm run build \
     && ls -R public/build
 
