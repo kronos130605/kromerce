@@ -17,10 +17,13 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        // Skip test user creation in production
+        if (app()->environment('local', 'testing')) {
+            User::factory()->create([
+                'name' => 'Test User',
+                'email' => 'test@example.com',
+            ]);
+        }
 
         // Run role and permission seeder
         $this->call(RolePermissionSeeder::class);
