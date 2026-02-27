@@ -149,10 +149,10 @@ const toggleEventRegistration = (event) => {
     event.registered = !event.registered;
     if (event.registered) {
         event.attendees++;
-        showNotification(`Successfully registered for ${event.title}`, 'success');
+        showNotification(t('dashboard.successfully_registered', { event: event.title }), 'success');
     } else {
         event.attendees--;
-        showNotification(`Unregistered from ${event.title}`, 'info');
+        showNotification(t('dashboard.unregistered_successfully', { event: event.title }), 'info');
     }
 };
 
@@ -206,7 +206,7 @@ onMounted(() => {
                                         ? 'bg-blue-500 text-white shadow-lg' 
                                         : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
                                 }`">
-                            {{ tab.charAt(0).toUpperCase() + tab.slice(1) }}
+                            {{ t(`dashboard.tab_${tab}`) }}
                         </button>
                     </div>
                 </div>
@@ -258,7 +258,7 @@ onMounted(() => {
                                 <div class="mt-4">
                                     <div class="flex items-center justify-between text-sm mb-2">
                                         <span class="text-gray-600 dark:text-gray-300">{{ t('dashboard.order_status') }}</span>
-                                        <span class="font-medium text-gray-900 dark:text-white capitalize">{{ order.status }}</span>
+                                        <span class="font-medium text-gray-900 dark:text-white capitalize">{{ t(`dashboard.status_${order.status}`) }}</span>
                                     </div>
                                     <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                                         <div class="bg-blue-600 h-2 rounded-full transition-all duration-500" 

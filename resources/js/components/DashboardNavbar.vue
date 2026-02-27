@@ -2,6 +2,7 @@
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import { usePage } from '@inertiajs/vue3';
 import { Link, router } from '@inertiajs/vue3';
+import { useI18n } from 'vue-i18n';
 import Button from '@/components/ui/Button.vue';
 import Badge from '@/components/ui/Badge.vue';
 import LanguageSelector from '@/components/LanguageSelector.vue';
@@ -9,6 +10,7 @@ import LanguageSelector from '@/components/LanguageSelector.vue';
 const page = usePage();
 const user = computed(() => page.props.auth.user);
 const currentTenant = computed(() => page.props.current_tenant);
+const { t } = useI18n();
 
 // Check user role
 const isCustomer = computed(() => {
@@ -70,27 +72,27 @@ const logout = () => {
 const navigationItems = computed(() => {
   if (isCustomer.value) {
     return [
-      { href: '/dashboard', label: 'Dashboard', icon: '🏠' },
-      { href: '#stores', label: 'Stores', icon: '🏪' },
-      { href: '#orders', label: 'My Orders', icon: '📦' },
-      { href: '#wishlist', label: 'Wishlist', icon: '❤️' },
-      { href: '#deals', label: 'Deals', icon: '🎯' },
+      { href: '/dashboard', label: t('dashboard.nav_dashboard'), icon: '🏠' },
+      { href: '#stores', label: t('dashboard.nav_stores'), icon: '🏪' },
+      { href: '#orders', label: t('dashboard.nav_my_orders'), icon: '📦' },
+      { href: '#wishlist', label: t('dashboard.nav_wishlist'), icon: '❤️' },
+      { href: '#deals', label: t('dashboard.nav_deals'), icon: '🎯' },
     ];
   } else if (isBusinessOwner.value) {
     return [
-      { href: '/dashboard', label: 'Dashboard', icon: '📊' },
-      { href: '#products', label: 'Products', icon: '📦' },
-      { href: '#orders', label: 'Orders', icon: '🛒' },
-      { href: '#analytics', label: 'Analytics', icon: '📈' },
-      { href: '#settings', label: 'Settings', icon: '⚙️' },
+      { href: '/dashboard', label: t('dashboard.nav_dashboard'), icon: '📊' },
+      { href: '#products', label: t('dashboard.nav_products'), icon: '📦' },
+      { href: '#orders', label: t('dashboard.nav_orders'), icon: '🛒' },
+      { href: '#analytics', label: t('dashboard.nav_analytics'), icon: '📈' },
+      { href: '#settings', label: t('dashboard.nav_settings'), icon: '⚙️' },
     ];
   } else if (isSuperAdmin.value) {
     return [
-      { href: '/dashboard', label: 'Dashboard', icon: '🔧' },
-      { href: '#users', label: 'Users', icon: '👥' },
-      { href: '#tenants', label: 'Tenants', icon: '🏢' },
-      { href: '#analytics', label: 'Analytics', icon: '📊' },
-      { href: '#settings', label: 'Settings', icon: '⚙️' },
+      { href: '/dashboard', label: t('dashboard.nav_dashboard'), icon: '🔧' },
+      { href: '#users', label: t('dashboard.nav_users'), icon: '👥' },
+      { href: '#tenants', label: t('dashboard.nav_tenants'), icon: '🏢' },
+      { href: '#analytics', label: t('dashboard.nav_analytics'), icon: '📊' },
+      { href: '#settings', label: t('dashboard.nav_settings'), icon: '⚙️' },
     ];
   }
   return [];
