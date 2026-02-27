@@ -45,15 +45,9 @@ RUN mkdir -p storage/logs \
     && truncate -s 0 storage/logs/laravel.log \
     && chown -R www-data:www-data storage bootstrap/cache
 
-# Clear all caches before starting
-RUN php artisan config:clear \
-    && php artisan cache:clear \
-    && php artisan view:clear \
-    && php artisan route:clear
-
 COPY ./nginx.conf /etc/nginx/sites-available/default
 COPY ./supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 EXPOSE 80
 
-CMD php artisan migrate --force && php artisan db:seed --force && supervisord -n
+CMD php artisan config:clear && php artisan cache:clear && php artisan view:clear && php artisan route:clear && php artisan migrate --force && php artisan db:seed --force && supervisord -n
