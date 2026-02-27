@@ -10,7 +10,7 @@ import DashboardNavbar from '@/components/DashboardNavbar.vue';
         <main class="pt-16">
             <!-- Page Heading -->
             <header
-                class="bg-white shadow"
+                class="bg-gradient-to-r from-blue-50 via-emerald-50 to-blue-50 dark:from-gray-800 dark:to-gray-900 shadow-sm"
                 v-if="$slots.header"
             >
                 <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">

@@ -14,11 +14,13 @@ return new class extends Migration
     {
         Schema::create('tenants', function (Blueprint $table) {
             $table->id();
+            $table->uuid('uuid')->unique();
             $table->string('name');
             $table->string('slug')->unique();
             $table->string('custom_domain')->nullable();
             $table->boolean('is_active')->default(true);
             $table->json('branding_config')->nullable();
+            $table->json('data')->nullable();
             $table->foreignId('owner_id')->constrained('users')->onDelete('cascade');
             $table->timestamps();
         });

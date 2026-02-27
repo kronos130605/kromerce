@@ -19,12 +19,49 @@ class Tenant extends BaseTenant
         'is_active',
         'branding_config',
         'owner_id',
+        'uuid',
     ];
 
     protected $casts = [
         'branding_config' => 'array',
         'is_active' => 'boolean',
     ];
+
+    /**
+     * Get the tenant key for the tenancy package.
+     * This tells the tenancy package which column to use as the identifier.
+     */
+    public function getTenantKey()
+    {
+        return $this->uuid;
+    }
+
+    /**
+     * Get the tenant key name.
+     */
+    public function getTenantKeyName(): string
+    {
+        return 'uuid';
+    }
+
+    /**
+     * Boot the model.
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($tenant) {
+            // Generate UUID if not present
+            if (!$tenant->uuid) {
+                $tenant->uuid = \Illuminate\Support\Str::uuid();
+            }
+            // Generate slug from name if not present
+            if (!$tenant->slug) {
+                $tenant->slug = str()->slug($tenant->name);
+            }
+        });
+    }
 
     public function owner()
     {
@@ -54,16 +91,5 @@ class Tenant extends BaseTenant
     public function getDomainAttribute()
     {
         return $this->domains->first()?->domain;
-    }
-
-    public static function boot()
-    {
-        parent::boot();
-
-        static::creating(function ($tenant) {
-            if (!$tenant->slug) {
-                $tenant->slug = str()->slug($tenant->name);
-            }
-        });
     }
 }

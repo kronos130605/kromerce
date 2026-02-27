@@ -9,6 +9,7 @@ use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules;
@@ -54,26 +55,51 @@ class RegisteredUserController extends Controller
 
         // Create tenant for business owners
         if ($request->user_type === 'business_owner') {
-            $tenant = Tenant::create([
-                'name' => $request->tenant_name,
-                'slug' => Str::slug($request->tenant_name),
-                'owner_id' => $user->id,
-                'branding_config' => [
-                    'primary_color' => '#3B82F6',
-                    'secondary_color' => '#10B981',
-                    'accent_color' => '#F59E0B',
-                    'theme' => 'light',
-                ],
-            ]);
+            $tenant = DB::transaction(function () use ($request, $user) {
+                // Generate UUID first
+                $uuid = Str::uuid();
+                
+                // Insert tenant manually to bypass tenancy package interception
+                $tenantId = DB::table('tenants')->insertGetId([
+                    'name' => $request->tenant_name,
+                    'slug' => Str::slug($request->tenant_name),
+                    'owner_id' => $user->id,
+                    'uuid' => $uuid,
+                    'data' => json_encode([
+                        'name' => $request->tenant_name,
+                        'slug' => Str::slug($request->tenant_name),
+                        'owner_id' => $user->id,
+                        'branding_config' => [
+                            'primary_color' => '#3B82F6',
+                            'secondary_color' => '#10B981',
+                            'accent_color' => '#F59E0B',
+                            'theme' => 'light',
+                        ],
+                    ]),
+                    'branding_config' => json_encode([
+                        'primary_color' => '#3B82F6',
+                        'secondary_color' => '#10B981',
+                        'accent_color' => '#F59E0B',
+                        'theme' => 'light',
+                    ]),
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
 
-            // Create domain for tenant
-            $tenant->domains()->create([
-                'domain' => $tenant->slug . '.' . config('tenancy.central_domains')[0] ?? 'kromerce.test',
-            ]);
+                // Get the tenant instance for relationships
+                $tenant = Tenant::find($tenantId);
 
-            // Associate user with tenant
-            $user->tenants()->attach($tenant->id, ['role' => 'owner']);
-            $user->update(['current_tenant_id' => $tenant->id]);
+                // Create domain for tenant
+                $tenant->domains()->create([
+                    'domain' => $tenant->slug . '.' . config('tenancy.central_domains')[0] ?? 'kromerce.test',
+                ]);
+
+                // Associate user with tenant
+                $user->tenants()->attach($tenant->id, ['role' => 'owner']);
+                $user->update(['current_tenant_id' => $tenant->id]);
+
+                return $tenant;
+            });
         }
 
         event(new Registered($user));
@@ -82,7 +108,7 @@ class RegisteredUserController extends Controller
 
         // Redirect based on user type
         if ($request->user_type === 'business_owner') {
-            return redirect()->route('business.dashboard');
+            return redirect()->route('dashboard');
         }
 
         return redirect()->route('dashboard');
