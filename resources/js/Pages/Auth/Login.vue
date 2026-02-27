@@ -132,8 +132,8 @@ onUnmounted(() => {
 <template>
     <div :class="[
         'min-h-screen flex items-center justify-center p-4',
-        isDarkMode 
-            ? 'bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900' 
+        isDarkMode
+            ? 'bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900'
             : 'bg-gradient-to-br from-blue-50 via-white to-emerald-50'
     ]">
         <Head :title="t('nav.login')" />
@@ -160,8 +160,8 @@ onUnmounted(() => {
                 @click="toggleDarkMode"
                 :class="[
                     'p-2 rounded-lg transition-colors',
-                    isDarkMode 
-                        ? 'bg-gray-800 text-yellow-400 hover:bg-gray-700' 
+                    isDarkMode
+                        ? 'bg-gray-800 text-yellow-400 hover:bg-gray-700'
                         : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
                 ]"
                 :title="isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'"
@@ -170,15 +170,34 @@ onUnmounted(() => {
             </button>
         </div>
 
+        <!-- Home Button -->
+        <div class="absolute top-4 left-4">
+            <Link
+                :href="route('kromerce.app')"
+                :class="[
+                    'inline-flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200',
+                    isDarkMode
+                        ? 'bg-gray-800/80 text-gray-300 hover:bg-gray-700/80 border border-gray-600'
+                        : 'bg-white/80 text-gray-700 hover:bg-gray-50/80 border border-gray-300'
+                ]"
+                :title="'Ir a página principal'"
+            >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                </svg>
+                <span class="hidden sm:inline">{{ t('nav.home') }}</span>
+            </Link>
+        </div>
+
         <!-- Main Container -->
         <div :class="[
             'w-full max-w-5xl backdrop-blur-xl rounded-3xl shadow-2xl border overflow-hidden',
-            isDarkMode 
-                ? 'bg-gray-800/80 border-gray-700' 
+            isDarkMode
+                ? 'bg-gray-800/80 border-gray-700'
                 : 'bg-white/80 border-white/20'
         ]">
             <div class="flex flex-col lg:flex-row">
-                
+
                 <!-- Left Panel - Hero Section -->
                 <div class="lg:w-1/2 bg-gradient-to-br from-blue-600 to-emerald-600 p-12 text-white relative overflow-hidden">
                     <!-- Background Pattern -->
@@ -187,19 +206,19 @@ onUnmounted(() => {
                         <div class="absolute bottom-10 right-10 w-24 h-24 border-4 border-white/20 rounded-lg rotate-45"></div>
                         <div class="absolute top-1/2 left-1/2 w-40 h-40 border-4 border-white/10 rounded-full -translate-x-1/2 -translate-y-1/2"></div>
                     </div>
-                    
+
                     <div class="relative z-10">
                         <!-- Logo -->
                         <div class="mb-8">
                             <img src="/images/kromerce-business-text.png" alt="Kromerce" class="h-12 w-auto filter brightness-0 invert" />
                         </div>
-                        
+
                         <!-- Content -->
                         <h1 class="text-4xl font-bold mb-6">{{ t('auth.welcome_back') }}</h1>
                         <p class="text-xl text-white/90 mb-8">
                             {{ t('auth.login_subtitle') }}
                         </p>
-                        
+
                         <!-- Features -->
                         <div class="space-y-4">
                             <div class="flex items-center space-x-3">
@@ -227,7 +246,7 @@ onUnmounted(() => {
                                 <span class="text-white/90">{{ t('auth.global_marketplace') }}</span>
                             </div>
                         </div>
-                        
+
                         <!-- Stats -->
                         <div class="mt-12 grid grid-cols-3 gap-6">
                             <div class="text-center">
@@ -281,8 +300,8 @@ onUnmounted(() => {
                                         v-model="form.email"
                                         :class="[
                                             'w-full px-4 py-3 border rounded-xl transition-colors',
-                                            isDarkMode 
-                                                ? 'bg-gray-700 border-gray-600 text-white focus:ring-blue-500 focus:border-blue-500' 
+                                            isDarkMode
+                                                ? 'bg-gray-700 border-gray-600 text-white focus:ring-blue-500 focus:border-blue-500'
                                                 : 'bg-white border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500'
                                         ]"
                                         :placeholder="t('auth.email_placeholder')"
@@ -305,8 +324,8 @@ onUnmounted(() => {
                                             v-model="form.password"
                                             :class="[
                                                 'w-full px-4 py-3 pr-12 border rounded-xl transition-colors',
-                                                isDarkMode 
-                                                    ? 'bg-gray-700 border-gray-600 text-white focus:ring-blue-500 focus:border-blue-500' 
+                                                isDarkMode
+                                                    ? 'bg-gray-700 border-gray-600 text-white focus:ring-blue-500 focus:border-blue-500'
                                                     : 'bg-white border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500'
                                             ]"
                                             placeholder="•••••••"
@@ -335,7 +354,7 @@ onUnmounted(() => {
                                 </div>
 
                                 <!-- Remember Me -->
-                                <div class="flex items-center justify-between mb-8">
+                                <div class="flex items-center justify-between mb-8 mt-2">
                                     <label class="flex items-center">
                                         <input
                                             type="checkbox"
@@ -376,7 +395,7 @@ onUnmounted(() => {
                         </form>
 
                         <!-- Login Attempts Indicator -->
-                        <LoginAttempts 
+                        <LoginAttempts
                             :attempts="page.props.loginAttempts ?? props.loginAttempts ?? 5"
                             :max-attempts="page.props.maxAttempts ?? props.maxAttempts ?? 5"
                             :lockout-time="page.props.lockoutTime ?? props.lockoutTime ?? 0"

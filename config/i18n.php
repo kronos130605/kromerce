@@ -11,7 +11,7 @@ return [
     | fallback locale when the current one is not available.
     |
     */
-    'locale' => env('APP_LOCALE', 'en'),
+    'locale' => env('APP_LOCALE', 'es'),
 
     /*
     |--------------------------------------------------------------------------
@@ -23,7 +23,7 @@ return [
     | the language folders in your resources/lang directory.
     |
     */
-    'fallback_locale' => env('APP_FALLBACK_LOCALE', 'en'),
+    'fallback_locale' => env('APP_FALLBACK_LOCALE', 'es'),
 
     /*
     |--------------------------------------------------------------------------
@@ -36,8 +36,8 @@ return [
     |
     */
     'supported_locales' => [
-        'en' => 'English',
         'es' => 'Español',
+        'en' => 'English',
     ],
 
     /*

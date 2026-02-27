@@ -24,12 +24,12 @@ class SetLocale
         $locale = $request->header('Accept-Language')
             ?? session('locale')
             ?? $request->cookie('locale')
-            ?? config('app.locale', 'en');
+            ?? config('app.locale', 'es');
 
         // Validate locale is supported
-        $supportedLocales = config('i18n.supported_locales', ['en' => 'English']);
+        $supportedLocales = config('i18n.supported_locales', ['es' => 'Español']);
         if (!array_key_exists($locale, $supportedLocales)) {
-            $locale = config('app.locale', 'en');
+            $locale = config('app.locale', 'es');
         }
 
         // Set locale for the application

@@ -132,6 +132,25 @@ onUnmounted(() => {
             </button>
         </div>
 
+        <!-- Home Button -->
+        <div class="absolute top-4 left-4">
+            <Link
+                :href="route('kromerce.app')"
+                :class="[
+                    'inline-flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200',
+                    isDarkMode
+                        ? 'bg-gray-800/80 text-gray-300 hover:bg-gray-700/80 border border-gray-600'
+                        : 'bg-white/80 text-gray-700 hover:bg-gray-50/80 border border-gray-300'
+                ]"
+                :title="'Ir a página principal'"
+            >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                </svg>
+                <span class="hidden sm:inline">{{ t('nav.home') }}</span>
+            </Link>
+        </div>
+
         <!-- Main Container -->
         <div :class="[
             'w-full max-w-5xl backdrop-blur-xl rounded-3xl shadow-2xl border overflow-hidden',
@@ -248,7 +267,8 @@ onUnmounted(() => {
                                 >
                                     <div class="flex items-center space-x-3">
                                         <div :class="[
-                                            'w-5 h-5 rounded-full border-2 flex items-center justify-center',
+                                            'w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0',
+                                            'aspect-square',
                                             form.user_type === 'customer' ? isDarkMode ? 'border-blue-400' : 'border-blue-500' : isDarkMode ? 'border-gray-500' : 'border-gray-300'
                                         ]">
                                             <div v-if="form.user_type === 'customer'" :class="[
@@ -285,7 +305,8 @@ onUnmounted(() => {
                                 >
                                     <div class="flex items-center space-x-3">
                                         <div :class="[
-                                            'w-5 h-5 rounded-full border-2 flex items-center justify-center',
+                                            'w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0',
+                                            'aspect-square',
                                             form.user_type === 'business_owner' ? isDarkMode ? 'border-emerald-400' : 'border-emerald-500' : isDarkMode ? 'border-gray-500' : 'border-gray-300'
                                         ]">
                                             <div v-if="form.user_type === 'business_owner'" :class="[
