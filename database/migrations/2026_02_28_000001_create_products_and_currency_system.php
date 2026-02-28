@@ -14,7 +14,7 @@ return new class extends Migration
         // Configuración de monedas por business
         Schema::create('business_currency_configs', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->uuid('tenant_id');
+            $table->unsignedBigInteger('tenant_id');  // ← CAMBIADO: BIGINT para referenciar tenants.id
             $table->string('default_currency', 3);
             $table->json('display_currencies');
             $table->boolean('use_custom_rates')->default(false);
@@ -38,15 +38,15 @@ return new class extends Migration
             $table->string('source', 50)->default('api');
             $table->timestamps();
             
-            $table->unique(['from_currency', 'to_currency', 'effective_date']);
-            $table->index(['from_currency', 'to_currency', 'effective_date']);
-            $table->index('effective_date');
+            $table->unique(['from_currency', 'to_currency', 'effective_date'], 'cr_global_unique');  // ← ACORTADO
+            $table->index(['from_currency', 'to_currency', 'effective_date'], 'cr_global_index');  // ← ACORTADO
+            $table->index('effective_date', 'cr_global_date');  // ← ACORTADO
         });
 
         // Tasas personalizadas por business
         Schema::create('currency_rates_business', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->uuid('tenant_id');
+            $table->unsignedBigInteger('tenant_id');  // ← CAMBIADO: BIGINT para referenciar tenants.id
             $table->string('from_currency', 3);
             $table->string('to_currency', 3);
             $table->decimal('rate', 10, 6);
@@ -55,13 +55,13 @@ return new class extends Migration
             $table->timestamps();
             
             $table->foreign('tenant_id')->references('id')->on('tenants')->onDelete('cascade');
-            $table->unique(['tenant_id', 'from_currency', 'to_currency', 'effective_date']);
+            $table->unique(['tenant_id', 'from_currency', 'to_currency', 'effective_date'], 'cr_business_unique');  // ← ACORTADO
         });
 
         // Categorías de productos
         Schema::create('product_categories', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->uuid('tenant_id');
+            $table->unsignedBigInteger('tenant_id');  // ← CAMBIADO: BIGINT para referenciar tenants.id
             $table->string('name');
             $table->string('slug');
             $table->text('description')->nullable();
@@ -75,14 +75,14 @@ return new class extends Migration
             
             $table->foreign('tenant_id')->references('id')->on('tenants')->onDelete('cascade');
             $table->foreign('parent_id')->references('id')->on('product_categories')->onDelete('set null');
-            $table->unique(['tenant_id', 'slug']);
-            $table->index(['tenant_id', 'status', 'parent_id']);
+            $table->unique(['tenant_id', 'slug'], 'pc_tenant_slug_unique');  // ← ACORTADO
+            $table->index(['tenant_id', 'status', 'parent_id'], 'pc_tenant_status_parent');  // ← ACORTADO
         });
 
         // Productos
         Schema::create('products', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->uuid('tenant_id');
+            $table->unsignedBigInteger('tenant_id');  // ← CAMBIADO: BIGINT para referenciar tenants.id
             $table->string('name');
             $table->string('slug');
             $table->text('description')->nullable();
@@ -142,18 +142,18 @@ return new class extends Migration
             $table->string('tax_status', 20)->default('taxable'); // taxable, exempt
             
             // Metadata
-            $table->uuid('created_by')->nullable();
-            $table->uuid('updated_by')->nullable();
+            $table->unsignedBigInteger('created_by')->nullable();  // ← CAMBIADO: BIGINT para referenciar users.id
+            $table->unsignedBigInteger('updated_by')->nullable();  // ← CAMBIADO: BIGINT para referenciar users.id
             $table->timestamps();
             
             $table->foreign('tenant_id')->references('id')->on('tenants')->onDelete('cascade');
             $table->foreign('created_by')->references('id')->on('users')->onDelete('set null');
             $table->foreign('updated_by')->references('id')->on('users')->onDelete('set null');
-            $table->unique(['tenant_id', 'slug']);
-            $table->unique(['tenant_id', 'sku']);
-            $table->index(['tenant_id', 'status']);
-            $table->index(['tenant_id', 'stock_status']);
-            $table->index(['tenant_id', 'featured']);
+            $table->unique(['tenant_id', 'slug'], 'p_tenant_slug_unique');  // ← ACORTADO
+            $table->unique(['tenant_id', 'sku'], 'p_tenant_sku_unique');  // ← ACORTADO
+            $table->index(['tenant_id', 'status'], 'p_tenant_status');  // ← ACORTADO
+            $table->index(['tenant_id', 'stock_status'], 'p_tenant_stock');  // ← ACORTADO
+            $table->index(['tenant_id', 'featured'], 'p_tenant_featured');  // ← ACORTADO
         });
 
         // Relación productos-categorías
@@ -170,7 +170,7 @@ return new class extends Migration
         // Tags de productos
         Schema::create('product_tags', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->uuid('tenant_id');
+            $table->unsignedBigInteger('tenant_id');  // ← CAMBIADO: BIGINT para referenciar tenants.id
             $table->string('name');
             $table->string('slug');
             $table->text('description')->nullable();
@@ -178,7 +178,7 @@ return new class extends Migration
             $table->timestamps();
             
             $table->foreign('tenant_id')->references('id')->on('tenants')->onDelete('cascade');
-            $table->unique(['tenant_id', 'slug']);
+            $table->unique(['tenant_id', 'slug'], 'pt_tenant_slug_unique');  // ← ACORTADO
         });
 
         // Relación productos-tags
@@ -193,7 +193,7 @@ return new class extends Migration
 
         // Imágenes de productos
         Schema::create('product_images', function (Blueprint $table) {
-            $table->uuid('id')->primary();
+            $table->id();  // ← CAMBIADO: Autoincremental para performance
             $table->uuid('product_id');
             $table->string('url');
             $table->string('alt')->nullable();
@@ -204,13 +204,13 @@ return new class extends Migration
             $table->timestamps();
             
             $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');
-            $table->index(['product_id', 'order']);
+            $table->index(['product_id', 'order'], 'pi_product_order');  // ← ACORTADO
         });
 
         // Atributos de productos (para variantes)
         Schema::create('product_attributes', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->uuid('tenant_id');
+            $table->unsignedBigInteger('tenant_id');  // ← CAMBIADO: BIGINT para referenciar tenants.id
             $table->string('name');
             $table->string('slug');
             $table->string('type', 20)->default('text'); // text, color, number, visual
@@ -220,12 +220,12 @@ return new class extends Migration
             $table->timestamps();
             
             $table->foreign('tenant_id')->references('id')->on('tenants')->onDelete('cascade');
-            $table->unique(['tenant_id', 'slug']);
+            $table->unique(['tenant_id', 'slug'], 'pa_tenant_slug_unique');  // ← ACORTADO
         });
 
         // Valores de atributos
         Schema::create('product_attribute_values', function (Blueprint $table) {
-            $table->uuid('id')->primary();
+            $table->id();  // ← CAMBIADO: Autoincremental para performance
             $table->uuid('attribute_id');
             $table->string('value');
             $table->string('label');
@@ -240,7 +240,7 @@ return new class extends Migration
 
         // Variantes de productos
         Schema::create('product_variants', function (Blueprint $table) {
-            $table->uuid('id')->primary();
+            $table->id();  // ← CAMBIADO: Autoincremental para performance
             $table->uuid('product_id');
             $table->string('sku')->unique();
             $table->string('barcode')->nullable();
@@ -271,43 +271,43 @@ return new class extends Migration
             $table->timestamps();
             
             $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');
-            $table->unique(['product_id', 'sku']);
-            $table->index(['product_id', 'status']);
+            $table->unique(['product_id', 'sku'], 'pv_product_sku_unique');  // ← ACORTADO
+            $table->index(['product_id', 'status'], 'pv_product_status');  // ← ACORTADO
         });
 
         // Imágenes de variantes
         Schema::create('product_variant_images', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->uuid('variant_id');
+            $table->id();  // ← CAMBIADO: Autoincremental para performance
+            $table->unsignedBigInteger('variant_id');  // ← CAMBIADO: BIGINT para referenciar product_variants.id
             $table->string('url');
             $table->string('alt')->nullable();
             $table->integer('order')->default(0);
             $table->timestamps();
             
             $table->foreign('variant_id')->references('id')->on('product_variants')->onDelete('cascade');
-            $table->index(['variant_id', 'order']);
+            $table->index(['variant_id', 'order'], 'pvi_variant_order');  // ← ACORTADO
         });
 
         // Historial de precios de productos
         Schema::create('product_price_history', function (Blueprint $table) {
-            $table->uuid('id')->primary();
+            $table->id();  // ← CAMBIADO: Autoincremental para performance
             $table->uuid('product_id');
             $table->string('currency', 3);
             $table->decimal('old_price', 10, 2);
             $table->decimal('new_price', 10, 2);
             $table->string('change_reason', 100); // 'manual', 'rate_update', 'sale_start', 'sale_end'
-            $table->uuid('changed_by')->nullable();
+            $table->unsignedBigInteger('changed_by')->nullable();  // ← CAMBIADO: BIGINT para referenciar users.id
             $table->text('notes')->nullable();
             $table->timestamps();
             
             $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');
             $table->foreign('changed_by')->references('id')->on('users')->onDelete('set null');
-            $table->index(['product_id', 'currency', 'created_at']);
+            $table->index(['product_id', 'currency', 'created_at'], 'pph_product_currency_date');  // ← ACORTADO
         });
 
         // Auditoría de actualizaciones de tasas
         Schema::create('currency_rate_updates', function (Blueprint $table) {
-            $table->uuid('id')->primary();
+            $table->id();  // ← CAMBIADO: Autoincremental para performance
             $table->date('update_date');
             $table->json('currencies_updated'); // ['USD-EUR', 'USD-GBP', ...]
             $table->string('source', 50); // 'api', 'manual', 'import'
@@ -316,8 +316,8 @@ return new class extends Migration
             $table->integer('total_rates_updated')->default(0);
             $table->timestamps();
             
-            $table->unique('update_date');
-            $table->index('success');
+            $table->unique('update_date', 'cru_update_date_unique');  // ← ACORTADO
+            $table->index('success', 'cru_success');  // ← ACORTADO
         });
     }
 
