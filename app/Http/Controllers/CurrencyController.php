@@ -20,14 +20,10 @@ class CurrencyController extends Controller
     {
         $tenant = $request->user()->tenant;
         $currencyConfig = $tenant->currencyConfig ?? $this->createDefaultConfig($tenant);
-        
-        $supportedCurrencies = $currencyConfig->getSupportedCurrenciesWithRates();
-        $currentRates = $this->getCurrentRates($currencyConfig);
 
         return Inertia::render('Currency/Index', [
             'currencyConfig' => $currencyConfig,
-            'supportedCurrencies' => $supportedCurrencies,
-            'currentRates' => $currentRates,
+            'supportedCurrencies' => $currencyConfig->getSupportedCurrenciesWithRates(),
             'availableCurrencies' => $this->getAvailableCurrencies(),
         ]);
     }
@@ -48,7 +44,7 @@ class CurrencyController extends Controller
         ]);
 
         $tenant = $request->user()->tenant;
-        
+
         $currencyConfig = BusinessCurrencyConfig::updateOrCreate(
             ['tenant_id' => $tenant->id],
             [
@@ -76,15 +72,13 @@ class CurrencyController extends Controller
     {
         $tenant = $request->user()->tenant;
         $currencyConfig = $tenant->currencyConfig;
-        
+
         if (!$currencyConfig) {
             return response()->json(['error' => 'Currency configuration not found'], 404);
         }
 
-        $rates = $this->getCurrentRates($currencyConfig);
-
         return response()->json([
-            'rates' => $rates,
+            'rates' => $this->getCurrentRatesArray($currencyConfig),
             'base_currency' => $currencyConfig->default_currency,
         ]);
     }
@@ -102,7 +96,7 @@ class CurrencyController extends Controller
 
         $tenant = $request->user()->tenant;
         $currencyConfig = $tenant->currencyConfig;
-        
+
         if (!$currencyConfig) {
             return response()->json(['error' => 'Currency configuration not found'], 404);
         }
@@ -170,57 +164,14 @@ class CurrencyController extends Controller
 
         $tenant = $request->user()->tenant;
         $currencyConfig = $tenant->currencyConfig;
-        
+
         if (!$currencyConfig) {
             return response()->json(['error' => 'Currency configuration not found'], 404);
         }
 
-        $history = [];
+        $history = $this->buildRateHistory($validated, $currencyConfig);
 
-        // Get custom rates first
-        if ($currencyConfig->use_custom_rates) {
-            $customHistory = CurrencyRateBusiness::where('tenant_id', $tenant->id)
-                ->where('from_currency', $validated['from_currency'])
-                ->where('to_currency', $validated['to_currency'])
-                ->whereBetween('effective_date', [$validated['start_date'], $validated['end_date']])
-                ->orderBy('effective_date')
-                ->get();
-
-            foreach ($customHistory as $rate) {
-                $history[] = [
-                    'date' => $rate->effective_date->format('Y-m-d'),
-                    'rate' => $rate->rate,
-                    'source' => 'business_custom',
-                ];
-            }
-        }
-
-        // Get global rates for dates without custom rates
-        $existingDates = collect($history)->pluck('date')->toArray();
-        
-        $globalHistory = CurrencyRateGlobal::where('from_currency', $validated['from_currency'])
-            ->where('to_currency', $validated['to_currency'])
-            ->whereBetween('effective_date', [$validated['start_date'], $validated['end_date']])
-            ->whereNotIn('effective_date', $existingDates)
-            ->orderBy('effective_date')
-            ->get();
-
-        foreach ($globalHistory as $rate) {
-            $history[] = [
-                'date' => $rate->effective_date->format('Y-m-d'),
-                'rate' => $rate->rate,
-                'source' => 'global_default',
-            ];
-        }
-
-        // Sort by date
-        usort($history, function ($a, $b) {
-            return strcmp($a['date'], $b['date']);
-        });
-
-        return response()->json([
-            'history' => $history,
-        ]);
+        return response()->json(['history' => $history]);
     }
 
     /**
@@ -245,7 +196,7 @@ class CurrencyController extends Controller
 
         $tenant = $request->user()->tenant;
         $currencyConfig = $tenant->currencyConfig;
-        
+
         if (!$currencyConfig) {
             return response()->json(['error' => 'Currency configuration not found'], 404);
         }
@@ -272,6 +223,57 @@ class CurrencyController extends Controller
     }
 
     /**
+     * Build rate history for a currency pair.
+     */
+    private function buildRateHistory(array $validated, BusinessCurrencyConfig $config): array
+    {
+        $history = [];
+
+        // Get custom rates first
+        if ($config->use_custom_rates) {
+            $customHistory = CurrencyRateBusiness::where('tenant_id', $config->tenant_id)
+                ->where('from_currency', $validated['from_currency'])
+                ->where('to_currency', $validated['to_currency'])
+                ->whereBetween('effective_date', [$validated['start_date'], $validated['end_date']])
+                ->orderBy('effective_date')
+                ->get();
+
+            foreach ($customHistory as $rate) {
+                $history[] = [
+                    'date' => $rate->effective_date->format('Y-m-d'),
+                    'rate' => $rate->rate,
+                    'source' => 'business_custom',
+                ];
+            }
+        }
+
+        // Get global rates for dates without custom rates
+        $existingDates = collect($history)->pluck('date')->toArray();
+
+        $globalHistory = CurrencyRateGlobal::where('from_currency', $validated['from_currency'])
+            ->where('to_currency', $validated['to_currency'])
+            ->whereBetween('effective_date', [$validated['start_date'], $validated['end_date']])
+            ->whereNotIn('effective_date', $existingDates)
+            ->orderBy('effective_date')
+            ->get();
+
+        foreach ($globalHistory as $rate) {
+            $history[] = [
+                'date' => $rate->effective_date->format('Y-m-d'),
+                'rate' => $rate->rate,
+                'source' => 'global_default',
+            ];
+        }
+
+        // Sort by date
+        usort($history, function ($a, $b) {
+            return strcmp($a['date'], $b['date']);
+        });
+
+        return $history;
+    }
+
+    /**
      * Create default currency configuration for tenant.
      */
     private function createDefaultConfig($tenant): BusinessCurrencyConfig
@@ -290,7 +292,7 @@ class CurrencyController extends Controller
     /**
      * Get current rates for a currency configuration.
      */
-    private function getCurrentRates(BusinessCurrencyConfig $config): array
+    private function getCurrentRatesArray(BusinessCurrencyConfig $config): array
     {
         $baseCurrency = $config->default_currency;
         $targetCurrencies = $config->display_currencies;

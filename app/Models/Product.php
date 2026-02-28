@@ -49,7 +49,7 @@ class Product extends Model
         'low_stock_threshold',
         'weight',
         'length',
-       width',
+        'width',
         'height',
         'shipping_class',
         'free_shipping',
@@ -93,12 +93,12 @@ class Product extends Model
             if (empty($product->slug)) {
                 $product->slug = Str::slug($product->name);
             }
-            
+
             // Generate SKU if not provided
             if (empty($product->sku)) {
                 $product->sku = $product->generateSku();
             }
-            
+
             // Set historical cost data if cost_price is provided
             if ($product->cost_price && !$product->historical_cost_amount) {
                 $product->setHistoricalCostData();
@@ -109,7 +109,7 @@ class Product extends Model
             if ($product->isDirty('name') && !$product->isDirty('slug')) {
                 $product->slug = Str::slug($product->name);
             }
-            
+
             // Track price changes
             if ($product->isDirty(['base_price', 'base_sale_price'])) {
                 $product->recordPriceChange();
@@ -289,15 +289,15 @@ class Product extends Model
         }
 
         $now = now();
-        
+
         if ($this->sale_start_date && $now->lt($this->sale_start_date)) {
             return false;
         }
-        
+
         if ($this->sale_end_date && $now->gt($this->sale_end_date)) {
             return false;
         }
-        
+
         return true;
     }
 
@@ -309,7 +309,7 @@ class Product extends Model
         if (!$this->manage_stock) {
             return true;
         }
-        
+
         return $this->stock_quantity > 0;
     }
 
@@ -321,7 +321,7 @@ class Product extends Model
         if (!$this->manage_stock) {
             return false;
         }
-        
+
         return $this->stock_quantity <= $this->low_stock_threshold;
     }
 
@@ -333,7 +333,7 @@ class Product extends Model
         $tenantSlug = $this->tenant->slug ?? 'TENANT';
         $productSlug = Str::upper(Str::substr(Str::slug($this->name), 0, 8));
         $random = strtoupper(Str::random(4));
-        
+
         return "{$tenantSlug}-{$productSlug}-{$random}";
     }
 
@@ -354,7 +354,7 @@ class Product extends Model
     private function recordPriceChange(): void
     {
         $changes = [];
-        
+
         if ($this->isDirty('base_price')) {
             $changes[] = [
                 'currency' => $this->base_currency,
@@ -362,7 +362,7 @@ class Product extends Model
                 'new_price' => $this->base_price,
             ];
         }
-        
+
         if ($this->isDirty('base_sale_price')) {
             $changes[] = [
                 'currency' => $this->base_currency,
@@ -370,7 +370,7 @@ class Product extends Model
                 'new_price' => $this->base_sale_price,
             ];
         }
-        
+
         foreach ($changes as $change) {
             ProductPriceHistory::create([
                 'product_id' => $this->id,
