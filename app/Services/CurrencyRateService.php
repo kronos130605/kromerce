@@ -340,6 +340,242 @@ class CurrencyRateService
     }
 
     /**
+     * Get supported currencies with their current rates for a tenant.
+     */
+    public function getSupportedCurrenciesWithRates(string $tenantId): array
+    {
+        $config = $this->configRepo->getByTenantId($tenantId);
+        
+        if (!$config) {
+            return [];
+        }
+
+        $currencies = [];
+        $baseCurrency = $config->default_currency;
+        $targetCurrencies = $config->display_currencies;
+
+        foreach ($targetCurrencies as $currency) {
+            if ($currency === $baseCurrency) {
+                $currencies[$currency] = [
+                    'code' => $currency,
+                    'rate' => 1.0,
+                    'symbol' => $this->getCurrencySymbol($currency),
+                    'name' => $this->getCurrencyName($currency),
+                    'flag' => $this->getCurrencyFlag($currency),
+                    'source' => 'base'
+                ];
+            } else {
+                try {
+                    $rateInfo = $this->getEffectiveRate($tenantId, $baseCurrency, $currency);
+                    $currencies[$currency] = [
+                        'code' => $currency,
+                        'rate' => $rateInfo['rate'],
+                        'symbol' => $this->getCurrencySymbol($currency),
+                        'name' => $this->getCurrencyName($currency),
+                        'flag' => $this->getCurrencyFlag($currency),
+                        'source' => $rateInfo['source']
+                    ];
+                } catch (\Exception $e) {
+                    // Skip currencies without rates
+                    continue;
+                }
+            }
+        }
+
+        return $currencies;
+    }
+
+    /**
+     * Update custom rates for a tenant.
+     */
+    public function updateCustomRates(string $tenantId, array $rates, string $effectiveDate): array
+    {
+        $config = $this->configRepo->getByTenantId($tenantId);
+        
+        if (!$config) {
+            throw new \Exception("Currency configuration not found for tenant: {$tenantId}");
+        }
+
+        $baseCurrency = $config->default_currency;
+        $results = [];
+
+        foreach ($rates as $targetCurrency => $rate) {
+            if ($targetCurrency === $baseCurrency) {
+                continue; // Skip base currency
+            }
+
+            try {
+                $this->businessRateRepo->updateOrCreateRate(
+                    $tenantId,
+                    $baseCurrency,
+                    $targetCurrency,
+                    $rate,
+                    $effectiveDate,
+                    'manual'
+                );
+
+                $results[] = [
+                    'from_currency' => $baseCurrency,
+                    'to_currency' => $targetCurrency,
+                    'rate' => $rate,
+                    'success' => true,
+                ];
+            } catch (\Exception $e) {
+                $results[] = [
+                    'from_currency' => $baseCurrency,
+                    'to_currency' => $targetCurrency,
+                    'rate' => $rate,
+                    'success' => false,
+                    'error' => $e->getMessage(),
+                ];
+            }
+        }
+
+        // Update last rate update date
+        $this->configRepo->updateForTenant($tenantId, ['last_rate_update' => $effectiveDate]);
+
+        return $results;
+    }
+
+    /**
+     * Get rate history for a currency pair.
+     */
+    public function getRateHistory(string $fromCurrency, string $toCurrency, string $startDate, string $endDate, string $tenantId): array
+    {
+        $history = [];
+
+        // Get custom rates first
+        $customHistory = $this->businessRateRepo->getHistory(
+            $tenantId,
+            $fromCurrency,
+            $toCurrency,
+            $startDate,
+            $endDate
+        );
+
+        foreach ($customHistory as $rate) {
+            $history[] = [
+                'date' => $rate->effective_date->format('Y-m-d'),
+                'rate' => $rate->rate,
+                'source' => 'business_custom',
+            ];
+        }
+
+        // Get global rates for dates without custom rates
+        $existingDates = collect($history)->pluck('date')->toArray();
+
+        $globalHistory = $this->globalRateRepo->getHistory(
+            $fromCurrency,
+            $toCurrency,
+            $startDate,
+            $endDate,
+            $existingDates
+        );
+
+        foreach ($globalHistory as $rate) {
+            $history[] = [
+                'date' => $rate->effective_date->format('Y-m-d'),
+                'rate' => $rate->rate,
+                'source' => 'global_default',
+            ];
+        }
+
+        // Sort by date
+        usort($history, function ($a, $b) {
+            return strcmp($a['date'], $b['date']);
+        });
+
+        return $history;
+    }
+
+    /**
+     * Get rate update summary.
+     */
+    public function getUpdateSummary(int $days): array
+    {
+        return $this->updateRepo->getRecentSummary($days);
+    }
+
+    /**
+     * Reset custom rates to use global rates.
+     */
+    public function resetToGlobal(string $tenantId, array $currencies): int
+    {
+        $config = $this->configRepo->getByTenantId($tenantId);
+        
+        if (!$config) {
+            throw new \Exception("Currency configuration not found for tenant: {$tenantId}");
+        }
+
+        $baseCurrency = $config->default_currency;
+        $deleted = 0;
+
+        foreach ($currencies as $targetCurrency) {
+            if ($targetCurrency === $baseCurrency) {
+                continue;
+            }
+
+            $deleted += $this->businessRateRepo->deleteRate(
+                $tenantId,
+                $baseCurrency,
+                $targetCurrency
+            );
+        }
+
+        return $deleted;
+    }
+
+    /**
+     * Get currency metadata (symbol, name, flag).
+     */
+    private function getCurrencyMetadata(string $currency): array
+    {
+        $metadata = [
+            'USD' => ['symbol' => '$', 'name' => 'US Dollar', 'flag' => '🇺🇸'],
+            'EUR' => ['symbol' => '€', 'name' => 'Euro', 'flag' => '🇪🇺'],
+            'GBP' => ['symbol' => '£', 'name' => 'British Pound', 'flag' => '🇬🇧'],
+            'JPY' => ['symbol' => '¥', 'name' => 'Japanese Yen', 'flag' => '🇯🇵'],
+            'COP' => ['symbol' => '$', 'name' => 'Colombian Peso', 'flag' => '🇨🇴'],
+            'MXN' => ['symbol' => '$', 'name' => 'Mexican Peso', 'flag' => '🇲🇽'],
+            'CAD' => ['symbol' => 'C$', 'name' => 'Canadian Dollar', 'flag' => '🇨🇦'],
+            'AUD' => ['symbol' => 'A$', 'name' => 'Australian Dollar', 'flag' => '🇦🇺'],
+            'CHF' => ['symbol' => 'Fr', 'name' => 'Swiss Franc', 'flag' => '🇨🇭'],
+            'CNY' => ['symbol' => '¥', 'name' => 'Chinese Yuan', 'flag' => '🇨🇳'],
+            'INR' => ['symbol' => '₹', 'name' => 'Indian Rupee', 'flag' => '🇮🇳'],
+        ];
+
+        return $metadata[$currency] ?? [
+            'symbol' => $currency,
+            'name' => $currency,
+            'flag' => '🏳️'
+        ];
+    }
+
+    /**
+     * Get currency symbol.
+     */
+    private function getCurrencySymbol(string $currency): string
+    {
+        return $this->getCurrencyMetadata($currency)['symbol'];
+    }
+
+    /**
+     * Get currency name.
+     */
+    private function getCurrencyName(string $currency): string
+    {
+        return $this->getCurrencyMetadata($currency)['name'];
+    }
+
+    /**
+     * Get currency flag.
+     */
+    private function getCurrencyFlag(string $currency): string
+    {
+        return $this->getCurrencyMetadata($currency)['flag'];
+    }
+
+    /**
      * Calculate price in target currency.
      */
     public function calculatePrice(float $amount, string $fromCurrency, string $toCurrency, string $tenantId, ?string $date = null): array
@@ -360,59 +596,5 @@ class CurrencyRateService
             'source' => $rateInfo['source'],
             'effective_date' => $rateInfo['effective_date'],
         ];
-    }
-
-    /**
-     * Get rate history for analysis.
-     */
-    public function getRateHistory(string $fromCurrency, string $toCurrency, string $startDate, string $endDate, ?string $tenantId = null): array
-    {
-        $history = [];
-
-        if ($tenantId) {
-            $config = BusinessCurrencyConfig::where('tenant_id', $tenantId)->first();
-            
-            if ($config && $config->use_custom_rates) {
-                $customHistory = CurrencyRateBusiness::where('tenant_id', $tenantId)
-                    ->where('from_currency', $fromCurrency)
-                    ->where('to_currency', $toCurrency)
-                    ->whereBetween('effective_date', [$startDate, $endDate])
-                    ->orderBy('effective_date')
-                    ->get();
-
-                foreach ($customHistory as $rate) {
-                    $history[] = [
-                        'date' => $rate->effective_date->format('Y-m-d'),
-                        'rate' => $rate->rate,
-                        'source' => 'business_custom',
-                    ];
-                }
-            }
-        }
-
-        // Get global rates for missing dates
-        $existingDates = collect($history)->pluck('date')->toArray();
-        
-        $globalHistory = CurrencyRateGlobal::where('from_currency', $fromCurrency)
-            ->where('to_currency', $toCurrency)
-            ->whereBetween('effective_date', [$startDate, $endDate])
-            ->whereNotIn('effective_date', $existingDates)
-            ->orderBy('effective_date')
-            ->get();
-
-        foreach ($globalHistory as $rate) {
-            $history[] = [
-                'date' => $rate->effective_date->format('Y-m-d'),
-                'rate' => $rate->rate,
-                'source' => 'global_default',
-            ];
-        }
-
-        // Sort by date
-        usort($history, function ($a, $b) {
-            return strcmp($a['date'], $b['date']);
-        });
-
-        return $history;
     }
 }

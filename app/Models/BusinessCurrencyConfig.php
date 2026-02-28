@@ -49,86 +49,13 @@ class BusinessCurrencyConfig extends Model
     }
 
     /**
-     * Get effective rate for a currency pair.
-     */
-    public function getEffectiveRate(string $fromCurrency, string $toCurrency, ?string $date = null): array
-    {
-        $targetDate = $date ?? now()->format('Y-m-d');
-        
-        // Try custom rate first
-        if ($this->use_custom_rates) {
-            $customRate = CurrencyRateBusiness::where('tenant_id', $this->tenant_id)
-                ->where('from_currency', $fromCurrency)
-                ->where('to_currency', $toCurrency)
-                ->where('effective_date', '<=', $targetDate)
-                ->orderBy('effective_date', 'desc')
-                ->first();
-
-            if ($customRate) {
-                return [
-                    'rate' => $customRate->rate,
-                    'source' => 'business_custom',
-                    'effective_date' => $customRate->effective_date->format('Y-m-d')
-                ];
-            }
-        }
-
-        // Fallback to global rate
-        $globalRate = CurrencyRateGlobal::where('from_currency', $fromCurrency)
-            ->where('to_currency', $toCurrency)
-            ->where('effective_date', '<=', $targetDate)
-            ->orderBy('effective_date', 'desc')
-            ->first();
-
-        if ($globalRate) {
-            return [
-                'rate' => $globalRate->rate,
-                'source' => 'global_default',
-                'effective_date' => $globalRate->effective_date->format('Y-m-d')
-            ];
-        }
-
-        // Last resort: throw exception or return null
-        throw new \Exception("No rate found for {$fromCurrency} to {$toCurrency} on {$targetDate}");
-    }
-
-    /**
      * Get all supported currencies with their current rates.
+     * Note: This method delegates to CurrencyRateService for clean architecture.
      */
     public function getSupportedCurrenciesWithRates(): array
     {
-        $currencies = [];
-        $baseCurrency = $this->default_currency;
-
-        foreach ($this->display_currencies as $currency) {
-            if ($currency === $baseCurrency) {
-                $currencies[$currency] = [
-                    'code' => $currency,
-                    'rate' => 1.0,
-                    'symbol' => $this->getCurrencySymbol($currency),
-                    'name' => $this->getCurrencyName($currency),
-                    'flag' => $this->getCurrencyFlag($currency),
-                    'source' => 'base'
-                ];
-            } else {
-                try {
-                    $rateInfo = $this->getEffectiveRate($baseCurrency, $currency);
-                    $currencies[$currency] = [
-                        'code' => $currency,
-                        'rate' => $rateInfo['rate'],
-                        'symbol' => $this->getCurrencySymbol($currency),
-                        'name' => $this->getCurrencyName($currency),
-                        'flag' => $this->getCurrencyFlag($currency),
-                        'source' => $rateInfo['source']
-                    ];
-                } catch (\Exception $e) {
-                    // Skip currencies without rates
-                    continue;
-                }
-            }
-        }
-
-        return $currencies;
+        // Delegar al service para mantener arquitectura limpia
+        return app(\App\Services\CurrencyRateService::class)->getSupportedCurrenciesWithRates($this->tenant_id);
     }
 
     /**

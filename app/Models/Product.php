@@ -195,77 +195,12 @@ class Product extends Model
 
     /**
      * Get calculated prices in all supported currencies.
+     * Note: This method delegates to ProductPricingService for clean architecture.
      */
     public function getCalculatedPrices(): array
     {
-        $currencyConfig = $this->tenant->currencyConfig;
-        if (!$currencyConfig) {
-            return [];
-        }
-
-        $supportedCurrencies = $currencyConfig->getSupportedCurrenciesWithRates();
-        $calculatedPrices = [];
-
-        foreach ($supportedCurrencies as $currency => $currencyInfo) {
-            $calculatedPrices[$currency] = [
-                'currency' => $currency,
-                'symbol' => $currencyInfo['symbol'],
-                'flag' => $currencyInfo['flag'],
-                'name' => $currencyInfo['name'],
-                'rate' => $currencyInfo['rate'],
-                'source' => $currencyInfo['source'],
-            ];
-
-            // Calculate base price
-            if ($currency === $this->base_currency) {
-                $calculatedPrices[$currency]['price'] = $this->base_price;
-            } else {
-                try {
-                    $rateInfo = $currencyConfig->getEffectiveRate($this->base_currency, $currency);
-                    $calculatedPrices[$currency]['price'] = round($this->base_price * $rateInfo['rate'], 2);
-                } catch (\Exception $e) {
-                    $calculatedPrices[$currency]['price'] = null;
-                }
-            }
-
-            // Calculate sale price if applicable
-            if ($this->is_on_sale && $this->base_sale_price) {
-                if ($currency === $this->base_currency) {
-                    $calculatedPrices[$currency]['sale_price'] = $this->base_sale_price;
-                } else {
-                    try {
-                        $rateInfo = $currencyConfig->getEffectiveRate($this->base_currency, $currency);
-                        $calculatedPrices[$currency]['sale_price'] = round($this->base_sale_price * $rateInfo['rate'], 2);
-                    } catch (\Exception $e) {
-                        $calculatedPrices[$currency]['sale_price'] = null;
-                    }
-                }
-            }
-
-            // Calculate cost price if tracking is enabled
-            if ($this->track_cost && $this->cost_price) {
-                if ($currency === $this->base_currency) {
-                    $calculatedPrices[$currency]['cost_price'] = $this->cost_price;
-                } else {
-                    try {
-                        $rateInfo = $currencyConfig->getEffectiveRate($this->base_currency, $currency);
-                        $calculatedPrices[$currency]['cost_price'] = round($this->cost_price * $rateInfo['rate'], 2);
-                    } catch (\Exception $e) {
-                        $calculatedPrices[$currency]['cost_price'] = null;
-                    }
-                }
-
-                // Calculate margin
-                if ($calculatedPrices[$currency]['price'] && $calculatedPrices[$currency]['cost_price']) {
-                    $calculatedPrices[$currency]['margin'] = round(
-                        (($calculatedPrices[$currency]['price'] - $calculatedPrices[$currency]['cost_price']) / $calculatedPrices[$currency]['price']) * 100,
-                        2
-                    );
-                }
-            }
-        }
-
-        return $calculatedPrices;
+        // Delegar al service para mantener arquitectura limpia
+        return app(\App\Services\ProductPricingService::class)->calculateProductPrices($this);
     }
 
     /**
