@@ -2,10 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\BusinessCurrencyConfig;
-use App\Models\CurrencyRateGlobal;
-use App\Models\CurrencyRateBusiness;
-use App\Models\CurrencyRateUpdate;
+use App\Services\CurrencyRateService;
+use App\Repositories\BusinessCurrencyConfigRepository;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Inertia\Inertia;
@@ -13,13 +11,23 @@ use Inertia\Response;
 
 class CurrencyController extends Controller
 {
+    private CurrencyRateService $currencyService;
+    private BusinessCurrencyConfigRepository $configRepo;
+
+    public function __construct(
+        CurrencyRateService $currencyService,
+        BusinessCurrencyConfigRepository $configRepo
+    ) {
+        $this->currencyService = $currencyService;
+        $this->configRepo = $configRepo;
+    }
     /**
      * Display the currency configuration page.
      */
     public function index(Request $request): Response
     {
         $tenant = $request->user()->tenant;
-        $currencyConfig = $tenant->currencyConfig ?? $this->createDefaultConfig($tenant);
+        $currencyConfig = $this->configRepo->getOrCreateForTenant($tenant->id);
 
         return Inertia::render('Currency/Index', [
             'currencyConfig' => $currencyConfig,
@@ -44,18 +52,12 @@ class CurrencyController extends Controller
         ]);
 
         $tenant = $request->user()->tenant;
-
-        $currencyConfig = BusinessCurrencyConfig::updateOrCreate(
+        
+        $currencyConfig = $this->configRepo->updateOrCreate(
             ['tenant_id' => $tenant->id],
-            [
-                'default_currency' => $validated['default_currency'],
-                'display_currencies' => $validated['display_currencies'],
-                'use_custom_rates' => $validated['use_custom_rates'],
-                'auto_update_rates' => $validated['auto_update_rates'],
-                'rate_update_frequency' => $validated['rate_update_frequency'],
-                'historical_retention_years' => $validated['historical_retention_years'],
+            array_merge($validated, [
                 'last_rate_update' => now()->format('Y-m-d'),
-            ]
+            ])
         );
 
         return response()->json([
@@ -71,7 +73,7 @@ class CurrencyController extends Controller
     public function getCurrentRates(Request $request): JsonResponse
     {
         $tenant = $request->user()->tenant;
-        $currencyConfig = $tenant->currencyConfig;
+        $currencyConfig = $this->configRepo->getByTenantId($tenant->id);
 
         if (!$currencyConfig) {
             return response()->json(['error' => 'Currency configuration not found'], 404);
@@ -95,59 +97,25 @@ class CurrencyController extends Controller
         ]);
 
         $tenant = $request->user()->tenant;
-        $currencyConfig = $tenant->currencyConfig;
+        
+        try {
+            $results = $this->currencyService->updateCustomRates(
+                $tenant->id,
+                $validated['rates'],
+                $validated['effective_date']
+            );
 
-        if (!$currencyConfig) {
-            return response()->json(['error' => 'Currency configuration not found'], 404);
+            return response()->json([
+                'success' => true,
+                'message' => 'Custom rates updated successfully',
+                'results' => $results,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => $e->getMessage(),
+            ], 400);
         }
-
-        $baseCurrency = $currencyConfig->default_currency;
-        $targetCurrencies = $currencyConfig->display_currencies;
-        $effectiveDate = $validated['effective_date'];
-        $results = [];
-
-        foreach ($targetCurrencies as $targetCurrency) {
-            if ($targetCurrency === $baseCurrency) {
-                continue; // Skip base currency
-            }
-
-            if (isset($validated['rates'][$targetCurrency])) {
-                try {
-                    $rate = CurrencyRateBusiness::updateRate(
-                        $tenant->id,
-                        $baseCurrency,
-                        $targetCurrency,
-                        $validated['rates'][$targetCurrency],
-                        $effectiveDate,
-                        'manual'
-                    );
-
-                    $results[] = [
-                        'from_currency' => $baseCurrency,
-                        'to_currency' => $targetCurrency,
-                        'rate' => $validated['rates'][$targetCurrency],
-                        'success' => true,
-                    ];
-                } catch (\Exception $e) {
-                    $results[] = [
-                        'from_currency' => $baseCurrency,
-                        'to_currency' => $targetCurrency,
-                        'rate' => $validated['rates'][$targetCurrency],
-                        'success' => false,
-                        'error' => $e->getMessage(),
-                    ];
-                }
-            }
-        }
-
-        // Update last rate update date
-        $currencyConfig->update(['last_rate_update' => $effectiveDate]);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Custom rates updated successfully',
-            'results' => $results,
-        ]);
     }
 
     /**
@@ -163,15 +131,22 @@ class CurrencyController extends Controller
         ]);
 
         $tenant = $request->user()->tenant;
-        $currencyConfig = $tenant->currencyConfig;
+        
+        try {
+            $history = $this->currencyService->getRateHistory(
+                $validated['from_currency'],
+                $validated['to_currency'],
+                $validated['start_date'],
+                $validated['end_date'],
+                $tenant->id
+            );
 
-        if (!$currencyConfig) {
-            return response()->json(['error' => 'Currency configuration not found'], 404);
+            return response()->json(['history' => $history]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => $e->getMessage(),
+            ], 400);
         }
-
-        $history = $this->buildRateHistory($validated, $currencyConfig);
-
-        return response()->json(['history' => $history]);
     }
 
     /**
@@ -179,7 +154,7 @@ class CurrencyController extends Controller
      */
     public function getUpdateSummary(Request $request): JsonResponse
     {
-        $summary = CurrencyRateUpdate::getRecentSummary(30);
+        $summary = $this->currencyService->getUpdateSummary(30);
 
         return response()->json($summary);
     }
@@ -195,104 +170,27 @@ class CurrencyController extends Controller
         ]);
 
         $tenant = $request->user()->tenant;
-        $currencyConfig = $tenant->currencyConfig;
+        
+        try {
+            $deletedCount = $this->currencyService->resetToGlobal($tenant->id, $validated['currencies']);
 
-        if (!$currencyConfig) {
-            return response()->json(['error' => 'Currency configuration not found'], 404);
+            return response()->json([
+                'success' => true,
+                'message' => 'Custom rates reset successfully',
+                'deleted_count' => $deletedCount,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => $e->getMessage(),
+            ], 400);
         }
-
-        $baseCurrency = $currencyConfig->default_currency;
-        $deleted = 0;
-
-        foreach ($validated['currencies'] as $targetCurrency) {
-            if ($targetCurrency === $baseCurrency) {
-                continue;
-            }
-
-            $deleted += CurrencyRateBusiness::where('tenant_id', $tenant->id)
-                ->where('from_currency', $baseCurrency)
-                ->where('to_currency', $targetCurrency)
-                ->delete();
-        }
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Custom rates reset successfully',
-            'deleted_count' => $deleted,
-        ]);
     }
 
     /**
-     * Build rate history for a currency pair.
+     * Get current rates array for configuration.
      */
-    private function buildRateHistory(array $validated, BusinessCurrencyConfig $config): array
-    {
-        $history = [];
-
-        // Get custom rates first
-        if ($config->use_custom_rates) {
-            $customHistory = CurrencyRateBusiness::where('tenant_id', $config->tenant_id)
-                ->where('from_currency', $validated['from_currency'])
-                ->where('to_currency', $validated['to_currency'])
-                ->whereBetween('effective_date', [$validated['start_date'], $validated['end_date']])
-                ->orderBy('effective_date')
-                ->get();
-
-            foreach ($customHistory as $rate) {
-                $history[] = [
-                    'date' => $rate->effective_date->format('Y-m-d'),
-                    'rate' => $rate->rate,
-                    'source' => 'business_custom',
-                ];
-            }
-        }
-
-        // Get global rates for dates without custom rates
-        $existingDates = collect($history)->pluck('date')->toArray();
-
-        $globalHistory = CurrencyRateGlobal::where('from_currency', $validated['from_currency'])
-            ->where('to_currency', $validated['to_currency'])
-            ->whereBetween('effective_date', [$validated['start_date'], $validated['end_date']])
-            ->whereNotIn('effective_date', $existingDates)
-            ->orderBy('effective_date')
-            ->get();
-
-        foreach ($globalHistory as $rate) {
-            $history[] = [
-                'date' => $rate->effective_date->format('Y-m-d'),
-                'rate' => $rate->rate,
-                'source' => 'global_default',
-            ];
-        }
-
-        // Sort by date
-        usort($history, function ($a, $b) {
-            return strcmp($a['date'], $b['date']);
-        });
-
-        return $history;
-    }
-
-    /**
-     * Create default currency configuration for tenant.
-     */
-    private function createDefaultConfig($tenant): BusinessCurrencyConfig
-    {
-        return BusinessCurrencyConfig::create([
-            'tenant_id' => $tenant->id,
-            'default_currency' => 'USD',
-            'display_currencies' => ['USD', 'EUR', 'GBP'],
-            'use_custom_rates' => false,
-            'auto_update_rates' => true,
-            'rate_update_frequency' => 'daily',
-            'historical_retention_years' => 2,
-        ]);
-    }
-
-    /**
-     * Get current rates for a currency configuration.
-     */
-    private function getCurrentRatesArray(BusinessCurrencyConfig $config): array
+    private function getCurrentRatesArray($config): array
     {
         $baseCurrency = $config->default_currency;
         $targetCurrencies = $config->display_currencies;
@@ -309,7 +207,7 @@ class CurrencyController extends Controller
                 ];
             } else {
                 try {
-                    $rateInfo = $config->getEffectiveRate($baseCurrency, $currency);
+                    $rateInfo = $this->currencyService->getEffectiveRate($config->tenant_id, $baseCurrency, $currency);
                     $rates[$currency] = [
                         'from_currency' => $baseCurrency,
                         'to_currency' => $currency,

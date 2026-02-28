@@ -2,19 +2,33 @@
 
 namespace App\Services;
 
+use App\Repositories\BusinessCurrencyConfigRepository;
+use App\Repositories\ProductRepository;
 use App\Models\Product;
 use App\Models\ProductVariant;
-use App\Models\BusinessCurrencyConfig;
 use Illuminate\Support\Collection;
 
 class ProductPricingService
 {
+    private BusinessCurrencyConfigRepository $configRepo;
+    private ProductRepository $productRepo;
+    private CurrencyRateService $currencyService;
+
+    public function __construct(
+        BusinessCurrencyConfigRepository $configRepo,
+        ProductRepository $productRepo,
+        CurrencyRateService $currencyService
+    ) {
+        $this->configRepo = $configRepo;
+        $this->productRepo = $productRepo;
+        $this->currencyService = $currencyService;
+    }
     /**
      * Calculate all prices for a product in supported currencies.
      */
     public function calculateProductPrices(Product $product, ?string $targetCurrency = null): array
     {
-        $currencyConfig = $product->tenant->currencyConfig;
+        $currencyConfig = $this->configRepo->getByTenantId($product->tenant_id);
         
         if (!$currencyConfig) {
             return [];
@@ -91,7 +105,7 @@ class ProductPricingService
     public function calculateVariantPrices(ProductVariant $variant, ?string $targetCurrency = null): array
     {
         $product = $variant->product;
-        $currencyConfig = $product->tenant->currencyConfig;
+        $currencyConfig = $this->configRepo->getByTenantId($product->tenant_id);
         
         if (!$currencyConfig) {
             return [];
@@ -169,8 +183,7 @@ class ProductPricingService
         }
 
         try {
-            $currencyService = app(CurrencyRateService::class);
-            $conversion = $currencyService->calculatePrice($amount, $fromCurrency, $toCurrency, $tenantId);
+            $conversion = $this->currencyService->calculatePrice($amount, $fromCurrency, $toCurrency, $tenantId);
             
             return $conversion['amount'];
         } catch (\Exception $e) {
@@ -185,10 +198,8 @@ class ProductPricingService
     private function convertHistoricalCost(Product $product, string $targetCurrency): array
     {
         try {
-            $currencyService = app(CurrencyRateService::class);
-            
             // Convert historical cost using historical rate
-            $conversion = $currencyService->calculatePrice(
+            $conversion = $this->currencyService->calculatePrice(
                 $product->historical_cost_amount,
                 $product->historical_cost_currency,
                 $targetCurrency,
@@ -197,7 +208,7 @@ class ProductPricingService
             );
 
             // Calculate current cost for comparison
-            $currentConversion = $currencyService->calculatePrice(
+            $currentConversion = $this->currencyService->calculatePrice(
                 $product->historical_cost_amount,
                 $product->historical_cost_currency,
                 $targetCurrency,

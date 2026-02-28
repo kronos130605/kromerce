@@ -2,16 +2,31 @@
 
 namespace App\Services;
 
-use App\Models\BusinessCurrencyConfig;
-use App\Models\CurrencyRateGlobal;
-use App\Models\CurrencyRateBusiness;
-use App\Models\CurrencyRateUpdate;
-use Illuminate\Support\Facades\Http;
+use App\Repositories\BusinessCurrencyConfigRepository;
+use App\Repositories\CurrencyRateGlobalRepository;
+use App\Repositories\CurrencyRateBusinessRepository;
+use App\Repositories\CurrencyRateUpdateRepository;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 
 class CurrencyRateService
 {
+    private BusinessCurrencyConfigRepository $configRepo;
+    private CurrencyRateGlobalRepository $globalRateRepo;
+    private CurrencyRateBusinessRepository $businessRateRepo;
+    private CurrencyRateUpdateRepository $updateRepo;
+
+    public function __construct(
+        BusinessCurrencyConfigRepository $configRepo,
+        CurrencyRateGlobalRepository $globalRateRepo,
+        CurrencyRateBusinessRepository $businessRateRepo,
+        CurrencyRateUpdateRepository $updateRepo
+    ) {
+        $this->configRepo = $configRepo;
+        $this->globalRateRepo = $globalRateRepo;
+        $this->businessRateRepo = $businessRateRepo;
+        $this->updateRepo = $updateRepo;
+    }
     /**
      * Update daily currency rates.
      */
@@ -37,7 +52,7 @@ class CurrencyRateService
             $this->cleanupOldRates();
 
             // Log successful update
-            CurrencyRateUpdate::createSuccess(
+            $this->updateRepo->createSuccess(
                 array_merge($globalResults['currencies'], $businessResults['currencies']),
                 'api',
                 $totalUpdated
@@ -56,7 +71,7 @@ class CurrencyRateService
             ]);
 
             // Log failed update
-            CurrencyRateUpdate::createFailure(
+            $this->updateRepo->createFailure(
                 array_merge($globalResults['currencies'] ?? [], $businessResults['currencies'] ?? []),
                 'api',
                 $e->getMessage()
@@ -88,7 +103,7 @@ class CurrencyRateService
                     $rate = $this->fetchRateFromAPI($fromCurrency, $toCurrency);
                     
                     if ($rate) {
-                        CurrencyRateGlobal::updateRate($fromCurrency, $toCurrency, $rate, $date, 'api');
+                        $this->globalRateRepo->updateOrCreateRate($fromCurrency, $toCurrency, $rate, $date, 'api');
                         $updated++;
                         $currencyPairs[] = "{$fromCurrency}-{$toCurrency}";
                     }
@@ -96,7 +111,7 @@ class CurrencyRateService
                     // Try to use previous day's rate as fallback
                     $previousRate = $this->getPreviousDayRate($fromCurrency, $toCurrency, $date);
                     if ($previousRate) {
-                        CurrencyRateGlobal::updateRate($fromCurrency, $toCurrency, $previousRate, $date, 'previous_day');
+                        $this->globalRateRepo->updateOrCreateRate($fromCurrency, $toCurrency, $previousRate, $date, 'previous_day');
                         $updated++;
                         $currencyPairs[] = "{$fromCurrency}-{$toCurrency}";
                     }
@@ -118,10 +133,7 @@ class CurrencyRateService
         $updated = 0;
         $currencyPairs = [];
 
-        $businesses = BusinessCurrencyConfig::where('auto_update_rates', true)
-            ->where('use_custom_rates', false) // Only update if not using custom rates
-            ->with('tenant')
-            ->get();
+        $businesses = $this->configRepo->getNeedingRateUpdate();
 
         foreach ($businesses as $config) {
             $baseCurrency = $config->default_currency;
@@ -136,7 +148,7 @@ class CurrencyRateService
                     $rate = $this->fetchRateFromAPI($baseCurrency, $targetCurrency);
                     
                     if ($rate) {
-                        CurrencyRateBusiness::updateRate(
+                        $this->businessRateRepo->updateOrCreateRate(
                             $config->tenant_id,
                             $baseCurrency,
                             $targetCurrency,
@@ -149,9 +161,9 @@ class CurrencyRateService
                     }
                 } catch (\Exception $e) {
                     // Use global rate as fallback
-                    $globalRate = CurrencyRateGlobal::getRateForDate($baseCurrency, $targetCurrency, $date);
+                    $globalRate = $this->globalRateRepo->getRateForDate($baseCurrency, $targetCurrency, $date);
                     if ($globalRate) {
-                        CurrencyRateBusiness::updateRate(
+                        $this->businessRateRepo->updateOrCreateRate(
                             $config->tenant_id,
                             $baseCurrency,
                             $targetCurrency,
@@ -166,7 +178,7 @@ class CurrencyRateService
             }
 
             // Update last rate update date
-            $config->update(['last_rate_update' => $date]);
+            $this->configRepo->updateForTenant($config->tenant_id, ['last_rate_update' => $date]);
         }
 
         return [
@@ -268,7 +280,7 @@ class CurrencyRateService
     {
         $previousDate = Carbon::parse($date)->subDay()->format('Y-m-d');
         
-        $rate = CurrencyRateGlobal::getRateForDate($fromCurrency, $toCurrency, $previousDate);
+        $rate = $this->globalRateRepo->getRateForDate($fromCurrency, $toCurrency, $previousDate);
         
         return $rate ? $rate->rate : null;
     }
@@ -279,13 +291,13 @@ class CurrencyRateService
     private function cleanupOldRates(): void
     {
         // Clean global rates (keep 2 years)
-        CurrencyRateGlobal::cleanupOldRates(2);
+        $this->globalRateRepo->cleanupOldRates(2);
 
         // Clean business rates based on their retention settings
-        $configs = BusinessCurrencyConfig::all();
+        $configs = $this->configRepo->getAll();
         
         foreach ($configs as $config) {
-            CurrencyRateBusiness::cleanupOldRates($config->tenant_id, $config->historical_retention_years);
+            $this->businessRateRepo->cleanupOldRates($config->tenant_id, $config->historical_retention_years);
         }
     }
 
@@ -294,13 +306,37 @@ class CurrencyRateService
      */
     public function getEffectiveRate(string $tenantId, string $fromCurrency, string $toCurrency, ?string $date = null): array
     {
-        $config = BusinessCurrencyConfig::where('tenant_id', $tenantId)->first();
+        $config = $this->configRepo->getByTenantId($tenantId);
         
         if (!$config) {
             throw new \Exception("Currency configuration not found for tenant: {$tenantId}");
         }
 
-        return $config->getEffectiveRate($fromCurrency, $toCurrency, $date);
+        // Try business custom rate first
+        if ($config->use_custom_rates) {
+            $businessRate = $this->businessRateRepo->getRateForDate($tenantId, $fromCurrency, $toCurrency, $date);
+            
+            if ($businessRate) {
+                return [
+                    'rate' => $businessRate->rate,
+                    'source' => 'business_custom',
+                    'effective_date' => $businessRate->effective_date->format('Y-m-d'),
+                ];
+            }
+        }
+
+        // Fallback to global rate
+        $globalRate = $this->globalRateRepo->getRateForDate($fromCurrency, $toCurrency, $date);
+        
+        if ($globalRate) {
+            return [
+                'rate' => $globalRate->rate,
+                'source' => 'global_default',
+                'effective_date' => $globalRate->effective_date->format('Y-m-d'),
+            ];
+        }
+
+        throw new \Exception("Rate not found for {$fromCurrency} to {$toCurrency}");
     }
 
     /**

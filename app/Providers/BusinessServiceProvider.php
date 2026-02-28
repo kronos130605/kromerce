@@ -4,6 +4,21 @@ namespace App\Providers;
 
 use App\Services\CurrencyRateService;
 use App\Services\ProductPricingService;
+use App\Repositories\BaseRepository;
+use App\Repositories\BusinessCurrencyConfigRepository;
+use App\Repositories\CurrencyRateGlobalRepository;
+use App\Repositories\CurrencyRateBusinessRepository;
+use App\Repositories\CurrencyRateUpdateRepository;
+use App\Repositories\ProductRepository;
+use App\Repositories\ProductCategoryRepository;
+use App\Repositories\ProductTagRepository;
+use App\Models\BusinessCurrencyConfig;
+use App\Models\CurrencyRateGlobal;
+use App\Models\CurrencyRateBusiness;
+use App\Models\CurrencyRateUpdate;
+use App\Models\Product;
+use App\Models\ProductCategory;
+use App\Models\ProductTag;
 use Illuminate\Support\ServiceProvider;
 
 class BusinessServiceProvider extends ServiceProvider
@@ -13,15 +28,11 @@ class BusinessServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        // Register Currency Rate Service
-        $this->app->singleton(CurrencyRateService::class, function ($app) {
-            return new CurrencyRateService();
-        });
-
-        // Register Product Pricing Service
-        $this->app->singleton(ProductPricingService::class, function ($app) {
-            return new ProductPricingService();
-        });
+        // Register Repositories
+        $this->registerRepositories();
+        
+        // Register Services
+        $this->registerServices();
     }
 
     /**
@@ -39,6 +50,77 @@ class BusinessServiceProvider extends ServiceProvider
                 \App\Console\Commands\CleanupOldCurrencyRates::class,
             ]);
         }
+    }
+
+    /**
+     * Register repositories.
+     */
+    private function registerRepositories(): void
+    {
+        // Base Repository
+        $this->app->bind(BaseRepository::class, function ($app) {
+            // Base repository is abstract, should not be instantiated directly
+            return new class extends BaseRepository {
+                public function __construct() {
+                    // This is just for binding, actual repositories will extend this
+                }
+            };
+        });
+
+        // Currency Repositories
+        $this->app->bind(BusinessCurrencyConfigRepository::class, function ($app) {
+            return new BusinessCurrencyConfigRepository(new BusinessCurrencyConfig());
+        });
+
+        $this->app->bind(CurrencyRateGlobalRepository::class, function ($app) {
+            return new CurrencyRateGlobalRepository(new CurrencyRateGlobal());
+        });
+
+        $this->app->bind(CurrencyRateBusinessRepository::class, function ($app) {
+            return new CurrencyRateBusinessRepository(new CurrencyRateBusiness());
+        });
+
+        $this->app->bind(CurrencyRateUpdateRepository::class, function ($app) {
+            return new CurrencyRateUpdateRepository(new CurrencyRateUpdate());
+        });
+
+        // Product Repositories
+        $this->app->bind(ProductRepository::class, function ($app) {
+            return new ProductRepository(new Product());
+        });
+
+        $this->app->bind(ProductCategoryRepository::class, function ($app) {
+            return new ProductCategoryRepository(new ProductCategory());
+        });
+
+        $this->app->bind(ProductTagRepository::class, function ($app) {
+            return new ProductTagRepository(new ProductTag());
+        });
+    }
+
+    /**
+     * Register services.
+     */
+    private function registerServices(): void
+    {
+        // Register Currency Rate Service with repositories
+        $this->app->singleton(CurrencyRateService::class, function ($app) {
+            return new CurrencyRateService(
+                $app->make(BusinessCurrencyConfigRepository::class),
+                $app->make(CurrencyRateGlobalRepository::class),
+                $app->make(CurrencyRateBusinessRepository::class),
+                $app->make(CurrencyRateUpdateRepository::class)
+            );
+        });
+
+        // Register Product Pricing Service with repositories
+        $this->app->singleton(ProductPricingService::class, function ($app) {
+            return new ProductPricingService(
+                $app->make(BusinessCurrencyConfigRepository::class),
+                $app->make(ProductRepository::class),
+                $app->make(CurrencyRateService::class)
+            );
+        });
     }
 
     /**
