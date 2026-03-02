@@ -93,7 +93,7 @@ class ProductTagRepository extends BaseRepository
     public function getStatistics(string $tenantId): array
     {
         $tags = $this->model->where('tenant_id', $tenantId);
-        
+
         return [
             'total_tags' => $tags->count(),
             'used_tags' => $tags->whereHas('products')->count(),
@@ -108,23 +108,20 @@ class ProductTagRepository extends BaseRepository
     public function batchCreate(string $tenantId, array $tagNames): Collection
     {
         $tags = collect();
-        
+
         foreach ($tagNames as $name) {
             $tag = $this->getOrCreate($tenantId, trim($name));
             $tags->push($tag);
         }
-        
+
         return $tags;
     }
 
     /**
-     * Clean up unused tags.
+     * Count tags for tenant.
      */
-    public function cleanupUnused(string $tenantId): int
+    public function countForTenant(string $tenantId): int
     {
-        return $this->model
-            ->where('tenant_id', $tenantId)
-            ->whereDoesntHave('products')
-            ->delete();
+        return $this->model->where('tenant_id', $tenantId)->count();
     }
 }

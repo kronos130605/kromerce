@@ -23,6 +23,7 @@ return new class extends Migration
             $table->date('last_rate_update')->nullable();
             $table->integer('historical_retention_years')->default(2);
             $table->timestamps();
+            $table->softDeletes();  // ← AGREGADO: SoftDeletes column
             
             $table->foreign('tenant_id')->references('id')->on('tenants')->onDelete('cascade');
             $table->unique('tenant_id');
@@ -72,6 +73,7 @@ return new class extends Migration
             $table->string('status', 20)->default('active');
             $table->json('settings')->nullable();
             $table->timestamps();
+            $table->softDeletes();  // ← AGREGADO: SoftDeletes column
             
             $table->foreign('tenant_id')->references('id')->on('tenants')->onDelete('cascade');
             $table->foreign('parent_id')->references('id')->on('product_categories')->onDelete('set null');
@@ -145,6 +147,7 @@ return new class extends Migration
             $table->unsignedBigInteger('created_by')->nullable();  // ← CAMBIADO: BIGINT para referenciar users.id
             $table->unsignedBigInteger('updated_by')->nullable();  // ← CAMBIADO: BIGINT para referenciar users.id
             $table->timestamps();
+            $table->softDeletes();  // ← AGREGADO: SoftDeletes column
             
             $table->foreign('tenant_id')->references('id')->on('tenants')->onDelete('cascade');
             $table->foreign('created_by')->references('id')->on('users')->onDelete('set null');
@@ -176,6 +179,7 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->string('color', 7)->nullable();
             $table->timestamps();
+            $table->softDeletes();  // ← AGREGADO: SoftDeletes column
             
             $table->foreign('tenant_id')->references('id')->on('tenants')->onDelete('cascade');
             $table->unique(['tenant_id', 'slug'], 'pt_tenant_slug_unique');  // ← ACORTADO
@@ -218,6 +222,7 @@ return new class extends Migration
             $table->json('config')->nullable(); // Configuración adicional
             $table->integer('order')->default(0);
             $table->timestamps();
+            $table->softDeletes();  // ← AGREGADO: SoftDeletes column
             
             $table->foreign('tenant_id')->references('id')->on('tenants')->onDelete('cascade');
             $table->unique(['tenant_id', 'slug'], 'pa_tenant_slug_unique');  // ← ACORTADO
@@ -269,6 +274,7 @@ return new class extends Migration
             // Metadata
             $table->json('attributes')->nullable(); // {color: 'red', size: 'M'}
             $table->timestamps();
+            $table->softDeletes();  // ← AGREGADO: SoftDeletes column
             
             $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');
             $table->unique(['product_id', 'sku'], 'pv_product_sku_unique');  // ← ACORTADO

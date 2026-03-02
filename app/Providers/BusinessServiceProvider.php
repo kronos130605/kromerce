@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Services\CurrencyRateService;
 use App\Services\ProductPricingService;
+use App\Services\DashboardService;
 use App\Repositories\BaseRepository;
 use App\Repositories\BusinessCurrencyConfigRepository;
 use App\Repositories\CurrencyRateGlobalRepository;
@@ -118,6 +119,17 @@ class BusinessServiceProvider extends ServiceProvider
             return new ProductPricingService(
                 $app->make(BusinessCurrencyConfigRepository::class),
                 $app->make(ProductRepository::class),
+                $app->make(CurrencyRateService::class)
+            );
+        });
+
+        // Register Dashboard Service with repositories
+        $this->app->singleton(DashboardService::class, function ($app) {
+            return new DashboardService(
+                $app->make(ProductRepository::class),
+                $app->make(ProductCategoryRepository::class),
+                $app->make(ProductTagRepository::class),
+                $app->make(BusinessCurrencyConfigRepository::class),
                 $app->make(CurrencyRateService::class)
             );
         });

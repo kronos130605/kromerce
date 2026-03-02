@@ -597,4 +597,47 @@ class CurrencyRateService
             'effective_date' => $rateInfo['effective_date'],
         ];
     }
+
+    /**
+     * Get currency performance data for dashboard.
+     */
+    public function getCurrencyPerformance(string $tenantId, int $days = 30): array
+    {
+        $config = $this->configRepo->getByTenantId($tenantId);
+        
+        if (!$config) {
+            return [];
+        }
+
+        $baseCurrency = $config->default_currency;
+        $targetCurrencies = $config->display_currencies;
+        $performance = [];
+
+        foreach ($targetCurrencies as $currency) {
+            if ($currency === $baseCurrency) {
+                continue;
+            }
+
+            // Obtener tasas históricas
+            $endDate = now()->format('Y-m-d');
+            $startDate = now()->subDays($days)->format('Y-m-d');
+
+            $history = $this->getRateHistory($baseCurrency, $currency, $startDate, $endDate, $tenantId);
+            
+            if (count($history) >= 2) {
+                $firstRate = $history[0]['rate'];
+                $lastRate = end($history)['rate'];
+                $change = (($lastRate - $firstRate) / $firstRate) * 100;
+                
+                $performance[] = [
+                    'currency' => $currency,
+                    'current_rate' => $lastRate,
+                    'change_percent' => round($change, 2),
+                    'trend' => $change >= 0 ? 'up' : 'down',
+                ];
+            }
+        }
+
+        return $performance;
+    }
 }

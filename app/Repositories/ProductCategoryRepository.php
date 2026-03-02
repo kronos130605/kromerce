@@ -106,7 +106,7 @@ class ProductCategoryRepository extends BaseRepository
     public function updateCategory(int $id, array $data): bool
     {
         $category = $this->getById($id);
-        
+
         if (!$category) {
             return false;
         }
@@ -130,13 +130,21 @@ class ProductCategoryRepository extends BaseRepository
     public function getStatistics(string $tenantId): array
     {
         $categories = $this->model->where('tenant_id', $tenantId);
-        
+
         return [
             'total_categories' => $categories->count(),
             'active_categories' => $categories->where('is_active', true)->count(),
             'root_categories' => $categories->whereNull('parent_id')->count(),
             'max_level' => $categories->max('level'),
         ];
+    }
+
+    /**
+     * Count categories for tenant.
+     */
+    public function countForTenant(string $tenantId): int
+    {
+        return $this->model->where('tenant_id', $tenantId)->count();
     }
 
     /**
