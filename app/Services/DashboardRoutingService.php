@@ -31,15 +31,17 @@ class DashboardRoutingService
             // Usar RoleService para obtener el rol del usuario en el tenant
             $userRoleInTenant = $this->roleService->getUserRoleInTenant($user, $tenant);
 
+            // Verificar roles de negocio
+            $businessRoles = ['business_owner', 'owner', 'admin', 'manager', 'employee'];
+
             Log::info('Dashboard view selection', [
                 'user_id' => $user->id,
                 'tenant_id' => $tenant->id,
                 'user_role_in_tenant' => $userRoleInTenant,
+                'user_spatie_roles' => $user->roles->pluck('name')->toArray(),
+                'business_roles_check' => in_array($userRoleInTenant, $businessRoles),
             ]);
 
-            // Verificar roles de negocio
-            $businessRoles = ['business_owner', 'admin', 'manager', 'employee'];
-            
             if (in_array($userRoleInTenant, $businessRoles)) {
                 // Usuario con rol de negocio - usar dashboard existente
                 return 'DashboardBusiness';

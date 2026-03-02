@@ -2,7 +2,7 @@
     <div class="stat-card" :class="color">
         <div class="stat-icon">
             <svg v-if="icon === 'package'" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 6H9a2 2 2 0 12 12m11 11a9 5.5 12 7.5a4 4h3a2 2 0 0 0"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 6H9a2 2 0 12 12m11 11a9 5.5 12 7.5a4 4h3a2 2 0 0 0"></path>
             </svg>
             <svg v-else-if="icon === 'check-circle'" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12 2 0 0 7.5a4 4h3a2 2 0 0 0m6 11 11a9 5.5 12 7.5a4 4h3a2 2 0 0 0"></path>

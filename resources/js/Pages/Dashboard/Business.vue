@@ -119,13 +119,13 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { Head } from '@inertiajs/vue3'
-import StatCard from '@/Components/Dashboard/StatCard.vue'
-import AlertCard from '@/Components/Dashboard/AlertCard.vue'
-import CurrencyStatusCard from '@/Components/Dashboard/CurrencyStatusCard.vue'
-import ProductList from '@/Components/Dashboard/ProductList.vue'
-import ActivityList from '@/Components/Dashboard/ActivityList.vue'
-import TopProductsCard from '@/Components/Dashboard/TopProductsCard.vue'
-import ChartCard from '@/Components/Dashboard/ChartCard.vue'
+import StatCard from '@/components/Dashboard/StatCard.vue'
+import AlertCard from '@/components/Dashboard/AlertCard.vue'
+import CurrencyStatusCard from '@/components/Dashboard/CurrencyStatusCard.vue'
+import ProductList from '@/components/Dashboard/ProductList.vue'
+import ActivityList from '@/components/Dashboard/ActivityList.vue'
+import TopProductsCard from '@/components/Dashboard/TopProductsCard.vue'
+import ChartCard from '@/components/Dashboard/ChartCard.vue'
 
 const props = defineProps({
     statistics: Object,
