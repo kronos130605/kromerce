@@ -76,7 +76,6 @@ return new class extends Migration
             $table->softDeletes();  // ← AGREGADO: SoftDeletes column
             
             $table->foreign('tenant_id')->references('id')->on('tenants')->onDelete('cascade');
-            $table->foreign('parent_id')->references('id')->on('product_categories')->onDelete('set null');
             $table->unique(['tenant_id', 'slug'], 'pc_tenant_slug_unique');  // ← ACORTADO
             $table->index(['tenant_id', 'status', 'parent_id'], 'pc_tenant_status_parent');  // ← ACORTADO
         });
@@ -325,6 +324,11 @@ return new class extends Migration
             $table->unique('update_date', 'cru_update_date_unique');  // ← ACORTADO
             $table->index('success', 'cru_success');  // ← ACORTADO
         });
+        
+        // Agregar foreign key de self-referencia después de crear todas las tablas
+        Schema::table('product_categories', function (Blueprint $table) {
+            $table->foreign('parent_id')->references('id')->on('product_categories')->onDelete('set null');
+        });
     }
 
     /**
@@ -332,6 +336,11 @@ return new class extends Migration
      */
     public function down(): void
     {
+        // Eliminar foreign key de self-referencia primero
+        Schema::table('product_categories', function (Blueprint $table) {
+            $table->dropForeign(['parent_id']);
+        });
+        
         Schema::dropIfExists('currency_rate_updates');
         Schema::dropIfExists('product_price_history');
         Schema::dropIfExists('product_variant_images');
