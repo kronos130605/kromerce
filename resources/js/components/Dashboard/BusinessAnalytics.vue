@@ -96,14 +96,14 @@ const stats = computed(() => [
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 p-6">
         <div class="flex items-center justify-between mb-6">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                {{ t('dashboard.analytics_overview') }}
+                {{ t('business.analytics_overview') }}
             </h3>
             <div class="flex space-x-2">
                 <button v-for="option in chartOptions" :key="option.key"
                         @click="activeChart = option.key"
                         :class="`px-3 py-1 rounded-lg text-sm font-medium transition-all ${
-                            activeChart === option.key 
-                                ? 'bg-blue-500 text-white' 
+                            activeChart === option.key
+                                ? 'bg-blue-500 text-white'
                                 : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                         }`">
                     <span class="mr-1">{{ option.icon }}</span>
@@ -114,12 +114,12 @@ const stats = computed(() => [
 
         <!-- Stats Grid -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <div v-for="stat in stats" :key="stat.label" 
+            <div v-for="stat in stats" :key="stat.label"
                  class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
                 <div class="flex items-center justify-between mb-2">
                     <span class="text-2xl">{{ stat.icon }}</span>
                     <span :class="`px-2 py-1 rounded-full text-xs font-medium ${
-                        stat.trend === 'up' 
+                        stat.trend === 'up'
                             ? 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300'
                             : 'bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300'
                     }`">
@@ -143,7 +143,7 @@ const stats = computed(() => [
                     {{ chartOptions.find(opt => opt.key === activeChart)?.label }} Chart
                 </h4>
                 <p class="text-gray-600 dark:text-gray-400">
-                    {{ t('dashboard.chart_coming_soon') }}
+                    {{ t('business.chart_coming_soon') }}
                 </p>
                 <div class="mt-4 text-sm text-gray-500 dark:text-gray-400">
                     <p>Sample data points: {{ chartData[activeChart]?.datasets?.[0]?.data?.length || 0 }}</p>
@@ -155,14 +155,14 @@ const stats = computed(() => [
         <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-600">
             <div class="flex items-center justify-between">
                 <span class="text-sm text-gray-500 dark:text-gray-400">
-                    {{ t('dashboard.data_period') }}: Últimos 30 días
+                    {{ t('business.data_period') }}: Últimos 30 días
                 </span>
                 <div class="flex space-x-2">
                     <button class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
-                        {{ t('dashboard.export_csv') }}
+                        {{ t('business.export_csv') }}
                     </button>
                     <button class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
-                        {{ t('dashboard.export_pdf') }}
+                        {{ t('business.export_pdf') }}
                     </button>
                 </div>
             </div>

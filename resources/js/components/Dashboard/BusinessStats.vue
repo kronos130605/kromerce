@@ -20,17 +20,17 @@ const getBgColor = (stat) => {
 // Setup dark mode listener
 onMounted(() => {
     checkDarkMode(); // Initial check
-    
+
     // Listen for class changes on document.documentElement
     const observer = new MutationObserver(() => {
         checkDarkMode();
     });
-    
+
     observer.observe(document.documentElement, {
         attributes: true,
         attributeFilter: ['class']
     });
-    
+
     // Store observer for cleanup
     window._darkModeObserver = observer;
 });
@@ -56,7 +56,7 @@ const stats = ref([
         previous: 101000
     },
     {
-        title: 'dashboard.total_orders',
+        title: 'common.total_orders',
         value: 3421,
         change: 18.2,
         changeType: 'positive',
@@ -67,7 +67,7 @@ const stats = ref([
         previous: 2894
     },
     {
-        title: 'dashboard.products',
+        title: 'common.products',
         value: 156,
         change: 12.1,
         changeType: 'positive',
@@ -112,7 +112,7 @@ const getChangeText = (stat) => {
              class="group relative bg-white dark:bg-gray-900 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 p-6 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
             <!-- Background gradient on hover -->
             <div :class="`absolute inset-0 bg-gradient-to-br ${getBgColor(stat)} rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity -z-10`"></div>
-            
+
             <div class="relative z-20">
                 <!-- Header -->
                 <div class="flex items-center justify-between mb-4">
@@ -123,7 +123,7 @@ const getChangeText = (stat) => {
                         {{ stat.change > 0 ? '+' : '' }}{{ stat.change }}%
                     </span>
                 </div>
-                
+
                 <!-- Content -->
                 <div>
                     <p class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">{{ t(stat.title) }}</p>

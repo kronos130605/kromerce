@@ -347,6 +347,7 @@
     "nav_wishlist": "Lista de Deseos",
     "nav_deals": "Ofertas",
     "nav_products": "Productos",
+    "nav_orders": "Pedidos",
     "nav_analytics": "Análisis",
     "nav_settings": "Configuración",
     "nav_users": "Usuarios",
@@ -387,7 +388,6 @@
     "urgent": "urgente",
     "top_products": "Productos Top",
     "best_performing_items": "Artículos con mejor rendimiento",
-    "sold": "vendidos",
     "low_stock": "Stock Bajo",
     "medium_stock": "Stock Medio",
     "in_stock": "En Stock",
@@ -494,7 +494,42 @@
     "confirm": "Confirmar",
     "warning": "Advertencia",
     "info": "Información",
-    "and": "y"
+    "and": "y",
+    "sold": "vendidos",
+    "in_stock": "En Stock",
+    "medium_stock": "Stock Medio",
+    "low_stock": "Stock Bajo",
+    "growth": "crecimiento",
+    "articles": "artículos",
+    "processing": "Procesando",
+    "shipped": "Enviado",
+    "active": "activos",
+    "new": "Nuevo",
+    "pending": "pendientes",
+    "products": "Productos",
+    "orders": "Pedidos",
+    "customers": "Clientes",
+    "total_revenue": "Ingresos Totales",
+    "total_orders": "Pedidos Totales",
+    "total_users": "Usuarios Totales",
+    "quick_actions": "Acciones Rápidas",
+    "recent_orders": "Pedidos Recientes",
+    "top_products": "Productos Top",
+    "settings": "Configuración",
+    "support": "Soporte",
+    "profile": "Perfil",
+    "notifications": "Notificaciones",
+    "logout": "Cerrar Sesión",
+    "register": "Registrarse",
+    "unregister": "Cancelar Registro",
+    "view_all": "Ver todos",
+    "track_order": "Rastrear Pedido",
+    "wishlist": "Lista de Deseos",
+    "payment": "Pagos",
+    "addresses": "Direcciones",
+    "reviews": "reseñas",
+    "events": "Eventos",
+    "analytics": "Análisis"
   },
   "errors": {
     "dashboard_error": "Error del Dashboard",
@@ -550,7 +585,12 @@
     "platform_status": "Estado de la Plataforma",
     "all_systems_operational": "Todos los Sistemas Operativos",
     "total_users": "Usuarios Totales",
-    "this_month": "este mes"
+    "this_month": "este mes",
+    "analytics_overview": "Resumen de Analytics",
+    "data_period": "Período de Datos",
+    "chart_coming_soon": "Gráfico próximamente",
+    "export_csv": "Exportar CSV",
+    "export_pdf": "Exportar PDF"
   },
   "actions": {
     "create_new_business": "Crear Nuevo Negocio",
@@ -581,12 +621,49 @@
     "role": "Rol",
     "no_role_assigned": "Sin rol asignado"
   },
+  "profile": {
+    "profile_settings": "Configuración de Perfil",
+    "notifications": "Notificaciones",
+    "logout": "Cerrar Sesión"
+  },
+  "quick_actions": {
+    "track_order": "Rastrear Pedido",
+    "track_package": "Rastrea tu paquete",
+    "browse_deals": "Explorar Ofertas",
+    "hot_offers_waiting": "Ofertas calientes esperándote",
+    "wishlist": "Lista de Deseos",
+    "saved_items": "Tus artículos guardados",
+    "support": "Soporte",
+    "get_help_anytime": "Obtén ayuda en cualquier momento",
+    "payment": "Pagos",
+    "manage_cards": "Gestiona tus tarjetas",
+    "addresses": "Direcciones",
+    "shipping_locations": "Ubicaciones de envío",
+    "reviews": "reseñas",
+    "rate_products": "Califica productos",
+    "settings": "Configuración",
+    "account_preferences": "Preferencias de cuenta"
+  },
+  "upcoming_events": {
+    "title": "Próximos Eventos",
+    "attendees": "Asistentes",
+    "register": "Registrarse",
+    "unregister": "Cancelar Registro"
+  },
+  "currency": {
+    "currency_status": "Estado de Moneda",
+    "base": "Base",
+    "per_usd": "por USD",
+    "live_rates": "Tasas en Vivo",
+    "last_updated": "Última actualización",
+    "refresh_rates": "Actualizar tasas"
+  },
   "dashboard_customer": {
     "customer_dashboard": "Dashboard del Cliente"
   },
   "tabs": {
     "overview": "Resumen",
-    "products": "Productos", 
+    "products": "Productos",
     "orders": "Pedidos",
     "events": "Eventos"
   }
