@@ -2,7 +2,7 @@
 import { Head, Link, useForm, usePage, router } from '@inertiajs/vue3';
 import { ref, computed, watch, onUnmounted } from 'vue';
 import { useI18n } from 'vue-i18n';
-import LoginAttempts from '@/Components/LoginAttempts.vue';
+import LoginAttempts from '@/components/LoginAttempts.vue';
 import LanguageSelector from '@/components/LanguageSelector.vue';
 
 const props = defineProps({

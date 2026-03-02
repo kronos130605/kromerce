@@ -1,0 +1,281 @@
+<?php
+
+namespace App\Repositories;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
+
+abstract class BaseRepository
+{
+    protected Model $model;
+
+    public function __construct(Model $model)
+    {
+        $this->model = $model;
+    }
+
+    /**
+     * Get all records.
+     */
+    public function getAll(array $columns = ['*']): Collection
+    {
+        return $this->model->all($columns);
+    }
+
+    /**
+     * Get record by ID.
+     */
+    public function getById(int $id, array $columns = ['*']): ?Model
+    {
+        return $this->model->find($id, $columns);
+    }
+
+    /**
+     * Get records by criteria.
+     */
+    public function getBy(array $criteria, array $columns = ['*']): Collection
+    {
+        $query = $this->model->query();
+        
+        foreach ($criteria as $key => $value) {
+            if (is_array($value)) {
+                $query->whereIn($key, $value);
+            } else {
+                $query->where($key, $value);
+            }
+        }
+        
+        return $query->get($columns);
+    }
+
+    /**
+     * Get first record by criteria.
+     */
+    public function getFirstBy(array $criteria, array $columns = ['*']): ?Model
+    {
+        return $this->model->where($criteria)->first($columns);
+    }
+
+    /**
+     * Create new record.
+     */
+    public function create(array $data): Model
+    {
+        return $this->model->create($data);
+    }
+
+    /**
+     * Create multiple records.
+     */
+    public function createMany(array $data): Collection
+    {
+        return $this->model->insert($data);
+    }
+
+    /**
+     * Update record by ID.
+     */
+    public function update(int $id, array $data): bool
+    {
+        $model = $this->getById($id);
+        
+        if (!$model) {
+            return false;
+        }
+        
+        return $model->update($data);
+    }
+
+    /**
+     * Update records by criteria.
+     */
+    public function updateBy(array $criteria, array $data): int
+    {
+        return $this->model->where($criteria)->update($data);
+    }
+
+    /**
+     * Delete record by ID.
+     */
+    public function delete(int $id): bool
+    {
+        $model = $this->getById($id);
+        
+        if (!$model) {
+            return false;
+        }
+        
+        return $model->delete();
+    }
+
+    /**
+     * Delete records by criteria.
+     */
+    public function deleteBy(array $criteria): int
+    {
+        return $this->model->where($criteria)->delete();
+    }
+
+    /**
+     * Get paginated records.
+     */
+    public function paginate(int $perPage = 15, array $columns = ['*']): LengthAwarePaginator
+    {
+        return $this->model->paginate($perPage, $columns);
+    }
+
+    /**
+     * Get paginated records with filters.
+     */
+    public function paginateWithFilters(array $filters = [], int $perPage = 15, array $columns = ['*']): LengthAwarePaginator
+    {
+        $query = $this->model->query();
+        
+        $this->applyFilters($query, $filters);
+        
+        return $query->paginate($perPage, $columns);
+    }
+
+    /**
+     * Apply filters to query.
+     */
+    protected function applyFilters(Builder $query, array $filters): void
+    {
+        foreach ($filters as $key => $value) {
+            if (is_null($value)) {
+                continue;
+            }
+            
+            if (is_array($value)) {
+                $query->whereIn($key, $value);
+            } elseif (str_contains($key, '_like')) {
+                $field = str_replace('_like', '', $key);
+                $query->where($field, 'like', "%{$value}%");
+            } elseif (str_contains($key, '_min')) {
+                $field = str_replace('_min', '', $key);
+                $query->where($field, '>=', $value);
+            } elseif (str_contains($key, '_max')) {
+                $field = str_replace('_max', '', $key);
+                $query->where($field, '<=', $value);
+            } else {
+                $query->where($key, $value);
+            }
+        }
+    }
+
+    /**
+     * Count records.
+     */
+    public function count(array $criteria = []): int
+    {
+        $query = $this->model->query();
+        
+        if (!empty($criteria)) {
+            $this->applyFilters($query, $criteria);
+        }
+        
+        return $query->count();
+    }
+
+    /**
+     * Check if record exists.
+     */
+    public function exists(int $id): bool
+    {
+        return $this->model->where('id', $id)->exists();
+    }
+
+    /**
+     * Check if record exists by criteria.
+     */
+    public function existsBy(array $criteria): bool
+    {
+        return $this->model->where($criteria)->exists();
+    }
+
+    /**
+     * Get query builder instance.
+     */
+    public function query(): Builder
+    {
+        return $this->model->query();
+    }
+
+    /**
+     * Get model instance.
+     */
+    public function getModel(): Model
+    {
+        return $this->model;
+    }
+
+    /**
+     * Find or create record.
+     */
+    public function firstOrCreate(array $criteria, array $data = []): Model
+    {
+        return $this->model->firstOrCreate($criteria, $data);
+    }
+
+    /**
+     * Update or create record.
+     */
+    public function updateOrCreate(array $criteria, array $data): Model
+    {
+        return $this->model->updateOrCreate($criteria, $data);
+    }
+
+    /**
+     * Get records with relationships.
+     */
+    public function with(array $relations): self
+    {
+        $this->model = $this->model->with($relations);
+        return $this;
+    }
+
+    /**
+     * Get records with count of relationships.
+     */
+    public function withCount(array $relations): self
+    {
+        $this->model = $this->model->withCount($relations);
+        return $this;
+    }
+
+    /**
+     * Order by column.
+     */
+    public function orderBy(string $column, string $direction = 'asc'): self
+    {
+        $this->model = $this->model->orderBy($column, $direction);
+        return $this;
+    }
+
+    /**
+     * Limit results.
+     */
+    public function limit(int $limit): self
+    {
+        $this->model = $this->model->limit($limit);
+        return $this;
+    }
+
+    /**
+     * Get results from modified query.
+     */
+    public function get(array $columns = ['*']): Collection
+    {
+        return $this->model->get($columns);
+    }
+
+    /**
+     * Get first result from modified query.
+     */
+    public function first(array $columns = ['*']): ?Model
+    {
+        return $this->model->first($columns);
+    }
+}

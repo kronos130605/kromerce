@@ -33,7 +33,7 @@ const businessStats = computed(() => ({
                 <p class="text-blue-100 text-lg mb-6">
                     {{ t('dashboard.business_subtitle') }}
                 </p>
-                
+
                 <!-- Business Info -->
                 <div v-if="currentTenant" class="flex items-center space-x-4">
                     <div class="bg-white/20 backdrop-blur-sm rounded-xl px-4 py-2">
@@ -46,7 +46,7 @@ const businessStats = computed(() => ({
                     </div>
                 </div>
             </div>
-            
+
             <!-- Key Metrics -->
             <div class="text-right">
                 <div class="bg-white/20 backdrop-blur-sm rounded-xl p-6">
@@ -59,7 +59,7 @@ const businessStats = computed(() => ({
                 </div>
             </div>
         </div>
-        
+
         <!-- Quick Stats -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
             <div class="bg-white/10 backdrop-blur-sm rounded-lg p-4 text-center border border-white/20">
@@ -68,7 +68,7 @@ const businessStats = computed(() => ({
             </div>
             <div class="bg-white/10 backdrop-blur-sm rounded-lg p-4 text-center border border-white/20">
                 <div class="text-2xl font-bold">{{ businessStats.products }}</div>
-                <div class="text-xs text-blue-100 dark:text-blue-300 mt-1">{{ t('dashboard.products') }}</div>
+                <div class="text-xs text-blue-100 dark:text-blue-300 mt-1">{{ t('common.products') }}</div>
             </div>
             <div class="bg-white/10 backdrop-blur-sm rounded-lg p-4 text-center border border-white/20">
                 <div class="text-2xl font-bold">{{ businessStats.customers.toLocaleString() }}</div>

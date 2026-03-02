@@ -12,10 +12,17 @@ import BusinessQuickActions from '@/components/Dashboard/BusinessQuickActions.vu
 import TopProducts from '@/components/Dashboard/TopProducts.vue';
 import RecentOrders from '@/components/Dashboard/RecentOrders.vue';
 
+// Import new dashboard components
+import BusinessCurrencyStatus from '@/components/Dashboard/BusinessCurrencyStatus.vue';
+import BusinessAnalytics from '@/components/Dashboard/BusinessAnalytics.vue';
+
 const page = usePage();
 const user = computed(() => page.props.auth.user);
 const currentTenant = computed(() => page.props.current_tenant);
 const { t } = useI18n();
+
+// Dashboard data from backend
+const dashboardData = computed(() => page.props.dashboard_data || {});
 
 // State management
 const activeTab = ref('overview');
@@ -108,6 +115,12 @@ const periodOptions = computed(() => [
                 <div v-if="activeTab === 'overview'" class="space-y-8">
                     <!-- Business Quick Actions -->
                     <BusinessQuickActions />
+
+                    <!-- Currency Status -->
+                    <BusinessCurrencyStatus :currency-status="dashboardData.currencyStatus || {}" />
+
+                    <!-- Analytics Overview -->
+                    <BusinessAnalytics :chart-data="dashboardData.chartData || {}" />
 
                     <!-- Main Content Grid -->
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">

@@ -18,12 +18,14 @@ class Tenant extends BaseTenant
         'custom_domain',
         'is_active',
         'branding_config',
+        'data',
         'owner_id',
         'uuid',
     ];
 
     protected $casts = [
         'branding_config' => 'array',
+        'data' => 'array',
         'is_active' => 'boolean',
     ];
 
@@ -59,6 +61,16 @@ class Tenant extends BaseTenant
             // Generate slug from name if not present
             if (!$tenant->slug) {
                 $tenant->slug = str()->slug($tenant->name);
+            }
+            // IMPORTANT: Ensure id is not set to prevent UUID being used as id
+            unset($tenant->id);
+        });
+
+        // Override the saving behavior to prevent UUID from being used as id
+        static::saving(function ($tenant) {
+            // Ensure id is never set to UUID
+            if (isset($tenant->id) && is_string($tenant->id)) {
+                unset($tenant->id);
             }
         });
     }
