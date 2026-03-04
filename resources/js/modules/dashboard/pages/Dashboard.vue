@@ -1,15 +1,15 @@
 <script setup>
 import { computed } from 'vue';
 import { usePage } from '@inertiajs/vue3';
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import CustomerLayout from '@/Layouts/CustomerLayout.vue';
 import { Head } from '@inertiajs/vue3';
 
 // Import dashboard components
-import CustomerHero from '@/components/Dashboard/CustomerHero.vue';
-import FeaturedProducts from '@/components/Dashboard/FeaturedProducts.vue';
-import ProductCategories from '@/components/Dashboard/ProductCategories.vue';
-import FlashSaleBanner from '@/components/Dashboard/FlashSaleBanner.vue';
-import QuickActions from '@/components/Dashboard/QuickActions.vue';
+import CustomerHero from '@/modules/dashboard/components/CustomerHero.vue';
+import FeaturedProducts from '@/modules/dashboard/components/FeaturedProducts.vue';
+import ProductCategories from '@/modules/dashboard/components/ProductCategories.vue';
+import FlashSaleBanner from '@/modules/dashboard/components/FlashSaleBanner.vue';
+import QuickActions from '@/modules/dashboard/components/QuickActions.vue';
 
 const page = usePage();
 const user = computed(() => page.props.auth.user);
@@ -33,12 +33,12 @@ const isSuperAdmin = computed(() => {
 
 <template>
     <Head title="Dashboard" />
-    
-    <AuthenticatedLayout>
+
+    <CustomerLayout>
         <!-- Customer Dashboard Content -->
         <div v-if="isCustomer">
             <CustomerHero />
-            
+
             <div class="px-4 sm:px-6 lg:px-8 py-12">
                 <div class="max-w-7xl mx-auto space-y-16">
                     <FeaturedProducts />
@@ -70,7 +70,7 @@ const isSuperAdmin = computed(() => {
                                 </span>
                             </div>
                         </div>
-                        
+
                         <div v-if="currentTenant" class="text-right space-y-2">
                             <div class="inline-flex items-center px-4 py-2 bg-white rounded-xl shadow-sm border border-gray-200">
                                 <div class="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
@@ -84,7 +84,7 @@ const isSuperAdmin = computed(() => {
 
             <div class="px-4 sm:px-6 lg:px-8 py-6">
                 <div class="mx-auto max-w-7xl space-y-8">
-                    
+
                     <!-- Enhanced Stats Grid -->
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                         <!-- Revenue Card -->
@@ -180,7 +180,7 @@ const isSuperAdmin = computed(() => {
                                     </div>
                                     <div class="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
                                 </div>
-                                
+
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <a href="#products" class="group relative overflow-hidden rounded-xl border border-gray-200 p-6 hover:border-gray-300 hover:shadow-lg transition-all duration-300">
                                         <div class="absolute inset-0 bg-gradient-to-br from-emerald-500 to-emerald-600 opacity-0 group-hover:opacity-5 transition-opacity"></div>
@@ -199,7 +199,7 @@ const isSuperAdmin = computed(() => {
                                             </svg>
                                         </div>
                                     </a>
-                                    
+
                                     <a href="#orders" class="group relative overflow-hidden rounded-xl border border-gray-200 p-6 hover:border-gray-300 hover:shadow-lg transition-all duration-300">
                                         <div class="absolute inset-0 bg-gradient-to-br from-blue-500 to-blue-600 opacity-0 group-hover:opacity-5 transition-opacity"></div>
                                         <div class="relative flex items-start space-x-4">
@@ -265,7 +265,7 @@ const isSuperAdmin = computed(() => {
                                     </div>
                                     <button class="text-blue-600 hover:text-blue-700 font-medium">View all →</button>
                                 </div>
-                                
+
                                 <div class="space-y-4">
                                     <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
                                         <div class="flex items-center space-x-4">
@@ -282,7 +282,7 @@ const isSuperAdmin = computed(() => {
                                             <p class="text-xs text-green-600">↑ 15.3%</p>
                                         </div>
                                     </div>
-                                    
+
                                     <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
                                         <div class="flex items-center space-x-4">
                                             <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center text-white font-bold text-sm">
@@ -298,7 +298,7 @@ const isSuperAdmin = computed(() => {
                                             <p class="text-xs text-green-600">↑ 8.7%</p>
                                         </div>
                                     </div>
-                                    
+
                                     <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
                                         <div class="flex items-center space-x-4">
                                             <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center text-white font-bold text-sm">
@@ -314,7 +314,7 @@ const isSuperAdmin = computed(() => {
                                             <p class="text-xs text-red-600">↓ 2.1%</p>
                                         </div>
                                     </div>
-                                    
+
                                     <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
                                         <div class="flex items-center space-x-4">
                                             <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center text-white font-bold text-sm">
@@ -344,7 +344,7 @@ const isSuperAdmin = computed(() => {
                                     </div>
                                     <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                                 </div>
-                                
+
                                 <div class="space-y-4 max-h-96 overflow-y-auto">
                                     <div class="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
                                         <div class="w-10 h-10 bg-gradient-to-br from-blue-100 to-purple-100 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
@@ -365,7 +365,7 @@ const isSuperAdmin = computed(() => {
                                             <p class="text-xs text-gray-500">3 items</p>
                                         </div>
                                     </div>
-                                    
+
                                     <div class="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
                                         <div class="w-10 h-10 bg-gradient-to-br from-blue-100 to-purple-100 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
                                             <span class="text-lg">📦</span>
@@ -385,7 +385,7 @@ const isSuperAdmin = computed(() => {
                                             <p class="text-xs text-gray-500">2 items</p>
                                         </div>
                                     </div>
-                                    
+
                                     <div class="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
                                         <div class="w-10 h-10 bg-gradient-to-br from-blue-100 to-purple-100 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
                                             <span class="text-lg">📦</span>
@@ -406,7 +406,7 @@ const isSuperAdmin = computed(() => {
                                         </div>
                                     </div>
                                 </div>
-                                
+
                                 <div class="mt-6 pt-6 border-t border-gray-200">
                                     <a href="#" class="flex items-center justify-center w-full py-2 text-sm font-medium text-blue-600 hover:text-blue-700 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
                                         View all orders
@@ -443,7 +443,7 @@ const isSuperAdmin = computed(() => {
                                 </span>
                             </div>
                         </div>
-                        
+
                         <div class="flex items-center space-x-3">
                             <div class="text-right">
                                 <p class="text-sm text-gray-500">Platform Status</p>
@@ -459,7 +459,7 @@ const isSuperAdmin = computed(() => {
 
             <div class="px-4 sm:px-6 lg:px-8 py-6">
                 <div class="mx-auto max-w-7xl space-y-8">
-                    
+
                     <!-- Enhanced System Stats -->
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
                         <!-- Users Card -->
@@ -575,7 +575,7 @@ const isSuperAdmin = computed(() => {
                                     </div>
                                     <div class="w-2 h-2 bg-purple-500 rounded-full animate-pulse"></div>
                                 </div>
-                                
+
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <a href="#users" class="group relative overflow-hidden rounded-xl border border-gray-200 p-6 hover:border-gray-300 hover:shadow-lg transition-all duration-300">
                                         <div class="absolute inset-0 bg-gradient-to-br from-purple-500 to-purple-600 opacity-0 group-hover:opacity-5 transition-opacity"></div>
@@ -594,7 +594,7 @@ const isSuperAdmin = computed(() => {
                                             </svg>
                                         </div>
                                     </a>
-                                    
+
                                     <a href="#tenants" class="group relative overflow-hidden rounded-xl border border-gray-200 p-6 hover:border-gray-300 hover:shadow-lg transition-all duration-300">
                                         <div class="absolute inset-0 bg-gradient-to-br from-blue-500 to-blue-600 opacity-0 group-hover:opacity-5 transition-opacity"></div>
                                         <div class="relative flex items-start space-x-4">
@@ -660,7 +660,7 @@ const isSuperAdmin = computed(() => {
                                     </div>
                                     <button class="text-blue-600 hover:text-blue-700 font-medium">View all →</button>
                                 </div>
-                                
+
                                 <div class="space-y-4">
                                     <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
                                         <div class="flex items-center space-x-4">
@@ -676,7 +676,7 @@ const isSuperAdmin = computed(() => {
                                             <p class="font-semibold text-gray-900">+23.5%</p>
                                         </div>
                                     </div>
-                                    
+
                                     <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
                                         <div class="flex items-center space-x-4">
                                             <div class="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-600 rounded-lg flex items-center justify-center text-white font-bold text-sm">
@@ -691,7 +691,7 @@ const isSuperAdmin = computed(() => {
                                             <p class="font-semibold text-gray-900">+18.2%</p>
                                         </div>
                                     </div>
-                                    
+
                                     <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
                                         <div class="flex items-center space-x-4">
                                             <div class="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-600 rounded-lg flex items-center justify-center text-white font-bold text-sm">
@@ -720,7 +720,7 @@ const isSuperAdmin = computed(() => {
                                     </div>
                                     <div class="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
                                 </div>
-                                
+
                                 <div class="space-y-4 max-h-96 overflow-y-auto">
                                     <div class="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
                                         <div class="w-10 h-10 bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
@@ -736,7 +736,7 @@ const isSuperAdmin = computed(() => {
                                             </div>
                                         </div>
                                     </div>
-                                    
+
                                     <div class="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
                                         <div class="w-10 h-10 bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
                                             <span class="text-lg">🏢</span>
@@ -751,7 +751,7 @@ const isSuperAdmin = computed(() => {
                                             </div>
                                         </div>
                                     </div>
-                                    
+
                                     <div class="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
                                         <div class="w-10 h-10 bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
                                             <span class="text-lg">💾</span>
@@ -766,7 +766,7 @@ const isSuperAdmin = computed(() => {
                                             </div>
                                         </div>
                                     </div>
-                                    
+
                                     <div class="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
                                         <div class="w-10 h-10 bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
                                             <span class="text-lg">🔒</span>
@@ -782,7 +782,7 @@ const isSuperAdmin = computed(() => {
                                         </div>
                                     </div>
                                 </div>
-                                
+
                                 <div class="mt-6 pt-6 border-t border-gray-200">
                                     <a href="#" class="flex items-center justify-center w-full py-2 text-sm font-medium text-blue-600 hover:text-blue-700 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
                                         View system logs
@@ -806,5 +806,5 @@ const isSuperAdmin = computed(() => {
                 <p class="text-sm text-gray-500 mt-2">Please wait while we set up your experience</p>
             </div>
         </div>
-    </AuthenticatedLayout>
+    </CustomerLayout>
 </template>

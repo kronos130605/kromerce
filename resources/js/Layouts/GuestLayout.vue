@@ -1,5 +1,5 @@
 <script setup>
-import ApplicationLogo from '@/components/ApplicationLogo.vue';
+import ApplicationLogo from '@/components/ui/ApplicationLogo.vue';
 import { Link } from '@inertiajs/vue3';
 </script>
 

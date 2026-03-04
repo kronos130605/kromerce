@@ -22,11 +22,11 @@ const countdown = computed(() => {
     const now = currentTime.value.getTime();
     const end = flashSaleEnds.value.getTime();
     const diff = Math.max(0, end - now);
-    
+
     const hours = Math.floor(diff / (1000 * 60 * 60));
     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
     const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-    
+
     return `${hours}h ${minutes}m ${seconds}s`;
 });
 
@@ -53,7 +53,7 @@ onUnmounted(() => {
         <div class="absolute inset-0 opacity-10">
             <div class="absolute inset-0 bg-gradient-45 from-transparent via-white to-transparent animate-pulse"></div>
         </div>
-        
+
         <div class="relative z-10">
             <div class="flex items-center justify-between mb-4">
                 <div>
@@ -73,7 +73,7 @@ onUnmounted(() => {
                     <div class="text-sm text-emerald-100">{{ t('dashboard.time_left') }}</div>
                 </div>
             </div>
-            
+
             <!-- Progress bar -->
             <div class="mb-4">
                 <div class="flex justify-between text-sm text-emerald-100 mb-1">
@@ -81,19 +81,19 @@ onUnmounted(() => {
                     <span>{{ Math.round(progressPercentage) }}%</span>
                 </div>
                 <div class="w-full bg-white/20 rounded-full h-3 overflow-hidden">
-                    <div 
+                    <div
                         class="bg-gradient-to-r from-yellow-400 to-amber-300 h-full rounded-full transition-all duration-1000 ease-out"
                         :style="{ width: `${progressPercentage}%` }"
                     ></div>
                 </div>
                 <div class="text-xs text-emerald-100 mt-1">
-                    {{ flashSaleData.sold }} {{ t('dashboard.sold') }} • {{ flashSaleData.available - flashSaleData.sold }} {{ t('dashboard.available') }}
+                    {{ flashSaleData.sold }} {{ t('common.sold') }} • {{ flashSaleData.available - flashSaleData.sold }} {{ t('dashboard.available') }}
                 </div>
             </div>
-            
+
             <!-- Featured products -->
             <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                <div v-for="product in flashSaleData.products" :key="product.id" 
+                <div v-for="product in flashSaleData.products" :key="product.id"
                      class="bg-white/10 backdrop-blur-sm rounded-lg p-3 hover:bg-white/20 transition-all cursor-pointer">
                     <div class="text-center">
                         <div class="text-2xl mb-1">{{ product.icon }}</div>

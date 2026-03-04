@@ -2,8 +2,8 @@
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import { computed, ref, onUnmounted } from 'vue';
 import { useI18n } from 'vue-i18n';
-import LanguageSelector from '@/components/LanguageSelector.vue';
-import PasswordStrength from '@/components/PasswordStrength.vue';
+import LanguageSelector from '@/components/shared/LanguageSelector.vue';
+import PasswordStrength from '@/modules/auth/components/PasswordStrength.vue';
 
 const { t } = useI18n();
 const isDarkMode = ref(false);

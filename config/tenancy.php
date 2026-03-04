@@ -41,7 +41,7 @@ return [
     ],
 
     'features' => [
-        // 'Stancl\Tenancy\Features\UniversalRoutes',
+        'Stancl\Tenancy\Features\UniversalRoutes',
         // 'Stancl\Tenancy\Features\TenantConfig',
         // 'Stancl\Tenancy\Features\TenantRedirect',
         // 'Stancl\Tenancy\Features\TelescopeTags',

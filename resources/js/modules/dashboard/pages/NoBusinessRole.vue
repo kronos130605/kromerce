@@ -2,7 +2,7 @@
     <div class="no-business-role">
         <Head title="Access Denied" />
 
-        <AuthenticatedLayout>
+        <CustomerLayout>
             <div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-12">
                 <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
@@ -25,13 +25,13 @@
                         <div class="px-8 py-6">
                             <div class="text-center py-8">
                                 <div class="text-6xl mb-6">🔒</div>
-                                
+
                                 <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">
                                     You don't have access to the Business Dashboard
                                 </h2>
-                                
+
                                 <p class="text-gray-600 dark:text-gray-400 mb-8 max-w-2xl mx-auto">
-                                    The Business Dashboard is only available to users with business roles. 
+                                    The Business Dashboard is only available to users with business roles.
                                     Your current account doesn't have the necessary permissions to access this area.
                                 </p>
 
@@ -109,14 +109,14 @@
                     </div>
                 </div>
             </div>
-        </AuthenticatedLayout>
+        </CustomerLayout>
     </div>
 </template>
 
 <script setup>
 import { computed } from 'vue'
 import { usePage } from '@inertiajs/vue3'
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
+import CustomerLayout from '@/Layouts/CustomerLayout.vue'
 import { Head } from '@inertiajs/vue3'
 
 const page = usePage()

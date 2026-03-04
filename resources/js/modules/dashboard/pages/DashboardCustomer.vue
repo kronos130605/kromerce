@@ -2,15 +2,15 @@
 import { computed, ref, onMounted, watch } from 'vue';
 import { usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import CustomerLayout from '@/Layouts/CustomerLayout.vue';
 import { Head } from '@inertiajs/vue3';
 
 // Import dashboard components
-import CustomerWelcome from '@/components/Dashboard/CustomerWelcome.vue';
-import FlashSaleBanner from '@/components/Dashboard/FlashSaleBanner.vue';
-import FeaturedStores from '@/components/Dashboard/FeaturedStores.vue';
-import AIRecommendations from '@/components/Dashboard/AIRecommendations.vue';
-import QuickActions from '@/components/Dashboard/QuickActions.vue';
+import CustomerWelcome from '@/modules/dashboard/components/CustomerWelcome.vue';
+import FlashSaleBanner from '@/modules/dashboard/components/FlashSaleBanner.vue';
+import FeaturedStores from '@/modules/dashboard/components/FeaturedStores.vue';
+import AIRecommendations from '@/modules/dashboard/components/AIRecommendations.vue';
+import QuickActions from '@/modules/dashboard/components/QuickActions.vue';
 
 const page = usePage();
 const user = computed(() => page.props.auth.user);
@@ -130,7 +130,7 @@ const showNotification = (message, type = 'success') => {
         timestamp: new Date()
     };
     notifications.value.push(notification);
-    
+
     // Auto dismiss after 5 seconds
     setTimeout(() => {
         dismissNotification(notification.id);
@@ -170,7 +170,7 @@ onMounted(() => {
 <template>
     <Head title="Customer Dashboard" />
 
-    <AuthenticatedLayout>
+    <CustomerLayout>
         <div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <!-- Notifications -->
@@ -202,8 +202,8 @@ onMounted(() => {
                         <button v-for="tab in ['overview', 'products', 'orders', 'events']" :key="tab"
                                 @click="activeTab = tab"
                                 :class="`flex-1 px-4 py-2 rounded-lg font-medium transition-all ${
-                                    activeTab === tab 
-                                        ? 'bg-blue-500 text-white shadow-lg' 
+                                    activeTab === tab
+                                        ? 'bg-blue-500 text-white shadow-lg'
                                         : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
                                 }`">
                             {{ t(`dashboard.tab_${tab}`) }}
@@ -234,9 +234,9 @@ onMounted(() => {
                                 <span>→</span>
                             </button>
                         </div>
-                        
+
                         <div class="space-y-4">
-                            <div v-for="order in recentOrders" :key="order.id" 
+                            <div v-for="order in recentOrders" :key="order.id"
                                  class="bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-100 dark:border-gray-700 p-6">
                                 <div class="flex items-center justify-between">
                                     <div class="flex items-center space-x-4">
@@ -253,7 +253,7 @@ onMounted(() => {
                                         <div class="text-sm text-gray-600 dark:text-gray-300">{{ order.items }} {{ t('dashboard.items') }}</div>
                                     </div>
                                 </div>
-                                
+
                                 <!-- Order Progress -->
                                 <div class="mt-4">
                                     <div class="flex items-center justify-between text-sm mb-2">
@@ -261,7 +261,7 @@ onMounted(() => {
                                         <span class="font-medium text-gray-900 dark:text-white capitalize">{{ t(`dashboard.status_${order.status}`) }}</span>
                                     </div>
                                     <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                                        <div class="bg-blue-600 h-2 rounded-full transition-all duration-500" 
+                                        <div class="bg-blue-600 h-2 rounded-full transition-all duration-500"
                                              :style="{ width: `${order.progress}%` }"></div>
                                     </div>
                                     <div v-if="order.tracking" class="mt-2 text-sm text-blue-600 dark:text-blue-400">
@@ -285,7 +285,7 @@ onMounted(() => {
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-100 dark:border-gray-700 p-6">
                             <div class="flex items-center justify-between">
                                 <div>
@@ -297,7 +297,7 @@ onMounted(() => {
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-100 dark:border-gray-700 p-6">
                             <div class="flex items-center justify-between">
                                 <div>
@@ -309,7 +309,7 @@ onMounted(() => {
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-100 dark:border-gray-700 p-6">
                             <div class="flex items-center justify-between">
                                 <div>
@@ -330,12 +330,12 @@ onMounted(() => {
                     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-100 dark:border-gray-700 p-6">
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                             <div class="md:col-span-2">
-                                <input v-model="searchQuery" 
-                                       type="text" 
+                                <input v-model="searchQuery"
+                                       type="text"
                                        :placeholder="t('dashboard.search_products')"
                                        class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
                             </div>
-                            <select v-model="selectedCategory" 
+                            <select v-model="selectedCategory"
                                     class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
                                 <option value="all">{{ t('dashboard.all_categories') }}</option>
                                 <option value="electronics">{{ t('dashboard.electronics') }}</option>
@@ -343,7 +343,7 @@ onMounted(() => {
                                 <option value="home">{{ t('dashboard.home') }}</option>
                                 <option value="sports">{{ t('dashboard.sports') }}</option>
                             </select>
-                            <select v-model="sortBy" 
+                            <select v-model="sortBy"
                                     class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
                                 <option value="recommended">{{ t('dashboard.recommended') }}</option>
                                 <option value="price_low">{{ t('dashboard.price_low_high') }}</option>
@@ -356,7 +356,7 @@ onMounted(() => {
                     <!-- Products Grid -->
                     <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
                         <!-- Product cards would go here -->
-                        <div v-for="i in 8" :key="i" 
+                        <div v-for="i in 8" :key="i"
                              class="bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-100 dark:border-gray-700 p-6">
                             <div class="w-full h-48 bg-gray-200 dark:bg-gray-700 rounded-lg mb-4"></div>
                             <h4 class="font-semibold text-gray-900 dark:text-white mb-2">{{ t('dashboard.product_name') }} {{ i }}</h4>
@@ -373,7 +373,7 @@ onMounted(() => {
                     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-100 dark:border-gray-700 p-6">
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">{{ t('dashboard.order_history') }}</h3>
                         <div class="space-y-4">
-                            <div v-for="order in recentOrders" :key="order.id" 
+                            <div v-for="order in recentOrders" :key="order.id"
                                  class="border-b border-gray-200 dark:border-gray-700 pb-4 last:border-0">
                                 <div class="flex items-center justify-between">
                                     <div>
@@ -395,7 +395,7 @@ onMounted(() => {
                     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-100 dark:border-gray-700 p-6">
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">{{ t('dashboard.upcoming_events') }}</h3>
                         <div class="space-y-4">
-                            <div v-for="event in upcomingEvents" :key="event.id" 
+                            <div v-for="event in upcomingEvents" :key="event.id"
                                  class="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
                                 <div class="flex items-center justify-between">
                                     <div>
@@ -413,8 +413,8 @@ onMounted(() => {
                                     </div>
                                     <button @click="toggleEventRegistration(event)"
                                             :class="`px-4 py-2 rounded-lg font-medium transition-colors ${
-                                                event.registered 
-                                                    ? 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600' 
+                                                event.registered
+                                                    ? 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600'
                                                     : 'bg-blue-600 hover:bg-blue-700 text-white'
                                             }`">
                                         {{ event.registered ? t('dashboard.unregister') : t('dashboard.register') }}
@@ -426,7 +426,7 @@ onMounted(() => {
                 </div>
             </div>
         </div>
-    </AuthenticatedLayout>
+    </CustomerLayout>
 </template>
 
 <style scoped>

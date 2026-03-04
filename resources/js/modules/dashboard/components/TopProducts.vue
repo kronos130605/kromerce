@@ -86,11 +86,11 @@ const getGrowthColor = (growth) => {
                 <span>→</span>
             </button>
         </div>
-        
+
         <!-- Products List -->
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-6">
             <div class="space-y-4">
-                <div v-for="(product, index) in topProducts" :key="product.id" 
+                <div v-for="(product, index) in topProducts" :key="product.id"
                      class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
                     <!-- Rank and Product Info -->
                     <div class="flex items-center space-x-4">
@@ -98,17 +98,17 @@ const getGrowthColor = (growth) => {
                         <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-emerald-600 rounded-lg flex items-center justify-center text-white font-bold text-sm">
                             {{ index + 1 }}
                         </div>
-                        
+
                         <!-- Product Image -->
                         <div class="w-12 h-12 bg-gray-200 dark:bg-gray-600 rounded-lg flex items-center justify-center text-2xl">
                             {{ product.image }}
                         </div>
-                        
+
                         <!-- Product Details -->
                         <div>
                             <h4 class="font-medium text-gray-900 dark:text-white">{{ product.name }}</h4>
                             <div class="flex items-center space-x-3 text-sm text-gray-600 dark:text-gray-400">
-                                <span>{{ product.sales }} {{ t('dashboard.sold') }}</span>
+                                <span>{{ product.sales }} {{ t('common.sold') }}</span>
                                 <span>•</span>
                                 <span :class="getStockStatus(product.stock).color">
                                     {{ product.stock }} {{ t('dashboard.in_stock') }}
@@ -121,14 +121,14 @@ const getGrowthColor = (growth) => {
                             </div>
                         </div>
                     </div>
-                    
+
                     <!-- Revenue and Growth -->
                     <div class="text-right">
                         <p class="font-semibold text-gray-900 dark:text-white">${{ product.revenue.toLocaleString() }}</p>
                         <p class="text-xs" :class="getGrowthColor(product.growth)">
                             {{ product.growth > 0 ? '↑' : '↓' }} {{ Math.abs(product.growth) }}% {{ t('dashboard.growth') }}
                         </p>
-                        
+
                         <!-- Stock Status Badge -->
                         <div class="mt-1">
                             <span :class="`inline-flex items-center px-2 py-1 text-xs font-medium rounded-full ${getStockStatus(product.stock).bg} ${getStockStatus(product.stock).color}`">

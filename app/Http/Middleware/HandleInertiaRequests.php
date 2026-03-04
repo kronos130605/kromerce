@@ -48,6 +48,13 @@ class HandleInertiaRequests extends Middleware
                 }
                 return null;
             },
+            'ziggy' => function () use ($request) {
+                $ziggy = new \Tighten\Ziggy\Ziggy;
+                return array_merge($ziggy->toArray(), [
+                    'location' => $request->url(),
+                    'query' => $request->query(),
+                ]);
+            },
         ];
     }
 }

@@ -1,7 +1,7 @@
 <script setup>
 import { computed, ref } from 'vue';
 import { usePage } from '@inertiajs/vue3';
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import CustomerLayout from '@/Layouts/CustomerLayout.vue';
 import { Head } from '@inertiajs/vue3';
 
 const page = usePage();
@@ -52,12 +52,12 @@ const getSeverityColor = (severity) => {
 <template>
     <Head title="Admin Dashboard" />
 
-    <AuthenticatedLayout>
+    <CustomerLayout>
         <template #header>
             <div class="relative">
                 <!-- Background gradient decoration -->
                 <div class="absolute inset-0 bg-gradient-to-r from-purple-50 via-red-50 to-orange-50 -z-10 rounded-2xl"></div>
-                
+
                 <div class="relative px-8 py-6">
                     <div class="flex justify-between items-start">
                         <div class="space-y-2">
@@ -75,7 +75,7 @@ const getSeverityColor = (severity) => {
                                 </span>
                             </div>
                         </div>
-                        
+
                         <div class="flex items-center space-x-3">
                             <div class="text-right">
                                 <p class="text-sm text-gray-500">Platform Status</p>
@@ -92,7 +92,7 @@ const getSeverityColor = (severity) => {
 
         <div class="px-4 sm:px-6 lg:px-8 py-6">
             <div class="mx-auto max-w-7xl space-y-8">
-                
+
                 <!-- System Stats Grid -->
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
                     <!-- Users Card -->
@@ -209,13 +209,13 @@ const getSeverityColor = (severity) => {
                                 </div>
                                 <div class="w-2 h-2 bg-purple-500 rounded-full animate-pulse"></div>
                             </div>
-                            
+
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <a v-for="action in quickActions" :key="action.title"
                                    :href="action.href"
                                    class="group relative overflow-hidden rounded-xl border border-gray-200 p-6 hover:border-gray-300 hover:shadow-lg transition-all duration-300">
                                     <div :class="`absolute inset-0 bg-gradient-to-br ${action.color} opacity-0 group-hover:opacity-5 transition-opacity`"></div>
-                                    
+
                                     <div class="relative flex items-start space-x-4">
                                         <div :class="`w-12 h-12 bg-gradient-to-br ${action.color} rounded-xl flex items-center justify-center flex-shrink-0 shadow-md`">
                                             <span class="text-white text-xl">{{ action.icon }}</span>
@@ -226,7 +226,7 @@ const getSeverityColor = (severity) => {
                                             </h4>
                                             <p class="text-sm text-gray-600">{{ action.description }}</p>
                                         </div>
-                                        <svg class="w-5 h-5 text-gray-400 group-hover:text-gray-600 group-hover:translate-x-1 transition-all flex-shrink-0" 
+                                        <svg class="w-5 h-5 text-gray-400 group-hover:text-gray-600 group-hover:translate-x-1 transition-all flex-shrink-0"
                                              fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                                         </svg>
@@ -244,9 +244,9 @@ const getSeverityColor = (severity) => {
                                 </div>
                                 <button class="text-blue-600 hover:text-blue-700 font-medium">View all →</button>
                             </div>
-                            
+
                             <div class="space-y-4">
-                                <div v-for="(tenant, index) in topTenants" :key="tenant.name" 
+                                <div v-for="(tenant, index) in topTenants" :key="tenant.name"
                                      class="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
                                     <div class="flex items-center space-x-4">
                                         <div class="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-600 rounded-lg flex items-center justify-center text-white font-bold text-sm">
@@ -278,9 +278,9 @@ const getSeverityColor = (severity) => {
                                 </div>
                                 <div class="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
                             </div>
-                            
+
                             <div class="space-y-4 max-h-96 overflow-y-auto">
-                                <div v-for="activity in recentActivity" :key="activity.id" 
+                                <div v-for="activity in recentActivity" :key="activity.id"
                                      class="group relative">
                                     <div class="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
                                         <div class="w-10 h-10 bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
@@ -298,7 +298,7 @@ const getSeverityColor = (severity) => {
                                     </div>
                                 </div>
                             </div>
-                            
+
                             <div class="mt-6 pt-6 border-t border-gray-200">
                                 <a href="#" class="flex items-center justify-center w-full py-2 text-sm font-medium text-blue-600 hover:text-blue-700 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
                                     View system logs
@@ -312,5 +312,5 @@ const getSeverityColor = (severity) => {
                 </div>
             </div>
         </div>
-    </AuthenticatedLayout>
+    </CustomerLayout>
 </template>
