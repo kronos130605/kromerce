@@ -42,10 +42,10 @@ const changeLanguage = (langCode) => {
           :class="{ 'bg-accent': language.code === locale }"
         >
           <span class="text-lg">{{ language.flag }}</span>
-          <div class="flex-1">
-            <div class="font-medium">{{ language.name }}</div>
-            <div class="text-xs text-muted-foreground">{{ language.code.toUpperCase() }}</div>
-          </div>
+          <span class="flex-1">
+            <span class="font-medium">{{ language.name }}</span>
+            <span class="text-xs text-muted-foreground">{{ language.code.toUpperCase() }}</span>
+          </span>
           <svg
             v-if="language.code === locale"
             class="w-4 h-4 text-primary"

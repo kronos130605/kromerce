@@ -5,12 +5,21 @@ namespace App\Repositories;
 use App\Models\Product;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
 
 class ProductRepository extends BaseRepository
 {
     public function __construct(Product $model)
     {
         parent::__construct($model);
+    }
+
+    /**
+     * Create new product.
+     */
+    public function create(array $data): Product
+    {
+        return $this->model->create($data);
     }
 
     /**
@@ -280,7 +289,7 @@ class ProductRepository extends BaseRepository
     {
         return $this->model->where('tenant_id', $tenantId)
             ->where('manage_stock', true)
-            ->where('stock_quantity', '<=', \DB::raw('low_stock_threshold'))
+            ->where('stock_quantity', '<=', DB::raw('low_stock_threshold'))
             ->count();
     }
 
@@ -289,7 +298,7 @@ class ProductRepository extends BaseRepository
      */
     public function getRecentPriceChanges(string $tenantId, int $limit = 10): Collection
     {
-        $items = \DB::table('product_price_history as pph')
+        $items = DB::table('product_price_history as pph')
             ->join('products as p', 'pph.product_id', '=', 'p.id')
             ->where('p.tenant_id', $tenantId)
             ->orderBy('pph.created_at', 'desc')
@@ -312,7 +321,7 @@ class ProductRepository extends BaseRepository
         // Esto requeriría una tabla de log de stock, por ahora retornamos productos con stock bajo
         return $this->model->where('tenant_id', $tenantId)
             ->where('manage_stock', true)
-            ->where('stock_quantity', '<=', \DB::raw('low_stock_threshold'))
+            ->where('stock_quantity', '<=', DB::raw('low_stock_threshold'))
             ->orderBy('updated_at', 'desc')
             ->limit($limit)
             ->get(['id', 'name', 'sku', 'stock_quantity', 'low_stock_threshold', 'updated_at']);

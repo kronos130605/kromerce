@@ -81,19 +81,19 @@ const handleAction = (action) => {
                     @click="handleAction(action)"
                     class="group bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-100 dark:border-gray-700 p-4 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 text-left">
                 
-                <div class="flex flex-col items-center text-center space-y-3">
-                    <div class="w-12 h-12 bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900 rounded-xl flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
+                <span class="flex flex-col items-center text-center space-y-3">
+                    <span class="w-12 h-12 bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900 rounded-xl flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
                         {{ action.icon }}
-                    </div>
+                    </span>
                     
-                    <div class="flex-1">
-                        <h4 class="font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                    <span class="flex-1">
+                        <span class="font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                             {{ action.title }}
-                        </h4>
-                        <p class="text-xs text-gray-600 dark:text-gray-300 mt-1">{{ action.description }}</p>
-                    </div>
+                        </span>
+                        <span class="text-xs text-gray-600 dark:text-gray-300 mt-1">{{ action.description }}</span>
+                    </span>
                     
-                    <div v-if="action.badge" 
+                    <span v-if="action.badge" 
                          :class="`px-2 py-1 rounded-full text-xs font-bold ${
                              action.badge.type === 'success' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
                              action.badge.type === 'warning' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' :
@@ -101,8 +101,8 @@ const handleAction = (action) => {
                              'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
                          }`">
                         {{ action.badge.text }}
-                    </div>
-                </div>
+                    </span>
+                </span>
             </button>
         </div>
     </div>

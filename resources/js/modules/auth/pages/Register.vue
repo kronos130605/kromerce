@@ -265,28 +265,28 @@ onUnmounted(() => {
                                                 : 'border-gray-200 bg-white hover:border-gray-300'
                                     ]"
                                 >
-                                    <div class="flex items-center space-x-3">
-                                        <div :class="[
+                                    <span class="flex items-center space-x-3">
+                                        <span :class="[
                                             'w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0',
                                             'aspect-square',
                                             form.user_type === 'customer' ? isDarkMode ? 'border-blue-400' : 'border-blue-500' : isDarkMode ? 'border-gray-500' : 'border-gray-300'
                                         ]">
-                                            <div v-if="form.user_type === 'customer'" :class="[
+                                            <span v-if="form.user_type === 'customer'" :class="[
                                                 'w-2 h-2 rounded-full',
                                                 isDarkMode ? 'bg-blue-400' : 'bg-blue-500'
-                                            ]"></div>
-                                        </div>
-                                        <div>
-                                        <div :class="[
-                                            'font-medium',
-                                            isDarkMode ? 'text-white' : 'text-gray-900'
-                                        ]">{{ t('auth.buy_products') }}</div>
-                                        <div :class="[
-                                            'text-sm',
-                                            isDarkMode ? 'text-gray-400' : 'text-gray-500'
-                                        ]">{{ t('auth.buy_products_desc') }}</div>
-                                        </div>
-                                    </div>
+                                            ]"></span>
+                                        </span>
+                                        <span>
+                                            <span :class="[
+                                                'font-medium',
+                                                isDarkMode ? 'text-white' : 'text-gray-900'
+                                            ]">{{ t('auth.buy_products') }}</span>
+                                            <span :class="[
+                                                'text-sm',
+                                                isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                                            ]">{{ t('auth.buy_products_desc') }}</span>
+                                        </span>
+                                    </span>
                                 </button>
 
                                 <button
@@ -303,28 +303,26 @@ onUnmounted(() => {
                                                 : 'border-gray-200 bg-white hover:border-gray-300'
                                     ]"
                                 >
-                                    <div class="flex items-center space-x-3">
-                                        <div :class="[
+                                    <span class="flex items-center space-x-3">
+                                        <span :class="[
                                             'w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0',
                                             'aspect-square',
                                             form.user_type === 'business_owner' ? isDarkMode ? 'border-emerald-400' : 'border-emerald-500' : isDarkMode ? 'border-gray-500' : 'border-gray-300'
                                         ]">
-                                            <div v-if="form.user_type === 'business_owner'" :class="[
+                                            <span v-if="form.user_type === 'business_owner'" :class="[
                                                 'w-2 h-2 rounded-full',
                                                 isDarkMode ? 'bg-emerald-400' : 'bg-emerald-500'
-                                            ]"></div>
-                                        </div>
-                                        <div>
-                                        <div :class="[
+                                            ]"></span>
+                                        </span>
+                                        <span :class="[
                                             'font-medium',
                                             isDarkMode ? 'text-white' : 'text-gray-900'
-                                        ]">{{ t('auth.sell_products') }}</div>
-                                        <div :class="[
+                                        ]">{{ t('auth.sell_products') }}</span>
+                                        <span :class="[
                                             'text-sm',
                                             isDarkMode ? 'text-gray-400' : 'text-gray-500'
-                                        ]">{{ t('auth.sell_products_desc') }}</div>
-                                        </div>
-                                    </div>
+                                        ]">{{ t('auth.sell_products_desc') }}</span>
+                                    </span>
                                 </button>
                             </div>
                         </div>

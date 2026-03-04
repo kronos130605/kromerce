@@ -254,7 +254,10 @@ class ProductController extends Controller
             'taxable' => 'boolean',
         ]);
 
-        $product = $this->productRepo->update($product->id, $validated);
+        $this->productRepo->update($product->id, $validated);
+
+        // Refresh the model to get updated data
+        $product->refresh();
 
         // Sync categories and tags
         if (isset($validated['category_id'])) {
