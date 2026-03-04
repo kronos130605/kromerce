@@ -43,8 +43,8 @@ class DashboardRoutingService
             ]);
 
             if (in_array($userRoleInTenant, $businessRoles)) {
-                // Usuario con rol de negocio - usar dashboard existente
-                return 'DashboardBusiness';
+                // Usuario con rol de negocio - usar nuevo dashboard
+                return 'Dashboard/Index';
             } else {
                 // Usuario sin rol de negocio - usar dashboard de customer
                 return 'DashboardCustomer';
@@ -146,7 +146,7 @@ class DashboardRoutingService
             ];
 
             // Solo obtener datos específicos del dashboard si es business
-            if ($dashboardView === 'DashboardBusiness' && $tenant) {
+            if ($dashboardView === 'Dashboard/Index' && $tenant) {
                 // Aquí podríamos inyectar DashboardService si es necesario
                 // Por ahora, retornamos datos vacíos para no romper
                 $dashboardData = [];
@@ -190,7 +190,7 @@ class DashboardRoutingService
             $userRole = $this->roleService->getUserRoleInTenant($user, $tenant);
             
             switch ($dashboardView) {
-                case 'DashboardBusiness':
+                case 'Dashboard/Index':
                     $businessRoles = ['business_owner', 'admin', 'manager', 'employee'];
                     return in_array($userRole, $businessRoles);
                     
@@ -235,7 +235,7 @@ class DashboardRoutingService
                 
                 if (in_array($userRole, $businessRoles)) {
                     $dashboards[] = [
-                        'name' => 'DashboardBusiness',
+                        'name' => 'Dashboard/Index',
                         'label' => 'Business Dashboard',
                         'accessible' => true,
                     ];

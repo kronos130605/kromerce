@@ -33,7 +33,7 @@ class AuthenticatedSessionController extends Controller
         $failedAttempts = $email ? LoginAttempt::getFailedAttemptsCount($email, 60) : 0;
         $remainingAttempts = max(0, 5 - $failedAttempts);
 
-        return Inertia::render('modules/auth/pages/Auth/Login', [
+        return Inertia::render('modules/auth/pages/Login', [
             'canResetPassword' => Route::has('password.request'),
             'status' => session('status'),
             'loginAttempts' => $remainingAttempts,

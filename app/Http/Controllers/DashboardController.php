@@ -18,29 +18,11 @@ use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
-    private DashboardService $dashboardService;
-    private ProductPricingService $pricingService;
-    private ProductRepository $productRepo;
-    private CurrencyRateService $currencyService;
-    private BusinessCurrencyConfigRepository $configRepo;
-    private RoleService $roleService;
     private DashboardRoutingService $dashboardRoutingService;
 
     public function __construct(
-        DashboardService $dashboardService,
-        ProductPricingService $pricingService,
-        ProductRepository $productRepo,
-        CurrencyRateService $currencyService,
-        BusinessCurrencyConfigRepository $configRepo,
-        RoleService $roleService,
         DashboardRoutingService $dashboardRoutingService
     ) {
-        $this->dashboardService = $dashboardService;
-        $this->pricingService = $pricingService;
-        $this->productRepo = $productRepo;
-        $this->currencyService = $currencyService;
-        $this->configRepo = $configRepo;
-        $this->roleService = $roleService;
         $this->dashboardRoutingService = $dashboardRoutingService;
     }
 
@@ -51,22 +33,12 @@ class DashboardController extends Controller
     {
         $user = $request->user();
 
-        // Debug: Log user info
-        \Log::info('Dashboard access attempt', [
-            'user_id' => $user->id,
-            'user_email' => $user->email,
-            'user_roles' => $user->roles->pluck('name')->toArray(),
-            'is_business_owner' => $user->isBusinessOwner(),
-            'current_tenant_id' => $user->currentTenant()?->id,
-            'all_tenants' => $user->tenants->pluck('id')->toArray(),
-        ]);
-
         // Usar DashboardRoutingService para obtener o asignar tenant
         $tenant = $this->dashboardRoutingService->getOrAssignTenantForUser($user);
-        
+
         if (!$tenant) {
             // No se pudo asignar tenant - mostrar dashboard de customer básico
-            return Inertia::render('modules/dashboard/DashboardCustomer', [
+            return Inertia::render('modules/dashboard/pages/DashboardCustomer', [
                 'auth' => [
                     'user' => $user,
                 ],
@@ -90,7 +62,7 @@ class DashboardController extends Controller
                 'trace' => $e->getTraceAsString(),
             ]);
 
-            return Inertia::render('modules/dashboard/DashboardError', [
+            return Inertia::render('modules/dashboard/pages/Error', [
                 'error' => 'Unable to load dashboard data',
                 'user' => $user,
                 'tenant' => $tenant,

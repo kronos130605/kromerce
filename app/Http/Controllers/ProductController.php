@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Inertia\Inertia;
 use Inertia\Response;
+use function tenancy;
 
 class ProductController extends Controller
 {
@@ -39,14 +40,47 @@ class ProductController extends Controller
      */
     public function index(Request $request): Response
     {
-        $tenant = $request->user()->tenant;
-        $filters = $request->only(['category_id', 'is_active', 'is_on_sale', 'min_price', 'max_price', 'search']);
-        
-        $products = $this->productRepo->paginateForTenant($tenant->id, $filters);
-        $categories = $this->categoryRepo->getForTenant($tenant->id);
-        $statistics = $this->productRepo->getStatistics($tenant->id);
+        // Get tenant from tenancy context instead of user
+        $tenant = tenancy()->initialized ? tenant() : null;
 
-        return Inertia::render('Products/Index', [
+        if (!$tenant) {
+            \Log::error('ProductController::index - No tenant context found');
+            return response()->json(['error' => 'No tenant context found'], 403);
+        }
+
+        $filters = $request->only(['category_id', 'is_active', 'is_on_sale', 'min_price', 'max_price', 'search']);
+
+        try {
+            $products = $this->productRepo->paginateForTenant($tenant->id, $filters);
+        } catch (\Exception $e) {
+            \Log::error('ProductController::index - Repository error', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return response()->json(['error' => 'Repository error: ' . $e->getMessage()], 500);
+        }
+
+        try {
+            $categories = $this->categoryRepo->getForTenant($tenant->id);
+        } catch (\Exception $e) {
+            \Log::error('ProductController::index - Category repository error', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            $categories = collect([]);
+        }
+
+        try {
+            $statistics = $this->productRepo->getStatistics($tenant->id);
+        } catch (\Exception $e) {
+            \Log::error('ProductController::index - Statistics error', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            $statistics = [];
+        }
+
+        return Inertia::render('modules/products/Products/Index', [
             'products' => $products,
             'categories' => $categories,
             'filters' => $filters,
@@ -59,9 +93,14 @@ class ProductController extends Controller
      */
     public function create(Request $request): Response
     {
-        $tenant = $request->user()->tenant;
-        
-        return Inertia::render('Products/Create', [
+        // Get tenant from tenancy context instead of user
+        $tenant = tenancy()->initialized ? tenant() : null;
+
+        if (!$tenant) {
+            return response()->json(['error' => 'No tenant context found'], 403);
+        }
+
+        return Inertia::render('modules/products/Products/Create', [
             'categories' => $this->categoryRepo->getForTenant($tenant->id),
             'tags' => $this->tagRepo->getForTenant($tenant->id),
         ]);
@@ -106,7 +145,7 @@ class ProductController extends Controller
         ]);
 
         $tenant = $request->user()->tenant;
-        
+
         $productData = array_merge($validated, [
             'tenant_id' => $tenant->id,
             'user_id' => $request->user()->id,
@@ -153,7 +192,7 @@ class ProductController extends Controller
 
         $calculatedPrices = $this->pricingService->calculateProductPrices($product);
 
-        return Inertia::render('Products/Show', [
+        return Inertia::render('modules/products/Products/Show', [
             'product' => $product,
             'calculatedPrices' => $calculatedPrices,
         ]);
@@ -167,8 +206,8 @@ class ProductController extends Controller
         $this->authorize('update', $product);
 
         $tenant = $request->user()->tenant;
-        
-        return Inertia::render('Products/Edit', [
+
+        return Inertia::render('modules/products/Products/Edit', [
             'product' => $product->load(['categories', 'tags', 'images']),
             'categories' => $this->categoryRepo->getForTenant($tenant->id),
             'tags' => $this->tagRepo->getForTenant($tenant->id),

@@ -178,9 +178,11 @@ class ProductRepository extends BaseRepository
 
         return [
             'total_products' => $products->count(),
-            'active_products' => $products->where('is_active', true)->count(),
-            'inactive_products' => $products->where('is_active', false)->count(),
+            'active_products' => $products->where('status', 'active')->count(),
+            'inactive_products' => $products->where('status', 'inactive')->count(),
+            'draft_products' => $products->where('status', 'draft')->count(),
             'products_on_sale' => $products->where('is_on_sale', true)->count(),
+            'featured_products' => $products->where('featured', true)->count(),
             'out_of_stock' => $products->where('manage_stock', true)->where('stock_quantity', 0)->count(),
             'low_stock' => $products->where('manage_stock', true)->whereColumn('stock_quantity', '<=', 'low_stock_threshold')->count(),
         ];
@@ -194,8 +196,8 @@ class ProductRepository extends BaseRepository
         $query->when(isset($filters['category_id']), function ($q) use ($filters) {
             $q->where('category_id', $filters['category_id']);
         })
-        ->when(isset($filters['is_active']), function ($q) use ($filters) {
-            $q->where('is_active', $filters['is_active']);
+        ->when(isset($filters['status']), function ($q) use ($filters) {
+            $q->where('status', $filters['status']);
         })
         ->when(isset($filters['is_on_sale']), function ($q) use ($filters) {
             $q->where('is_on_sale', $filters['is_on_sale']);
