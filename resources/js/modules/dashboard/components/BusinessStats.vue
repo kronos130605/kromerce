@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
@@ -98,7 +98,6 @@ const formatValue = (value, title) => {
 };
 
 const getChangeText = (stat) => {
-    const changeValue = Math.abs(stat.change);
     if (stat.title === 'dashboard.total_revenue') {
         return `↑ $${((stat.value - stat.previous)).toLocaleString()} ${t('dashboard.from_last_month')}`;
     }

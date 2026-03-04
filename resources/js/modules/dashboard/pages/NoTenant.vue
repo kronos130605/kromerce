@@ -6,34 +6,32 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
                 </svg>
             </div>
-            
+
             <div class="content">
                 <h1 class="title">No Business Account</h1>
                 <p class="message">
-                    Your account is not associated with a business yet. 
+                    Your account is not associated with a business yet.
                     Please create or join a business to access the dashboard.
                 </p>
-                
+
                 <div class="actions">
                     <button @click="createBusiness" class="btn btn-primary">
                         Create New Business
                     </button>
-                    
+
                     <button @click="joinBusiness" class="btn btn-secondary">
                         Join Existing Business
                     </button>
-                    
-                    <Link href="/home" class="btn btn-outline">
-                        Back to Home
-                    </Link>
+
+                    <Link href="/home" class="btn btn-outline">Back to Home</Link>
                 </div>
-                
+
                 <div class="help-text">
                     <p>Need help? <a href="/support" class="help-link">Contact Support</a></p>
                 </div>
             </div>
         </div>
-        
+
         <div class="user-info">
             <div class="user-card">
                 <div class="user-avatar">
@@ -53,7 +51,6 @@
 </template>
 
 <script setup>
-import { Head } from '@inertiajs/vue3'
 
 const props = defineProps({
     auth: Object,
@@ -246,21 +243,21 @@ const joinBusiness = () => {
         padding: 2rem;
         margin: 1rem;
     }
-    
+
     .title {
         font-size: 2rem;
     }
-    
+
     .actions {
         flex-direction: column;
         align-items: center;
     }
-    
+
     .btn {
         width: 100%;
         max-width: 300px;
     }
-    
+
     .user-card {
         flex-direction: column;
         text-align: center;

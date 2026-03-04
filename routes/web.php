@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ProductController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Route;
@@ -48,7 +49,7 @@ Route::get('/health', function () {
 
 // Landing page - Kromerce como página principal
 Route::get('/', function () {
-    return Inertia::render('Kromerce');
+    return Inertia::render('Kromerce.vue');
 })->name('kromerce.app');
 
 Route::get('/dashboard', [DashboardController::class, 'index'])
@@ -63,6 +64,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+// Test routes for products - Inertia version with ProductController
+Route::middleware(['auth', 'verified', 'App\Http\Middleware\IdentifyTenant'])->group(function () {
+    Route::get('/test-products', [ProductController::class, 'index']);
+    Route::get('/test-products-create', [ProductController::class, 'create']);
 });
 
 require __DIR__.'/auth.php';

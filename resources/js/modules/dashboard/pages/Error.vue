@@ -6,32 +6,32 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                 </svg>
             </div>
-            
+
             <div class="error-content">
                 <h1 class="error-title">Dashboard Error</h1>
                 <p class="error-message">{{ error }}</p>
-                
+
                 <div v-if="details" class="error-details">
                     <h3>Technical Details:</h3>
                     <pre>{{ details }}</pre>
                 </div>
-                
+
                 <div class="error-actions">
                     <button @click="refresh" class="btn btn-primary">
                         Refresh Dashboard
                     </button>
-                    
+
                     <Link href="/home" class="btn btn-secondary">
                         Go to Home
                     </Link>
-                    
+
                     <button @click="contactSupport" class="btn btn-outline">
                         Contact Support
                     </button>
                 </div>
             </div>
         </div>
-        
+
         <div class="user-info">
             <p><strong>User:</strong> {{ auth.user.name }}</p>
             <p><strong>Email:</strong> {{ auth.user.email }}</p>
@@ -41,7 +41,7 @@
 </template>
 
 <script setup>
-import { Head } from '@inertiajs/vue3'
+import { Link } from '@inertiajs/vue3'
 
 const props = defineProps({
     error: String,
@@ -190,12 +190,12 @@ const contactSupport = () => {
         padding: 2rem;
         margin: 1rem;
     }
-    
+
     .error-actions {
         flex-direction: column;
         align-items: center;
     }
-    
+
     .btn {
         width: 100%;
         max-width: 300px;

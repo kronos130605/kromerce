@@ -1,6 +1,6 @@
 <script setup>
 import { Head, Link, useForm, usePage, router } from '@inertiajs/vue3';
-import { ref, computed, watch, onUnmounted } from 'vue';
+import { ref, watch, onUnmounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import LoginAttempts from '@/modules/auth/components/LoginAttempts.vue';
 import LanguageSelector from '@/components/shared/LanguageSelector.vue';

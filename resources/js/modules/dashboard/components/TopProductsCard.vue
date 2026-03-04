@@ -9,7 +9,7 @@
             </div>
             <p class="empty-message">No products found</p>
         </div>
-        
+
         <div v-else class="products-list">
             <div v-for="(product, index) in products" :key="product.id" class="product-item">
                 <div class="product-rank">
@@ -27,7 +27,6 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
 
 const props = defineProps({
     title: {
@@ -102,30 +101,6 @@ const getRankClass = (index) => {
 
 .rank-indicator {
     @apply w-2 h-2 rounded-full mx-auto mb-1;
-}
-
-.rank-first {
-    @apply bg-yellow-400 text-white;
-}
-
-.rank-second {
-    @apply bg-gray-400 text-white;
-}
-
-.rank-third {
-    @apply bg-orange-400 text-white;
-}
-
-.rank-fourth {
-    @apply bg-red-400 text-white;
-}
-
-.rank-fifth {
-    @apply bg-purple-400 text-white;
-}
-
-.rank-default {
-    @apply bg-gray-300 text-white;
 }
 
 .product-info {

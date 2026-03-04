@@ -12,6 +12,7 @@ use App\Models\ProductCategory;
 use App\Models\ProductTag;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Inertia\Response;
 use function tenancy;
@@ -38,13 +39,13 @@ class ProductController extends Controller
     /**
      * Display the products page.
      */
-    public function index(Request $request): Response
+    public function index(Request $request): Response|JsonResponse
     {
         // Get tenant from tenancy context instead of user
         $tenant = tenancy()->initialized ? tenant() : null;
 
         if (!$tenant) {
-            \Log::error('ProductController::index - No tenant context found');
+            Log::error('ProductController::index - No tenant context found');
             return response()->json(['error' => 'No tenant context found'], 403);
         }
 
@@ -53,7 +54,7 @@ class ProductController extends Controller
         try {
             $products = $this->productRepo->paginateForTenant($tenant->id, $filters);
         } catch (\Exception $e) {
-            \Log::error('ProductController::index - Repository error', [
+            Log::error('ProductController::index - Repository error', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -63,7 +64,7 @@ class ProductController extends Controller
         try {
             $categories = $this->categoryRepo->getForTenant($tenant->id);
         } catch (\Exception $e) {
-            \Log::error('ProductController::index - Category repository error', [
+            Log::error('ProductController::index - Category repository error', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -73,7 +74,7 @@ class ProductController extends Controller
         try {
             $statistics = $this->productRepo->getStatistics($tenant->id);
         } catch (\Exception $e) {
-            \Log::error('ProductController::index - Statistics error', [
+            Log::error('ProductController::index - Statistics error', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -91,7 +92,7 @@ class ProductController extends Controller
     /**
      * Show the form for creating a new product.
      */
-    public function create(Request $request): Response
+    public function create(Request $request): Response|JsonResponse
     {
         // Get tenant from tenancy context instead of user
         $tenant = tenancy()->initialized ? tenant() : null;

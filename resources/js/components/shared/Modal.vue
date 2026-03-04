@@ -81,7 +81,6 @@ const maxWidthClass = computed(() => {
     >
         <div
             class="fixed inset-0 z-50 overflow-y-auto px-4 py-6 sm:px-0"
-            scroll-region
         >
             <Transition
                 enter-active-class="ease-out duration-300"

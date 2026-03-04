@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
@@ -99,18 +99,18 @@ const formatDate = (dateString) => {
             </div>
             <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
         </div>
-        
+
         <!-- Orders List -->
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-6">
             <div class="space-y-4 max-h-96 overflow-y-auto">
-                <div v-for="order in recentOrders" :key="order.id" 
+                <div v-for="order in recentOrders" :key="order.id"
                      class="group relative">
                     <div class="flex items-start space-x-3 p-4 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                         <!-- Order Icon -->
                         <div class="w-10 h-10 bg-gradient-to-br from-blue-100 to-emerald-100 dark:from-blue-900 dark:to-emerald-900 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
                             <span class="text-lg">📦</span>
                         </div>
-                        
+
                         <!-- Order Details -->
                         <div class="flex-1 min-w-0">
                             <!-- Order ID and Customer -->
@@ -125,7 +125,7 @@ const formatDate = (dateString) => {
                                     <p class="text-xs text-gray-500 dark:text-gray-400">{{ order.items }} {{ t('dashboard.items') }}</p>
                                 </div>
                             </div>
-                            
+
                             <!-- Order Meta -->
                             <div class="flex items-center justify-between">
                                 <div class="flex items-center space-x-3 text-xs text-gray-500 dark:text-gray-400">
@@ -140,7 +140,7 @@ const formatDate = (dateString) => {
                                     {{ t(`dashboard.status_${order.status}`) }}
                                 </span>
                             </div>
-                            
+
                             <!-- Shipping Address (truncated) -->
                             <div class="mt-2 text-xs text-gray-500 dark:text-gray-400">
                                 📍 {{ order.shippingAddress.length > 30 ? order.shippingAddress.substring(0, 30) + '...' : order.shippingAddress }}
@@ -149,7 +149,7 @@ const formatDate = (dateString) => {
                     </div>
                 </div>
             </div>
-            
+
             <!-- View All Link -->
             <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
                 <a href="#" class="flex items-center justify-center w-full py-2 text-sm font-medium text-blue-600 hover:text-blue-700 bg-blue-50 dark:bg-blue-900/20 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors">

@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref, onMounted, watch } from 'vue';
+import { computed, ref, onMounted } from 'vue';
 import { usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import CustomerLayout from '@/Layouts/CustomerLayout.vue';
@@ -464,25 +464,16 @@ onMounted(() => {
     }
 }
 
-.animate-slide-in {
-    animation: slideIn 0.3s ease-out;
-}
-
 /* Gradient animation */
 @keyframes gradient {
     0% {
-        background-position: 0% 50%;
+        background-position: 0 50%;
     }
     50% {
         background-position: 100% 50%;
     }
     100% {
-        background-position: 0% 50%;
+        background-position: 0 50%;
     }
-}
-
-.animate-gradient {
-    background-size: 200% 200%;
-    animation: gradient 3s ease infinite;
 }
 </style>

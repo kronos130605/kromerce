@@ -662,7 +662,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import { useForm, router } from '@inertiajs/vue3'
 import TagInput from '@/components/ui/TagInput.vue'
 import ImageUploader from '@/modules/products/components/ImageUploader.vue';

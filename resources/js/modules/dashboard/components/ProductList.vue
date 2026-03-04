@@ -8,7 +8,7 @@
             </div>
             <p class="empty-message">No products found</p>
         </div>
-        
+
         <div v-else class="product-grid">
             <div v-for="product in products" :key="product.id" class="product-item">
                 <div class="product-image">
@@ -34,7 +34,6 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
 
 const props = defineProps({
     products: {
@@ -118,18 +117,6 @@ const formatDate = (date) => {
 
 .status {
     @apply px-2 py-1 rounded-full font-medium;
-}
-
-.status.active {
-    @apply bg-green-100 text-green-800;
-}
-
-.status.inactive {
-    @apply bg-gray-100 text-gray-800;
-}
-
-.status.draft {
-    @apply bg-yellow-100 text-yellow-800;
 }
 
 .created {

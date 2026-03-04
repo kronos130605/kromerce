@@ -9,7 +9,7 @@
             </div>
             <p class="empty-message">No recent activity</p>
         </div>
-        
+
         <div v-else class="activity-grid">
             <!-- Price Changes -->
             <div v-if="activities.recentPriceChanges.length > 0" class="activity-section">
@@ -35,7 +35,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <!-- New Products -->
             <div v-if="activities.newProducts.length > 0" class="activity-section">
                 <h4 class="section-title">New Products</h4>
@@ -60,7 +60,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <!-- Stock Updates -->
             <div v-if="activities.stockUpdates.length > 0" class="activity-section">
                 <h4 class="section-title">Stock Updates</h4>
@@ -90,7 +90,6 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
 
 const props = defineProps({
     activities: {

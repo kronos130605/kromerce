@@ -2,19 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Tenant;
-use App\Services\DashboardService;
 use App\Services\DashboardRoutingService;
-use App\Services\ProductPricingService;
-use App\Services\RoleService;
-use App\Services\TenantService;
-use App\Repositories\ProductRepository;
-use App\Services\CurrencyRateService;
-use App\Repositories\BusinessCurrencyConfigRepository;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Inertia\Response;
-use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
@@ -55,7 +47,7 @@ class DashboardController extends Controller
             $dashboardData = $this->dashboardRoutingService->getDashboardDataForUser($user, $tenant, $dashboardView);
         } catch (\Exception $e) {
             // Log error y mostrar página de error
-            \Log::error('Dashboard data error', [
+            Log::error('Dashboard data error', [
                 'user_id' => $user->id,
                 'tenant_id' => $tenant->id,
                 'error' => $e->getMessage(),

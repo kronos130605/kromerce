@@ -117,8 +117,6 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { Head } from '@inertiajs/vue3'
 import StatCard from '@/modules/dashboard/components/StatCard.vue';
 import AlertCard from '@/modules/dashboard/components/AlertCard.vue'
 import CurrencyStatusCard from '@/modules/dashboard/components/CurrencyStatusCard.vue'

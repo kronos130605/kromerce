@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 use App\Models\Tenant;
 
@@ -50,7 +51,7 @@ class IdentifyTenant
             // Make tenant available in views
             view()->share('current_tenant', $tenant);
         } else {
-            \Log::warning('IdentifyTenant - No tenant found for hostname', ['hostname' => $hostname]);
+            Log::warning('IdentifyTenant - No tenant found for hostname', ['hostname' => $hostname]);
         }
 
         return $next($request);
