@@ -25,12 +25,6 @@ class RoleService
         try {
             // First attempt: Get from tenant_user pivot
             $pivotRole = $this->userRoleRepository->getUserRoleInTenant($user, $tenant);
-            
-            Log::info('Role lookup - Pivot check', [
-                'user_id' => $user->id,
-                'tenant_id' => $tenant->id,
-                'pivot_role' => $pivotRole,
-            ]);
 
             if ($pivotRole) {
                 // Verify and sync with model_has_roles if needed
@@ -40,13 +34,6 @@ class RoleService
 
             // Second attempt: Get from model_has_roles
             $spatieRole = $this->getSpatieRoleForTenant($user, $tenant);
-            
-            Log::info('Role lookup - Spatie check', [
-                'user_id' => $user->id,
-                'tenant_id' => $tenant->id,
-                'spatie_role' => $spatieRole,
-                'all_spatie_roles' => $user->roles->pluck('name')->toArray(),
-            ]);
 
             if ($spatieRole) {
                 // Update tenant_user pivot with Spatie role
@@ -54,11 +41,6 @@ class RoleService
                 return $spatieRole;
             }
 
-            // No role found in either table
-            Log::warning('No role found for user in tenant', [
-                'user_id' => $user->id,
-                'tenant_id' => $tenant->id,
-            ]);
             return null;
 
         } catch (\Exception $e) {
@@ -89,12 +71,6 @@ class RoleService
 
             DB::commit();
 
-            Log::info('Role assigned successfully', [
-                'user_id' => $user->id,
-                'tenant_id' => $tenant->id,
-                'role' => $role,
-            ]);
-
             return true;
 
         } catch (\Exception $e) {
@@ -124,11 +100,6 @@ class RoleService
             $this->removeSpatieRoleForTenant($user, $tenant);
 
             DB::commit();
-
-            Log::info('Role removed successfully', [
-                'user_id' => $user->id,
-                'tenant_id' => $tenant->id,
-            ]);
 
             return true;
         } catch (\Exception $e) {
@@ -162,13 +133,6 @@ class RoleService
             if (!$spatieRole || $spatieRole !== $role) {
                 // Update Spatie role to match pivot
                 $this->assignSpatieRoleForTenant($user, $role, $tenant);
-
-                Log::info('Spatie role synced with pivot', [
-                    'user_id' => $user->id,
-                    'tenant_id' => $tenant->id,
-                    'pivot_role' => $role,
-                    'spatie_role' => $spatieRole,
-                ]);
             }
         } catch (\Exception $e) {
             Log::error('Error syncing role with Spatie', [
@@ -198,17 +162,17 @@ class RoleService
                 'employee' => 5,
                 'customer' => 6,
             ];
-            
+
             $selectedRole = null;
             $highestPriority = PHP_INT_MAX;
-            
+
             foreach ($roles as $role) {
                 if (isset($rolePriority[$role]) && $rolePriority[$role] < $highestPriority) {
                     $selectedRole = $role;
                     $highestPriority = $rolePriority[$role];
                 }
             }
-            
+
             return $selectedRole;
         } catch (\Exception $e) {
             Log::error('Error getting Spatie role for tenant', [
@@ -268,12 +232,6 @@ class RoleService
         try {
             $user->tenants()->syncWithoutDetaching([
                 $tenant->id => ['role' => $role]
-            ]);
-
-            Log::info('Tenant pivot role updated', [
-                'user_id' => $user->id,
-                'tenant_id' => $tenant->id,
-                'role' => $role,
             ]);
         } catch (\Exception $e) {
             Log::error('Error updating tenant pivot role', [

@@ -12,8 +12,10 @@ use App\Models\ProductCategory;
 use App\Models\ProductTag;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Inertia\Response;
+use function tenancy;
 
 class ProductController extends Controller
 {
@@ -37,16 +39,49 @@ class ProductController extends Controller
     /**
      * Display the products page.
      */
-    public function index(Request $request): Response
+    public function index(Request $request): Response|JsonResponse
     {
-        $tenant = $request->user()->tenant;
-        $filters = $request->only(['category_id', 'is_active', 'is_on_sale', 'min_price', 'max_price', 'search']);
-        
-        $products = $this->productRepo->paginateForTenant($tenant->id, $filters);
-        $categories = $this->categoryRepo->getForTenant($tenant->id);
-        $statistics = $this->productRepo->getStatistics($tenant->id);
+        // Get tenant from tenancy context instead of user
+        $tenant = tenancy()->initialized ? tenant() : null;
 
-        return Inertia::render('Products/Index', [
+        if (!$tenant) {
+            Log::error('ProductController::index - No tenant context found');
+            return response()->json(['error' => 'No tenant context found'], 403);
+        }
+
+        $filters = $request->only(['category_id', 'is_active', 'is_on_sale', 'min_price', 'max_price', 'search']);
+
+        try {
+            $products = $this->productRepo->paginateForTenant($tenant->id, $filters);
+        } catch (\Exception $e) {
+            Log::error('ProductController::index - Repository error', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return response()->json(['error' => 'Repository error: ' . $e->getMessage()], 500);
+        }
+
+        try {
+            $categories = $this->categoryRepo->getForTenant($tenant->id);
+        } catch (\Exception $e) {
+            Log::error('ProductController::index - Category repository error', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            $categories = collect([]);
+        }
+
+        try {
+            $statistics = $this->productRepo->getStatistics($tenant->id);
+        } catch (\Exception $e) {
+            Log::error('ProductController::index - Statistics error', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            $statistics = [];
+        }
+
+        return Inertia::render('modules/products/Products/Index', [
             'products' => $products,
             'categories' => $categories,
             'filters' => $filters,
@@ -57,11 +92,16 @@ class ProductController extends Controller
     /**
      * Show the form for creating a new product.
      */
-    public function create(Request $request): Response
+    public function create(Request $request): Response|JsonResponse
     {
-        $tenant = $request->user()->tenant;
-        
-        return Inertia::render('Products/Create', [
+        // Get tenant from tenancy context instead of user
+        $tenant = tenancy()->initialized ? tenant() : null;
+
+        if (!$tenant) {
+            return response()->json(['error' => 'No tenant context found'], 403);
+        }
+
+        return Inertia::render('modules/products/Products/Create', [
             'categories' => $this->categoryRepo->getForTenant($tenant->id),
             'tags' => $this->tagRepo->getForTenant($tenant->id),
         ]);
@@ -106,7 +146,7 @@ class ProductController extends Controller
         ]);
 
         $tenant = $request->user()->tenant;
-        
+
         $productData = array_merge($validated, [
             'tenant_id' => $tenant->id,
             'user_id' => $request->user()->id,
@@ -115,12 +155,19 @@ class ProductController extends Controller
         $product = $this->productRepo->create($productData);
 
         // Attach categories and tags
-        if (isset($validated['category_id'])) {
-            $product->categories()->attach($validated['category_id']);
-        }
+        try {
+            if (isset($validated['category_id'])) {
+                $product->categories()->attach($validated['category_id']);
+            }
 
-        if (isset($validated['tags'])) {
-            $product->tags()->attach($validated['tags']);
+            if (isset($validated['tags'])) {
+                $product->tags()->attach($validated['tags']);
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error attaching categories and tags: ' . $e->getMessage(),
+            ], 500);
         }
 
         return response()->json([
@@ -153,7 +200,7 @@ class ProductController extends Controller
 
         $calculatedPrices = $this->pricingService->calculateProductPrices($product);
 
-        return Inertia::render('Products/Show', [
+        return Inertia::render('modules/products/Products/Show', [
             'product' => $product,
             'calculatedPrices' => $calculatedPrices,
         ]);
@@ -167,8 +214,8 @@ class ProductController extends Controller
         $this->authorize('update', $product);
 
         $tenant = $request->user()->tenant;
-        
-        return Inertia::render('Products/Edit', [
+
+        return Inertia::render('modules/products/Products/Edit', [
             'product' => $product->load(['categories', 'tags', 'images']),
             'categories' => $this->categoryRepo->getForTenant($tenant->id),
             'tags' => $this->tagRepo->getForTenant($tenant->id),
@@ -214,19 +261,37 @@ class ProductController extends Controller
             'taxable' => 'boolean',
         ]);
 
-        $product = $this->productRepo->update($product->id, $validated);
+        $this->productRepo->update($product->id, $validated);
 
-        // Sync categories and tags
-        if (isset($validated['category_id'])) {
-            $product->categories()->sync([$validated['category_id']]);
-        } else {
-            $product->categories()->detach();
+        // Reload the product from database to get updated data
+        $product = $this->productRepo->getById($product->id);
+        
+        // Ensure we have a fresh product instance
+        if (!$product) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Product not found after update',
+            ], 404);
         }
 
-        if (isset($validated['tags'])) {
-            $product->tags()->sync($validated['tags']);
-        } else {
-            $product->tags()->detach();
+        // Sync categories and tags
+        try {
+            if (isset($validated['category_id'])) {
+                $product->categories()->sync([$validated['category_id']]);
+            } else {
+                $product->categories()->detach();
+            }
+
+            if (isset($validated['tags'])) {
+                $product->tags()->sync($validated['tags']);
+            } else {
+                $product->tags()->detach();
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error syncing categories and tags: ' . $e->getMessage(),
+            ], 500);
         }
 
         return response()->json([
@@ -266,8 +331,15 @@ class ProductController extends Controller
         $newProduct = $this->productRepo->duplicate($product->id, $overrides);
 
         // Copy categories and tags
-        $newProduct->categories()->attach($product->categories->pluck('id'));
-        $newProduct->tags()->attach($product->tags->pluck('id'));
+        try {
+            $newProduct->categories()->attach($product->categories->pluck('id'));
+            $newProduct->tags()->attach($product->tags->pluck('id'));
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error copying categories and tags: ' . $e->getMessage(),
+            ], 500);
+        }
 
         return response()->json([
             'success' => true,

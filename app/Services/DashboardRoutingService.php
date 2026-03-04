@@ -34,29 +34,21 @@ class DashboardRoutingService
             // Verificar roles de negocio
             $businessRoles = ['business_owner', 'owner', 'admin', 'manager', 'employee'];
 
-            Log::info('Dashboard view selection', [
-                'user_id' => $user->id,
-                'tenant_id' => $tenant->id,
-                'user_role_in_tenant' => $userRoleInTenant,
-                'user_spatie_roles' => $user->roles->pluck('name')->toArray(),
-                'business_roles_check' => in_array($userRoleInTenant, $businessRoles),
-            ]);
-
             if (in_array($userRoleInTenant, $businessRoles)) {
-                // Usuario con rol de negocio - usar dashboard existente
-                return 'DashboardBusiness';
+                // Usuario con rol de negocio - usar nuevo dashboard
+                return 'Dashboard/Index';
             } else {
                 // Usuario sin rol de negocio - usar dashboard de customer
                 return 'DashboardCustomer';
             }
-            
+
         } catch (\Exception $e) {
             Log::error('Error determining dashboard view', [
                 'user_id' => $user->id,
                 'tenant_id' => $tenant?->id,
                 'error' => $e->getMessage(),
             ]);
-            
+
             // Fallback a dashboard de customer
             return 'DashboardCustomer';
         }
@@ -74,18 +66,18 @@ class DashboardRoutingService
             // Si no tiene tenant actual, obtener el primero disponible
             if (!$tenant) {
                 $firstTenant = $this->tenantService->getUserFirstTenant($user);
-                
+
                 if (!$firstTenant) {
                     // Asignar tenant por defecto según rol del usuario
                     $defaultTenant = $this->tenantService->getOrCreateDefaultTenantForUser($user);
-                    
+
                     if ($defaultTenant) {
                         // Asignar tenant por defecto al usuario
                         $assigned = $this->tenantService->assignTenantToUser($user, $defaultTenant);
-                        
+
                         if ($assigned) {
                             $tenant = $defaultTenant;
-                            
+
                             Log::info('User assigned to default tenant', [
                                 'user_id' => $user->id,
                                 'user_email' => $user->email,
@@ -115,14 +107,14 @@ class DashboardRoutingService
             }
 
             return $tenant;
-            
+
         } catch (\Exception $e) {
             Log::error('Error getting or assigning tenant for user', [
                 'user_id' => $user->id,
                 'user_email' => $user->email,
                 'error' => $e->getMessage(),
             ]);
-            
+
             return null;
         }
     }
@@ -146,7 +138,7 @@ class DashboardRoutingService
             ];
 
             // Solo obtener datos específicos del dashboard si es business
-            if ($dashboardView === 'DashboardBusiness' && $tenant) {
+            if ($dashboardView === 'Dashboard/Index' && $tenant) {
                 // Aquí podríamos inyectar DashboardService si es necesario
                 // Por ahora, retornamos datos vacíos para no romper
                 $dashboardData = [];
@@ -155,7 +147,7 @@ class DashboardRoutingService
             }
 
             return array_merge($commonData, $dashboardData);
-            
+
         } catch (\Exception $e) {
             Log::error('Error getting dashboard data for user', [
                 'user_id' => $user->id,
@@ -163,7 +155,7 @@ class DashboardRoutingService
                 'dashboard_view' => $dashboardView,
                 'error' => $e->getMessage(),
             ]);
-            
+
             return [
                 'auth' => [
                     'user' => $user,
@@ -181,33 +173,33 @@ class DashboardRoutingService
     {
         try {
             $tenant = $this->tenantService->getUserCurrentTenant($user);
-            
+
             if (!$tenant) {
                 // Sin tenant, solo puede acceder a customer dashboard
                 return $dashboardView === 'DashboardCustomer';
             }
-            
+
             $userRole = $this->roleService->getUserRoleInTenant($user, $tenant);
-            
+
             switch ($dashboardView) {
-                case 'DashboardBusiness':
+                case 'Dashboard/Index':
                     $businessRoles = ['business_owner', 'admin', 'manager', 'employee'];
                     return in_array($userRole, $businessRoles);
-                    
+
                 case 'DashboardCustomer':
                     return true; // Todos pueden acceder al customer dashboard
-                    
+
                 default:
                     return false;
             }
-            
+
         } catch (\Exception $e) {
             Log::error('Error checking dashboard access', [
                 'user_id' => $user->id,
                 'dashboard_view' => $dashboardView,
                 'error' => $e->getMessage(),
             ]);
-            
+
             return false;
         }
     }
@@ -219,37 +211,37 @@ class DashboardRoutingService
     {
         try {
             $tenant = $this->tenantService->getUserCurrentTenant($user);
-            
+
             $dashboards = [];
-            
+
             // Customer dashboard siempre disponible
             $dashboards[] = [
                 'name' => 'DashboardCustomer',
                 'label' => 'Customer Dashboard',
                 'accessible' => true,
             ];
-            
+
             if ($tenant) {
                 $userRole = $this->roleService->getUserRoleInTenant($user, $tenant);
                 $businessRoles = ['business_owner', 'admin', 'manager', 'employee'];
-                
+
                 if (in_array($userRole, $businessRoles)) {
                     $dashboards[] = [
-                        'name' => 'DashboardBusiness',
+                        'name' => 'Dashboard/Index',
                         'label' => 'Business Dashboard',
                         'accessible' => true,
                     ];
                 }
             }
-            
+
             return $dashboards;
-            
+
         } catch (\Exception $e) {
             Log::error('Error getting available dashboards for user', [
                 'user_id' => $user->id,
                 'error' => $e->getMessage(),
             ]);
-            
+
             return [
                 [
                     'name' => 'DashboardCustomer',

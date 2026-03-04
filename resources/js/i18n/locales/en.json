@@ -253,7 +253,7 @@
       "linkedin": "Connect on LinkedIn",
       "github": "View on GitHub"
     },
-    "copyright": "© 2024 Kromerce. All rights reserved."
+    "copyright": "© 2026 Kromerce. All rights reserved."
   },
   "dashboard": {
     "welcome_back": "Welcome back",
@@ -388,7 +388,6 @@
     "urgent": "urgent",
     "top_products": "Top Products",
     "best_performing_items": "Best performing items",
-    "sold": "sold",
     "low_stock": "Low Stock",
     "medium_stock": "Medium Stock",
     "in_stock": "In Stock",
@@ -664,7 +663,7 @@
   },
   "tabs": {
     "overview": "Overview",
-    "products": "Products", 
+    "products": "Products",
     "orders": "Orders",
     "events": "Events"
   }

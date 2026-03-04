@@ -4,7 +4,7 @@ import { usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import Button from '@/components/ui/Button.vue';
 import Badge from '@/components/ui/Badge.vue';
-import LanguageSelector from '@/components/LanguageSelector.vue';
+import LanguageSelector from '@/components/shared/LanguageSelector.vue';
 
 const { t } = useI18n();
 const page = usePage();

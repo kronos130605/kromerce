@@ -34,11 +34,84 @@ const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,
-    resolve: (name) =>
-        resolvePageComponent(
-            `./Pages/${name}.vue`,
+    resolve: (name) => {
+        // Check if name already has .vue extension
+        const hasVueExtension = name.endsWith('.vue');
+        const baseName = hasVueExtension ? name.slice(0, -4) : name;
+        
+        // Handle full module paths (already includes modules/structure)
+        if (baseName.startsWith('modules/')) {
+            const modulePath = `./${baseName}.vue`;
+            return resolvePageComponent(
+                modulePath,
+                import.meta.glob('./modules/**/*.vue'),
+            );
+        }
+        
+        // For marketing pages, use the full path structure
+        if (baseName === 'Kromerce') {
+            return resolvePageComponent(
+                './modules/marketing/pages/Kromerce.vue',
+                import.meta.glob('./modules/**/*.vue'),
+            );
+        }
+        
+        // Handle dashboard routes with specific mapping
+        if (baseName.startsWith('Dashboard/')) {
+            const dashboardPage = baseName.replace('Dashboard/', '');
+            const modulePath = `./modules/dashboard/pages/${dashboardPage}.vue`;
+            
+            return resolvePageComponent(
+                modulePath,
+                import.meta.glob('./modules/**/*.vue'),
+            );
+        }
+        
+        // Handle dashboard page names without Dashboard/ prefix
+        if (baseName.startsWith('Dashboard') || baseName.includes('Dashboard')) {
+            // Handle names like 'DashboardCustomer', 'DashboardBusiness', 'Index', etc.
+            const modulePath = `./modules/dashboard/pages/${baseName}.vue`;
+            
+            return resolvePageComponent(
+                modulePath,
+                import.meta.glob('./modules/**/*.vue'),
+            );
+        }
+        
+        // Handle auth routes (special case for Laravel Breeze structure)
+        if (baseName.startsWith('Auth/')) {
+            const authPage = baseName.replace('Auth/', '');
+            const modulePath = `./modules/auth/pages/${authPage}.vue`;
+            
+            return resolvePageComponent(
+                modulePath,
+                import.meta.glob('./modules/**/*.vue'),
+            );
+        }
+        
+        // Handle other module routes (Profile/, Products/, etc.)
+        if (baseName.includes('/')) {
+            const [module, page] = baseName.split('/');
+            const modulePath = `./modules/${module.toLowerCase()}/pages/${page}.vue`;
+            
+            return resolvePageComponent(
+                modulePath,
+                import.meta.glob('./modules/**/*.vue'),
+            );
+        }
+        
+        // Try to resolve from modules first, then fallback to Pages
+        const modulePath = `./modules/${baseName}.vue`;
+        const pagePath = `./Pages/${baseName}.vue`;
+        
+        return resolvePageComponent(
+            modulePath,
+            import.meta.glob('./modules/**/*.vue'),
+        ) || resolvePageComponent(
+            pagePath,
             import.meta.glob('./Pages/**/*.vue'),
-        ),
+        );
+    },
     setup({ el, App, props, plugin }) {
         // Set locale from backend
         const currentLocale = props.initialPage?.props?.currentLocale || 'en';
