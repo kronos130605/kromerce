@@ -29,7 +29,7 @@ class CurrencyController extends Controller
         $tenant = $request->user()->tenant;
         $currencyConfig = $this->configRepo->getOrCreateForTenant($tenant->id);
 
-        return Inertia::render('Currency/Index', [
+        return Inertia::render('modules/dashboard/DashboardCurrency', [
             'currencyConfig' => $currencyConfig,
             'supportedCurrencies' => $currencyConfig->getSupportedCurrenciesWithRates(),
             'availableCurrencies' => $this->getAvailableCurrencies(),

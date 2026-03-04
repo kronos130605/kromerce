@@ -66,7 +66,7 @@ class DashboardController extends Controller
         
         if (!$tenant) {
             // No se pudo asignar tenant - mostrar dashboard de customer básico
-            return Inertia::render('DashboardCustomer', [
+            return Inertia::render('modules/dashboard/DashboardCustomer', [
                 'auth' => [
                     'user' => $user,
                 ],
@@ -90,7 +90,7 @@ class DashboardController extends Controller
                 'trace' => $e->getTraceAsString(),
             ]);
 
-            return Inertia::render('Dashboard/Error', [
+            return Inertia::render('modules/dashboard/DashboardError', [
                 'error' => 'Unable to load dashboard data',
                 'user' => $user,
                 'tenant' => $tenant,
