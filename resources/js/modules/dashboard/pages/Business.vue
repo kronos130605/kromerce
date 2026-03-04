@@ -61,7 +61,7 @@
                     compact
                 />
             </div>
-            
+
             <div class="recent-activity">
                 <h2>Recent Activity</h2>
                 <ActivityList
@@ -119,13 +119,13 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { Head } from '@inertiajs/vue3'
-import StatCard from '@/components/Dashboard/StatCard.vue'
-import AlertCard from '@/components/Dashboard/AlertCard.vue'
-import CurrencyStatusCard from '@/components/Dashboard/CurrencyStatusCard.vue'
-import ProductList from '@/components/Dashboard/ProductList.vue'
-import ActivityList from '@/components/Dashboard/ActivityList.vue'
-import TopProductsCard from '@/components/Dashboard/TopProductsCard.vue'
-import ChartCard from '@/components/Dashboard/ChartCard.vue'
+import StatCard from '@/modules/dashboard/components/StatCard.vue';
+import AlertCard from '@/modules/dashboard/components/AlertCard.vue'
+import CurrencyStatusCard from '@/modules/dashboard/components/CurrencyStatusCard.vue'
+import ProductList from '@/modules/dashboard/components/ProductList.vue'
+import ActivityList from '@/modules/dashboard/components/ActivityList.vue'
+import TopProductsCard from '@/modules/dashboard/components/TopProductsCard.vue'
+import ChartCard from '@/modules/dashboard/components/ChartCard.vue'
 
 const props = defineProps({
     statistics: Object,
@@ -207,7 +207,7 @@ const handleUpdateRates = () => {
     .activity-section {
         grid-template-columns: 1fr;
     }
-    
+
     .charts-grid {
         grid-template-columns: 1fr;
     }
