@@ -12,6 +12,15 @@ export default defineConfig(({ command }) => ({
             host: 'localhost',
             port: 5173,
         },
+        proxy: {
+            // Proxy todas las peticiones de Laravel al servidor backend
+            '^/(api|login|logout|register|dashboard|profile|password|sanctum)': {
+                target: 'http://localhost:8080',
+                changeOrigin: true,
+                secure: false,
+                ws: true,
+            },
+        },
     },
     build: {
         outDir: 'public/build',
