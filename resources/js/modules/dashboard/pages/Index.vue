@@ -115,7 +115,7 @@ const tabOptions = computed(() => [
 
                     <!-- Other tabs (placeholder) -->
                     <div v-else-if="activeTab !== 'overview' && activeTab !== 'products'" class="text-center py-12">
-                        <p class="text-gray-500">{{ tabOptions.find(t => t.key === activeTab)?.label }} coming soon...</p>
+                        <p class="text-gray-500">{{ tabOptions.find(tab => tab.key === activeTab)?.label }} coming soon...</p>
                     </div>
                 </div>
             </div>

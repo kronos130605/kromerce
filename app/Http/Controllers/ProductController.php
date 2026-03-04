@@ -155,12 +155,19 @@ class ProductController extends Controller
         $product = $this->productRepo->create($productData);
 
         // Attach categories and tags
-        if (isset($validated['category_id'])) {
-            $product->categories()->attach($validated['category_id']);
-        }
+        try {
+            if (isset($validated['category_id'])) {
+                $product->categories()->attach($validated['category_id']);
+            }
 
-        if (isset($validated['tags'])) {
-            $product->tags()->attach($validated['tags']);
+            if (isset($validated['tags'])) {
+                $product->tags()->attach($validated['tags']);
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error attaching categories and tags: ' . $e->getMessage(),
+            ], 500);
         }
 
         return response()->json([
@@ -256,20 +263,35 @@ class ProductController extends Controller
 
         $this->productRepo->update($product->id, $validated);
 
-        // Refresh the model to get updated data
-        $product->refresh();
-
-        // Sync categories and tags
-        if (isset($validated['category_id'])) {
-            $product->categories()->sync([$validated['category_id']]);
-        } else {
-            $product->categories()->detach();
+        // Reload the product from database to get updated data
+        $product = $this->productRepo->getById($product->id);
+        
+        // Ensure we have a fresh product instance
+        if (!$product) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Product not found after update',
+            ], 404);
         }
 
-        if (isset($validated['tags'])) {
-            $product->tags()->sync($validated['tags']);
-        } else {
-            $product->tags()->detach();
+        // Sync categories and tags
+        try {
+            if (isset($validated['category_id'])) {
+                $product->categories()->sync([$validated['category_id']]);
+            } else {
+                $product->categories()->detach();
+            }
+
+            if (isset($validated['tags'])) {
+                $product->tags()->sync($validated['tags']);
+            } else {
+                $product->tags()->detach();
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error syncing categories and tags: ' . $e->getMessage(),
+            ], 500);
         }
 
         return response()->json([
@@ -309,8 +331,15 @@ class ProductController extends Controller
         $newProduct = $this->productRepo->duplicate($product->id, $overrides);
 
         // Copy categories and tags
-        $newProduct->categories()->attach($product->categories->pluck('id'));
-        $newProduct->tags()->attach($product->tags->pluck('id'));
+        try {
+            $newProduct->categories()->attach($product->categories->pluck('id'));
+            $newProduct->tags()->attach($product->tags->pluck('id'));
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error copying categories and tags: ' . $e->getMessage(),
+            ], 500);
+        }
 
         return response()->json([
             'success' => true,

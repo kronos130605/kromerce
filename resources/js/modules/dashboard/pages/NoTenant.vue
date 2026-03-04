@@ -23,7 +23,8 @@
                         Join Existing Business
                     </button>
 
-                    <Link href="/home" class="btn btn-outline">Back to Home</Link>
+                    <Link href="/home" class="btn btn-outline"/>
+                        Back to Home
                 </div>
 
                 <div class="help-text">
