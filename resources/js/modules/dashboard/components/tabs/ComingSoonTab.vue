@@ -1,19 +1,16 @@
 <script setup>
-import { useDarkMode } from '@/composables/useDarkMode';
-
 const props = defineProps({
     tabLabel: {
         type: String,
         required: true
     }
 });
-
-const { isDark } = useDarkMode();
+// No imports needed - using Tailwind dark: classes
 </script>
 
 <template>
     <div class="text-center py-12">
-        <p :class="isDark ? 'text-gray-400' : 'text-gray-500'">
+        <p class="text-gray-500 dark:text-gray-400">
             {{ tabLabel }} coming soon...
         </p>
     </div>

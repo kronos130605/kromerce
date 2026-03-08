@@ -1,7 +1,8 @@
 <script setup>
 import { Head, Link, useForm, usePage, router } from '@inertiajs/vue3';
-import { ref, watch, onUnmounted } from 'vue';
+import { ref, watch, onUnmounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useDarkMode } from '@/composables/useDarkMode';
 import LoginAttempts from '@/modules/auth/components/LoginAttempts.vue';
 import LanguageSelector from '@/components/shared/LanguageSelector.vue';
 
@@ -33,9 +34,12 @@ const props = defineProps({
 const { t } = useI18n();
 const { locale } = useI18n();
 const page = usePage();
-const isDarkMode = ref(false);
+const { isDark, toggleDarkMode } = useDarkMode();
 const showPassword = ref(false);
 const isFormLocked = ref(page.props.isLocked || false);
+
+// Computed properties for reactive classes
+const isDarkMode = computed(() => isDark.value);
 
 // Watch for changes in page.props.isLocked from backend
 watch(() => page.props.isLocked, (newValue) => {
@@ -47,41 +51,6 @@ watch(() => page.props.lockoutTime, (newValue) => {
     // If backend sends new lockout time, update local state
     if (newValue > 0) {
         isFormLocked.value = true;
-    }
-});
-
-// Detect dark mode from localStorage or system preference
-const detectDarkMode = () => {
-    try {
-        const stored = localStorage.getItem('kromerce_theme');
-        if (stored === 'dark' || stored === 'light') {
-            isDarkMode.value = stored === 'dark';
-        } else {
-            isDarkMode.value = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        }
-    } catch {
-        isDarkMode.value = false;
-    }
-};
-
-// Apply dark mode to document
-const applyDarkMode = (enabled) => {
-    if (enabled) {
-        document.documentElement.classList.add('dark');
-    } else {
-        document.documentElement.classList.remove('dark');
-    }
-};
-
-// Initialize dark mode
-detectDarkMode();
-applyDarkMode(isDarkMode.value);
-
-// Listen for system theme changes
-window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-    if (!localStorage.getItem('kromerce_theme')) {
-        isDarkMode.value = e.matches;
-        applyDarkMode(e.matches);
     }
 });
 
@@ -106,16 +75,6 @@ const submit = () => {
             });
         },
     });
-};
-
-const toggleDarkMode = () => {
-    isDarkMode.value = !isDarkMode.value;
-    applyDarkMode(isDarkMode.value);
-    try {
-        localStorage.setItem('kromerce_theme', isDarkMode.value ? 'dark' : 'light');
-    } catch {
-        // ignore
-    }
 };
 
 const handleLockoutEnded = () => {

@@ -2,49 +2,18 @@
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import { computed, ref, onUnmounted } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useDarkMode } from '@/composables/useDarkMode';
 import LanguageSelector from '@/components/shared/LanguageSelector.vue';
 import PasswordStrength from '@/modules/auth/components/PasswordStrength.vue';
 
 const { t } = useI18n();
-const isDarkMode = ref(false);
+const { isDark, toggleDarkMode } = useDarkMode();
 const showPassword = ref(false);
 const showPasswordConfirm = ref(false);
 const showPasswordStrength = ref(false);
 
-// Detect dark mode from localStorage or system preference
-const detectDarkMode = () => {
-    try {
-        const stored = localStorage.getItem('kromerce_theme');
-        if (stored === 'dark' || stored === 'light') {
-            isDarkMode.value = stored === 'dark';
-        } else {
-            isDarkMode.value = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        }
-    } catch {
-        isDarkMode.value = false;
-    }
-};
-
-// Apply dark mode to document
-const applyDarkMode = (enabled) => {
-    if (enabled) {
-        document.documentElement.classList.add('dark');
-    } else {
-        document.documentElement.classList.remove('dark');
-    }
-};
-
-// Initialize dark mode
-detectDarkMode();
-applyDarkMode(isDarkMode.value);
-
-// Listen for system theme changes
-window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-    if (!localStorage.getItem('kromerce_theme')) {
-        isDarkMode.value = e.matches;
-        applyDarkMode(e.matches);
-    }
-});
+// Computed properties for reactive classes
+const isDarkMode = computed(() => isDark.value);
 
 const form = useForm({
     name: '',
@@ -73,16 +42,6 @@ const submit = () => {
 };
 
 const isBusinessOwner = computed(() => form.user_type === 'business_owner');
-
-const toggleDarkMode = () => {
-    isDarkMode.value = !isDarkMode.value;
-    applyDarkMode(isDarkMode.value);
-    try {
-        localStorage.setItem('kromerce_theme', isDarkMode.value ? 'dark' : 'light');
-    } catch {
-        // ignore
-    }
-};
 
 onUnmounted(() => {
     form.reset();
