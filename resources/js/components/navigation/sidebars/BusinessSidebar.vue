@@ -87,13 +87,22 @@
       <Link
         v-for="item in navigation"
         :key="item.href"
-        :href="item.href"
+        :href="isActive(item.href) ? '#' : item.href"
         class="flex items-center px-3 py-2.5 rounded-lg transition-colors group relative"
         :class="[
-          isActive(item.href) ? 'bg-accent text-accent-foreground' : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground',
+          isActive(item.href) 
+            ? 'bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 text-white cursor-default shadow-md' 
+            : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground cursor-pointer',
           isCollapsed ? 'justify-center' : 'justify-start space-x-3'
         ]"
+        @click="isActive(item.href) ? $event.preventDefault() : null"
       >
+        <!-- Active indicator dot -->
+        <span 
+          v-if="isActive(item.href)"
+          class="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-1 bg-white rounded-full shadow-md"
+        ></span>
+        
         <!-- Icon -->
         <span class="text-xl flex-shrink-0">{{ item.icon }}</span>
 
@@ -124,9 +133,10 @@
   <!-- Desktop Expand Button - Outside sidebar container -->
   <aside>
     <button
-    v-if="isCollapsed && !isMobile"
+    v-if="isCollapsed && !isMobile && showExpandButton"
     @click="toggleSidebar"
-    class="fixed top-24 left-16 transform -translate-y-1/2 w-6 h-12 bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700 border border-gray-200 dark:border-gray-600 rounded-r-lg shadow-md hover:shadow-lg transition-all duration-300 hover:translate-x-1 flex items-center justify-center z-40 group"
+    class="fixed left-16 w-6 h-12 bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700 border border-gray-200 dark:border-gray-600 rounded-r-lg shadow-md hover:shadow-lg transition-all duration-300 hover:translate-x-1 flex items-center justify-center z-40 group opacity-0 animate-fade-in"
+    style="top: 72px;"
     title="Expand sidebar"
   >
       <!-- Vertical gradient line for visual effect -->
@@ -156,13 +166,14 @@
 
 <script setup>
 import { Link, usePage } from '@inertiajs/vue3';
-import { computed, ref, onMounted, onUnmounted } from 'vue';
+import { computed, ref, onMounted, onUnmounted, watch } from 'vue';
 
 const page = usePage();
 
 // Sidebar state
 const isCollapsed = ref(false);
 const isMobileOpen = ref(false);
+const showExpandButton = ref(false);
 
 // Screen size detection
 const isMobile = ref(false);
@@ -181,6 +192,20 @@ onMounted(() => {
 
 onUnmounted(() => {
   window.removeEventListener('resize', checkScreenSize);
+});
+
+// Watch for collapse state changes
+watch(isCollapsed, (newValue) => {
+  if (newValue && !isMobile.value) {
+    // Sidebar is being collapsed, wait for animation then show button
+    showExpandButton.value = false;
+    setTimeout(() => {
+      showExpandButton.value = true;
+    }, 300); // Wait for sidebar collapse animation
+  } else {
+    // Sidebar is being expanded, hide button immediately
+    showExpandButton.value = false;
+  }
 });
 
 // Navigation items
@@ -250,3 +275,20 @@ defineExpose({
   closeMobileSidebar
 });
 </script>
+
+<style scoped>
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+</style>
