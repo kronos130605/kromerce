@@ -10,7 +10,7 @@ use App\Models\Tenant;
 
 abstract class BaseRepository
 {
-    protected Model $model;
+    protected Model|Builder $model;
     protected array $allowedFields = [];
     protected ?Builder $query = null;
 

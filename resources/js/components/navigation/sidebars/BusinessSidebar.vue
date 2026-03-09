@@ -7,10 +7,10 @@
     :title="isMobileOpen ? 'Close menu' : 'Open menu'"
   >
     <!-- Background glow effect -->
-    <div class="absolute inset-0 bg-blue-400 rounded-full opacity-0 group-hover:opacity-20 transition-opacity duration-300 blur-xl"></div>
+    <span class="absolute inset-0 bg-blue-400 rounded-full opacity-0 group-hover:opacity-20 transition-opacity duration-300 blur-xl"></span>
 
     <!-- Icon container -->
-    <div class="relative flex items-center justify-center">
+    <span class="relative flex items-center justify-center">
       <svg
         v-if="!isMobileOpen"
         class="w-6 h-6 transition-all duration-300 group-hover:rotate-12"
@@ -29,13 +29,13 @@
       >
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path>
       </svg>
-    </div>
+    </span>
 
     <!-- Pulse animation when closed -->
-    <div
+    <span
       v-if="!isMobileOpen"
       class="absolute inset-0 rounded-full border-2 border-blue-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-    ></div>
+    ></span>
   </button>
 
   <!-- Mobile Overlay -->
@@ -130,10 +130,10 @@
     title="Expand sidebar"
   >
       <!-- Vertical gradient line for visual effect -->
-      <div class="absolute left-0 top-0 bottom-0 w-0.5 bg-gradient-to-b from-blue-400 to-blue-600 rounded-l-full"></div>
+      <span class="absolute left-0 top-0 bottom-0 w-0.5 bg-gradient-to-b from-blue-400 to-blue-600 rounded-l-full"></span>
 
       <!-- Icon container -->
-      <div class="relative flex items-center justify-center">
+      <span class="relative flex items-center justify-center">
         <svg
           class="w-4 h-4 text-gray-600 dark:text-gray-300 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-200"
           fill="none"
@@ -142,14 +142,14 @@
         >
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
         </svg>
-      </div>
+      </span>
 
       <!-- Hover effect overlay -->
-      <div class="absolute inset-0 bg-gradient-to-r from-transparent via-blue-50 to-blue-100 dark:from-transparent dark:via-blue-900/20 dark:to-blue-900/40 rounded-r-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
+      <span class="absolute inset-0 bg-gradient-to-r from-transparent via-blue-50 to-blue-100 dark:from-transparent dark:via-blue-900/20 dark:to-blue-900/40 rounded-r-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200"></span>
 
       <!-- Subtle top and bottom borders -->
-      <div class="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-gray-300 dark:via-gray-600 to-transparent"></div>
-      <div class="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-gray-300 dark:via-gray-600 to-transparent"></div>
+      <span class="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-gray-300 dark:via-gray-600 to-transparent"></span>
+      <span class="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-gray-300 dark:via-gray-600 to-transparent"></span>
     </button>
   </aside>
 </template>

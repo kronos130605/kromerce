@@ -3,7 +3,7 @@ import { computed, ref } from 'vue';
 import { usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import BusinessLayout from '@/Layouts/BusinessLayout.vue';
-import { Head, Link } from '@inertiajs/vue3';
+import { Head } from '@inertiajs/vue3';
 
 // Import business dashboard components
 import BusinessWelcome from '@/modules/dashboard/components/BusinessWelcome.vue';
@@ -50,17 +50,17 @@ const tabOptions = computed(() => [
 
 <template>
     <Head title="Dashboard" />
-    
+
     <BusinessLayout>
         <div class="space-y-6">
             <!-- Welcome Section -->
-            <BusinessWelcome 
-                :user="user" 
-                :tenant="currentTenant" 
+            <BusinessWelcome
+                :user="user"
+                :tenant="currentTenant"
             />
 
             <!-- Stats Overview -->
-            <BusinessStats 
+            <BusinessStats
                 :stats="dashboardData.stats || {}"
                 :period="selectedPeriod"
                 @period-changed="selectedPeriod = $event"
@@ -82,12 +82,12 @@ const tabOptions = computed(() => [
                 <OrdersTab v-if="activeTab === 'orders'" :dashboard-data="dashboardData" />
 
                 <!-- Analytics Tab -->
-                <AnalyticsTab 
-                    v-if="activeTab === 'analytics'" 
-                    :dashboard-data="dashboardData" 
-                    :selected-period="selectedPeriod" 
+                <AnalyticsTab
+                    v-if="activeTab === 'analytics'"
+                    :dashboard-data="dashboardData"
+                    :selected-period="selectedPeriod"
                 />
-                <BusinessCurrencyStatus 
+                <BusinessCurrencyStatus
                     v-if="activeTab === 'analytics'"
                     :currencies="dashboardData.currencies || []"
                 />
@@ -99,7 +99,7 @@ const tabOptions = computed(() => [
                 <SettingsTab v-if="activeTab === 'settings'" />
 
                 <!-- Fallback for any other tabs -->
-                <ComingSoonTab 
+                <ComingSoonTab
                     v-if="!['overview', 'products', 'orders', 'analytics', 'marketing', 'settings'].includes(activeTab)"
                     :tab-label="tabOptions.find(tab => tab.key === activeTab)?.label || 'This feature'"
                 />

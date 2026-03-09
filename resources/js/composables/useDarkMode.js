@@ -36,7 +36,7 @@ export function useDarkMode() {
 
     const initializeDarkMode = () => {
         // Check localStorage first, then system preference
-        let shouldBeDark = false
+        let shouldBeDark
         
         try {
             const stored = localStorage.getItem('kromerce_theme')

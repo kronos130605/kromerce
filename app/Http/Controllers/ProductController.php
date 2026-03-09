@@ -54,7 +54,10 @@ class ProductController extends Controller
             ]);
             
         } catch (\Exception $e) {
-            return $this->error('Failed to load product creation form', 500);
+            return Inertia::render('modules/products/Products/Error', [
+                'error' => 'Failed to load product creation form',
+                'message' => $e->getMessage(),
+            ]);
         }
     }
     
@@ -90,7 +93,10 @@ class ProductController extends Controller
             $product = $this->productService->getProductForTenant($tenant, $id);
             
             if (!$product) {
-                return $this->notFound('Product not found');
+                return Inertia::render('modules/products/Products/Error', [
+                    'error' => 'Product not found',
+                    'message' => 'The requested product could not be found.',
+                ]);
             }
             
             return Inertia::render('modules/products/Products/Show', [
@@ -98,7 +104,10 @@ class ProductController extends Controller
             ]);
             
         } catch (\Exception $e) {
-            return $this->error('Failed to load product', 500);
+            return Inertia::render('modules/products/Products/Error', [
+                'error' => 'Failed to load product',
+                'message' => $e->getMessage(),
+            ]);
         }
     }
     
@@ -113,7 +122,10 @@ class ProductController extends Controller
             $categories = $this->productService->getCategoriesForTenant($tenant);
             
             if (!$product) {
-                return $this->notFound('Product not found');
+                return Inertia::render('modules/products/Products/Error', [
+                    'error' => 'Product not found',
+                    'message' => 'The requested product could not be found.',
+                ]);
             }
             
             return Inertia::render('modules/products/Products/Edit', [
@@ -122,7 +134,10 @@ class ProductController extends Controller
             ]);
             
         } catch (\Exception $e) {
-            return $this->error('Failed to load product edit form', 500);
+            return Inertia::render('modules/products/Products/Error', [
+                'error' => 'Failed to load product edit form',
+                'message' => $e->getMessage(),
+            ]);
         }
     }
     

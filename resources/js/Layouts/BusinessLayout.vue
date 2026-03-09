@@ -11,8 +11,7 @@
       <main 
         class="flex-1 overflow-y-auto p-6 transition-all duration-300"
         :class="{
-          'lg:ml-0': sidebarRef?.isCollapsed,
-          'lg:ml-0': !sidebarRef?.isCollapsed
+          'lg:ml-0': sidebarRef?.isCollapsed
         }"
       >
         <slot />
