@@ -4,6 +4,53 @@ description: Development Guidelines and Standards
 
 # Development Guidelines and Standards
 
+## 🖥️ WSL/NVM Development Protocol
+
+### **Command Execution Workflow**
+1. **Assistant provides command** with explanation
+2. **Developer executes** in WSL/NVM environment
+3. **Developer confirms** result (success/failure)
+4. **Assistant continues** or provides alternative
+5. **Working commands** documented for future use
+
+### **WSL Command Standards**
+```bash
+# Laravel Artisan (WSL)
+php artisan make:migration migration_name
+php artisan migrate
+php artisan tinker
+
+# Package Management (WSL)
+composer install --optimize-autoloader
+npm install
+npm run build
+
+# Database (WSL)
+mysql -u root -p database_name
+```
+
+### **NVM Version Handling**
+```bash
+# Check current PHP version
+php --version
+
+# Use specific PHP version if needed
+php8.2 artisan command
+php8.1 artisan command
+
+# Check Node version
+node --version
+npm --version
+```
+
+### **Command Testing Rules**
+- Always test in your environment first
+- Report exact error messages
+- Document working commands in workflow
+- Use documented commands for consistency
+
+---
+
 ## 🎯 Core Development Philosophy
 
 ### 1. Consistency Over Convenience

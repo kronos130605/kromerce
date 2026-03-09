@@ -2,382 +2,173 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\ProductPricingService;
-use App\Repositories\ProductRepository;
-use App\Repositories\ProductCategoryRepository;
-use App\Repositories\ProductTagRepository;
-use App\Models\Product;
-use App\Models\ProductImage;
-use App\Models\ProductCategory;
-use App\Models\ProductTag;
+use App\Services\ProductService;
+use App\Http\Requests\ProductRequest;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Inertia\Response;
-use function tenancy;
 
 class ProductController extends Controller
 {
-    private ProductPricingService $pricingService;
-    private ProductRepository $productRepo;
-    private ProductCategoryRepository $categoryRepo;
-    private ProductTagRepository $tagRepo;
-
     public function __construct(
-        ProductPricingService $pricingService,
-        ProductRepository $productRepo,
-        ProductCategoryRepository $categoryRepo,
-        ProductTagRepository $tagRepo
-    ) {
-        $this->pricingService = $pricingService;
-        $this->productRepo = $productRepo;
-        $this->categoryRepo = $categoryRepo;
-        $this->tagRepo = $tagRepo;
-    }
-
+        private ProductService $productService
+    ) {}
+    
     /**
-     * Display the products page.
+     * Display products page.
      */
-    public function index(Request $request): Response|JsonResponse
+    public function index(ProductRequest $request): Response|JsonResponse
     {
-        // Get tenant from tenancy context instead of user
-        $tenant = tenancy()->initialized ? tenant() : null;
-
-        if (!$tenant) {
-            Log::error('ProductController::index - No tenant context found');
-            return response()->json(['error' => 'No tenant context found'], 403);
-        }
-
-        $filters = $request->only(['category_id', 'is_active', 'is_on_sale', 'min_price', 'max_price', 'search']);
-
         try {
-            $products = $this->productRepo->paginateForTenant($tenant->id, $filters);
-        } catch (\Exception $e) {
-            Log::error('ProductController::index - Repository error', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
+            $tenant = $this->validateTenant();
+            $filters = $request->validated();
+            
+            $products = $this->productService->getProductsForTenant($tenant, $filters);
+            $categories = $this->productService->getCategoriesForTenant($tenant);
+            $statistics = $this->productService->getStatisticsForTenant($tenant);
+            
+            return Inertia::render('modules/products/Products/Index', [
+                'products' => $products,
+                'categories' => $categories,
+                'filters' => $filters,
+                'statistics' => $statistics,
             ]);
-            return response()->json(['error' => 'Repository error: ' . $e->getMessage()], 500);
-        }
-
-        try {
-            $categories = $this->categoryRepo->getForTenant($tenant->id);
+            
         } catch (\Exception $e) {
-            Log::error('ProductController::index - Category repository error', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-            ]);
-            $categories = collect([]);
+            return $this->error('Failed to load products', 500);
         }
-
-        try {
-            $statistics = $this->productRepo->getStatistics($tenant->id);
-        } catch (\Exception $e) {
-            Log::error('ProductController::index - Statistics error', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-            ]);
-            $statistics = [];
-        }
-
-        return Inertia::render('modules/products/Products/Index', [
-            'products' => $products,
-            'categories' => $categories,
-            'filters' => $filters,
-            'statistics' => $statistics,
-        ]);
     }
-
+    
     /**
      * Show the form for creating a new product.
      */
-    public function create(Request $request): Response|JsonResponse
+    public function create(ProductRequest $request): Response
     {
-        // Get tenant from tenancy context instead of user
-        $tenant = tenancy()->initialized ? tenant() : null;
-
-        if (!$tenant) {
-            return response()->json(['error' => 'No tenant context found'], 403);
+        try {
+            $tenant = $this->validateTenant();
+            $categories = $this->productService->getCategoriesForTenant($tenant);
+            
+            return Inertia::render('modules/products/Products/Create', [
+                'categories' => $categories,
+            ]);
+            
+        } catch (\Exception $e) {
+            return $this->error('Failed to load product creation form', 500);
         }
-
-        return Inertia::render('modules/products/Products/Create', [
-            'categories' => $this->categoryRepo->getForTenant($tenant->id),
-            'tags' => $this->tagRepo->getForTenant($tenant->id),
-        ]);
     }
-
+    
     /**
      * Store a newly created product.
      */
-    public function store(Request $request): JsonResponse
+    public function store(ProductRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'short_description' => 'nullable|string|max:500',
-            'base_price' => 'required|numeric|min:0',
-            'base_currency' => 'required|string|size:3',
-            'base_sale_price' => 'nullable|numeric|min:0',
-            'cost_price' => 'nullable|numeric|min:0',
-            'track_cost' => 'boolean',
-            'category_id' => 'nullable|exists:product_categories,id',
-            'tags' => 'array',
-            'tags.*' => 'exists:product_tags,id',
-            'manage_stock' => 'boolean',
-            'stock_quantity' => 'nullable|integer|min:0',
-            'low_stock_threshold' => 'nullable|integer|min:0',
-            'weight' => 'nullable|numeric|min:0',
-            'length' => 'nullable|numeric|min:0',
-            'width' => 'nullable|numeric|min:0',
-            'height' => 'nullable|numeric|min:0',
-            'is_active' => 'boolean',
-            'is_on_sale' => 'boolean',
-            'sale_type' => 'nullable|in:fixed,percentage',
-            'sale_amount' => 'nullable|numeric|min:0',
-            'seo_title' => 'nullable|string|max:255',
-            'seo_description' => 'nullable|string|max:255',
-            'meta_keywords' => 'nullable|array',
-            'meta_keywords.*' => 'string|max:100',
-            'shipping_class' => 'nullable|string|max:100',
-            'free_shipping' => 'boolean',
-            'tax_class' => 'nullable|string|max:100',
-            'taxable' => 'boolean',
-        ]);
-
-        $tenant = $request->user()->tenant;
-
-        $productData = array_merge($validated, [
-            'tenant_id' => $tenant->id,
-            'user_id' => $request->user()->id,
-        ]);
-
-        $product = $this->productRepo->create($productData);
-
-        // Attach categories and tags
         try {
-            if (isset($validated['category_id'])) {
-                $product->categories()->attach($validated['category_id']);
-            }
-
-            if (isset($validated['tags'])) {
-                $product->tags()->attach($validated['tags']);
-            }
+            $tenant = $this->validateTenant();
+            $user = $request->user();
+            
+            $product = $this->productService->createProductForTenant(
+                $tenant, 
+                $user, 
+                $request->validated()
+            );
+            
+            return $this->success($product, 'Product created successfully', 201);
+            
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Error attaching categories and tags: ' . $e->getMessage(),
-            ], 500);
+            return $this->error('Failed to create product', 500);
         }
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Product created successfully',
-            'product' => $product,
-        ]);
     }
-
+    
     /**
      * Display the specified product.
      */
-    public function show(Request $request, Product $product): Response
+    public function show(ProductRequest $request, int $id): Response
     {
-        $this->authorize('view', $product);
-
-        $product = $this->productRepo->getWithRelationships($product->tenant_id, [
-            'category',
-            'tags',
-            'images' => function ($query) {
-                $query->orderBy('order');
-            },
-            'variants' => function ($query) {
-                $query->where('is_active', true);
-            },
-            'priceHistory' => function ($query) {
-                $query->latest()->limit(10);
-            },
-        ])->find($product->id);
-
-        $calculatedPrices = $this->pricingService->calculateProductPrices($product);
-
-        return Inertia::render('modules/products/Products/Show', [
-            'product' => $product,
-            'calculatedPrices' => $calculatedPrices,
-        ]);
+        try {
+            $tenant = $this->validateTenant();
+            $product = $this->productService->getProductForTenant($tenant, $id);
+            
+            if (!$product) {
+                return $this->notFound('Product not found');
+            }
+            
+            return Inertia::render('modules/products/Products/Show', [
+                'product' => $product,
+            ]);
+            
+        } catch (\Exception $e) {
+            return $this->error('Failed to load product', 500);
+        }
     }
-
+    
     /**
      * Show the form for editing the specified product.
      */
-    public function edit(Request $request, Product $product): Response
+    public function edit(ProductRequest $request, int $id): Response
     {
-        $this->authorize('update', $product);
-
-        $tenant = $request->user()->tenant;
-
-        return Inertia::render('modules/products/Products/Edit', [
-            'product' => $product->load(['categories', 'tags', 'images']),
-            'categories' => $this->categoryRepo->getForTenant($tenant->id),
-            'tags' => $this->tagRepo->getForTenant($tenant->id),
-        ]);
+        try {
+            $tenant = $this->validateTenant();
+            $product = $this->productService->getProductForTenant($tenant, $id);
+            $categories = $this->productService->getCategoriesForTenant($tenant);
+            
+            if (!$product) {
+                return $this->notFound('Product not found');
+            }
+            
+            return Inertia::render('modules/products/Products/Edit', [
+                'product' => $product,
+                'categories' => $categories,
+            ]);
+            
+        } catch (\Exception $e) {
+            return $this->error('Failed to load product edit form', 500);
+        }
     }
-
+    
     /**
      * Update the specified product.
      */
-    public function update(Request $request, Product $product): JsonResponse
+    public function update(ProductRequest $request, int $id): JsonResponse
     {
-        $this->authorize('update', $product);
-
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'base_price' => 'required|numeric|min:0',
-            'base_currency' => 'required|string|size:3',
-            'base_sale_price' => 'nullable|numeric|min:0',
-            'cost_price' => 'nullable|numeric|min:0',
-            'track_cost' => 'boolean',
-            'category_id' => 'nullable|exists:product_categories,id',
-            'tags' => 'array',
-            'tags.*' => 'exists:product_tags,id',
-            'manage_stock' => 'boolean',
-            'stock_quantity' => 'nullable|integer|min:0',
-            'low_stock_threshold' => 'nullable|integer|min:0',
-            'weight' => 'nullable|numeric|min:0',
-            'length' => 'nullable|numeric|min:0',
-            'width' => 'nullable|numeric|min:0',
-            'height' => 'nullable|numeric|min:0',
-            'is_active' => 'boolean',
-            'is_on_sale' => 'boolean',
-            'sale_type' => 'nullable|in:fixed,percentage',
-            'sale_amount' => 'nullable|numeric|min:0',
-            'seo_title' => 'nullable|string|max:255',
-            'seo_description' => 'nullable|string|max:255',
-            'meta_keywords' => 'nullable|array',
-            'meta_keywords.*' => 'string|max:100',
-            'shipping_class' => 'nullable|string|max:100',
-            'free_shipping' => 'boolean',
-            'tax_class' => 'nullable|string|max:100',
-            'taxable' => 'boolean',
-        ]);
-
-        $this->productRepo->update($product->id, $validated);
-
-        // Reload the product from database to get updated data
-        $product = $this->productRepo->getById($product->id);
-        
-        // Ensure we have a fresh product instance
-        if (!$product) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Product not found after update',
-            ], 404);
-        }
-
-        // Sync categories and tags
         try {
-            if (isset($validated['category_id'])) {
-                $product->categories()->sync([$validated['category_id']]);
-            } else {
-                $product->categories()->detach();
+            $tenant = $this->validateTenant();
+            
+            $updated = $this->productService->updateProductForTenant(
+                $tenant, 
+                $id, 
+                $request->validated()
+            );
+            
+            if (!$updated) {
+                return $this->notFound('Product not found');
             }
-
-            if (isset($validated['tags'])) {
-                $product->tags()->sync($validated['tags']);
-            } else {
-                $product->tags()->detach();
-            }
+            
+            return $this->success(null, 'Product updated successfully');
+            
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Error syncing categories and tags: ' . $e->getMessage(),
-            ], 500);
+            return $this->error('Failed to update product', 500);
         }
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Product updated successfully',
-            'product' => $product,
-        ]);
     }
-
+    
     /**
-     * Remove the specified resource from storage.
+     * Remove the specified product.
      */
-    public function destroy(Request $request, Product $product): JsonResponse
+    public function destroy(ProductRequest $request, int $id): JsonResponse
     {
-        $this->authorize('delete', $product);
-
-        $this->productRepo->delete($product->id);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Product deleted successfully',
-        ]);
-    }
-
-    /**
-     * Duplicate a product.
-     */
-    public function duplicate(Request $request, Product $product): JsonResponse
-    {
-        $this->authorize('view', $product);
-
-        $overrides = [
-            'name' => $product->name . ' (Copy)',
-            'user_id' => $request->user()->id,
-        ];
-
-        $newProduct = $this->productRepo->duplicate($product->id, $overrides);
-
-        // Copy categories and tags
         try {
-            $newProduct->categories()->attach($product->categories->pluck('id'));
-            $newProduct->tags()->attach($product->tags->pluck('id'));
+            $tenant = $this->validateTenant();
+            
+            $deleted = $this->productService->deleteProductForTenant($tenant, $id);
+            
+            if (!$deleted) {
+                return $this->notFound('Product not found');
+            }
+            
+            return $this->noContent('Product deleted successfully');
+            
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Error copying categories and tags: ' . $e->getMessage(),
-            ], 500);
+            return $this->error('Failed to delete product', 500);
         }
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Product duplicated successfully',
-            'product' => $newProduct,
-        ]);
-    }
-
-    /**
-     * Get calculated prices for a product.
-     */
-    public function getPrices(Request $request, Product $product): JsonResponse
-    {
-        $this->authorize('view', $product);
-
-        $targetCurrency = $request->get('currency');
-        $prices = $this->pricingService->calculateProductPrices($product, $targetCurrency);
-
-        return response()->json([
-            'prices' => $prices,
-        ]);
-    }
-
-    /**
-     * Search products.
-     */
-    public function search(Request $request): JsonResponse
-    {
-        $validated = $request->validate([
-            'query' => 'required|string|min:2',
-            'filters' => 'array',
-        ]);
-
-        $tenant = $request->user()->tenant;
-        $products = $this->productRepo->search($tenant->id, $validated['query'], $validated['filters'] ?? []);
-
-        return response()->json([
-            'products' => $products,
-        ]);
     }
 }

@@ -9,6 +9,11 @@ use Illuminate\Support\Facades\DB;
 
 class ProductRepository extends BaseRepository
 {
+    protected array $allowedFields = [
+        'name', 'description', 'price', 'is_active', 'category_id', 
+        'tenant_id', 'created_at', 'updated_at'
+    ];
+    
     public function __construct(Product $model)
     {
         parent::__construct($model);
