@@ -126,6 +126,13 @@ onBeforeUnmount(() => {
     onDocumentClick = undefined;
   }
 });
+
+// Toggle sidebar method
+const toggleSidebar = () => {
+  // Emit event to parent or use global event bus
+  const event = new CustomEvent('toggle-sidebar');
+  document.dispatchEvent(event);
+};
 </script>
 
 <template>

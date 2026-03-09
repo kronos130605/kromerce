@@ -8,10 +8,11 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
+use App\Traits\DarkModePreferences;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable, HasRoles, BelongsToTenant;
+    use HasFactory, Notifiable, HasRoles, BelongsToTenant, DarkModePreferences;
 
     /**
      * The attributes that are mass assignable.
@@ -25,6 +26,9 @@ class User extends Authenticatable
         'phone',
         'avatar_url',
         'is_active',
+        'dark_mode',
+        'theme_preferences',
+        'language',
     ];
 
     /**
@@ -48,6 +52,9 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_active' => 'boolean',
+            'dark_mode' => 'boolean',
+            'theme_preferences' => 'array',
+            'language' => 'string',
         ];
     }
 

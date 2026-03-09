@@ -1,46 +1,15 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useDarkMode } from '@/composables/useDarkMode';
 
 const { t } = useI18n();
-
-// Reactive dark mode detection
-const isDarkMode = ref(false);
-
-// Check dark mode
-const checkDarkMode = () => {
-    isDarkMode.value = document.documentElement.classList.contains('dark');
-};
+const { isDark } = useDarkMode();
 
 // Get dynamic background color based on mode
 const getBgColor = (stat) => {
-    return isDarkMode.value ? stat.bgColorDark : stat.bgColor;
+    return isDark.value ? stat.bgColorDark : stat.bgColor;
 };
-
-// Setup dark mode listener
-onMounted(() => {
-    checkDarkMode(); // Initial check
-
-    // Listen for class changes on document.documentElement
-    const observer = new MutationObserver(() => {
-        checkDarkMode();
-    });
-
-    observer.observe(document.documentElement, {
-        attributes: true,
-        attributeFilter: ['class']
-    });
-
-    // Store observer for cleanup
-    window._darkModeObserver = observer;
-});
-
-onUnmounted(() => {
-    if (window._darkModeObserver) {
-        window._darkModeObserver.disconnect();
-        delete window._darkModeObserver;
-    }
-});
 
 // Business metrics
 const stats = ref([

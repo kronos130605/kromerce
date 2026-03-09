@@ -4,22 +4,20 @@ namespace App\Repositories;
 
 use App\Models\Product;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 
 class ProductRepository extends BaseRepository
 {
+    protected array $allowedFields = [
+        'name', 'description', 'price', 'is_active', 'category_id',
+        'tenant_id', 'created_at', 'updated_at'
+    ];
+
     public function __construct(Product $model)
     {
         parent::__construct($model);
-    }
-
-    /**
-     * Create new product.
-     */
-    public function create(array $data): Product
-    {
-        return $this->model->create($data);
     }
 
     /**
@@ -155,7 +153,7 @@ class ProductRepository extends BaseRepository
     /**
      * Duplicate product.
      */
-    public function duplicate(int $productId, array $overrides = []): Product
+    public function duplicate(int $productId, array $overrides = []): Model
     {
         $originalProduct = $this->getById($productId);
 

@@ -10,58 +10,41 @@ use Inertia\Response;
 
 class DashboardController extends Controller
 {
-    private DashboardRoutingService $dashboardRoutingService;
-
     public function __construct(
-        DashboardRoutingService $dashboardRoutingService
-    ) {
-        $this->dashboardRoutingService = $dashboardRoutingService;
-    }
+        private DashboardRoutingService $dashboardRoutingService
+    ) {}
 
     /**
-     * Display the appropriate dashboard based on user role and tenant.
+     * Display appropriate dashboard based on user role and tenant.
      */
     public function index(Request $request): Response
     {
-        $user = $request->user();
-
-        // Usar DashboardRoutingService para obtener o asignar tenant
-        $tenant = $this->dashboardRoutingService->getOrAssignTenantForUser($user);
-
-        if (!$tenant) {
-            // No se pudo asignar tenant - mostrar dashboard de customer básico
-            return Inertia::render('modules/dashboard/pages/DashboardCustomer', [
-                'auth' => [
-                    'user' => $user,
-                ],
-                'user_role' => 'customer',
-                'tenant' => null,
-            ]);
-        }
-
-        // Determinar qué dashboard mostrar
-        $dashboardView = $this->dashboardRoutingService->getDashboardViewForUser($user, $tenant);
-
-        // Obtener datos del dashboard
         try {
+            $user = $request->user();
+            
+            // Use DashboardRoutingService to get or assign tenant for user
+            $tenant = $this->dashboardRoutingService->getOrAssignTenantForUser($user);
+            
+            // Get dashboard view and data using service
+            $dashboardView = $this->dashboardRoutingService->getDashboardViewForUser($user, $tenant);
             $dashboardData = $this->dashboardRoutingService->getDashboardDataForUser($user, $tenant, $dashboardView);
+            
+            return Inertia::render($dashboardView, $dashboardData);
+            
         } catch (\Exception $e) {
-            // Log error y mostrar página de error
-            Log::error('Dashboard data error', [
-                'user_id' => $user->id,
-                'tenant_id' => $tenant->id,
+            Log::error('Dashboard error', [
+                'user_id' => $request->user()?->id,
+                'tenant_id' => tenant()?->id,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-
+            
+            // Return error page with Inertia instead of JsonResponse
             return Inertia::render('modules/dashboard/pages/Error', [
-                'error' => 'Unable to load dashboard data',
-                'user' => $user,
-                'tenant' => $tenant,
-                'details' => $e->getMessage(),
+                'error' => 'Failed to load dashboard',
+                'message' => $e->getMessage(),
+                'user' => $request->user(),
             ]);
         }
-
-        return Inertia::render($dashboardView, $dashboardData);
     }
 }

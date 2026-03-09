@@ -6,10 +6,13 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
+use App\Models\Tenant;
 
 abstract class BaseRepository
 {
-    protected Model $model;
+    protected Model|Builder $model;
+    protected array $allowedFields = [];
+    protected ?Builder $query = null;
 
     public function __construct(Model $model)
     {
@@ -40,6 +43,10 @@ abstract class BaseRepository
         $query = $this->model->query();
         
         foreach ($criteria as $key => $value) {
+            if (!in_array($key, $this->allowedFields)) {
+                continue; // Skip invalid fields
+            }
+            
             if (is_array($value)) {
                 $query->whereIn($key, $value);
             } else {
@@ -47,7 +54,7 @@ abstract class BaseRepository
             }
         }
         
-        return $query->get($columns);
+        return $this->applyTenantScope($query)->get($columns);
     }
 
     /**
@@ -55,7 +62,21 @@ abstract class BaseRepository
      */
     public function getFirstBy(array $criteria, array $columns = ['*']): ?Model
     {
-        return $this->model->where($criteria)->first($columns);
+        $query = $this->model->query();
+        
+        foreach ($criteria as $key => $value) {
+            if (!in_array($key, $this->allowedFields)) {
+                continue;
+            }
+            
+            if (is_array($value)) {
+                $query->whereIn($key, $value);
+            } else {
+                $query->where($key, $value);
+            }
+        }
+        
+        return $this->applyTenantScope($query)->first($columns);
     }
 
     /**
@@ -93,7 +114,21 @@ abstract class BaseRepository
      */
     public function updateBy(array $criteria, array $data): int
     {
-        return $this->model->where($criteria)->update($data);
+        $query = $this->model->query();
+        
+        foreach ($criteria as $key => $value) {
+            if (!in_array($key, $this->allowedFields)) {
+                continue;
+            }
+            
+            if (is_array($value)) {
+                $query->whereIn($key, $value);
+            } else {
+                $query->where($key, $value);
+            }
+        }
+        
+        return $this->applyTenantScope($query)->update($data);
     }
 
     /**
@@ -115,7 +150,21 @@ abstract class BaseRepository
      */
     public function deleteBy(array $criteria): int
     {
-        return $this->model->where($criteria)->delete();
+        $query = $this->model->query();
+        
+        foreach ($criteria as $key => $value) {
+            if (!in_array($key, $this->allowedFields)) {
+                continue;
+            }
+            
+            if (is_array($value)) {
+                $query->whereIn($key, $value);
+            } else {
+                $query->where($key, $value);
+            }
+        }
+        
+        return $this->applyTenantScope($query)->delete();
     }
 
     /**
@@ -141,28 +190,33 @@ abstract class BaseRepository
     /**
      * Apply filters to query.
      */
-    protected function applyFilters(Builder $query, array $filters): void
+    protected function applyFilters(Builder $query, array $filters): Builder
     {
         foreach ($filters as $key => $value) {
             if (is_null($value)) {
                 continue;
             }
             
+            // Validate field name
+            $field = $this->extractFieldName($key);
+            if (!in_array($field, $this->allowedFields)) {
+                continue;
+            }
+            
             if (is_array($value)) {
-                $query->whereIn($key, $value);
+                $query->whereIn($field, $value);
             } elseif (str_contains($key, '_like')) {
-                $field = str_replace('_like', '', $key);
                 $query->where($field, 'like', "%{$value}%");
             } elseif (str_contains($key, '_min')) {
-                $field = str_replace('_min', '', $key);
                 $query->where($field, '>=', $value);
             } elseif (str_contains($key, '_max')) {
-                $field = str_replace('_max', '', $key);
                 $query->where($field, '<=', $value);
             } else {
-                $query->where($key, $value);
+                $query->where($field, $value);
             }
         }
+        
+        return $query;
     }
 
     /**
@@ -192,7 +246,21 @@ abstract class BaseRepository
      */
     public function existsBy(array $criteria): bool
     {
-        return $this->model->where($criteria)->exists();
+        $query = $this->model->query();
+        
+        foreach ($criteria as $key => $value) {
+            if (!in_array($key, $this->allowedFields)) {
+                continue;
+            }
+            
+            if (is_array($value)) {
+                $query->whereIn($key, $value);
+            } else {
+                $query->where($key, $value);
+            }
+        }
+        
+        return $this->applyTenantScope($query)->exists();
     }
 
     /**
@@ -276,6 +344,47 @@ abstract class BaseRepository
      */
     public function first(array $columns = ['*']): ?Model
     {
-        return $this->model->first($columns);
+        $query = $this->query ?? $this->model->query();
+        return $this->applyTenantScope($query)->first($columns);
+    }
+    
+    /**
+     * Apply tenant scope to query.
+     */
+    protected function applyTenantScope(Builder $query, ?Tenant $tenant = null): Builder
+    {
+        if ($tenant) {
+            return $query->where('tenant_id', $tenant->id);
+        }
+        
+        if (tenant()) {
+            return $query->where('tenant_id', tenant()->id);
+        }
+        
+        return $query;
+    }
+    
+    /**
+     * Extract field name from filter key.
+     */
+    protected function extractFieldName(string $key): string
+    {
+        return str_replace(['_like', '_min', '_max'], '', $key);
+    }
+    
+    /**
+     * Get allowed fields for filtering.
+     */
+    protected function getAllowedFields(): array
+    {
+        return $this->allowedFields;
+    }
+    
+    /**
+     * Set allowed fields for filtering.
+     */
+    protected function setAllowedFields(array $fields): void
+    {
+        $this->allowedFields = $fields;
     }
 }
