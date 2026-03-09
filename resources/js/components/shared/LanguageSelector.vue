@@ -44,7 +44,6 @@ const changeLanguage = (langCode) => {
           <span class="text-lg">{{ language.flag }}</span>
           <span class="flex-1">
             <span class="font-medium">{{ language.name }}</span>
-            <span class="text-xs text-muted-foreground">{{ language.code.toUpperCase() }}</span>
           </span>
           <svg
             v-if="language.code === locale"

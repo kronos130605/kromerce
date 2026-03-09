@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Services\DashboardRoutingService;
 use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -22,12 +21,15 @@ class DashboardController extends Controller
     {
         try {
             $user = $request->user();
-            $tenant = $this->validateTenant();
             
-            // Get dashboard data using service
-            $dashboardData = $this->dashboardRoutingService->getDashboardDataForUser($user, $tenant);
+            // Use DashboardRoutingService to get or assign tenant for user
+            $tenant = $this->dashboardRoutingService->getOrAssignTenantForUser($user);
             
-            return Inertia::render($dashboardData['view'], $dashboardData['data']);
+            // Get dashboard view and data using service
+            $dashboardView = $this->dashboardRoutingService->getDashboardViewForUser($user, $tenant);
+            $dashboardData = $this->dashboardRoutingService->getDashboardDataForUser($user, $tenant, $dashboardView);
+            
+            return Inertia::render($dashboardView, $dashboardData);
             
         } catch (\Exception $e) {
             Log::error('Dashboard error', [
@@ -37,7 +39,12 @@ class DashboardController extends Controller
                 'trace' => $e->getTraceAsString(),
             ]);
             
-            return $this->error('Failed to load dashboard', 500);
+            // Return error page with Inertia instead of JsonResponse
+            return Inertia::render('modules/dashboard/pages/Error', [
+                'error' => 'Failed to load dashboard',
+                'message' => $e->getMessage(),
+                'user' => $request->user(),
+            ]);
         }
     }
 }
