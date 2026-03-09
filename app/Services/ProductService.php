@@ -15,8 +15,7 @@ class ProductService
 {
     public function __construct(
         private ProductRepository $productRepo,
-        private ProductCategoryRepository $categoryRepo,
-        private ProductTagRepository $tagRepo
+        private ProductCategoryRepository $categoryRepo
     ) {}
     
     /**
@@ -25,10 +24,7 @@ class ProductService
     public function getProductsForTenant(Tenant $tenant, array $filters = []): LengthAwarePaginator
     {
         try {
-            return $this->productRepo
-                ->forTenant($tenant)
-                ->withFilters($filters)
-                ->paginate(15);
+            return $this->productRepo->paginateForTenant($tenant->id, $filters);
         } catch (\Exception $e) {
             throw new \Exception('Failed to retrieve products: ' . $e->getMessage());
         }
@@ -40,7 +36,7 @@ class ProductService
     public function getCategoriesForTenant(Tenant $tenant): Collection
     {
         try {
-            return $this->categoryRepo->forTenant($tenant)->get();
+            return $this->categoryRepo->getForTenant($tenant->id);
         } catch (\Exception $e) {
             throw new \Exception('Failed to retrieve categories: ' . $e->getMessage());
         }
@@ -80,8 +76,7 @@ class ProductService
     {
         try {
             return $this->productRepo
-                ->forTenant($tenant)
-                ->find($productId);
+                ->getById($productId, ['tenant_id' => $tenant->id]);
         } catch (\Exception $e) {
             throw new \Exception('Failed to retrieve product: ' . $e->getMessage());
         }
@@ -94,8 +89,7 @@ class ProductService
     {
         try {
             return $this->productRepo
-                ->forTenant($tenant)
-                ->update($productId, $data);
+                ->update($productId, array_merge($data, ['tenant_id' => $tenant->id]));
         } catch (\Exception $e) {
             throw new \Exception('Failed to update product: ' . $e->getMessage());
         }
@@ -108,8 +102,7 @@ class ProductService
     {
         try {
             return $this->productRepo
-                ->forTenant($tenant)
-                ->delete($productId);
+                ->delete($productId, ['tenant_id' => $tenant->id]);
         } catch (\Exception $e) {
             throw new \Exception('Failed to delete product: ' . $e->getMessage());
         }

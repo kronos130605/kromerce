@@ -20,14 +20,6 @@ class ProductRepository extends BaseRepository
     }
 
     /**
-     * Create new product.
-     */
-    public function create(array $data): Product
-    {
-        return $this->model->create($data);
-    }
-
-    /**
      * Get products for tenant.
      */
     public function getForTenant(string $tenantId, array $filters = []): Collection
