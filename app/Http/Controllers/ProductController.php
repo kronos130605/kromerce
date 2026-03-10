@@ -18,24 +18,37 @@ class ProductController extends Controller
     /**
      * Display products page.
      */
-    public function index(ProductRequest $request): Response|JsonResponse
+    public function index(Request $request): Response|JsonResponse
     {
         try {
             $tenant = $this->validateTenant();
-            $filters = $request->validated();
             
+            // Get products data using the service
+            $filters = $request->all();
             $products = $this->productService->getProductsForTenant($tenant, $filters);
             $categories = $this->productService->getCategoriesForTenant($tenant);
             $statistics = $this->productService->getStatisticsForTenant($tenant);
             
-            return Inertia::render('modules/products/Products/Index', [
+            // Return products page with SPA structure
+            return Inertia::render('Business/Index', [
+                'activeTab' => 'products',
                 'products' => $products,
                 'categories' => $categories,
                 'filters' => $filters,
                 'statistics' => $statistics,
+                'dashboard_data' => [
+                    'totalProducts' => $statistics['total_products'] ?? 0,
+                    'activeProducts' => $statistics['active_products'] ?? 0,
+                    'lowStock' => $statistics['low_stock'] ?? 0,
+                    'outOfStock' => $statistics['out_of_stock'] ?? 0,
+                ]
             ]);
             
         } catch (\Exception $e) {
+            \Log::error('ProductController::index - Exception', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
             return $this->error('Failed to load products', 500);
         }
     }

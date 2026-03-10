@@ -76,7 +76,12 @@ const tabOptions = computed(() => [
                 <OverviewTab v-if="activeTab === 'overview'" :dashboard-data="dashboardData" />
 
                 <!-- Products Tab -->
-                <ProductsTab v-if="activeTab === 'products'" />
+                <ProductsTab 
+                    v-if="activeTab === 'products'" 
+                    :statistics="dashboardData.productStatistics || {}"
+                    :recent-products="dashboardData.recentProducts || []"
+                    :low-stock-products="dashboardData.lowStockProducts || []"
+                />
 
                 <!-- Orders Tab -->
                 <OrdersTab v-if="activeTab === 'orders'" :dashboard-data="dashboardData" />

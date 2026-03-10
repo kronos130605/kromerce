@@ -68,7 +68,7 @@ const navigationItems = computed(() => {
   if (isBusinessOwner.value) {
     return [
       { href: '/dashboard', label: t('dashboard.nav_dashboard'), icon: '📊' },
-      { href: '/test-products', label: t('dashboard.nav_products'), icon: '📦' },
+      { href: '/products', label: t('dashboard.nav_products'), icon: '📦' },
       { href: '#orders', label: t('dashboard.nav_orders'), icon: '🛒' },
       { href: '#analytics', label: t('dashboard.nav_analytics'), icon: '📈' },
       { href: '#settings', label: t('dashboard.nav_settings'), icon: '⚙️' },

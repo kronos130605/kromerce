@@ -48,11 +48,7 @@
   <!-- Sidebar -->
   <aside
     class="fixed lg:static inset-y-0 left-0 z-30 bg-background dark:bg-gray-900 border-r border-border dark:border-gray-800 transform transition-all duration-300 ease-in-out"
-    :class="[
-      isMobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
-      isCollapsed ? 'w-16 lg:w-16' : 'w-64 lg:w-64',
-      'overflow-hidden'
-    ]"
+    :class="sidebarClasses"
   >
     <!-- Sidebar Header - Always visible -->
     <div class="flex items-center justify-between p-4 border-b border-border dark:border-gray-800 h-16">
@@ -90,19 +86,14 @@
         :href="isActive(item.href) ? '#' : item.href"
         class="flex items-center px-3 py-2.5 rounded-lg transition-colors group relative"
         :class="[
-          isActive(item.href) 
-            ? 'bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 text-white cursor-default shadow-md' 
+          isActive(item.href)
+            ? 'bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 text-white cursor-default shadow-md'
             : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground cursor-pointer',
           isCollapsed ? 'justify-center' : 'justify-start space-x-3'
         ]"
         @click="isActive(item.href) ? $event.preventDefault() : null"
       >
-        <!-- Active indicator dot -->
-        <span 
-          v-if="isActive(item.href)"
-          class="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-1 bg-white rounded-full shadow-md"
-        ></span>
-        
+
         <!-- Icon -->
         <span class="text-xl flex-shrink-0">{{ item.icon }}</span>
 
@@ -136,6 +127,7 @@
     v-if="isCollapsed && !isMobile && showExpandButton"
     @click="toggleSidebar"
     class="fixed left-16 w-6 h-12 bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700 border border-gray-200 dark:border-gray-600 rounded-r-lg shadow-md hover:shadow-lg transition-all duration-300 hover:translate-x-1 flex items-center justify-center z-40 group opacity-0 animate-fade-in"
+    :data-first-render="isFirstLoad && isCollapsed"
     style="top: 72px;"
     title="Expand sidebar"
   >
@@ -166,47 +158,22 @@
 
 <script setup>
 import { Link, usePage } from '@inertiajs/vue3';
-import { computed, ref, onMounted, onUnmounted, watch } from 'vue';
+import { computed } from 'vue';
+import { useSidebar } from '@/Composables/useSidebar.js';
 
 const page = usePage();
 
-// Sidebar state
-const isCollapsed = ref(false);
-const isMobileOpen = ref(false);
-const showExpandButton = ref(false);
-
-// Screen size detection
-const isMobile = ref(false);
-
-const checkScreenSize = () => {
-  isMobile.value = window.innerWidth < 1024;
-  if (isMobile.value) {
-    isMobileOpen.value = false; // Always closed on mobile by default
-  }
-};
-
-onMounted(() => {
-  checkScreenSize();
-  window.addEventListener('resize', checkScreenSize);
-});
-
-onUnmounted(() => {
-  window.removeEventListener('resize', checkScreenSize);
-});
-
-// Watch for collapse state changes
-watch(isCollapsed, (newValue) => {
-  if (newValue && !isMobile.value) {
-    // Sidebar is being collapsed, wait for animation then show button
-    showExpandButton.value = false;
-    setTimeout(() => {
-      showExpandButton.value = true;
-    }, 300); // Wait for sidebar collapse animation
-  } else {
-    // Sidebar is being expanded, hide button immediately
-    showExpandButton.value = false;
-  }
-});
+// Use sidebar composable
+const {
+    isCollapsed,
+    isMobileOpen,
+    showExpandButton,
+    isMobile,
+    sidebarClasses,
+    toggleSidebar,
+    closeMobileSidebar,
+    isFirstLoad
+} = useSidebar();
 
 // Navigation items
 const navigation = computed(() => [
@@ -217,7 +184,7 @@ const navigation = computed(() => [
     badge: null
   },
   {
-    href: '/test-products',
+    href: '/products',
     label: 'Products',
     icon: '📦',
     badge: { type: 'success', text: '0 items' }
@@ -244,7 +211,7 @@ const navigation = computed(() => [
 
 // Methods
 const isActive = (href) => {
-  return page.url.startsWith(href);
+  return page.url === href;
 };
 
 const getBadgeClass = (type) => {
@@ -256,31 +223,13 @@ const getBadgeClass = (type) => {
   };
   return classes[type] || 'bg-muted text-muted-foreground';
 };
-
-const toggleSidebar = () => {
-  if (isMobile.value) {
-    isMobileOpen.value = !isMobileOpen.value;
-  } else {
-    isCollapsed.value = !isCollapsed.value;
-  }
-};
-
-const closeMobileSidebar = () => {
-  isMobileOpen.value = false;
-};
-
-// Expose methods for parent components
-defineExpose({
-  toggleSidebar,
-  closeMobileSidebar
-});
 </script>
 
 <style scoped>
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateX(-10px);
+    transform: translateX(-5px);
   }
   to {
     opacity: 1;
@@ -289,6 +238,18 @@ defineExpose({
 }
 
 .animate-fade-in {
-  animation: fadeIn 0.3s ease-out forwards;
+  animation: fadeIn 0.2s ease-out forwards;
+}
+
+/* Prevenir parpadeo al cambiar de página */
+.animate-fade-in:not([data-first-render="true"]) {
+  animation: none;
+  opacity: 1 !important;
+  transform: translateX(0) !important;
+}
+
+/* Solo animar cuando el botón aparece por primera vez */
+.animate-fade-in[data-first-render="true"] {
+  animation: fadeIn 0.2s ease-out forwards;
 }
 </style>

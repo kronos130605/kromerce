@@ -2,12 +2,9 @@
 
 namespace App\Services;
 
-use App\Models\Product;
+use App\Factories\RepositoryFactory;
 use App\Models\Tenant;
 use App\Models\User;
-use App\Repositories\ProductRepository;
-use App\Repositories\ProductCategoryRepository;
-use App\Repositories\ProductTagRepository;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
@@ -15,8 +12,7 @@ use Illuminate\Support\Collection;
 class ProductService
 {
     public function __construct(
-        private ProductRepository $productRepo,
-        private ProductCategoryRepository $categoryRepo
+        private RepositoryFactory $repositoryFactory
     ) {}
 
     /**
@@ -25,7 +21,7 @@ class ProductService
     public function getProductsForTenant(Tenant $tenant, array $filters = []): LengthAwarePaginator
     {
         try {
-            return $this->productRepo->paginateForTenant($tenant->id, $filters);
+            return $this->repositoryFactory->productRepository()->paginateForTenant($tenant->id, $filters);
         } catch (\Exception $e) {
             throw new \Exception('Failed to retrieve products: ' . $e->getMessage());
         }
@@ -37,7 +33,7 @@ class ProductService
     public function getCategoriesForTenant(Tenant $tenant): Collection
     {
         try {
-            return $this->categoryRepo->getForTenant($tenant->id);
+            return $this->repositoryFactory->productCategoryRepository()->getForTenant($tenant->id);
         } catch (\Exception $e) {
             throw new \Exception('Failed to retrieve categories: ' . $e->getMessage());
         }
@@ -49,7 +45,7 @@ class ProductService
     public function getStatisticsForTenant(Tenant $tenant): array
     {
         try {
-            return $this->productRepo->getStatistics($tenant->id);
+            return $this->repositoryFactory->productRepository()->getStatistics($tenant->id);
         } catch (\Exception $e) {
             throw new \Exception('Failed to retrieve statistics: ' . $e->getMessage());
         }
@@ -64,7 +60,7 @@ class ProductService
             $data['tenant_id'] = $tenant->id;
             $data['created_by'] = $user->id;
 
-            return $this->productRepo->create($data);
+            return $this->repositoryFactory->productRepository()->create($data);
         } catch (\Exception $e) {
             throw new \Exception('Failed to create product: ' . $e->getMessage());
         }
@@ -76,7 +72,7 @@ class ProductService
     public function getProductForTenant(Tenant $tenant, int $productId): ?Model
     {
         try {
-            return $this->productRepo
+            return $this->repositoryFactory->productRepository()
                 ->getById($productId, ['tenant_id' => $tenant->id]);
         } catch (\Exception $e) {
             throw new \Exception('Failed to retrieve product: ' . $e->getMessage());
@@ -89,10 +85,34 @@ class ProductService
     public function updateProductForTenant(Tenant $tenant, int $productId, array $data): bool
     {
         try {
-            return $this->productRepo
+            return $this->repositoryFactory->productRepository()
                 ->update($productId, array_merge($data, ['tenant_id' => $tenant->id]));
         } catch (\Exception $e) {
             throw new \Exception('Failed to update product: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Get latest products for tenant.
+     */
+    public function getLatestProductsForTenant(Tenant $tenant, int $limit = 5): Collection
+    {
+        try {
+            return $this->repositoryFactory->productRepository()->getLatestForTenant($tenant->id, $limit);
+        } catch (\Exception $e) {
+            throw new \Exception('Failed to retrieve latest products: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Get low stock products for tenant.
+     */
+    public function getLowStockProductsForTenant(Tenant $tenant, int $limit = 5): Collection
+    {
+        try {
+            return $this->repositoryFactory->productRepository()->getLowStock($tenant->id)->take($limit);
+        } catch (\Exception $e) {
+            throw new \Exception('Failed to retrieve low stock products: ' . $e->getMessage());
         }
     }
 
@@ -102,7 +122,7 @@ class ProductService
     public function deleteProductForTenant(Tenant $tenant, int $productId): bool
     {
         try {
-            return $this->productRepo
+            return $this->repositoryFactory->productRepository()
                 ->delete($productId, ['tenant_id' => $tenant->id]);
         } catch (\Exception $e) {
             throw new \Exception('Failed to delete product: ' . $e->getMessage());

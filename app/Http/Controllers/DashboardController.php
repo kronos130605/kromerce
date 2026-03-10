@@ -29,6 +29,13 @@ class DashboardController extends Controller
             $dashboardView = $this->dashboardRoutingService->getDashboardViewForUser($user, $tenant);
             $dashboardData = $this->dashboardRoutingService->getDashboardDataForUser($user, $tenant, $dashboardView);
             
+            // For business users, use the new SPA structure
+            if ($dashboardView === 'modules/dashboard/pages/DashboardBusiness') {
+                return Inertia::render('Business/Index', array_merge($dashboardData, [
+                    'activeTab' => 'overview'
+                ]));
+            }
+            
             return Inertia::render($dashboardView, $dashboardData);
             
         } catch (\Exception $e) {

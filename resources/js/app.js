@@ -89,6 +89,27 @@ createInertiaApp({
             );
         }
         
+        // Handle Business routes (special case)
+        if (baseName.startsWith('Business/')) {
+            const businessPage = baseName.replace('Business/', '');
+            const pagePath = `./Pages/Business/${businessPage}.vue`;
+            
+            return resolvePageComponent(
+                pagePath,
+                import.meta.glob('./Pages/**/*.vue'),
+            );
+        }
+        
+        // Handle Business Index (main SPA page)
+        if (baseName === 'Business/Index') {
+            const pagePath = `./Pages/Business/Index.vue`;
+            
+            return resolvePageComponent(
+                pagePath,
+                import.meta.glob('./Pages/**/*.vue'),
+            );
+        }
+        
         // Handle other module routes (Profile/, Products/, etc.)
         if (baseName.includes('/')) {
             const [module, page] = baseName.split('/');

@@ -10,7 +10,8 @@ class DashboardRoutingService
 {
     public function __construct(
         private TenantService $tenantService,
-        private RoleService $roleService
+        private RoleService $roleService,
+        private ProductService $productService
     ) {}
 
     /**
@@ -139,9 +140,30 @@ class DashboardRoutingService
 
             // Solo obtener datos específicos del dashboard si es business
             if ($dashboardView === 'Dashboard/Index' && $tenant) {
-                // Aquí podríamos inyectar DashboardService si es necesario
-                // Por ahora, retornamos datos vacíos para no romper
-                $dashboardData = [];
+                // Obtener datos de productos para el dashboard
+                try {
+                    $productStatistics = $this->productService->getStatisticsForTenant($tenant);
+                    $recentProducts = $this->productService->getLatestProductsForTenant($tenant, 5);
+                    $lowStockProducts = $this->productService->getLowStockProductsForTenant($tenant, 5);
+                    
+                    $dashboardData = [
+                        'productStatistics' => $productStatistics,
+                        'recentProducts' => $recentProducts,
+                        'lowStockProducts' => $lowStockProducts,
+                    ];
+                } catch (\Exception $e) {
+                    Log::error('Error getting product data for dashboard', [
+                        'user_id' => $user->id,
+                        'tenant_id' => $tenant->id,
+                        'error' => $e->getMessage(),
+                    ]);
+                    
+                    $dashboardData = [
+                        'productStatistics' => [],
+                        'recentProducts' => [],
+                        'lowStockProducts' => [],
+                    ];
+                }
             } else {
                 $dashboardData = [];
             }

@@ -11,7 +11,7 @@ use App\Traits\ApiResponse;
 abstract class Controller extends BaseController
 {
     use AuthorizesRequests, ValidatesRequests, ApiResponse;
-    
+
     /**
      * Validate tenant context.
      */
@@ -20,14 +20,19 @@ abstract class Controller extends BaseController
         if (!$tenant) {
             $tenant = tenant();
         }
-        
+
         if (!$tenant) {
+            \Log::error('validateTenant: no tenant found, throwing exception');
             throw new \Exception('No tenant context found');
         }
-        
+
+        \Log::info('validateTenant success', [
+            'tenant_id' => $tenant->id,
+        ]);
+
         return $tenant;
     }
-    
+
     /**
      * Validate user access to tenant.
      */
@@ -36,7 +41,7 @@ abstract class Controller extends BaseController
         if ($user->isSuperAdmin()) {
             return true;
         }
-        
+
         return $user->tenants()->where('tenants.id', $tenant->id)->exists();
     }
 }

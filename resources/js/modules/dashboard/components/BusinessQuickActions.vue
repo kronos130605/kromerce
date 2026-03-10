@@ -12,7 +12,7 @@ const quickActions = computed(() => [
         description: t('dashboard.manage_inventory'),
         icon: '📦',
         color: 'from-blue-500 to-emerald-600',
-        href: '/test-products',
+        href: '/products',
         badge: { type: 'success', text: '156 ' + t('dashboard.items') }
     },
     {
@@ -21,7 +21,7 @@ const quickActions = computed(() => [
         description: 'Create a new product for your catalog',
         icon: '➕',
         color: 'from-green-500 to-emerald-600',
-        href: '/test-products-create',
+        href: '/products/create',
         badge: null
     },
     {

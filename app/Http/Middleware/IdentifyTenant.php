@@ -51,7 +51,7 @@ class IdentifyTenant
             // Make tenant available in views
             view()->share('current_tenant', $tenant);
         } else {
-            Log::warning('IdentifyTenant - No tenant found for hostname', ['hostname' => $hostname]);
+            \Log::warning('IdentifyTenant - No tenant found for hostname', ['hostname' => $hostname]);
         }
 
         return $next($request);
