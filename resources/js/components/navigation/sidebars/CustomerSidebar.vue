@@ -1,10 +1,10 @@
 <script setup>
+import { Link, usePage } from '@inertiajs/vue3';
 import { ref, onMounted, onBeforeUnmount } from 'vue';
-import { usePage } from '@inertiajs/vue3';
-import { Link } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import { useNavigation } from '@/composables/useNavigation.js';
 import { useAuth } from '@/composables/useAuth.js';
+import { useSidebar } from '@/composables/useSidebar.js';
 import { UIIcons } from '@/icons';
 import Icon from '@/components/ui/Icon.vue';
 import Badge from '@/components/ui/Badge.vue';
@@ -18,44 +18,18 @@ const { user, displayName, userAvatar, userInitials, isCustomer } = useAuth();
 // Use navigation composable
 const { sidebarNavigationItems } = useNavigation();
 
-const isCollapsed = ref(false);
-const isMobileOpen = ref(false);
-
-const toggleSidebar = () => {
-  isCollapsed.value = !isCollapsed.value;
-  localStorage.setItem('customerSidebarCollapsed', isCollapsed.value);
-};
-
-const closeMobileSidebar = () => {
-  isMobileOpen.value = false;
-};
-
-const openMobileSidebar = () => {
-  isMobileOpen.value = true;
-};
-
-onMounted(() => {
-  // Load saved state
-  const savedState = localStorage.getItem('customerSidebarCollapsed');
-  if (savedState !== null) {
-    isCollapsed.value = savedState === 'true';
-  }
-
-  // Handle mobile menu
-  const handleResize = () => {
-    if (window.innerWidth >= 1024) {
-      isMobileOpen.value = false;
-    }
-  };
-
-  window.addEventListener('resize', handleResize);
-  handleResize();
-
-  onBeforeUnmount(() => {
-    window.removeEventListener('resize', handleResize);
-  });
-});
-
+// Use sidebar composable
+const {
+    isCollapsed,
+    isMobileOpen,
+    showExpandButton,
+    isMobile,
+    sidebarClasses,
+    toggleSidebar,
+    closeMobileSidebar,
+    openMobileSidebar,
+    isFirstLoad
+} = useSidebar();
 </script>
 
 <template>

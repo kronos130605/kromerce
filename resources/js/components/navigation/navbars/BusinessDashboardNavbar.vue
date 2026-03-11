@@ -74,7 +74,7 @@ onBeforeUnmount(() => {
         : 'bg-white/95 border-b border-border shadow-sm'
     ]"
   >
-    <div class="container mx-auto px-4">
+    <div class="mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between items-center h-16">
         <!-- Logo -->
         <Link href="/public" class="flex items-center group cursor-pointer">
