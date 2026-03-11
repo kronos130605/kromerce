@@ -1,0 +1,323 @@
+{
+  "nav": {
+    "home": "Home",
+    "features": "Features",
+    "testimonials": "Reviews",
+    "pricing": "Pricing",
+    "contact": "Contact",
+    "login": "Login",
+    "register": "Register",
+    "toggle_dark": "Switch to dark mode",
+    "toggle_light": "Switch to light mode"
+  },
+  "hero": {
+    "badge": "Business Platform",
+    "title_line1": "The future of",
+    "title_line2": "is here",
+    "subtitle": "Transform your business with the most advanced platform on the market. Global payments, real-time analytics and unlimited growth.",
+    "cta": "Start Free",
+    "learn_more": "View Demo",
+    "social_proof": {
+      "active_businesses": "10K+ active businesses",
+      "processed": "$2M+ processed",
+      "countries": "150+ countries"
+    },
+    "floating_cards": {
+      "dashboard_analytics": {
+        "title": "Dashboard Analytics",
+        "value": "$24,500",
+        "change": "+12%"
+      },
+      "active_users": {
+        "title": "Active Users",
+        "value": "1,234",
+        "change": "+8%"
+      },
+      "conversion_rate": {
+        "title": "Conversion Rate",
+        "value": "3.2%",
+        "change": "+15%"
+      }
+    }
+  },
+  "cta": {
+    "title": "Ready to transform your",
+    "title_highlight": "business today?",
+    "subtitle": "Join thousands of businesses already selling more, managing better, and growing faster with Kromerce.",
+    "benefits": {
+      "setup": "Setup in less than 5 minutes",
+      "no_card": "No credit card required",
+      "cancel": "Cancel anytime",
+      "support": "24/7 support from day 1"
+    },
+    "form": {
+      "title": "Start your free trial",
+      "name_label": "Full Name",
+      "name_placeholder": "Your name",
+      "email_label": "Email",
+      "email_placeholder": "your email address",
+      "business_label": "Business Name",
+      "business_placeholder": "Your business",
+      "message_label": "Message (Optional)",
+      "message_placeholder": "Tell us about your business...",
+      "submitting": "Sending...",
+      "submit": "Start Free →",
+      "success": "Thank you for contacting us! We'll respond within 24 hours."
+    },
+    "trust": {
+      "secure": "Secure and encrypted",
+      "response": "24h response",
+      "commitment": "No commitment"
+    }
+  },
+  "pricing": {
+    "title": "Simple pricing for",
+    "title_highlight": "all businesses",
+    "subtitle": "Grow with us. From individual entrepreneurs to large enterprises, we have the perfect plan for you.",
+    "monthly": "Monthly",
+    "yearly": "Yearly",
+    "yearly_discount": "-20%",
+    "most_popular": "Most Popular",
+    "save": "Save",
+    "per_month": "month",
+    "per_year": "year",
+    "free": "Free",
+    "plans": {
+      "starter": {
+        "name": "Starter",
+        "description": "Perfect for starting businesses",
+        "features": [
+          "Up to 100 products",
+          "Basic payments",
+          "Simple dashboard",
+          "Email support",
+          "1% commission per sale",
+          "Kromerce branding"
+        ],
+        "cta": "Start Free"
+      },
+      "professional": {
+        "name": "Professional",
+        "description": "Ideal for growing businesses",
+        "features": [
+          "Unlimited products",
+          "Advanced payments",
+          "Complete analytics",
+          "Priority support",
+          "0.5% commission per sale",
+          "No branding",
+          "Basic API",
+          "Popular integrations"
+        ],
+        "cta": "Start Trial"
+      },
+      "enterprise": {
+        "name": "Enterprise",
+        "description": "For large operations and customization",
+        "features": [
+          "Everything in Professional",
+          "Complete API",
+          "Custom integrations",
+          "Dedicated account manager",
+          "Guaranteed SLA",
+          "Personalized onboarding",
+          "White label available",
+          "Dedicated servers"
+        ],
+        "cta": "Contact Sales"
+      }
+    },
+    "questions": {
+      "title": "Questions about our plans?",
+      "subtitle": "Our team is ready to help you find the perfect plan for your business.",
+      "talk_sales": "Talk to Sales",
+      "documentation": "View Documentation"
+    }
+  },
+  "features": {
+    "title": "Everything you need to",
+    "title_highlight": "grow your business",
+    "subtitle": "Professional tools designed to help you sell more, manage better, and make smart decisions.",
+    "list": [
+      {
+        "title": "Intuitive Dashboard",
+        "description": "Manage your business with an interface designed to maximize your productivity and make intelligent decisions."
+      },
+      {
+        "title": "Global Payments",
+        "description": "Accept payments from anywhere in the world with multiple methods and currencies, no technical complications."
+      },
+      {
+        "title": "Enterprise Security",
+        "description": "Bank-level protection with SSL encryption, PCI compliance and 24/7 monitoring of your business."
+      },
+      {
+        "title": "Fast Performance",
+        "description": "Optimized loading time and smooth experience for your customers, increasing conversions up to 40%."
+      },
+      {
+        "title": "24/7 Support",
+        "description": "Expert team available whenever you need it. Chat, email and phone to resolve any questions."
+      },
+      {
+        "title": "Advanced Analytics",
+        "description": "Detailed insights on sales, customers and trends. Make decisions based on real data."
+      }
+    ],
+    "cta": {
+      "question": "Ready to transform your business?",
+      "button": "Explore all features"
+    }
+  },
+  "testimonials": {
+    "title": "What our",
+    "title_highlight": "clients say",
+    "subtitle": "Thousands of businesses are already growing with Kromerce. Discover their success stories.",
+    "industries": {
+      "retail": "Retail",
+      "services": "Services",
+      "technology": "Technology",
+      "creative": "Creative"
+    },
+    "cta": {
+      "title": "Ready to join thousands of successful businesses?",
+      "subtitle": "Start free and scale as you grow. No credit card, no commitment.",
+      "start_free": "Start Free",
+      "case_studies": "View Case Studies"
+    }
+  },
+  "stats": {
+    "title": "Numbers that speak for",
+    "title_highlight": "themselves",
+    "subtitle": "Our platform's growth reflects our clients' success. Join thousands of businesses already transforming their future.",
+    "businesses": {
+      "label": "Active Businesses",
+      "description": "Trust Kromerce to grow"
+    },
+    "countries": {
+      "label": "Countries",
+      "description": "Global presence with local support"
+    },
+    "uptime": {
+      "label": "Uptime",
+      "description": "Guaranteed availability"
+    },
+    "support": {
+      "label": "Support",
+      "description": "Help when you need it"
+    },
+    "additional": {
+      "processed": "Processed in transactions",
+      "rating": "Average customer rating",
+      "response_time": "Average response time"
+    }
+  },
+  "pwa": {
+    "install_title": "Install Kromerce",
+    "install_description": "Install our app for quick access and better experience",
+    "install_button": "Install",
+    "install_app_button": "Install App",
+    "firefox_install_title": "To install Kromerce in Firefox:",
+    "firefox_method_1_title": "📋 METHOD 1 - Firefox Menu:",
+    "firefox_method_1_step_1": "Click the three-dot menu (⋮) in the top right",
+    "firefox_method_1_step_2": "Select \"Install this site as an app\"",
+    "firefox_method_1_step_3": "Confirm by clicking \"Install\"",
+    "firefox_method_2_title": "📋 METHOD 2 - Page Icon:",
+    "firefox_method_2_step_1": "Click the page icon (📄) in the address bar",
+    "firefox_method_2_step_2": "Select \"Install Application\" or \"Install\"",
+    "firefox_note": "NOTE: Firefox doesn't show automatic installation banner. You must install manually using one of the methods above.",
+    "offline_message": "You are browsing offline",
+    "content_cached": "Content cached for offline use"
+  },
+  "footer": {
+    "description": "E-commerce platform for modern businesses",
+    "links": {
+      "about": "About",
+      "features": "Features",
+      "pricing": "Pricing",
+      "contact": "Contact",
+      "blog": "Blog",
+      "careers": "Careers",
+      "privacy": "Privacy",
+      "terms": "Terms",
+      "integrations": "Integrations",
+      "api": "API",
+      "cookies": "Cookies",
+      "gdpr": "GDPR",
+      "product": "Product",
+      "company": "Company",
+      "legal": "Legal"
+    },
+    "social": {
+      "twitter": "Follow us on Twitter",
+      "linkedin": "Connect on LinkedIn",
+      "github": "View on GitHub"
+    },
+    "copyright": "© 2026 Kromerce. All rights reserved."
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "close": "Close",
+    "save": "Save",
+    "edit": "Edit",
+    "delete": "Delete",
+    "submit": "Submit",
+    "search": "Search",
+    "filter": "Filter",
+    "sort": "Sort",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "yes": "Yes",
+    "no": "No",
+    "ok": "OK",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "warning": "Warning",
+    "info": "Information",
+    "and": "and",
+    "sold": "sold",
+    "in_stock": "In Stock",
+    "medium_stock": "Medium Stock",
+    "low_stock": "Low Stock",
+    "growth": "growth",
+    "articles": "items",
+    "processing": "Processing",
+    "shipped": "Shipped",
+    "active": "active",
+    "new": "New",
+    "pending": "pending",
+    "products": "Products",
+    "orders": "Orders",
+    "customers": "Customers",
+    "total_revenue": "Total Revenue",
+    "total_orders": "Total Orders",
+    "total_users": "Total Users",
+    "quick_actions": "Quick Actions",
+    "recent_orders": "Recent Orders",
+    "top_products": "Top Products",
+    "settings": "Settings",
+    "support": "Support",
+    "profile": "Profile",
+    "notifications": "Notifications",
+    "logout": "Logout",
+    "register": "Register",
+    "unregister": "Unregister",
+    "view_all": "View all",
+    "track_order": "Track Order",
+    "wishlist": "Wishlist",
+    "payment": "Payment",
+    "addresses": "Addresses",
+    "reviews": "reviews",
+    "events": "Events",
+    "analytics": "Analytics"
+  },
+  "tabs": {
+    "overview": "Overview",
+    "products": "Products",
+    "orders": "Orders",
+    "events": "Events"
+  }
+}

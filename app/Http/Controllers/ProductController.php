@@ -14,7 +14,10 @@ class ProductController extends Controller
 {
     public function __construct(
         private ProductService $productService
-    ) {}
+    ) {
+        // Apply business role middleware to all product methods
+        $this->middleware('role:business');
+    }
 
     /**
      * Display products page.

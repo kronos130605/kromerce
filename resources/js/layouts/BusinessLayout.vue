@@ -36,6 +36,7 @@ import { useI18n } from 'vue-i18n';
 import BusinessSidebar from '@/components/navigation/sidebars/BusinessSidebar.vue';
 import BusinessDashboardNavbar from '@/components/navigation/navbars/BusinessDashboardNavbar.vue';
 import { useSidebar } from '@/composables/useSidebar.js';
+import { useRoleGuard } from '@/composables/useRoleGuard.js';
 
 // Import content components
 import DashboardContent from '@/modules/business/content/DashboardContent.vue';
@@ -48,8 +49,14 @@ const { t } = useI18n();
 const sidebarRef = ref(null);
 const navbarRef = ref(null);
 
-// Use sidebar composable
+// Use composables
 const { isCollapsed } = useSidebar();
+const { requireBusinessRole } = useRoleGuard();
+
+// Role validation - redirect if not business user
+onMounted(() => {
+    requireBusinessRole('dashboard');
+});
 
 // Get active tab from props or default to overview
 const activeTab = computed(() => page.props.activeTab || 'overview');

@@ -7,20 +7,7 @@ import { createApp, h } from 'vue';
 import { ZiggyVue } from 'ziggy-js';
 
 // Import i18n configuration
-import { createI18n } from 'vue-i18n';
-import enMessages from './i18n/locales/en.json';
-import esMessages from './i18n/locales/es.json';
-
-// Create i18n instance
-const i18n = createI18n({
-    legacy: false,
-    locale: 'en',
-    fallbackLocale: 'en',
-    messages: {
-        en: enMessages,
-        es: esMessages,
-    },
-});
+import { i18n } from './i18n.js';
 
 // PWA Service Worker Registration - manejado por VitePWA
 if ('serviceWorker' in navigator) {
