@@ -41,39 +41,19 @@
 
   <!-- Sidebar -->
   <aside
-    class="fixed lg:static inset-y-0 left-0 z-30 bg-background dark:bg-gray-900 border-r border-border dark:border-gray-800 transform transition-all duration-300 ease-in-out"
-    :class="sidebarClasses"
+    class="fixed top-16 left-0 z-50 h-[calc(100vh-4rem)]
+    bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700
+    transform transition-all duration-300 ease-in-out
+    lg:relative lg:transform-none
+    ${isCollapsed ? 'lg:w-16 w-64' : 'w-64'}
+    ${isMobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+    "
   >
-    <!-- Sidebar Header - Always visible -->
-    <div class="flex items-center justify-between p-4 border-b border-border dark:border-gray-800 h-16">
-      <!-- Logo/Title -->
-      <div class="flex items-center space-x-3">
-        <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
-          K
-        </div>
-        <h3 v-if="!isCollapsed" class="text-lg font-semibold text-foreground truncate">Menu</h3>
-      </div>
+    <!-- Content Wrapper -->
+    <div class="h-full flex flex-col">
 
-      <!-- Collapse Toggle (Desktop) - Hidden when collapsed -->
-      <button
-        v-if="!isMobile && !isCollapsed"
-        @click="toggleSidebar"
-        class="p-2 rounded-lg hover:bg-accent transition-colors flex-shrink-0"
-        title="Collapse sidebar"
-      >
-        <svg
-          class="w-5 h-5 transition-transform duration-300"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"></path>
-        </svg>
-      </button>
-    </div>
-
-      <!-- Navigation - Always visible -->
-    <nav class="h-[calc(100vh-4rem)] overflow-y-auto p-2 space-y-1">
+      <!-- Navigation -->
+      <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
       <Link
         v-for="item in sidebarNavigationItems"
         :key="item.href"
@@ -120,39 +100,18 @@
         </div>
       </Link>
     </nav>
-  </aside>
+    </div>
 
-  <!-- Desktop Expand Button - Outside sidebar container -->
-  <aside>
+    <!-- Collapse Toggle (Desktop) -->
     <button
-    v-if="isCollapsed && !isMobile && showExpandButton"
-    @click="toggleSidebar"
-    class="fixed left-16 w-6 h-12 bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700 border border-gray-200 dark:border-gray-600 rounded-r-lg shadow-md hover:shadow-lg transition-all duration-300 hover:translate-x-1 flex items-center justify-center z-40 group opacity-0 animate-fade-in"
-    :data-first-render="isFirstLoad && isCollapsed"
-    style="top: 72px;"
-    title="Expand sidebar"
-  >
-      <!-- Vertical gradient line for visual effect -->
-      <span class="absolute left-0 top-0 bottom-0 w-0.5 bg-gradient-to-b from-blue-400 to-blue-600 rounded-l-full"></span>
-
-      <!-- Icon container -->
-      <span class="relative flex items-center justify-center">
-        <svg
-          class="w-4 h-4 text-gray-600 dark:text-gray-300 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-200"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-        </svg>
-      </span>
-
-      <!-- Hover effect overlay -->
-      <span class="absolute inset-0 bg-gradient-to-r from-transparent via-blue-50 to-blue-100 dark:from-transparent dark:via-blue-900/20 dark:to-blue-900/40 rounded-r-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200"></span>
-
-      <!-- Subtle top and bottom borders -->
-      <span class="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-gray-300 dark:via-gray-600 to-transparent"></span>
-      <span class="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-gray-300 dark:via-gray-600 to-transparent"></span>
+      @click="toggleSidebar"
+      class="hidden lg:flex absolute -right-3 top-8 items-center justify-center w-6 h-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full shadow-md hover:shadow-lg transition-all duration-200 z-10"
+    >
+      <Icon
+        name="chevronLeft"
+        category="ui"
+        :class="`text-gray-600 dark:text-gray-400 transform transition-transform duration-200 ${isCollapsed ? 'rotate-180' : ''}`"
+      />
     </button>
   </aside>
 </template>

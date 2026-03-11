@@ -3,19 +3,14 @@
     <!-- Business Dashboard Navbar -->
     <BusinessDashboardNavbar ref="navbarRef" />
 
-    <div class="flex pt-16">
-      <!-- Sidebar -->
+    <!-- Contenedor principal con misma estructura que CustomerLayout -->
+    <div class="flex h-[calc(100vh-10px)]">
+      <!-- Business Sidebar -->
       <BusinessSidebar ref="sidebarRef" />
 
-      <!-- Main Content with dynamic width adjustment -->
-      <main
-        class="flex-1 overflow-y-auto transition-all duration-300"
-        :class="{
-          'lg:ml-0': sidebarRef?.isCollapsed
-        }"
-      >
-        <!-- Dynamic Content Slot -->
-        <div class="pt-2 px-2 pb-2">
+      <!-- Main Content -->
+      <main class="flex-1 overflow-y-auto">
+        <div class="px-4 pb-4 pt-[5rem] h-full">
           <component
             :is="currentContent"
             :products="page.props.products"
