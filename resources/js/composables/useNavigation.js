@@ -1,4 +1,5 @@
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useAuth } from './useAuth.js';
 import { usePage } from '@inertiajs/vue3';
 import { BusinessIcons, CustomerIcons } from '@/icons';
@@ -6,6 +7,7 @@ import { BusinessIcons, CustomerIcons } from '@/icons';
 export function useNavigation() {
     const { isCustomer, isBusinessUser, isSuperAdmin } = useAuth();
     const page = usePage();
+    const { t } = useI18n();
 
     // Debug: Verificar roles y navegación
     console.log('useNavigation - isCustomer:', isCustomer.value);
@@ -60,28 +62,28 @@ export function useNavigation() {
             return [
                 { 
                     name: 'dashboard', 
-                    label: 'Dashboard', 
+                    label: t('dashboard.nav_dashboard'), 
                     icon: CustomerIcons.dashboard,
                     href: '/dashboard',
                     active: currentUrl.startsWith('/dashboard')
                 },
                 { 
                     name: 'stores', 
-                    label: 'Stores', 
+                    label: t('dashboard.nav_stores'), 
                     icon: CustomerIcons.stores,
                     href: '/stores',
                     active: currentUrl.startsWith('/stores')
                 },
                 { 
                     name: 'orders', 
-                    label: 'My Orders', 
+                    label: t('dashboard.nav_my_orders'), 
                     icon: CustomerIcons.orders,
                     href: '/orders',
                     active: currentUrl.startsWith('/orders')
                 },
                 { 
                     name: 'wishlist', 
-                    label: 'Wishlist', 
+                    label: t('dashboard.nav_wishlist'), 
                     icon: CustomerIcons.wishlist,
                     href: '/wishlist',
                     active: currentUrl.startsWith('/wishlist'),
@@ -89,14 +91,14 @@ export function useNavigation() {
                 },
                 { 
                     name: 'profile', 
-                    label: 'Profile', 
+                    label: t('dashboard.nav_profile'), 
                     icon: CustomerIcons.profile,
                     href: '/profile',
                     active: currentUrl.startsWith('/profile')
                 },
                 { 
                     name: 'settings', 
-                    label: 'Settings', 
+                    label: t('dashboard.nav_settings'), 
                     icon: CustomerIcons.settings,
                     href: '/settings',
                     active: currentUrl.startsWith('/settings')
@@ -108,63 +110,63 @@ export function useNavigation() {
             return [
                 { 
                     name: 'dashboard', 
-                    label: 'Dashboard', 
+                    label: t('dashboard.nav_dashboard'), 
                     icon: BusinessIcons.dashboard,
                     href: '/dashboard',
                     active: currentUrl.startsWith('/dashboard')
                 },
                 { 
                     name: 'products', 
-                    label: 'Products', 
+                    label: t('dashboard.nav_products'), 
                     icon: BusinessIcons.products,
                     href: '/products',
                     active: currentUrl.startsWith('/products')
                 },
                 { 
                     name: 'orders', 
-                    label: 'Orders', 
+                    label: t('dashboard.nav_orders'), 
                     icon: BusinessIcons.orders,
                     href: '#orders',
                     active: currentUrl.includes('/orders')
                 },
                 { 
                     name: 'inventory', 
-                    label: 'Inventory', 
+                    label: t('dashboard.nav_inventory'), 
                     icon: BusinessIcons.inventory,
                     href: '#inventory',
                     active: currentUrl.includes('/inventory')
                 },
                 { 
                     name: 'customers', 
-                    label: 'Customers', 
+                    label: t('dashboard.nav_customers'), 
                     icon: BusinessIcons.customers,
                     href: '#customers',
                     active: currentUrl.includes('/customers')
                 },
                 { 
                     name: 'analytics', 
-                    label: 'Analytics', 
+                    label: t('dashboard.nav_analytics'), 
                     icon: BusinessIcons.analytics,
                     href: '#analytics',
                     active: currentUrl.includes('/analytics')
                 },
                 { 
                     name: 'marketing', 
-                    label: 'Marketing', 
+                    label: t('dashboard.nav_marketing'), 
                     icon: BusinessIcons.marketing,
                     href: '#marketing',
                     active: currentUrl.includes('/marketing')
                 },
                 { 
                     name: 'reports', 
-                    label: 'Reports', 
+                    label: t('dashboard.nav_reports'), 
                     icon: BusinessIcons.reports,
                     href: '#reports',
                     active: currentUrl.includes('/reports')
                 },
                 { 
                     name: 'settings', 
-                    label: 'Settings', 
+                    label: t('dashboard.nav_settings'), 
                     icon: BusinessIcons.settings,
                     href: '#settings',
                     active: currentUrl.includes('/settings')
