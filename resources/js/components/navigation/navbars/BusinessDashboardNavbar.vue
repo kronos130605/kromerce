@@ -1,57 +1,34 @@
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
-import { usePage } from '@inertiajs/vue3';
+import { ref, onMounted, onBeforeUnmount, computed } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
-import Button from '@/components/ui/Button.vue';
+import { useAuth } from '@/composables/useAuth.js';
+import { useDarkMode } from '@/composables/useDarkMode.js';
+import { useNavigation } from '@/composables/useNavigation.js';
 import Badge from '@/components/ui/Badge.vue';
 import LanguageSelector from '@/components/shared/LanguageSelector.vue';
 
-const page = usePage();
-const user = computed(() => page.props.auth.user);
-const currentTenant = computed(() => page.props.current_tenant);
 const { t } = useI18n();
 
-// Check user role
-const isBusinessOwner = computed(() => {
-    const roles = user.value?.roles || [];
-    return roles.some(role => role.name === 'business_owner') || user.value?.role === 'business_owner';
-});
+// Use auth composable
+const {
+    user,
+    currentTenant,
+    isBusinessOwner,
+    isSuperAdmin,
+    displayName,
+    userInitials,
+    userAvatar,
+} = useAuth();
 
-const isSuperAdmin = computed(() => {
-    const roles = user.value?.roles || [];
-    return roles.some(role => role.name === 'super_admin') || user.value?.role === 'super_admin';
-});
+// Use dark mode composable
+const { isDark, toggleDarkMode } = useDarkMode();
 
 const isOpen = ref(false);
-const isDarkTheme = ref(false);
 const showUserDropdown = ref(false);
 const userDropdownRef = ref(null);
 
-let observer;
 let onDocumentClick;
-
-const applyDarkClass = (enabled) => {
-  if (enabled) {
-    document.documentElement.classList.add('dark');
-  } else {
-    document.documentElement.classList.remove('dark');
-  }
-};
-
-const syncDarkThemeFromDom = () => {
-  isDarkTheme.value = document.documentElement.classList.contains('dark');
-};
-
-const toggleDarkMode = () => {
-  isDarkTheme.value = !isDarkTheme.value;
-  applyDarkClass(isDarkTheme.value);
-  try {
-    localStorage.setItem('kromerce_theme', isDarkTheme.value ? 'dark' : 'light');
-  } catch {
-    // ignore
-  }
-};
 
 const navigateTo = (href) => {
   router.visit(href);
@@ -63,46 +40,11 @@ const logout = () => {
   showUserDropdown.value = false;
 };
 
-// Navigation items for business dashboard
-const navigationItems = computed(() => {
-  if (isBusinessOwner.value) {
-    return [
-      { href: '/dashboard', label: t('dashboard.nav_dashboard'), icon: '📊' },
-      { href: '/products', label: t('dashboard.nav_products'), icon: '📦' },
-      { href: '#orders', label: t('dashboard.nav_orders'), icon: '🛒' },
-      { href: '#analytics', label: t('dashboard.nav_analytics'), icon: '📈' },
-      { href: '#settings', label: t('dashboard.nav_settings'), icon: '⚙️' },
-    ];
-  } else if (isSuperAdmin.value) {
-    return [
-      { href: '/dashboard', label: t('dashboard.nav_dashboard'), icon: '🔧' },
-      { href: '#users', label: t('dashboard.nav_users'), icon: '👥' },
-      { href: '#tenants', label: t('dashboard.nav_tenants'), icon: '🏢' },
-      { href: '#analytics', label: t('dashboard.nav_analytics'), icon: '📊' },
-      { href: '#settings', label: t('dashboard.nav_settings'), icon: '⚙️' },
-    ];
-  }
-  return [];
-});
+// Use navigation composable
+const { navigationItems } = useNavigation();
 
 onMounted(() => {
-  try {
-    const stored = localStorage.getItem('kromerce_theme');
-    if (stored === 'dark' || stored === 'light') {
-      applyDarkClass(stored === 'dark');
-    }
-  } catch {
-    // ignore
-  }
-
-  syncDarkThemeFromDom();
-
-  observer = new MutationObserver(syncDarkThemeFromDom);
-  observer.observe(document.documentElement, {
-    attributes: true,
-    attributeFilter: ['class'],
-  });
-
+  // Close dropdown when clicking outside
   onDocumentClick = (event) => {
     if (!showUserDropdown.value) return;
     const el = userDropdownRef.value;
@@ -116,30 +58,18 @@ onMounted(() => {
 });
 
 onBeforeUnmount(() => {
-  if (observer) {
-    observer.disconnect();
-    observer = undefined;
-  }
-
   if (onDocumentClick) {
     document.removeEventListener('click', onDocumentClick, true);
     onDocumentClick = undefined;
   }
 });
-
-// Toggle sidebar method
-const toggleSidebar = () => {
-  // Emit event to parent or use global event bus
-  const event = new CustomEvent('toggle-sidebar');
-  document.dispatchEvent(event);
-};
 </script>
 
 <template>
   <header
     :class="[
       'fixed top-0 left-0 right-0 z-50 backdrop-blur-md transition-all duration-300',
-      isDarkTheme
+      isDark
         ? 'bg-gray-900/95 border-b border-gray-800'
         : 'bg-white/95 border-b border-border shadow-sm'
     ]"
@@ -154,7 +84,7 @@ const toggleSidebar = () => {
               alt="Kromerce"
               :class="[
                 'h-8 w-auto object-contain transition-transform duration-300 group-hover:scale-110',
-                isDarkTheme ? 'filter brightness-0 invert' : ''
+                isDark ? 'filter brightness-0 invert' : ''
               ]"
             />
           </div>
@@ -168,13 +98,13 @@ const toggleSidebar = () => {
             :href="href"
             :class="[
               'flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
-              isDarkTheme
+              isDark
                 ? 'text-gray-300 hover:text-white hover:bg-gray-800'
                 : 'text-foreground hover:text-foreground hover:bg-accent'
             ]"
           >
             <span>{{ icon }}</span>
-            {{ label }}
+            {{ t(label) }}
           </Link>
         </nav>
 
@@ -186,7 +116,7 @@ const toggleSidebar = () => {
               variant="secondary"
               :class="[
                 'text-xs',
-                isDarkTheme
+                isDark
                   ? 'bg-gray-800 text-gray-300 border-gray-700'
                   : 'bg-muted text-foreground'
               ]"
@@ -201,15 +131,25 @@ const toggleSidebar = () => {
               @click.stop="showUserDropdown = !showUserDropdown"
               :class="[
                 'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer',
-                isDarkTheme
+                isDark
                   ? 'text-gray-300 hover:text-white hover:bg-gray-800'
                   : 'text-foreground hover:text-foreground hover:bg-accent'
               ]"
             >
-              <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-sm font-bold">
-                {{ user.name.charAt(0).toUpperCase() }}
-              </div>
-              <span class="hidden md:block">{{ user.name }}</span>
+              <!-- Avatar fallback with initials -->
+              <span
+                v-if="!user?.avatar"
+                class="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-sm font-bold"
+              >
+                {{ userInitials }}
+              </span>
+              <img
+                v-else
+                :src="userAvatar"
+                :alt="displayName"
+                class="h-8 w-8 rounded-full object-cover"
+              />
+              <span class="hidden md:block">{{ displayName }}</span>
               <svg class="w-4 h-4 transition-transform" :class="{ 'rotate-180': showUserDropdown }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
               </svg>
@@ -221,14 +161,14 @@ const toggleSidebar = () => {
               ref="userDropdownRef"
               :class="[
                 'absolute right-0 top-full mt-2 w-56 rounded-lg border shadow-lg py-2 z-50',
-                isDarkTheme
+                isDark
                   ? 'bg-gray-900 border-gray-800'
                   : 'bg-background border-border'
               ]"
             >
               <!-- User Info -->
-              <div class="px-4 py-3 border-b" :class="isDarkTheme ? 'border-gray-800' : 'border-border'">
-                <p class="text-sm font-medium">{{ user.name }}</p>
+              <div class="px-4 py-3 border-b" :class="isDark ? 'border-gray-800' : 'border-border'">
+                <p class="text-sm font-medium">{{ displayName }}</p>
                 <p class="text-xs text-muted-foreground">{{ user.email }}</p>
                 <div v-if="isBusinessOwner" class="mt-2">
                   <Badge variant="secondary" class="text-xs">Business Owner</Badge>
@@ -244,7 +184,7 @@ const toggleSidebar = () => {
                   href="/profile"
                   :class="[
                     'flex items-center gap-3 px-4 py-2 text-sm transition-colors',
-                    isDarkTheme
+                    isDark
                       ? 'text-gray-300 hover:text-white hover:bg-gray-800'
                       : 'text-foreground hover:text-foreground hover:bg-accent'
                   ]"
@@ -257,7 +197,7 @@ const toggleSidebar = () => {
                   href="#billing"
                   :class="[
                     'flex items-center gap-3 px-4 py-2 text-sm transition-colors',
-                    isDarkTheme
+                    isDark
                       ? 'text-gray-300 hover:text-white hover:bg-gray-800'
                       : 'text-foreground hover:text-foreground hover:bg-accent'
                   ]"
@@ -268,12 +208,12 @@ const toggleSidebar = () => {
               </div>
 
               <!-- Logout -->
-              <div class="pt-2 border-t" :class="isDarkTheme ? 'border-gray-800' : 'border-border'">
+              <div class="pt-2 border-t" :class="isDark ? 'border-gray-800' : 'border-border'">
                 <button
                   @click="logout"
                   :class="[
                     'flex items-center gap-3 w-full px-4 py-2 text-sm transition-colors text-left',
-                    isDarkTheme
+                    isDark
                       ? 'text-red-400 hover:text-red-300 hover:bg-gray-800'
                       : 'text-red-600 hover:text-red-700 hover:bg-accent'
                   ]"
@@ -292,9 +232,9 @@ const toggleSidebar = () => {
           <button
             @click="toggleDarkMode"
             class="p-2 rounded-lg hover:bg-accent transition-colors cursor-pointer"
-            :title="isDarkTheme ? 'Switch to light mode' : 'Switch to dark mode'"
+            :title="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
           >
-            <span v-if="!isDarkTheme" class="text-xl">🌙</span>
+            <span v-if="!isDark" class="text-xl">🌙</span>
             <span v-else class="text-xl">☀️</span>
           </button>
         </div>
@@ -308,9 +248,9 @@ const toggleSidebar = () => {
           <button
             @click="toggleDarkMode"
             class="p-2 rounded-lg hover:bg-accent transition-colors cursor-pointer"
-            :title="isDarkTheme ? 'Switch to light mode' : 'Switch to dark mode'"
+            :title="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
           >
-            <span v-if="!isDarkTheme" class="text-xl">🌙</span>
+            <span v-if="!isDark" class="text-xl">🌙</span>
             <span v-else class="text-xl">☀️</span>
           </button>
 
@@ -331,7 +271,7 @@ const toggleSidebar = () => {
         v-if="isOpen"
         :class="[
           'lg:hidden transition-all duration-300',
-          isDarkTheme
+          isDark
             ? 'bg-gray-900 border-t border-gray-800'
             : 'bg-background border-t border-border'
         ]"
@@ -344,24 +284,34 @@ const toggleSidebar = () => {
             @click="navigateTo(href)"
             :class="[
               'flex items-center gap-3 w-full px-4 py-3 text-sm font-medium transition-colors cursor-pointer',
-              isDarkTheme
+              isDark
                 ? 'text-gray-300 hover:text-white hover:bg-gray-800'
                 : 'text-foreground/80 hover:text-foreground hover:bg-accent'
             ]"
           >
             <span>{{ icon }}</span>
-            {{ label }}
+            {{ t(label) }}
           </button>
 
-          <div :class="['pt-4 border-t', isDarkTheme ? 'border-gray-800' : 'border-border']">
+          <div :class="['pt-4 border-t', isDark ? 'border-gray-800' : 'border-border']">
             <!-- User Info Mobile -->
             <div class="px-4 py-3 space-y-2">
               <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold">
-                  {{ user.name.charAt(0).toUpperCase() }}
+                <!-- Avatar fallback with initials -->
+                <div 
+                  v-if="!user?.avatar"
+                  class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold"
+                >
+                  {{ userInitials }}
                 </div>
+                <img
+                  v-else
+                  :src="userAvatar"
+                  :alt="displayName"
+                  class="h-10 w-10 rounded-full object-cover"
+                />
                 <div>
-                  <p class="text-sm font-medium">{{ user.name }}</p>
+                  <p class="text-sm font-medium">{{ displayName }}</p>
                   <p class="text-xs text-muted-foreground">{{ user.email }}</p>
                 </div>
               </div>
@@ -380,7 +330,7 @@ const toggleSidebar = () => {
                 @click="navigateTo('/profile')"
                 :class="[
                   'flex items-center gap-3 w-full px-4 py-3 text-sm transition-colors cursor-pointer',
-                  isDarkTheme
+                  isDark
                     ? 'text-gray-300 hover:text-white hover:bg-gray-800'
                     : 'text-foreground/80 hover:text-foreground hover:bg-accent'
                 ]"
@@ -393,7 +343,7 @@ const toggleSidebar = () => {
                 @click="logout"
                 :class="[
                   'flex items-center gap-3 w-full px-4 py-3 text-sm transition-colors cursor-pointer',
-                  isDarkTheme
+                  isDark
                     ? 'text-red-400 hover:text-red-300 hover:bg-gray-800'
                     : 'text-red-600 hover:text-red-700 hover:bg-accent'
                 ]"

@@ -398,7 +398,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { Link, router } from '@inertiajs/vue3'
 import { debounce } from 'lodash'
-import BusinessLayout from '@/Layouts/BusinessLayout.vue';
+import BusinessLayout from '@/layouts/BusinessLayout.vue';
 import ProductCard from '@/modules/products/components/ProductCard.vue';
 
 const props = defineProps({

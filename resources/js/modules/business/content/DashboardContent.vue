@@ -5,13 +5,13 @@ import { useI18n } from 'vue-i18n';
 import { Link } from '@inertiajs/vue3';
 
 // Import business dashboard components
-import BusinessWelcome from '@/modules/dashboard/components/BusinessWelcome.vue';
-import BusinessStats from '@/modules/dashboard/components/BusinessStats.vue';
-import BusinessQuickActions from '@/modules/dashboard/components/BusinessQuickActions.vue';
-import TopProducts from '@/modules/dashboard/components/TopProducts.vue';
-import RecentOrders from '@/modules/dashboard/components/RecentOrders.vue';
-import BusinessCurrencyStatus from '@/modules/dashboard/components/BusinessCurrencyStatus.vue';
-import BusinessAnalytics from '@/modules/dashboard/components/BusinessAnalytics.vue';
+import BusinessWelcome from '@/components/dashboard/BusinessWelcome.vue';
+import BusinessStats from '@/components/dashboard/BusinessStats.vue';
+import BusinessQuickActions from '@/components/dashboard/BusinessQuickActions.vue';
+import TopProducts from '@/components/dashboard/TopProducts.vue';
+import RecentOrders from '@/components/dashboard/RecentOrders.vue';
+import BusinessCurrencyStatus from '@/components/dashboard/BusinessCurrencyStatus.vue';
+import BusinessAnalytics from '@/components/dashboard/BusinessAnalytics.vue';
 
 const page = usePage();
 const { t } = useI18n();

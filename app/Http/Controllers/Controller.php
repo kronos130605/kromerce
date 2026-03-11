@@ -26,10 +26,6 @@ abstract class Controller extends BaseController
             throw new \Exception('No tenant context found');
         }
 
-        \Log::info('validateTenant success', [
-            'tenant_id' => $tenant->id,
-        ]);
-
         return $tenant;
     }
 

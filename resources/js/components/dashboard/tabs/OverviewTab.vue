@@ -1,5 +1,5 @@
 <script setup>
-import { useDarkMode } from '@/composables/useDarkMode';
+import { useDarkMode } from '@/composables/useDarkMode.js';
 import BusinessQuickActions from '../BusinessQuickActions.vue';
 import TopProducts from '../TopProducts.vue';
 import RecentOrders from '../RecentOrders.vue';

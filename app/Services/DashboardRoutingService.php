@@ -26,7 +26,7 @@ class DashboardRoutingService
                     'user_id' => $user->id,
                     'user_email' => $user->email,
                 ]);
-                return 'DashboardCustomer';
+                return 'Customer/Index';
             }
 
             // Usar RoleService para obtener el rol del usuario en el tenant
@@ -37,10 +37,10 @@ class DashboardRoutingService
 
             if (in_array($userRoleInTenant, $businessRoles)) {
                 // Usuario con rol de negocio - usar nuevo dashboard
-                return 'Dashboard/Index';
+                return 'Business/Index';
             } else {
                 // Usuario sin rol de negocio - usar dashboard de customer
-                return 'DashboardCustomer';
+                return 'Customer/Index';
             }
 
         } catch (\Exception $e) {
@@ -51,7 +51,7 @@ class DashboardRoutingService
             ]);
 
             // Fallback a dashboard de customer
-            return 'DashboardCustomer';
+            return 'Customer/Index';
         }
     }
 
@@ -139,7 +139,7 @@ class DashboardRoutingService
             ];
 
             // Solo obtener datos específicos del dashboard si es business
-            if ($dashboardView === 'Dashboard/Index' && $tenant) {
+            if ($dashboardView === 'Business/Index' && $tenant) {
                 // Obtener datos de productos para el dashboard
                 try {
                     $productStatistics = $this->productService->getStatisticsForTenant($tenant);
@@ -198,17 +198,17 @@ class DashboardRoutingService
 
             if (!$tenant) {
                 // Sin tenant, solo puede acceder a customer dashboard
-                return $dashboardView === 'DashboardCustomer';
+                return $dashboardView === 'Customer/Index';
             }
 
             $userRole = $this->roleService->getUserRoleInTenant($user, $tenant);
 
             switch ($dashboardView) {
-                case 'Dashboard/Index':
+                case 'Business/Index':
                     $businessRoles = ['business_owner', 'admin', 'manager', 'employee'];
                     return in_array($userRole, $businessRoles);
 
-                case 'DashboardCustomer':
+                case 'Customer/Index':
                     return true; // Todos pueden acceder al customer dashboard
 
                 default:
@@ -238,7 +238,7 @@ class DashboardRoutingService
 
             // Customer dashboard siempre disponible
             $dashboards[] = [
-                'name' => 'DashboardCustomer',
+                'name' => 'Customer/Index',
                 'label' => 'Customer Dashboard',
                 'accessible' => true,
             ];
@@ -249,7 +249,7 @@ class DashboardRoutingService
 
                 if (in_array($userRole, $businessRoles)) {
                     $dashboards[] = [
-                        'name' => 'Dashboard/Index',
+                        'name' => 'Business/Index',
                         'label' => 'Business Dashboard',
                         'accessible' => true,
                     ];
@@ -266,7 +266,7 @@ class DashboardRoutingService
 
             return [
                 [
-                    'name' => 'DashboardCustomer',
+                    'name' => 'Customer/Index',
                     'label' => 'Customer Dashboard',
                     'accessible' => true,
                 ]

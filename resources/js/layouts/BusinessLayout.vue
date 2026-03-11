@@ -8,15 +8,15 @@
       <BusinessSidebar ref="sidebarRef" />
 
       <!-- Main Content with dynamic width adjustment -->
-      <main 
+      <main
         class="flex-1 overflow-y-auto transition-all duration-300"
         :class="{
           'lg:ml-0': sidebarRef?.isCollapsed
         }"
       >
         <!-- Dynamic Content Slot -->
-        <div class="px-6 pb-6">
-          <component 
+        <div class="pt-2 px-2 pb-2">
+          <component
             :is="currentContent"
             :products="page.props.products"
             :categories="page.props.categories"
@@ -35,13 +35,13 @@ import { usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import BusinessSidebar from '@/components/navigation/sidebars/BusinessSidebar.vue';
 import BusinessDashboardNavbar from '@/components/navigation/navbars/BusinessDashboardNavbar.vue';
-import { useSidebar } from '@/Composables/useSidebar.js';
+import { useSidebar } from '@/composables/useSidebar.js';
 
 // Import content components
-import DashboardContent from '@/Pages/Business/Content/DashboardContent.vue';
-import ProductsContent from '@/Pages/Business/Content/ProductsContent.vue';
-import OrdersContent from '@/Pages/Business/Content/OrdersContent.vue';
-import AnalyticsContent from '@/Pages/Business/Content/AnalyticsContent.vue';
+import DashboardContent from '@/modules/business/content/DashboardContent.vue';
+import ProductsContent from '@/modules/business/content/ProductsContent.vue';
+import OrdersContent from '@/modules/business/content/OrdersContent.vue';
+import AnalyticsContent from '@/modules/business/content/AnalyticsContent.vue';
 
 const page = usePage();
 const { t } = useI18n();

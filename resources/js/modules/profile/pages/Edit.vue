@@ -1,5 +1,5 @@
 <script setup>
-import CustomerLayout from '@/Layouts/CustomerLayout.vue';
+import CustomerLayout from '@/layouts/CustomerLayout.vue';
 import DeleteUserForm from './Partials/DeleteUserForm.vue';
 import UpdatePasswordForm from './Partials/UpdatePasswordForm.vue';
 import UpdateProfileInformationForm from './Partials/UpdateProfileInformationForm.vue';

@@ -666,7 +666,7 @@ import { ref } from 'vue'
 import { useForm, router } from '@inertiajs/vue3'
 import TagInput from '@/components/ui/TagInput.vue'
 import ImageUploader from '@/modules/products/components/ImageUploader.vue';
-import BusinessLayout from '@/Layouts/BusinessLayout.vue';
+import BusinessLayout from '@/layouts/BusinessLayout.vue';
 
 const props = defineProps({
     categories: Array,

@@ -1,6 +1,6 @@
 <script setup>
 import { computed } from 'vue';
-import { useDarkMode } from '@/composables/useDarkMode';
+import { useDarkMode } from '@/composables/useDarkMode.js';
 
 const props = defineProps({
     activeTab: {
@@ -22,7 +22,7 @@ const handleTabChange = (tabKey) => {
 
 const tabClasses = (isActive) => {
     const baseClasses = 'py-4 px-1 border-b-2 font-medium text-sm transition-colors';
-    
+
     if (isDark.value) {
         return isActive
             ? `${baseClasses} border-blue-500 text-blue-400`

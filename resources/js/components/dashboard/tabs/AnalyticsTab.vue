@@ -1,5 +1,5 @@
 <script setup>
-import { useDarkMode } from '@/composables/useDarkMode';
+import { useDarkMode } from '@/composables/useDarkMode.js';
 import BusinessAnalytics from '../BusinessAnalytics.vue';
 
 const props = defineProps({
@@ -18,7 +18,7 @@ const { isDark } = useDarkMode();
 
 <template>
     <div class="space-y-6">
-        <BusinessAnalytics 
+        <BusinessAnalytics
             :data="dashboardData.analytics || {}"
             :period="selectedPeriod"
         />

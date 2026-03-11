@@ -159,7 +159,7 @@
 <script setup>
 import { Link, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
-import { useSidebar } from '@/Composables/useSidebar.js';
+import { useSidebar } from '@/composables/useSidebar.js';
 
 const page = usePage();
 
