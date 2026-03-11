@@ -314,6 +314,11 @@
     "events": "Eventos",
     "analytics": "Análisis"
   },
+  "navigation": {
+    "settings": "Configuración",
+    "logout": "Cerrar Sesión",
+    "profile": "Perfil"
+  },
   "tabs": {
     "overview": "Resumen",
     "products": "Productos",

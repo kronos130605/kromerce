@@ -7,6 +7,7 @@ import { useDarkMode } from '@/composables/useDarkMode.js';
 import { useNavigation } from '@/composables/useNavigation.js';
 import Badge from '@/components/ui/Badge.vue';
 import LanguageSelector from '@/components/shared/LanguageSelector.vue';
+import Icon from '@/components/ui/Icon.vue';
 
 const { t } = useI18n();
 
@@ -84,10 +85,11 @@ onBeforeUnmount(() => {
                 : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
             ]"
           >
-            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path v-if="!isOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-              <path v-else stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
+            <Icon
+              :name="isOpen ? 'close' : 'menu'"
+              category="ui"
+              class="h-6 w-6"
+            />
           </button>
 
           <!-- Logo -->
@@ -108,7 +110,7 @@ onBeforeUnmount(() => {
         <!-- Desktop Navigation -->
         <nav class="hidden lg:flex items-center gap-6">
           <Link
-            v-for="{ href, label, icon } in navigationItems"
+            v-for="{ href, label, name } in navigationItems"
             :key="label"
             :href="href"
             :class="[
@@ -118,7 +120,11 @@ onBeforeUnmount(() => {
                 : 'text-foreground hover:text-foreground hover:bg-accent'
             ]"
           >
-            <span>{{ icon }}</span>
+            <Icon
+              :name="name"
+              category="customer"
+              class="w-5 h-5"
+            />
             {{ t(label) }}
           </Link>
         </nav>
@@ -138,12 +144,11 @@ onBeforeUnmount(() => {
                 : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
             ]"
           >
-            <svg v-if="!isDark" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-            </svg>
-            <svg v-else class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-            </svg>
+            <Icon
+              :name="isDark ? 'moon' : 'sun'"
+              category="ui"
+              class="h-5 w-5"
+            />
           </button>
 
           <!-- Notifications -->
@@ -155,9 +160,11 @@ onBeforeUnmount(() => {
                 : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
             ]"
           >
-            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-            </svg>
+            <Icon
+              name="bell"
+              category="ui"
+              class="h-5 w-5"
+            />
             <span class="absolute top-1 right-1 h-2 w-2 bg-red-500 rounded-full"></span>
           </button>
 
@@ -201,9 +208,12 @@ onBeforeUnmount(() => {
                 class="h-8 w-8 rounded-full object-cover"
               />
               <span class="hidden md:block text-sm font-medium">{{ displayName }}</span>
-              <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-              </svg>
+              <Icon
+                name="chevronDown"
+                category="ui"
+                class="h-4 w-4 transition-transform"
+                :class="{ 'rotate-180': showUserDropdown }"
+              />
             </button>
 
             <!-- Dropdown Menu -->
@@ -267,7 +277,7 @@ onBeforeUnmount(() => {
       ]">
         <div class="px-2 pt-2 pb-3 space-y-1">
           <Link
-            v-for="{ href, label, icon } in navigationItems"
+            v-for="{ href, label, name } in navigationItems"
             :key="label"
             :href="href"
             :class="[
@@ -278,7 +288,11 @@ onBeforeUnmount(() => {
             ]"
             @click="isOpen = false"
           >
-            <span>{{ icon }}</span>
+            <Icon
+              :name="name"
+              category="customer"
+              class="w-5 h-5"
+            />
             {{ t(label) }}
           </Link>
         </div>

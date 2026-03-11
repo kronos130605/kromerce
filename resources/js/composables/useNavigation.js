@@ -12,32 +12,32 @@ export function useNavigation() {
     console.log('useNavigation - isBusinessUser:', isBusinessUser.value);
     console.log('useNavigation - isSuperAdmin:', isSuperAdmin.value);
 
-    // Customer navigation items (for navbars with emojis)
+    // Customer navigation items (for navbars with SVG icons)
     const customerNavigation = computed(() => [
-        { href: '/dashboard', label: 'dashboard.nav_dashboard', icon: '🏠' },
-        { href: '#stores', label: 'dashboard.nav_stores', icon: '🏪' },
-        { href: '#orders', label: 'dashboard.nav_my_orders', icon: '📦' },
-        { href: '#wishlist', label: 'dashboard.nav_wishlist', icon: '❤️' },
-        { href: '#deals', label: 'dashboard.nav_deals', icon: '🎯' },
+        { href: '/dashboard', label: 'dashboard.nav_dashboard', name: 'dashboard' },
+        { href: '#stores', label: 'dashboard.nav_stores', name: 'stores' },
+        { href: '#orders', label: 'dashboard.nav_my_orders', name: 'orders' },
+        { href: '#wishlist', label: 'dashboard.nav_wishlist', name: 'wishlist' },
+        { href: '#deals', label: 'dashboard.nav_deals', name: 'settings' },
     ]);
 
-    // Business navigation items (for navbars with emojis)
+    // Business navigation items (for navbars with SVG icons)
     const businessNavigation = computed(() => [
-        { href: '/dashboard', label: 'dashboard.nav_dashboard', icon: '📊' },
-        { href: '/products', label: 'dashboard.nav_products', icon: '📦' },
-        { href: '#orders', label: 'dashboard.nav_orders', icon: '🛒' },
-        { href: '#analytics', label: 'dashboard.nav_analytics', icon: '📈' },
-        { href: '#marketing', label: 'dashboard.nav_marketing', icon: '📢' },
-        { href: '#settings', label: 'dashboard.nav_settings', icon: '⚙️' },
+        { href: '/dashboard', label: 'dashboard.nav_dashboard', name: 'dashboard' },
+        { href: '/products', label: 'dashboard.nav_products', name: 'products' },
+        { href: '#orders', label: 'dashboard.nav_orders', name: 'orders' },
+        { href: '#analytics', label: 'dashboard.nav_analytics', name: 'analytics' },
+        { href: '#marketing', label: 'dashboard.nav_marketing', name: 'marketing' },
+        { href: '#settings', label: 'dashboard.nav_settings', name: 'settings' },
     ]);
 
-    // Admin navigation items (for navbars with emojis)
+    // Admin navigation items (for navbars with SVG icons)
     const adminNavigation = computed(() => [
-        { href: '/dashboard', label: 'dashboard.nav_dashboard', icon: '🔧' },
-        { href: '#users', label: 'dashboard.nav_users', icon: '👥' },
-        { href: '#tenants', label: 'dashboard.nav_tenants', icon: '🏢' },
-        { href: '#analytics', label: 'dashboard.nav_analytics', icon: '📊' },
-        { href: '#settings', label: 'dashboard.nav_settings', icon: '⚙️' },
+        { href: '/dashboard', label: 'dashboard.nav_dashboard', name: 'settings' },
+        { href: '#users', label: 'dashboard.nav_users', name: 'customers' },
+        { href: '#tenants', label: 'dashboard.nav_tenants', name: 'customers' },
+        { href: '#analytics', label: 'dashboard.nav_analytics', name: 'analytics' },
+        { href: '#settings', label: 'dashboard.nav_settings', name: 'settings' },
     ]);
 
     // Get navigation items based on user role (for navbars)

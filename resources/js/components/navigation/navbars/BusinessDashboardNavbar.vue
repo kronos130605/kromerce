@@ -7,6 +7,7 @@ import { useDarkMode } from '@/composables/useDarkMode.js';
 import { useNavigation } from '@/composables/useNavigation.js';
 import Badge from '@/components/ui/Badge.vue';
 import LanguageSelector from '@/components/shared/LanguageSelector.vue';
+import Icon from '@/components/ui/Icon.vue';
 
 const { t } = useI18n();
 
@@ -76,24 +77,44 @@ onBeforeUnmount(() => {
   >
     <div class="mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between items-center h-16">
-        <!-- Logo -->
-        <Link href="/public" class="flex items-center group cursor-pointer">
-          <div class="mr-3 transition-transform duration-300 group-hover:scale-110">
-            <img
-              src="/images/kromerce-business-text.png"
-              alt="Kromerce"
-              :class="[
-                'h-8 w-auto object-contain transition-transform duration-300 group-hover:scale-110',
-                isDark ? 'filter brightness-0 invert' : ''
-              ]"
+        <!-- Left side - Logo and Mobile Menu -->
+        <div class="flex items-center">
+          <!-- Mobile menu button -->
+          <button
+            @click="isOpen = !isOpen"
+            :class="[
+              'lg:hidden p-2 rounded-md transition-colors',
+              isDark
+                ? 'text-gray-300 hover:text-white hover:bg-gray-800'
+                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+            ]"
+          >
+            <Icon
+              :name="isOpen ? 'close' : 'menu'"
+              category="ui"
+              class="h-6 w-6"
             />
-          </div>
-        </Link>
+          </button>
+
+          <!-- Logo -->
+          <Link href="/public" class="flex items-center ml-4 lg:ml-0 group cursor-pointer">
+            <div class="transition-transform duration-300 group-hover:scale-110">
+              <img
+                src="/images/kromerce-business-text.png"
+                alt="Kromerce"
+                :class="[
+                  'h-8 w-auto object-contain transition-transform duration-300',
+                  isDark ? 'filter brightness-0 invert' : ''
+                ]"
+              />
+            </div>
+          </Link>
+        </div>
 
         <!-- Desktop Navigation -->
         <nav class="hidden lg:flex items-center gap-6">
           <Link
-            v-for="{ href, label, icon } in navigationItems"
+            v-for="{ href, label, name } in navigationItems"
             :key="label"
             :href="href"
             :class="[
@@ -103,15 +124,56 @@ onBeforeUnmount(() => {
                 : 'text-foreground hover:text-foreground hover:bg-accent'
             ]"
           >
-            <span>{{ icon }}</span>
+            <Icon
+              :name="name"
+              category="business"
+              class="w-5 h-5"
+            />
             {{ t(label) }}
           </Link>
         </nav>
 
-        <!-- Desktop User Section -->
-        <div class="hidden lg:flex items-center gap-4">
+        <!-- Right side - User actions -->
+        <div class="flex items-center gap-4">
+          <!-- Language Selector -->
+          <LanguageSelector />
+
+          <!-- Theme Toggle -->
+          <button
+            @click="toggleDarkMode"
+            :class="[
+              'p-2 rounded-md transition-colors',
+              isDark
+                ? 'text-gray-300 hover:text-white hover:bg-gray-800'
+                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+            ]"
+          >
+            <Icon
+              :name="isDark ? 'moon' : 'sun'"
+              category="ui"
+              class="h-5 w-5"
+            />
+          </button>
+
+          <!-- Notifications -->
+          <button
+            :class="[
+              'p-2 rounded-md transition-colors relative',
+              isDark
+                ? 'text-gray-300 hover:text-white hover:bg-gray-800'
+                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+            ]"
+          >
+            <Icon
+              name="bell"
+              category="ui"
+              class="h-5 w-5"
+            />
+            <span class="absolute top-1 right-1 h-2 w-2 bg-red-500 rounded-full"></span>
+          </button>
+
           <!-- Tenant Info for Business Owners -->
-          <div v-if="isBusinessOwner && currentTenant" class="flex items-center gap-2">
+          <div v-if="isBusinessOwner && currentTenant" class="hidden lg:flex items-center gap-2">
             <Badge
               variant="secondary"
               :class="[
@@ -150,9 +212,12 @@ onBeforeUnmount(() => {
                 class="h-8 w-8 rounded-full object-cover"
               />
               <span class="hidden md:block">{{ displayName }}</span>
-              <svg class="w-4 h-4 transition-transform" :class="{ 'rotate-180': showUserDropdown }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-              </svg>
+              <Icon
+                name="chevronDown"
+                category="ui"
+                class="w-4 h-4 transition-transform"
+                :class="{ 'rotate-180': showUserDropdown }"
+              />
             </button>
 
             <!-- Dropdown Menu -->
@@ -224,47 +289,7 @@ onBeforeUnmount(() => {
               </div>
             </div>
           </div>
-
-          <!-- Language Selector -->
-          <LanguageSelector />
-
-          <!-- Dark Mode Toggle -->
-          <button
-            @click="toggleDarkMode"
-            class="p-2 rounded-lg hover:bg-accent transition-colors cursor-pointer"
-            :title="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
-          >
-            <span v-if="!isDark" class="text-xl">🌙</span>
-            <span v-else class="text-xl">☀️</span>
-          </button>
         </div>
-
-        <!-- Mobile Menu -->
-        <div class="flex items-center lg:hidden gap-2">
-          <!-- Language Selector Mobile -->
-          <LanguageSelector />
-
-          <!-- Dark Mode Toggle Mobile -->
-          <button
-            @click="toggleDarkMode"
-            class="p-2 rounded-lg hover:bg-accent transition-colors cursor-pointer"
-            :title="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
-          >
-            <span v-if="!isDark" class="text-xl">🌙</span>
-            <span v-else class="text-xl">☀️</span>
-          </button>
-
-          <!-- Mobile Menu Button -->
-          <button
-            @click="isOpen = !isOpen"
-            class="p-2 rounded-lg hover:bg-accent transition-colors cursor-pointer"
-          >
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
-        </div>
-      </div>
 
       <!-- Mobile Menu Content -->
       <div
@@ -279,7 +304,7 @@ onBeforeUnmount(() => {
         <div class="py-4 space-y-2">
           <!-- Navigation Items -->
           <button
-            v-for="{ href, label, icon } in navigationItems"
+            v-for="{ href, label, name } in navigationItems"
             :key="label"
             @click="navigateTo(href)"
             :class="[
@@ -289,7 +314,11 @@ onBeforeUnmount(() => {
                 : 'text-foreground/80 hover:text-foreground hover:bg-accent'
             ]"
           >
-            <span>{{ icon }}</span>
+            <Icon
+              :name="name"
+              category="business"
+              class="w-5 h-5"
+            />
             {{ t(label) }}
           </button>
 
@@ -355,6 +384,7 @@ onBeforeUnmount(() => {
           </div>
         </div>
       </div>
+    </div>
     </div>
   </header>
 </template>
