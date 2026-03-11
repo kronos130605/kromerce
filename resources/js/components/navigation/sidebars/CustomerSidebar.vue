@@ -165,11 +165,16 @@ onMounted(() => {
             :alt="displayName"
             class="h-8 w-8 rounded-full object-cover transition-all duration-200"
           />
-          <!-- User name tooltip -->
-          <div class="opacity-0 hover:opacity-100 transition-opacity duration-200">
-            <p class="text-xs font-medium text-gray-900 dark:text-white whitespace-nowrap">
-              {{ displayName }}
+          <!-- User name tooltip - mejorado para mayor visibilidad -->
+          <div class="group relative">
+            <p class="text-xs font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap transition-colors duration-200 group-hover:text-gray-900 dark:group-hover:text-white">
+              <!-- Truncate name to fit in collapsed sidebar -->
+              {{ displayName.length > 8 ? displayName.substring(0, 8) + '...' : displayName }}
             </p>
+            <!-- Full name tooltip on hover -->
+            <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 px-2 py-1 bg-gray-900 dark:bg-gray-700 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
+              {{ displayName }}
+            </div>
           </div>
         </div>
       </div>
