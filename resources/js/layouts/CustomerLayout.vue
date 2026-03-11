@@ -33,13 +33,13 @@ const currentContent = computed(() => {
     <!-- Customer Navbar -->
     <CustomerDashboardNavbar ref="navbarRef" />
 
-    <div class="flex">
+    <div class="flex h-[calc(100vh-10px)]">
       <!-- Customer Sidebar -->
       <CustomerSidebar ref="sidebarRef" />
 
       <!-- Main Content -->
       <main class="flex-1 overflow-y-auto">
-        <div class="px-4 pb-4 pt-[5rem]">
+        <div class="px-4 pb-4 pt-[5rem] h-full">
           <component
             :is="currentContent"
             :user="page.props.auth.user"
