@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
+import { ref, onMounted, onBeforeUnmount } from 'vue';
 import { usePage } from '@inertiajs/vue3';
 import { Link } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
@@ -67,7 +67,7 @@ onMounted(() => {
   <!-- Sidebar -->
   <aside
     :class="`
-      fixed top-16 left-0 z-50 h-[calc(100vh-4rem)] 
+      fixed top-16 left-0 z-50 h-[calc(100vh-4rem)]
       bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700
       transform transition-transform duration-300 ease-in-out
       lg:relative lg:transform-none
@@ -94,8 +94,8 @@ onMounted(() => {
           :href="item.href"
           :class="`
             flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors
-            ${item.active 
-              ? 'bg-blue-50 dark:bg-blue-900 text-blue-700 dark:text-blue-300' 
+            ${item.active
+              ? 'bg-blue-50 dark:bg-blue-900 text-blue-700 dark:text-blue-300'
               : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
             }
             ${isCollapsed ? 'justify-center' : ''}
@@ -110,9 +110,9 @@ onMounted(() => {
           >
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="item.icon" />
           </svg>
-          
+
           <span v-if="!isCollapsed" class="flex-1">{{ item.label }}</span>
-          
+
           <Badge v-if="item.badge && !isCollapsed" variant="primary" size="sm">
             {{ item.badge }}
           </Badge>
@@ -124,7 +124,7 @@ onMounted(() => {
     <div v-if="!isCollapsed" class="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 dark:border-gray-700">
       <div class="flex items-center space-x-3">
         <!-- Avatar fallback with initials -->
-        <div 
+        <div
           v-if="!user?.avatar"
           class="h-8 w-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-sm font-medium"
         >

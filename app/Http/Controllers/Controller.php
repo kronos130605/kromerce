@@ -7,6 +7,7 @@ use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Routing\Controller as BaseController;
 use App\Models\Tenant;
 use App\Traits\ApiResponse;
+use Illuminate\Support\Facades\Log;
 
 abstract class Controller extends BaseController
 {
@@ -22,7 +23,7 @@ abstract class Controller extends BaseController
         }
 
         if (!$tenant) {
-            \Log::error('validateTenant: no tenant found, throwing exception');
+            Log::error('validateTenant: no tenant found, throwing exception');
             throw new \Exception('No tenant context found');
         }
 

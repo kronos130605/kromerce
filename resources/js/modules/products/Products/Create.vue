@@ -1,5 +1,5 @@
 <script setup>
-import { Link, useForm } from '@inertiajs/vue3';
+import { useForm } from '@inertiajs/vue3';
 import { ref } from 'vue';
 
 const props = defineProps({
@@ -30,7 +30,7 @@ const isGeneratingSlug = ref(false);
 // Generate SKU from name
 const generateSku = () => {
     if (!form.name) return;
-    
+
     isGeneratingSku.value = true;
     // Simulate API call to generate unique SKU
     setTimeout(() => {
@@ -46,7 +46,7 @@ const generateSku = () => {
 // Generate slug from name
 const generateSlug = () => {
     if (!form.name) return;
-    
+
     isGeneratingSlug.value = true;
     setTimeout(() => {
         form.slug = form.name
@@ -116,7 +116,7 @@ const cancel = () => {
                 <!-- Basic Information -->
                 <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
                     <h2 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Basic Information</h2>
-                    
+
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="md:col-span-2">
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -134,7 +134,7 @@ const cancel = () => {
                                 {{ form.errors.name }}
                             </p>
                         </div>
-                        
+
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                 SKU
@@ -160,7 +160,7 @@ const cancel = () => {
                                 {{ form.errors.sku }}
                             </p>
                         </div>
-                        
+
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                 Slug
@@ -186,7 +186,7 @@ const cancel = () => {
                                 {{ form.errors.slug }}
                             </p>
                         </div>
-                        
+
                         <div class="md:col-span-2">
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                 Description
@@ -207,7 +207,7 @@ const cancel = () => {
                 <!-- Pricing -->
                 <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
                     <h2 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Pricing</h2>
-                    
+
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -231,7 +231,7 @@ const cancel = () => {
                                 {{ form.errors.base_price }}
                             </p>
                         </div>
-                        
+
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                 Sale Price
@@ -253,7 +253,7 @@ const cancel = () => {
                                 {{ form.errors.sale_price }}
                             </p>
                         </div>
-                        
+
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                 Currency *
@@ -281,7 +281,7 @@ const cancel = () => {
                 <!-- Stock Management -->
                 <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
                     <h2 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Stock Management</h2>
-                    
+
                     <div class="space-y-4">
                         <div>
                             <label class="flex items-center">
@@ -295,7 +295,7 @@ const cancel = () => {
                                 </span>
                             </label>
                         </div>
-                        
+
                         <div v-if="form.manage_stock" class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -313,7 +313,7 @@ const cancel = () => {
                                     {{ form.errors.stock_quantity }}
                                 </p>
                             </div>
-                            
+
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                     Low Stock Threshold *
@@ -337,7 +337,7 @@ const cancel = () => {
                 <!-- Status and Visibility -->
                 <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
                     <h2 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Status and Visibility</h2>
-                    
+
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -357,7 +357,7 @@ const cancel = () => {
                                 {{ form.errors.status }}
                             </p>
                         </div>
-                        
+
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                 Category
@@ -376,7 +376,7 @@ const cancel = () => {
                                 {{ form.errors.category_id }}
                             </p>
                         </div>
-                        
+
                         <div>
                             <label class="flex items-center">
                                 <input
@@ -389,7 +389,7 @@ const cancel = () => {
                                 </span>
                             </label>
                         </div>
-                        
+
                         <div>
                             <label class="flex items-center">
                                 <input

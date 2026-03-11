@@ -1,6 +1,6 @@
 <script setup>
 import { Link } from '@inertiajs/vue3';
-import { ref, computed } from 'vue';
+import { computed } from 'vue';
 import { usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 
@@ -118,7 +118,7 @@ const dashboardData = computed(() => page.props.dashboard_data || {});
         </div>
 
         <!-- Full Products Content -->
-        <ProductsContent 
+        <ProductsContent
             :products="products"
             :categories="categories"
             :filters="filters"

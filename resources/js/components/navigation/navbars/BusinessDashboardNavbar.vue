@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, onBeforeUnmount, computed } from 'vue';
+import { ref, onMounted, onBeforeUnmount } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import { useAuth } from '@/composables/useAuth.js';
@@ -298,7 +298,7 @@ onBeforeUnmount(() => {
             <div class="px-4 py-3 space-y-2">
               <div class="flex items-center gap-3">
                 <!-- Avatar fallback with initials -->
-                <div 
+                <div
                   v-if="!user?.avatar"
                   class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold"
                 >

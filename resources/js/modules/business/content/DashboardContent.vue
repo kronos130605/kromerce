@@ -1,8 +1,7 @@
 <script setup>
-import { computed, ref } from 'vue';
+import { computed } from 'vue';
 import { usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
-import { Link } from '@inertiajs/vue3';
 
 // Import business dashboard components
 import BusinessWelcome from '@/components/dashboard/BusinessWelcome.vue';
