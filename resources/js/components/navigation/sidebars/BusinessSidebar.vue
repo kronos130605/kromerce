@@ -11,24 +11,18 @@
 
     <!-- Icon container -->
     <span class="relative flex items-center justify-center">
-      <svg
+      <Icon
         v-if="!isMobileOpen"
+        name="menu"
+        category="ui"
         class="w-6 h-6 transition-all duration-300 group-hover:rotate-12"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 12h16M4 18h16"></path>
-      </svg>
-      <svg
+      />
+      <Icon
         v-else
+        name="close"
+        category="ui"
         class="w-6 h-6 transition-all duration-300 group-hover:rotate-90"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path>
-      </svg>
+      />
     </span>
 
     <!-- Pulse animation when closed -->
@@ -81,7 +75,7 @@
       <!-- Navigation - Always visible -->
     <nav class="h-[calc(100vh-4rem)] overflow-y-auto p-2 space-y-1">
       <Link
-        v-for="item in navigation"
+        v-for="item in sidebarNavigationItems"
         :key="item.href"
         :href="isActive(item.href) ? '#' : item.href"
         class="flex items-center px-3 py-2.5 rounded-lg transition-colors group relative"
@@ -95,7 +89,14 @@
       >
 
         <!-- Icon -->
-        <span class="text-xl flex-shrink-0">{{ item.icon }}</span>
+        <Icon
+          :name="item.name"
+          category="business"
+          :class="`
+            text-xl flex-shrink-0
+            ${isCollapsed ? 'w-6 h-6' : 'w-5 h-5'}
+          `"
+        />
 
         <!-- Label and Badge (hidden when collapsed) -->
         <div v-if="!isCollapsed" class="flex-1 flex items-center justify-between min-w-0">
@@ -160,8 +161,19 @@
 import { Link, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
 import { useSidebar } from '@/composables/useSidebar.js';
+import { useNavigation } from '@/composables/useNavigation.js';
+import { useAuth } from '@/composables/useAuth.js';
+import { UIIcons, BusinessIcons } from '@/icons';
+import Icon from '@/components/ui/Icon.vue';
+import Badge from '@/components/ui/Badge.vue';
 
 const page = usePage();
+
+// Use auth composable
+const { user, displayName, userInitials } = useAuth();
+
+// Use navigation composable
+const { sidebarNavigationItems } = useNavigation();
 
 // Use sidebar composable
 const {
@@ -175,43 +187,15 @@ const {
     isFirstLoad
 } = useSidebar();
 
-// Navigation items
-const navigation = computed(() => [
-  {
-    href: '/dashboard',
-    label: 'Dashboard',
-    icon: '📊',
-    badge: null
-  },
-  {
-    href: '/products',
-    label: 'Products',
-    icon: '📦',
-    badge: { type: 'success', text: '0 items' }
-  },
-  {
-    href: '#orders',
-    label: 'Orders',
-    icon: '🛒',
-    badge: { type: 'warning', text: '0 new' }
-  },
-  {
-    href: '#analytics',
-    label: 'Analytics',
-    icon: '📈',
-    badge: null
-  },
-  {
-    href: '#settings',
-    label: 'Settings',
-    icon: '⚙️',
-    badge: null
-  },
-]);
-
 // Methods
 const isActive = (href) => {
-  return page.url === href;
+  const currentUrl = page.url;
+  // Handle hash-based routes
+  if (href.startsWith('#')) {
+    return currentUrl.includes(href.substring(1));
+  }
+  // Handle exact and partial matches
+  return currentUrl === href || currentUrl.startsWith(href);
 };
 
 const getBadgeClass = (type) => {
