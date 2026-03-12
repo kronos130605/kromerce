@@ -183,7 +183,7 @@ onMounted(() => {
             </div>
         </div>
 
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div>
             <!-- Welcome Section -->
             <CustomerWelcome :user="userProfile" :currentTime="currentTime" />
 
@@ -291,7 +291,7 @@ onMounted(() => {
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Upcoming Events</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <div v-for="event in upcomingEvents" :key="event.id" 
+                    <div v-for="event in upcomingEvents" :key="event.id"
                          class="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:shadow-md transition-shadow">
                         <div class="flex items-center justify-between mb-2">
                             <h4 class="font-medium text-gray-900 dark:text-white">{{ event.title }}</h4>
@@ -306,10 +306,10 @@ onMounted(() => {
                             <span>{{ event.date }} at {{ event.time }}</span>
                             <span>{{ event.attendees }}/{{ event.maxAttendees }} attending</span>
                         </div>
-                        <button @click="toggleEventRegistration(event)" 
+                        <button @click="toggleEventRegistration(event)"
                                 :class="`w-full mt-2 px-4 py-2 rounded-lg text-sm font-medium ${
-                                    event.registered 
-                                    ? 'bg-gray-200 text-gray-800 hover:bg-gray-300' 
+                                    event.registered
+                                    ? 'bg-gray-200 text-gray-800 hover:bg-gray-300'
                                     : 'bg-blue-600 text-white hover:bg-blue-700'
                                 }`">
                             {{ event.registered ? 'Unregister' : 'Register' }}
