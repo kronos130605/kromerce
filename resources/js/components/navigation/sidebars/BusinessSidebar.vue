@@ -131,9 +131,7 @@ import { computed } from 'vue';
 import { useSidebar } from '@/composables/useSidebar.js';
 import { useNavigation } from '@/composables/useNavigation.js';
 import { useAuth } from '@/composables/useAuth.js';
-import { UIIcons, BusinessIcons } from '@/icons';
 import Icon from '@/components/ui/Icon.vue';
-import Badge from '@/components/ui/Badge.vue';
 
 const page = usePage();
 
@@ -152,12 +150,8 @@ const { sidebarNavigationItems } = useNavigation();
 const {
     isCollapsed,
     isMobileOpen,
-    showExpandButton,
-    isMobile,
-    sidebarClasses,
     toggleSidebar,
     closeMobileSidebar,
-    isFirstLoad
 } = useSidebar();
 
 // Methods

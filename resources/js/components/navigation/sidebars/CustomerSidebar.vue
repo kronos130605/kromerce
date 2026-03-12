@@ -1,16 +1,11 @@
 <script setup>
 import { Link, usePage } from '@inertiajs/vue3';
-import { ref, onMounted, onBeforeUnmount } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useNavigation } from '@/composables/useNavigation.js';
 import { useAuth } from '@/composables/useAuth.js';
 import { useSidebar } from '@/composables/useSidebar.js';
-import { UIIcons } from '@/icons';
 import Icon from '@/components/ui/Icon.vue';
 import Badge from '@/components/ui/Badge.vue';
-
-const page = usePage();
-const { t } = useI18n();
 
 // Use auth composable
 const { user, displayName, userAvatar, userInitials, isCustomer } = useAuth();
@@ -22,13 +17,8 @@ const { sidebarNavigationItems } = useNavigation();
 const {
     isCollapsed,
     isMobileOpen,
-    showExpandButton,
-    isMobile,
-    sidebarClasses,
     toggleSidebar,
     closeMobileSidebar,
-    openMobileSidebar,
-    isFirstLoad
 } = useSidebar();
 </script>
 
