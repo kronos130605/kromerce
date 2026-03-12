@@ -1,11 +1,12 @@
 <script setup>
 import { Link, usePage } from '@inertiajs/vue3';
-import { useI18n } from 'vue-i18n';
 import { useNavigation } from '@/composables/useNavigation.js';
 import { useAuth } from '@/composables/useAuth.js';
 import { useSidebar } from '@/composables/useSidebar.js';
 import Icon from '@/components/ui/Icon.vue';
 import Badge from '@/components/ui/Badge.vue';
+
+const page = usePage();
 
 // Use auth composable
 const { user, displayName, userAvatar, userInitials, isCustomer } = useAuth();
@@ -20,6 +21,17 @@ const {
     toggleSidebar,
     closeMobileSidebar,
 } = useSidebar();
+
+// Methods
+const isActive = (href) => {
+  const currentUrl = page.url;
+  // Handle hash-based routes
+  if (href.startsWith('#')) {
+    return currentUrl.includes(href.substring(1));
+  }
+  // Handle exact and partial matches
+  return currentUrl === href || currentUrl.startsWith(href);
+};
 </script>
 
 <template>
@@ -58,14 +70,13 @@ const {
         <template v-for="item in sidebarNavigationItems" :key="item.name">
           <Link
             :href="item.href"
-            :class="`
-              flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200
-              ${item.active
+            :class="[
+              isActive(item.href)
                 ? 'bg-blue-50 dark:bg-blue-900 text-blue-700 dark:text-blue-300'
-                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
-              }
-              ${isCollapsed ? 'justify-center' : ''}
-            `"
+                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800',
+              isCollapsed ? 'justify-center' : '',
+              'flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200'
+            ]"
             @click="closeMobileSidebar"
           >
             <Icon

@@ -172,21 +172,6 @@ onBeforeUnmount(() => {
             <span class="absolute top-1 right-1 h-2 w-2 bg-red-500 rounded-full"></span>
           </button>
 
-          <!-- Tenant Info for Business Owners -->
-          <div v-if="isBusinessOwner && currentTenant" class="hidden lg:flex items-center gap-2">
-            <Badge
-              variant="secondary"
-              :class="[
-                'text-xs',
-                isDark
-                  ? 'bg-gray-800 text-gray-300 border-gray-700'
-                  : 'bg-muted text-foreground'
-              ]"
-            >
-              🏢 {{ currentTenant.name }}
-            </Badge>
-          </div>
-
           <!-- User Dropdown -->
           <div class="relative">
             <button

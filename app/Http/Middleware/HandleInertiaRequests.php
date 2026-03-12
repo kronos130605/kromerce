@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
@@ -46,6 +47,50 @@ class HandleInertiaRequests extends Middleware
                 if (tenancy()->initialized) {
                     return tenant();
                 }
+                return null;
+            },
+            'user_role' => function () use ($request) {
+                $user = $request->user();
+
+                // Usar la misma lógica que DashboardRoutingService para consistencia
+                if (!$user) {
+                    return 'customer';
+                }
+
+                // Para dashboard, usar la misma lógica que DashboardRoutingService
+                if ($request->is('dashboard') || $request->is('business/dashboard')) {
+                    $tenant = tenancy()->initialized ? tenant() : null;
+
+                    if (!$tenant) {
+                        return 'customer';
+                    }
+
+                    // Usar RoleService con cache - ahora no hay redundancia real
+                    return app(\App\Services\RoleService::class)
+                        ->getUserRoleInTenant($user, $tenant);
+                }
+
+                // Para otras rutas, usar la lógica normal
+                $tenant = tenancy()->initialized ? tenant() : null;
+
+                if ($user && $tenant) {
+                    return app(\App\Services\RoleService::class)
+                        ->getUserRoleInTenant($user, $tenant);
+                }
+
+                return 'customer';
+            },
+            'tenant' => function () use ($request) {
+                $tenant = tenancy()->initialized ? tenant() : null;
+
+                if ($tenant) {
+                    return [
+                        'id' => $tenant->id,
+                        'name' => $tenant->name,
+                        'slug' => $tenant->slug,
+                    ];
+                }
+
                 return null;
             },
             'ziggy' => function () use ($request) {

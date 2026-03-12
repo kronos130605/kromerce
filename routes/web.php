@@ -53,11 +53,11 @@ Route::get('/', function () {
 })->name('kromerce.app');
 
 Route::get('/dashboard', [DashboardController::class, 'index'])
-    ->middleware(['auth', 'verified'])
+    ->middleware(['auth', 'verified', 'App\Http\Middleware\IdentifyTenant'])
     ->name('dashboard');
 
 Route::get('/business/dashboard', [DashboardController::class, 'index'])
-    ->middleware(['auth', 'verified'])
+    ->middleware(['auth', 'verified', 'App\Http\Middleware\IdentifyTenant'])
     ->name('business.dashboard');
 
 Route::middleware('auth')->group(function () {
@@ -69,7 +69,7 @@ Route::middleware('auth')->group(function () {
 require __DIR__.'/auth.php';
 
 // Product Routes - MOVED HERE TO AVOID BOOTSTRAP ISSUES
-Route::middleware(['auth', 'verified', 'App\Http\Middleware\IdentifyTenant', 'role:business'])->prefix('products')->name('products.')->group(function () {
+Route::middleware(['auth', 'verified', 'App\Http\Middleware\IdentifyTenant'])->prefix('products')->name('products.')->group(function () {
     Route::get('/', [App\Http\Controllers\ProductController::class, 'index'])->name('index');
     Route::get('/create', [App\Http\Controllers\ProductController::class, 'create'])->name('create');
     Route::post('/', [App\Http\Controllers\ProductController::class, 'store'])->name('store');
