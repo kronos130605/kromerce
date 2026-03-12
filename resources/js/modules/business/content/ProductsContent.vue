@@ -5,7 +5,7 @@ import { usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 
 // Import products component
-import ProductsContent from '@/modules/products/Products/Content.vue';
+import ProductsMainContent from '@/modules/products/Products/Content.vue';
 
 const { t } = useI18n();
 const page = usePage();
@@ -118,7 +118,7 @@ const dashboardData = computed(() => page.props.dashboard_data || {});
         </div>
 
         <!-- Full Products Content -->
-        <ProductsContent
+        <ProductsMainContent
             :products="products"
             :categories="categories"
             :filters="filters"

@@ -8,37 +8,23 @@ export function useAuth() {
     const userRole = computed(() => page.props.user_role);
 
     // Check user roles - usando user_role directamente
-    const isCustomer = computed(() => {
-        return userRole.value === 'customer';
-    });
+    const isCustomer = computed(() => userRole.value === 'customer');
 
     const isBusinessOwner = computed(() => {
-        return userRole.value === 'business_owner';
+        const role = userRole.value;
+        return role === 'business_owner' || role === 'owner';
     });
 
-    const isOwner = computed(() => {
-        return userRole.value === 'owner';
-    });
+    const isOwner = computed(() => userRole.value === 'owner');
+    const isAdmin = computed(() => userRole.value === 'admin');
+    const isManager = computed(() => userRole.value === 'manager');
+    const isEmployee = computed(() => userRole.value === 'employee');
+    const isSuperAdmin = computed(() => userRole.value === 'super_admin');
 
-    const isAdmin = computed(() => {
-        return userRole.value === 'admin';
-    });
-
-    const isManager = computed(() => {
-        return userRole.value === 'manager';
-    });
-
-    const isEmployee = computed(() => {
-        return userRole.value === 'employee';
-    });
-
-    const isSuperAdmin = computed(() => {
-        return userRole.value === 'super_admin';
-    });
-
-    // Business roles (for business dashboard)
+    // Business roles (for business dashboard) - única fuente de verdad
     const isBusinessUser = computed(() => {
-        return isBusinessOwner.value || isOwner.value || isAdmin.value || isManager.value || isEmployee.value;
+        const businessRoles = ['business_owner', 'owner', 'admin', 'manager', 'employee'];
+        return businessRoles.includes(userRole.value);
     });
 
     // User role priority (for determining primary role)

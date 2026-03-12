@@ -26,6 +26,7 @@ class IdentifyTenant
         $centralDomains = config('tenancy.central_domains', []);
         if (in_array($hostname, $centralDomains)) {
             $user = $request->user();
+
             if ($user) {
                 // Get tenant from user's current tenant or first tenant
                 $tenant = $user->currentTenant() ?: $user->tenants()->first();

@@ -30,6 +30,7 @@ class DashboardRoutingService
             }
 
             // Usar RoleService para obtener el rol del usuario en el tenant
+            // Ahora usa cache, así que no hay redundancia real con HandleInertiaRequests
             $userRoleInTenant = $this->roleService->getUserRoleInTenant($user, $tenant);
 
             // Verificar roles de negocio
@@ -130,12 +131,7 @@ class DashboardRoutingService
                 'auth' => [
                     'user' => $user,
                 ],
-                'user_role' => $tenant ? $this->roleService->getUserRoleInTenant($user, $tenant) : 'customer',
-                'tenant' => $tenant ? [
-                    'id' => $tenant->id,
-                    'name' => $tenant->name,
-                    'slug' => $tenant->slug,
-                ] : null,
+                // user_role y tenant ahora se manejan globalmente en HandleInertiaRequests
             ];
 
             // Solo obtener datos específicos del dashboard si es business
@@ -145,7 +141,7 @@ class DashboardRoutingService
                     $productStatistics = $this->productService->getStatisticsForTenant($tenant);
                     $recentProducts = $this->productService->getLatestProductsForTenant($tenant, 5);
                     $lowStockProducts = $this->productService->getLowStockProductsForTenant($tenant, 5);
-                    
+
                     $dashboardData = [
                         'productStatistics' => $productStatistics,
                         'recentProducts' => $recentProducts,
@@ -157,7 +153,7 @@ class DashboardRoutingService
                         'tenant_id' => $tenant->id,
                         'error' => $e->getMessage(),
                     ]);
-                    
+
                     $dashboardData = [
                         'productStatistics' => [],
                         'recentProducts' => [],

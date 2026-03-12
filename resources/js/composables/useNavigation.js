@@ -5,14 +5,8 @@ import { usePage } from '@inertiajs/vue3';
 import { BusinessIcons, CustomerIcons } from '@/icons';
 
 export function useNavigation() {
-    const { isCustomer, isBusinessUser, isSuperAdmin } = useAuth();
     const page = usePage();
     const { t } = useI18n();
-
-    // Debug: Verificar roles y navegación
-    console.log('useNavigation - isCustomer:', isCustomer.value);
-    console.log('useNavigation - isBusinessUser:', isBusinessUser.value);
-    console.log('useNavigation - isSuperAdmin:', isSuperAdmin.value);
 
     // Customer navigation items (for navbars with SVG icons)
     const customerNavigation = computed(() => [
@@ -44,6 +38,14 @@ export function useNavigation() {
 
     // Get navigation items based on user role (for navbars)
     const navigationItems = computed(() => {
+        // Get auth values inside computed to ensure reactivity
+        const { isCustomer, isBusinessUser, isSuperAdmin } = useAuth();
+        
+        // Wait for user role to be loaded
+        if (page.props.user_role === undefined) {
+            return [];
+        }
+        
         if (isCustomer.value) {
             return customerNavigation.value;
         } else if (isBusinessUser.value) {
@@ -51,12 +53,20 @@ export function useNavigation() {
         } else if (isSuperAdmin.value) {
             return adminNavigation.value;
         }
+        
         return [];
     });
 
     // Get navigation items for sidebars (with SVG icon names)
     const sidebarNavigationItems = computed(() => {
+        // Get auth values inside computed to ensure reactivity
+        const { isCustomer, isBusinessUser, isSuperAdmin } = useAuth();
         const currentUrl = page.url;
+        
+        // Wait for user role to be loaded
+        if (page.props.user_role === undefined) {
+            return [];
+        }
         
         if (isCustomer.value) {
             return [
@@ -126,50 +136,50 @@ export function useNavigation() {
                     name: 'orders', 
                     label: t('dashboard.nav_orders'), 
                     icon: BusinessIcons.orders,
-                    href: '#orders',
-                    active: currentUrl.includes('/orders')
+                    href: '/orders',
+                    active: currentUrl.startsWith('/orders')
                 },
                 { 
                     name: 'inventory', 
                     label: t('dashboard.nav_inventory'), 
                     icon: BusinessIcons.inventory,
-                    href: '#inventory',
-                    active: currentUrl.includes('/inventory')
+                    href: '/inventory',
+                    active: currentUrl.startsWith('/inventory')
                 },
                 { 
                     name: 'customers', 
                     label: t('dashboard.nav_customers'), 
                     icon: BusinessIcons.customers,
-                    href: '#customers',
-                    active: currentUrl.includes('/customers')
+                    href: '/customers',
+                    active: currentUrl.startsWith('/customers')
                 },
                 { 
                     name: 'analytics', 
                     label: t('dashboard.nav_analytics'), 
                     icon: BusinessIcons.analytics,
-                    href: '#analytics',
-                    active: currentUrl.includes('/analytics')
+                    href: '/analytics',
+                    active: currentUrl.startsWith('/analytics')
                 },
                 { 
                     name: 'marketing', 
                     label: t('dashboard.nav_marketing'), 
                     icon: BusinessIcons.marketing,
-                    href: '#marketing',
-                    active: currentUrl.includes('/marketing')
+                    href: '/marketing',
+                    active: currentUrl.startsWith('/marketing')
                 },
                 { 
                     name: 'reports', 
                     label: t('dashboard.nav_reports'), 
                     icon: BusinessIcons.reports,
-                    href: '#reports',
-                    active: currentUrl.includes('/reports')
+                    href: '/reports',
+                    active: currentUrl.startsWith('/reports')
                 },
                 { 
                     name: 'settings', 
                     label: t('dashboard.nav_settings'), 
                     icon: BusinessIcons.settings,
-                    href: '#settings',
-                    active: currentUrl.includes('/settings')
+                    href: '/settings',
+                    active: currentUrl.startsWith('/settings')
                 }
             ];
         }

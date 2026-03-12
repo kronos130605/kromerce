@@ -1,6 +1,7 @@
 import { computed } from 'vue';
 import { usePage } from '@inertiajs/vue3';
 import { router } from '@inertiajs/vue3';
+import {useAuth} from "@/composables/useAuth.js";
 
 /**
  * Role-based navigation guard composable
@@ -8,40 +9,39 @@ import { router } from '@inertiajs/vue3';
  */
 export function useRoleGuard() {
     const page = usePage();
-    
+    const { isBusinessUser, isCustomer, userRole } = useAuth();
+
     /**
      * Get current user's role in current tenant
      */
-    const currentUserRole = computed(() => {
-        return page.props.user_role || 'customer';
-    });
-    
-    /**
-     * Check if user has business role
-     */
-    const isBusinessUser = computed(() => {
-        const businessRoles = ['business_owner', 'owner', 'admin', 'manager', 'employee'];
-        return businessRoles.includes(currentUserRole.value);
-    });
-    
+    const currentUserRole = computed(() => userRole.value || 'customer');
+
     /**
      * Check if user can access business routes
      */
-    const canAccessBusiness = computed(() => {
-        return isBusinessUser.value;
-    });
-    
+    const canAccessBusiness = computed(() => isBusinessUser.value);
+
+    /**
+     * Check if user can access customer routes
+     */
+    const canAccessCustomer = computed(() => isCustomer.value);
+
     /**
      * Guard function to protect business routes
      */
     const requireBusinessRole = (fallbackRoute = 'dashboard') => {
+        // Wait for props to be loaded during navigation
+        if (page.props.user_role === undefined) {
+            return true; // Allow navigation to complete
+        }
+
         if (!canAccessBusiness.value) {
             router.visit(fallbackRoute);
             return false;
         }
         return true;
     };
-    
+
     /**
      * Guard function to protect customer routes (if needed)
      */
@@ -52,7 +52,7 @@ export function useRoleGuard() {
         }
         return true;
     };
-    
+
     /**
      * Check if current route is accessible
      */
@@ -68,18 +68,19 @@ export function useRoleGuard() {
             'products.destroy',
             'business.dashboard'
         ];
-        
+
         if (businessRoutes.includes(routeName)) {
             return canAccessBusiness.value;
         }
-        
+
         return true; // Other routes are accessible to all authenticated users
     };
-    
+
     return {
         currentUserRole,
         isBusinessUser,
         canAccessBusiness,
+        canAccessCustomer,
         requireBusinessRole,
         requireCustomerRole,
         isRouteAccessible

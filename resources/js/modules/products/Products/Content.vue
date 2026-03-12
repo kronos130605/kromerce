@@ -65,7 +65,7 @@ const buildQueryString = () => {
 // Apply filters
 const applyFilters = () => {
     const queryString = buildQueryString();
-    window.location.href = queryString ? `/products?${queryString}` : '/products';
+    router.visit(queryString ? `/products?${queryString}` : '/products');
 };
 
 // Clear filters
@@ -77,7 +77,7 @@ const clearFilters = () => {
     maxPrice.value = '';
     inStock.value = false;
     
-    window.location.href = '/products';
+    router.visit('/products');
 };
 
 // Check if product is low stock

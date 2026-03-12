@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\User;
 use App\Models\Tenant;
 use App\Repositories\UserRoleRepository;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Spatie\Permission\Models\Role;
@@ -13,14 +14,32 @@ class RoleService
 {
     private UserRoleRepository $userRoleRepository;
 
+    // Cache key pattern
+    private const CACHE_KEY_PREFIX = 'user_role_';
+    private const CACHE_TTL = 300; // 5 minutes
+
     public function __construct(UserRoleRepository $userRoleRepository)
     {
         $this->userRoleRepository = $userRoleRepository;
     }
+
     /**
-     * Get user role in tenant with synchronization
+     * Get user role in tenant with caching
      */
     public function getUserRoleInTenant(User $user, Tenant $tenant): ?string
+    {
+        $cacheKey = self::CACHE_KEY_PREFIX . $user->id . '_' . $tenant->id;
+
+        return Cache::remember($cacheKey, self::CACHE_TTL, function () use ($user, $tenant) {
+
+            return $this->calculateUserRoleInTenant($user, $tenant);
+        });
+    }
+
+    /**
+     * Calculate user role in tenant (actual logic)
+     */
+    private function calculateUserRoleInTenant(User $user, Tenant $tenant): ?string
     {
         try {
             // First attempt: Get from tenant_user pivot
@@ -54,6 +73,15 @@ class RoleService
     }
 
     /**
+     * Clear user role cache (for when roles change)
+     */
+    public function clearUserRoleCache(User $user, Tenant $tenant): void
+    {
+        $cacheKey = self::CACHE_KEY_PREFIX . $user->id . '_' . $tenant->id;
+        Cache::forget($cacheKey);
+    }
+
+    /**
      * Assign role to user in tenant (both tables)
      */
     public function assignRoleToUserInTenant(User $user, Tenant $tenant, string $role): bool
@@ -70,6 +98,9 @@ class RoleService
             $this->assignSpatieRoleForTenant($user, $role, $tenant);
 
             DB::commit();
+
+            // Clear cache after role change
+            $this->clearUserRoleCache($user, $tenant);
 
             return true;
 
