@@ -10,8 +10,9 @@ return Application::configure(basePath: dirname(__DIR__))
         web: __DIR__.'/../routes/web.php',
         commands: __DIR__.'/../routes/console.php',
         then: function () {
-            Route::middleware(['auth', 'verified'])
+            Route::middleware(['auth', 'verified', 'tenant'])
                 ->prefix('products')
+                ->name('products.')
                 ->group(base_path('routes/products.php'));
         },
         health: '/up',
@@ -26,7 +27,11 @@ return Application::configure(basePath: dirname(__DIR__))
             \App\Http\Middleware\TrustProxies::class,
         ]);
 
-        //
+        // Register middleware aliases
+        $middleware->alias([
+            'tenant' => \App\Http\Middleware\IdentifyTenant::class,
+            'role' => \App\Http\Middleware\RoleMiddleware::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

@@ -11,18 +11,18 @@ use Inertia\Inertia;
 // Health check con log file
 Route::get('/health', function () {
     $logPath = storage_path('logs/laravel.log');
-    
+
     try {
         $exists = File::exists($logPath);
         $size = $exists ? File::size($logPath) : 0;
         $modified = $exists ? File::lastModified($logPath) : null;
-        
+
         // Leer todo el contenido del log si existe
         $logContent = '';
         if ($exists && $size > 0) {
             $logContent = File::get($logPath);
         }
-        
+
         return response()->json([
             'status' => 'ok',
             'timestamp' => now()->toISOString(),
@@ -36,7 +36,7 @@ Route::get('/health', function () {
                 'lines_count' => $exists ? count(File::lines($logPath)) : 0
             ]
         ], 200);
-        
+
     } catch (\Exception $e) {
         return response()->json([
             'status' => 'error',
@@ -66,10 +66,15 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-// Test routes for products - Inertia version with ProductController
-Route::middleware(['auth', 'verified', 'App\Http\Middleware\IdentifyTenant'])->group(function () {
-    Route::get('/test-products', [ProductController::class, 'index']);
-    Route::get('/test-products-create', [ProductController::class, 'create']);
-});
-
 require __DIR__.'/auth.php';
+
+// Product Routes - MOVED HERE TO AVOID BOOTSTRAP ISSUES
+Route::middleware(['auth', 'verified', 'App\Http\Middleware\IdentifyTenant', 'role:business'])->prefix('products')->name('products.')->group(function () {
+    Route::get('/', [App\Http\Controllers\ProductController::class, 'index'])->name('index');
+    Route::get('/create', [App\Http\Controllers\ProductController::class, 'create'])->name('create');
+    Route::post('/', [App\Http\Controllers\ProductController::class, 'store'])->name('store');
+    Route::get('/{product}', [App\Http\Controllers\ProductController::class, 'show'])->name('show');
+    Route::get('/{product}/edit', [App\Http\Controllers\ProductController::class, 'edit'])->name('edit');
+    Route::put('/{product}', [App\Http\Controllers\ProductController::class, 'update'])->name('update');
+    Route::delete('/{product}', [App\Http\Controllers\ProductController::class, 'destroy'])->name('destroy');
+});

@@ -6,6 +6,7 @@ use App\Services\ProductService;
 use App\Http\Requests\ProductRequest;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -13,33 +14,49 @@ class ProductController extends Controller
 {
     public function __construct(
         private ProductService $productService
-    ) {}
-    
+    ) {
+        // Apply business role middleware to all product methods
+        $this->middleware('role:business');
+    }
+
     /**
      * Display products page.
      */
-    public function index(ProductRequest $request): Response|JsonResponse
+    public function index(Request $request): Response|JsonResponse
     {
         try {
             $tenant = $this->validateTenant();
-            $filters = $request->validated();
-            
+
+            // Get products data using the service
+            $filters = $request->all();
             $products = $this->productService->getProductsForTenant($tenant, $filters);
             $categories = $this->productService->getCategoriesForTenant($tenant);
             $statistics = $this->productService->getStatisticsForTenant($tenant);
-            
-            return Inertia::render('modules/products/Products/Index', [
+
+            // Return products page with SPA structure
+            return Inertia::render('Business/Index', [
+                'activeTab' => 'products',
                 'products' => $products,
                 'categories' => $categories,
                 'filters' => $filters,
                 'statistics' => $statistics,
+                'dashboard_data' => [
+                    'totalProducts' => $statistics['total_products'] ?? 0,
+                    'activeProducts' => $statistics['active_products'] ?? 0,
+                    'lowStock' => $statistics['low_stock'] ?? 0,
+                    'outOfStock' => $statistics['out_of_stock'] ?? 0,
+                ]
             ]);
-            
+
         } catch (\Exception $e) {
+            Log::error('ProductController::index - Exception', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
             return $this->error('Failed to load products', 500);
         }
     }
-    
+
     /**
      * Show the form for creating a new product.
      */
@@ -48,11 +65,11 @@ class ProductController extends Controller
         try {
             $tenant = $this->validateTenant();
             $categories = $this->productService->getCategoriesForTenant($tenant);
-            
+
             return Inertia::render('modules/products/Products/Create', [
                 'categories' => $categories,
             ]);
-            
+
         } catch (\Exception $e) {
             return Inertia::render('modules/products/Products/Error', [
                 'error' => 'Failed to load product creation form',
@@ -60,7 +77,7 @@ class ProductController extends Controller
             ]);
         }
     }
-    
+
     /**
      * Store a newly created product.
      */
@@ -69,20 +86,20 @@ class ProductController extends Controller
         try {
             $tenant = $this->validateTenant();
             $user = $request->user();
-            
+
             $product = $this->productService->createProductForTenant(
-                $tenant, 
-                $user, 
+                $tenant,
+                $user,
                 $request->validated()
             );
-            
+
             return $this->success($product, 'Product created successfully', 201);
-            
+
         } catch (\Exception $e) {
             return $this->error('Failed to create product', 500);
         }
     }
-    
+
     /**
      * Display the specified product.
      */
@@ -91,18 +108,18 @@ class ProductController extends Controller
         try {
             $tenant = $this->validateTenant();
             $product = $this->productService->getProductForTenant($tenant, $id);
-            
+
             if (!$product) {
                 return Inertia::render('modules/products/Products/Error', [
                     'error' => 'Product not found',
                     'message' => 'The requested product could not be found.',
                 ]);
             }
-            
+
             return Inertia::render('modules/products/Products/Show', [
                 'product' => $product,
             ]);
-            
+
         } catch (\Exception $e) {
             return Inertia::render('modules/products/Products/Error', [
                 'error' => 'Failed to load product',
@@ -110,7 +127,7 @@ class ProductController extends Controller
             ]);
         }
     }
-    
+
     /**
      * Show the form for editing the specified product.
      */
@@ -120,19 +137,19 @@ class ProductController extends Controller
             $tenant = $this->validateTenant();
             $product = $this->productService->getProductForTenant($tenant, $id);
             $categories = $this->productService->getCategoriesForTenant($tenant);
-            
+
             if (!$product) {
                 return Inertia::render('modules/products/Products/Error', [
                     'error' => 'Product not found',
                     'message' => 'The requested product could not be found.',
                 ]);
             }
-            
+
             return Inertia::render('modules/products/Products/Edit', [
                 'product' => $product,
                 'categories' => $categories,
             ]);
-            
+
         } catch (\Exception $e) {
             return Inertia::render('modules/products/Products/Error', [
                 'error' => 'Failed to load product edit form',
@@ -140,7 +157,7 @@ class ProductController extends Controller
             ]);
         }
     }
-    
+
     /**
      * Update the specified product.
      */
@@ -148,24 +165,24 @@ class ProductController extends Controller
     {
         try {
             $tenant = $this->validateTenant();
-            
+
             $updated = $this->productService->updateProductForTenant(
-                $tenant, 
-                $id, 
+                $tenant,
+                $id,
                 $request->validated()
             );
-            
+
             if (!$updated) {
                 return $this->notFound('Product not found');
             }
-            
+
             return $this->success(null, 'Product updated successfully');
-            
+
         } catch (\Exception $e) {
             return $this->error('Failed to update product', 500);
         }
     }
-    
+
     /**
      * Remove the specified product.
      */
@@ -173,15 +190,15 @@ class ProductController extends Controller
     {
         try {
             $tenant = $this->validateTenant();
-            
+
             $deleted = $this->productService->deleteProductForTenant($tenant, $id);
-            
+
             if (!$deleted) {
                 return $this->notFound('Product not found');
             }
-            
+
             return $this->noContent('Product deleted successfully');
-            
+
         } catch (\Exception $e) {
             return $this->error('Failed to delete product', 500);
         }

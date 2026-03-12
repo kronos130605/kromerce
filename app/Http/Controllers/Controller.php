@@ -7,11 +7,12 @@ use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Routing\Controller as BaseController;
 use App\Models\Tenant;
 use App\Traits\ApiResponse;
+use Illuminate\Support\Facades\Log;
 
 abstract class Controller extends BaseController
 {
     use AuthorizesRequests, ValidatesRequests, ApiResponse;
-    
+
     /**
      * Validate tenant context.
      */
@@ -20,14 +21,15 @@ abstract class Controller extends BaseController
         if (!$tenant) {
             $tenant = tenant();
         }
-        
+
         if (!$tenant) {
+            Log::error('validateTenant: no tenant found, throwing exception');
             throw new \Exception('No tenant context found');
         }
-        
+
         return $tenant;
     }
-    
+
     /**
      * Validate user access to tenant.
      */
@@ -36,7 +38,7 @@ abstract class Controller extends BaseController
         if ($user->isSuperAdmin()) {
             return true;
         }
-        
+
         return $user->tenants()->where('tenants.id', $tenant->id)->exists();
     }
 }

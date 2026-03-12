@@ -19,17 +19,48 @@ class ProductRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
+        $rules = [
+            // Basic product info
             'name' => 'required|string|max:255',
-            'description' => 'nullable|string|max:1000',
-            'price' => 'required|numeric|min:0|max:999999.99',
-            'category_id' => 'nullable|exists:product_categories,id',
-            'is_active' => 'sometimes|boolean',
+            'description' => 'nullable|string|max:2000',
+            'sku' => 'nullable|string|max:100|unique:products,sku',
+            'slug' => 'nullable|string|max:255|unique:products,slug',
+            
+            // Pricing
+            'base_price' => 'required|numeric|min:0|max:999999.99',
+            'sale_price' => 'nullable|numeric|min:0|max:999999.99|lt:base_price',
+            'base_currency' => 'required|string|size:3|exists:currencies,code',
+            
+            // Stock management
+            'manage_stock' => 'sometimes|boolean',
+            'stock_quantity' => 'required_if:manage_stock,true|integer|min:0',
+            'low_stock_threshold' => 'required_if:manage_stock,true|integer|min:1',
+            
+            // Status and visibility
+            'status' => 'required|in:active,inactive,draft',
+            'is_featured' => 'sometimes|boolean',
             'is_on_sale' => 'sometimes|boolean',
+            
+            // Organization
+            'category_id' => 'nullable|exists:product_categories,id',
+            'tags' => 'nullable|array',
+            'tags.*' => 'exists:product_tags,id',
+            
+            // Filters for listing
             'min_price' => 'sometimes|numeric|min:0',
             'max_price' => 'sometimes|numeric|min:0',
             'search' => 'sometimes|string|max:255',
+            'in_stock' => 'sometimes|boolean',
         ];
+
+        // For updates, make sku and slug unique except for current product
+        if ($this->isMethod('PUT') || $this->isMethod('PATCH')) {
+            $productId = $this->route('product');
+            $rules['sku'] = 'nullable|string|max:100|unique:products,sku,' . $productId;
+            $rules['slug'] = 'nullable|string|max:255|unique:products,slug,' . $productId;
+        }
+
+        return $rules;
     }
     
     /**
@@ -38,11 +69,33 @@ class ProductRequest extends FormRequest
     public function messages(): array
     {
         return [
+            // Basic info
             'name.required' => 'Product name is required',
             'name.max' => 'Product name must not exceed 255 characters',
-            'price.required' => 'Product price is required',
-            'price.numeric' => 'Price must be a valid number',
+            'description.max' => 'Description must not exceed 2000 characters',
+            'sku.unique' => 'SKU must be unique',
+            'slug.unique' => 'Slug must be unique',
+            
+            // Pricing
+            'base_price.required' => 'Base price is required',
+            'base_price.numeric' => 'Base price must be a valid number',
+            'sale_price.lt' => 'Sale price must be less than base price',
+            'base_currency.required' => 'Currency is required',
+            'base_currency.exists' => 'Selected currency is not supported',
+            
+            // Stock
+            'stock_quantity.required_if' => 'Stock quantity is required when stock management is enabled',
+            'stock_quantity.min' => 'Stock quantity cannot be negative',
+            'low_stock_threshold.required_if' => 'Low stock threshold is required when stock management is enabled',
+            'low_stock_threshold.min' => 'Low stock threshold must be at least 1',
+            
+            // Status
+            'status.required' => 'Product status is required',
+            'status.in' => 'Invalid status selected',
+            
+            // Organization
             'category_id.exists' => 'Selected category does not exist',
+            'tags.*.exists' => 'One or more selected tags are invalid',
         ];
     }
 }

@@ -1,0 +1,18 @@
+{
+  "errors": {
+    "dashboard_error": "Dashboard Error",
+    "access_denied": "Access Denied",
+    "business_access_required": "Business Dashboard Access Required",
+    "no_business_account": "No Business Account",
+    "no_business_description": "Your account is not associated with a business yet. Please create or join a business to access the dashboard.",
+    "no_access_business_dashboard": "You don't have access to the Business Dashboard",
+    "no_access_description": "The Business Dashboard is only available to users with business roles. Your current account doesn't have the necessary permissions to access this area.",
+    "technical_details": "Technical Details:",
+    "current_account": "Current Account",
+    "individual_account": "Individual Account",
+    "refresh_dashboard": "Refresh Dashboard",
+    "go_to_home": "Go to Home",
+    "contact_support": "Contact Support",
+    "back_to_customer_dashboard": "← Back to Customer Dashboard"
+  }
+}

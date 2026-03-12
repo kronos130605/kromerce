@@ -1,121 +1,48 @@
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
-import { usePage } from '@inertiajs/vue3';
+import { ref, onMounted, onBeforeUnmount } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
-import Button from '@/components/ui/Button.vue';
+import { useAuth } from '@/composables/useAuth.js';
+import { useDarkMode } from '@/composables/useDarkMode.js';
+import { useNavigation } from '@/composables/useNavigation.js';
 import Badge from '@/components/ui/Badge.vue';
 import LanguageSelector from '@/components/shared/LanguageSelector.vue';
+import Icon from '@/components/ui/Icon.vue';
 
-const page = usePage();
-const user = computed(() => page.props.auth.user);
-const currentTenant = computed(() => page.props.current_tenant);
 const { t } = useI18n();
 
-// Check user role
-const isCustomer = computed(() => {
-    const roles = user.value?.roles || [];
-    return roles.some(role => role.name === 'customer') || user.value?.role === 'customer';
-});
+// Use auth composable
+const {
+    user,
+    currentTenant,
+    isBusinessOwner,
+    displayName,
+    userAvatar,
+    userInitials,
+} = useAuth();
 
-const isBusinessOwner = computed(() => {
-    const roles = user.value?.roles || [];
-    return roles.some(role => role.name === 'business_owner') || user.value?.role === 'business_owner';
-});
-
-const isSuperAdmin = computed(() => {
-    const roles = user.value?.roles || [];
-    return roles.some(role => role.name === 'super_admin') || user.value?.role === 'super_admin';
-});
+// Use dark mode composable
+const { isDark, toggleDarkMode } = useDarkMode();
 
 const isOpen = ref(false);
-const isDarkTheme = ref(false);
 const showUserDropdown = ref(false);
 const userDropdownRef = ref(null);
 
-let observer;
 let onDocumentClick;
-
-const applyDarkClass = (enabled) => {
-  if (enabled) {
-    document.documentElement.classList.add('dark');
-  } else {
-    document.documentElement.classList.remove('dark');
-  }
-};
-
-const syncDarkThemeFromDom = () => {
-  isDarkTheme.value = document.documentElement.classList.contains('dark');
-};
-
-const toggleDarkMode = () => {
-  isDarkTheme.value = !isDarkTheme.value;
-  applyDarkClass(isDarkTheme.value);
-  try {
-    localStorage.setItem('kromerce_theme', isDarkTheme.value ? 'dark' : 'light');
-  } catch {
-    // ignore
-  }
-};
-
-const navigateTo = (href) => {
-  router.visit(href);
-  isOpen.value = false;
-};
 
 const logout = () => {
   router.post('/logout');
   showUserDropdown.value = false;
 };
 
-// Navigation items based on role
-const navigationItems = computed(() => {
-  if (isCustomer.value) {
-    return [
-      { href: '/dashboard', label: t('dashboard.nav_dashboard'), icon: '🏠' },
-      { href: '#stores', label: t('dashboard.nav_stores'), icon: '🏪' },
-      { href: '#orders', label: t('dashboard.nav_my_orders'), icon: '📦' },
-      { href: '#wishlist', label: t('dashboard.nav_wishlist'), icon: '❤️' },
-      { href: '#deals', label: t('dashboard.nav_deals'), icon: '🎯' },
-    ];
-  } else if (isBusinessOwner.value) {
-    return [
-      { href: '/dashboard', label: t('dashboard.nav_dashboard'), icon: '📊' },
-      { href: '/test-products', label: t('dashboard.nav_products'), icon: '📦' },
-      { href: '#orders', label: t('dashboard.nav_orders'), icon: '🛒' },
-      { href: '#analytics', label: t('dashboard.nav_analytics'), icon: '📈' },
-      { href: '#settings', label: t('dashboard.nav_settings'), icon: '⚙️' },
-    ];
-  } else if (isSuperAdmin.value) {
-    return [
-      { href: '/dashboard', label: t('dashboard.nav_dashboard'), icon: '🔧' },
-      { href: '#users', label: t('dashboard.nav_users'), icon: '👥' },
-      { href: '#tenants', label: t('dashboard.nav_tenants'), icon: '🏢' },
-      { href: '#analytics', label: t('dashboard.nav_analytics'), icon: '📊' },
-      { href: '#settings', label: t('dashboard.nav_settings'), icon: '⚙️' },
-    ];
-  }
-  return [];
-});
+// Use navigation composable
+const { navigationItems } = useNavigation();
+
+// Debug: Verificar items de navegación
+console.log('CustomerDashboardNavbar - navigationItems:', navigationItems.value);
 
 onMounted(() => {
-  try {
-    const stored = localStorage.getItem('kromerce_theme');
-    if (stored === 'dark' || stored === 'light') {
-      applyDarkClass(stored === 'dark');
-    }
-  } catch {
-    // ignore
-  }
-
-  syncDarkThemeFromDom();
-
-  observer = new MutationObserver(syncDarkThemeFromDom);
-  observer.observe(document.documentElement, {
-    attributes: true,
-    attributeFilter: ['class'],
-  });
-
+  // Close dropdown when clicking outside
   onDocumentClick = (event) => {
     if (!showUserDropdown.value) return;
     const el = userDropdownRef.value;
@@ -124,16 +51,10 @@ onMounted(() => {
       showUserDropdown.value = false;
     }
   };
-
   document.addEventListener('click', onDocumentClick, true);
 });
 
 onBeforeUnmount(() => {
-  if (observer) {
-    observer.disconnect();
-    observer = undefined;
-  }
-
   if (onDocumentClick) {
     document.removeEventListener('click', onDocumentClick, true);
     onDocumentClick = undefined;
@@ -145,291 +66,235 @@ onBeforeUnmount(() => {
   <header
     :class="[
       'fixed top-0 left-0 right-0 z-50 backdrop-blur-md transition-all duration-300',
-      isDarkTheme
+      isDark
         ? 'bg-gray-900/95 border-b border-gray-800'
         : 'bg-white/95 border-b border-border shadow-sm'
     ]"
   >
-    <div class="container mx-auto px-4">
+    <div class="mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between items-center h-16">
-        <!-- Logo -->
-        <Link href="/public" class="flex items-center group cursor-pointer">
-          <div class="mr-3 transition-transform duration-300 group-hover:scale-110">
-            <img
-              src="/images/kromerce-business-text.png"
-              alt="Kromerce"
-              :class="[
-                'h-8 w-auto object-contain transition-transform duration-300 group-hover:scale-110',
-                isDarkTheme ? 'filter brightness-0 invert' : ''
-              ]"
+        <!-- Left side - Logo and Mobile Menu -->
+        <div class="flex items-center">
+          <!-- Mobile menu button -->
+          <button
+            @click="isOpen = !isOpen"
+            :class="[
+              'lg:hidden p-2 rounded-md transition-colors',
+              isDark
+                ? 'text-gray-300 hover:text-white hover:bg-gray-800'
+                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+            ]"
+          >
+            <Icon
+              :name="isOpen ? 'close' : 'menu'"
+              category="ui"
+              class="h-6 w-6"
             />
-          </div>
-        </Link>
+          </button>
+
+          <!-- Logo -->
+          <Link href="/" class="flex items-center ml-4 lg:ml-0 group">
+            <div class="transition-transform duration-300 group-hover:scale-110">
+              <img
+                src="/images/kromerce-business-text.png"
+                alt="Kromerce"
+                :class="[
+                  'h-8 w-auto object-contain transition-transform duration-300',
+                  isDark ? 'filter brightness-0 invert' : ''
+                ]"
+              />
+            </div>
+          </Link>
+        </div>
 
         <!-- Desktop Navigation -->
         <nav class="hidden lg:flex items-center gap-6">
           <Link
-            v-for="{ href, label, icon } in navigationItems"
+            v-for="{ href, label, name } in navigationItems"
             :key="label"
             :href="href"
             :class="[
               'flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
-              isDarkTheme
+              isDark
                 ? 'text-gray-300 hover:text-white hover:bg-gray-800'
                 : 'text-foreground hover:text-foreground hover:bg-accent'
             ]"
           >
-            <span>{{ icon }}</span>
-            {{ label }}
+            <Icon
+              :name="name"
+              category="customer"
+              class="w-5 h-5"
+            />
+            {{ t(label) }}
           </Link>
         </nav>
 
-        <!-- Desktop User Section -->
-        <div class="hidden lg:flex items-center gap-4">
+        <!-- Right side - User actions -->
+        <div class="flex items-center gap-4">
+          <!-- Language Selector -->
+          <LanguageSelector />
+
+          <!-- Theme Toggle -->
+          <button
+            @click="toggleDarkMode"
+            :class="[
+              'p-2 rounded-md transition-colors',
+              isDark
+                ? 'text-gray-300 hover:text-white hover:bg-gray-800'
+                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+            ]"
+          >
+            <Icon
+              :name="isDark ? 'moon' : 'sun'"
+              category="ui"
+              class="h-5 w-5"
+            />
+          </button>
+
+          <!-- Notifications -->
+          <button
+            :class="[
+              'p-2 rounded-md transition-colors relative',
+              isDark
+                ? 'text-gray-300 hover:text-white hover:bg-gray-800'
+                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+            ]"
+          >
+            <Icon
+              name="bell"
+              category="ui"
+              class="h-5 w-5"
+            />
+            <span class="absolute top-1 right-1 h-2 w-2 bg-red-500 rounded-full"></span>
+          </button>
+
           <!-- Tenant Info for Business Owners -->
-          <div v-if="isBusinessOwner && currentTenant" class="flex items-center gap-2">
+          <div v-if="isBusinessOwner && currentTenant" class="hidden lg:flex items-center gap-2">
             <Badge
               variant="secondary"
               :class="[
                 'text-xs',
-                isDarkTheme
+                isDark
                   ? 'bg-gray-800 text-gray-300 border-gray-700'
                   : 'bg-muted text-foreground'
               ]"
             >
-              🏢 {{ currentTenant.name }}
+              {{ currentTenant.name }}
             </Badge>
           </div>
 
           <!-- User Dropdown -->
-          <div class="relative">
+          <div class="relative" ref="userDropdownRef">
             <button
-              @click.stop="showUserDropdown = !showUserDropdown"
+              @click="showUserDropdown = !showUserDropdown"
               :class="[
-                'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer',
-                isDarkTheme
+                'flex items-center space-x-3 p-2 rounded-md transition-colors',
+                isDark
                   ? 'text-gray-300 hover:text-white hover:bg-gray-800'
-                  : 'text-foreground hover:text-foreground hover:bg-accent'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
               ]"
             >
-              <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-sm font-bold">
-                {{ user.name.charAt(0).toUpperCase() }}
-              </div>
-              <span class="hidden md:block">{{ user.name }}</span>
-              <svg class="w-4 h-4 transition-transform" :class="{ 'rotate-180': showUserDropdown }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-              </svg>
+              <!-- Avatar fallback with initials -->
+              <span
+                v-if="!user?.avatar"
+                class="h-8 w-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-sm font-medium"
+              >
+                {{ userInitials }}
+              </span>
+              <img
+                v-else
+                :src="userAvatar"
+                :alt="displayName"
+                class="h-8 w-8 rounded-full object-cover"
+              />
+              <span class="hidden md:block text-sm font-medium">{{ displayName }}</span>
+              <Icon
+                name="chevronDown"
+                category="ui"
+                class="h-4 w-4 transition-transform"
+                :class="{ 'rotate-180': showUserDropdown }"
+              />
             </button>
 
             <!-- Dropdown Menu -->
             <div
               v-if="showUserDropdown"
-              ref="userDropdownRef"
               :class="[
-                'absolute right-0 top-full mt-2 w-56 rounded-lg border shadow-lg py-2 z-50',
-                isDarkTheme
-                  ? 'bg-gray-900 border-gray-800'
-                  : 'bg-background border-border'
+                'absolute right-0 mt-2 w-48 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none',
+                isDark
+                  ? 'bg-gray-800 border border-gray-700'
+                  : 'bg-white border border-gray-200'
               ]"
             >
-              <!-- User Info -->
-              <div class="px-4 py-3 border-b" :class="isDarkTheme ? 'border-gray-800' : 'border-border'">
-                <p class="text-sm font-medium">{{ user.name }}</p>
-                <p class="text-xs text-muted-foreground">{{ user.email }}</p>
-                <div v-if="isCustomer" class="mt-2">
-                  <Badge variant="secondary" class="text-xs">VIP Member</Badge>
-                </div>
-                <div v-else-if="isBusinessOwner" class="mt-2">
-                  <Badge variant="secondary" class="text-xs">Business Owner</Badge>
-                </div>
-                <div v-else-if="isSuperAdmin" class="mt-2">
-                  <Badge variant="secondary" class="text-xs">Super Admin</Badge>
-                </div>
-              </div>
-
-              <!-- Menu Items -->
-              <div class="py-2">
+              <div class="py-1">
                 <Link
                   href="/profile"
                   :class="[
-                    'flex items-center gap-3 px-4 py-2 text-sm transition-colors',
-                    isDarkTheme
-                      ? 'text-gray-300 hover:text-white hover:bg-gray-800'
-                      : 'text-foreground hover:text-foreground hover:bg-accent'
+                    'block px-4 py-2 text-sm transition-colors',
+                    isDark
+                      ? 'text-gray-300 hover:bg-gray-700'
+                      : 'text-gray-700 hover:bg-gray-100'
                   ]"
                 >
-                  <span>👤</span>
-                  Profile Settings
+                  {{ t('navigation.profile') }}
                 </Link>
-
                 <Link
-                  v-if="isCustomer"
-                  href="#notifications"
+                  href="/settings"
                   :class="[
-                    'flex items-center gap-3 px-4 py-2 text-sm transition-colors',
-                    isDarkTheme
-                      ? 'text-gray-300 hover:text-white hover:bg-gray-800'
-                      : 'text-foreground hover:text-foreground hover:bg-accent'
+                    'block px-4 py-2 text-sm transition-colors',
+                    isDark
+                      ? 'text-gray-300 hover:bg-gray-700'
+                      : 'text-gray-700 hover:bg-gray-100'
                   ]"
                 >
-                  <span>🔔</span>
-                  Notifications
+                  {{ t('navigation.settings') }}
                 </Link>
-
-                <Link
-                  v-if="isBusinessOwner"
-                  href="#billing"
-                  :class="[
-                    'flex items-center gap-3 px-4 py-2 text-sm transition-colors',
-                    isDarkTheme
-                      ? 'text-gray-300 hover:text-white hover:bg-gray-800'
-                      : 'text-foreground hover:text-foreground hover:bg-accent'
-                  ]"
-                >
-                  <span>💳</span>
-                  Billing
-                </Link>
-              </div>
-
-              <!-- Logout -->
-              <div class="pt-2 border-t" :class="isDarkTheme ? 'border-gray-800' : 'border-border'">
+                <div :class="[
+                  'border-t',
+                  isDark ? 'border-gray-700' : 'border-gray-200'
+                ]"></div>
                 <button
                   @click="logout"
                   :class="[
-                    'flex items-center gap-3 w-full px-4 py-2 text-sm transition-colors text-left',
-                    isDarkTheme
-                      ? 'text-red-400 hover:text-red-300 hover:bg-gray-800'
-                      : 'text-red-600 hover:text-red-700 hover:bg-accent'
+                    'block w-full text-left px-4 py-2 text-sm transition-colors',
+                    isDark
+                      ? 'text-gray-300 hover:bg-gray-700'
+                      : 'text-gray-700 hover:bg-gray-100'
                   ]"
                 >
-                  <span>🚪</span>
-                  Logout
+                  {{ t('navigation.logout') }}
                 </button>
               </div>
             </div>
           </div>
-
-          <!-- Language Selector -->
-          <LanguageSelector />
-
-          <!-- Dark Mode Toggle -->
-          <button
-            @click="toggleDarkMode"
-            class="p-2 rounded-lg hover:bg-accent transition-colors cursor-pointer"
-            :title="isDarkTheme ? 'Switch to light mode' : 'Switch to dark mode'"
-          >
-            <span v-if="!isDarkTheme" class="text-xl">🌙</span>
-            <span v-else class="text-xl">☀️</span>
-          </button>
-        </div>
-
-        <!-- Mobile Menu -->
-        <div class="flex items-center lg:hidden gap-2">
-          <!-- Language Selector Mobile -->
-          <LanguageSelector />
-
-          <!-- Dark Mode Toggle Mobile -->
-          <button
-            @click="toggleDarkMode"
-            class="p-2 rounded-lg hover:bg-accent transition-colors cursor-pointer"
-            :title="isDarkTheme ? 'Switch to light mode' : 'Switch to dark mode'"
-          >
-            <span v-if="!isDarkTheme" class="text-xl">🌙</span>
-            <span v-else class="text-xl">☀️</span>
-          </button>
-
-          <!-- Mobile Menu Button -->
-          <button
-            @click="isOpen = !isOpen"
-            class="p-2 rounded-lg hover:bg-accent transition-colors cursor-pointer"
-          >
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
         </div>
       </div>
 
-      <!-- Mobile Menu Content -->
-      <div
-        v-if="isOpen"
-        :class="[
-          'lg:hidden transition-all duration-300',
-          isDarkTheme
-            ? 'bg-gray-900 border-t border-gray-800'
-            : 'bg-background border-t border-border'
-        ]"
-      >
-        <div class="py-4 space-y-2">
-          <!-- Navigation Items -->
-          <button
-            v-for="{ href, label, icon } in navigationItems"
+      <!-- Mobile Navigation Menu -->
+      <div v-if="isOpen" :class="[
+        'lg:hidden border-t',
+        isDark ? 'border-gray-800 bg-gray-900' : 'border-gray-200 bg-white'
+      ]">
+        <div class="px-2 pt-2 pb-3 space-y-1">
+          <Link
+            v-for="{ href, label, name } in navigationItems"
             :key="label"
-            @click="navigateTo(href)"
+            :href="href"
             :class="[
-              'flex items-center gap-3 w-full px-4 py-3 text-sm font-medium transition-colors cursor-pointer',
-              isDarkTheme
+              'flex items-center gap-3 px-3 py-2 rounded-md text-base font-medium transition-colors',
+              isDark
                 ? 'text-gray-300 hover:text-white hover:bg-gray-800'
-                : 'text-foreground/80 hover:text-foreground hover:bg-accent'
+                : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'
             ]"
+            @click="isOpen = false"
           >
-            <span>{{ icon }}</span>
-            {{ label }}
-          </button>
-
-          <div :class="['pt-4 border-t', isDarkTheme ? 'border-gray-800' : 'border-border']">
-            <!-- User Info Mobile -->
-            <div class="px-4 py-3 space-y-2">
-              <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold">
-                  {{ user.name.charAt(0).toUpperCase() }}
-                </div>
-                <div>
-                  <p class="text-sm font-medium">{{ user.name }}</p>
-                  <p class="text-xs text-muted-foreground">{{ user.email }}</p>
-                </div>
-              </div>
-
-              <div v-if="isCustomer">
-                <Badge variant="secondary" class="text-xs">VIP Member</Badge>
-              </div>
-              <div v-else-if="isBusinessOwner">
-                <Badge variant="secondary" class="text-xs">Business Owner</Badge>
-              </div>
-              <div v-else-if="isSuperAdmin">
-                <Badge variant="secondary" class="text-xs">Super Admin</Badge>
-              </div>
-            </div>
-
-            <!-- Mobile Actions -->
-            <div class="space-y-2">
-              <button
-                @click="navigateTo('/profile')"
-                :class="[
-                  'flex items-center gap-3 w-full px-4 py-3 text-sm transition-colors cursor-pointer',
-                  isDarkTheme
-                    ? 'text-gray-300 hover:text-white hover:bg-gray-800'
-                    : 'text-foreground/80 hover:text-foreground hover:bg-accent'
-                ]"
-              >
-                <span>👤</span>
-                Profile Settings
-              </button>
-
-              <button
-                @click="logout"
-                :class="[
-                  'flex items-center gap-3 w-full px-4 py-3 text-sm transition-colors cursor-pointer',
-                  isDarkTheme
-                    ? 'text-red-400 hover:text-red-300 hover:bg-gray-800'
-                    : 'text-red-600 hover:text-red-700 hover:bg-accent'
-                ]"
-              >
-                <span>🚪</span>
-                Logout
-              </button>
-            </div>
-          </div>
+            <Icon
+              :name="name"
+              category="customer"
+              class="w-5 h-5"
+            />
+            {{ t(label) }}
+          </Link>
         </div>
       </div>
     </div>

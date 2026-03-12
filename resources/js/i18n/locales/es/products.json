@@ -1,0 +1,170 @@
+{
+  "products_management": {
+    "title": "Productos",
+    "overview": "Resumen de Productos",
+    "management": "Gestión de Productos",
+    "add_new": "Agregar Nuevo Producto",
+    "manage_products": "Gestionar Productos",
+    "import_products": "Importar Productos",
+    "export_products": "Exportar Productos",
+    "statistics": {
+      "total_products": "Total de Productos",
+      "active_products": "Productos Activos",
+      "low_stock": "Stock Bajo",
+      "out_of_stock": "Sin Stock"
+    },
+    "list": {
+      "title": "Lista de Productos",
+      "empty": "No se encontraron productos",
+      "search_placeholder": "Buscar productos...",
+      "filter": "Filtrar",
+      "clear_filters": "Limpiar",
+      "apply_filters": "Aplicar Filtros",
+      "showing_results": "Mostrando {from} a {to} de {total} resultados",
+      "previous": "Anterior",
+      "next": "Siguiente",
+      "filters": {
+        "title": "Filtros",
+        "search": "Buscar",
+        "category": "Categoría",
+        "status": "Estado",
+        "price_range": "Rango de Precio",
+        "stock": "Stock",
+        "all_categories": "Todas las Categorías",
+        "all_status": "Todos los Estados",
+        "active": "Activo",
+        "inactive": "Inactivo",
+        "draft": "Borrador",
+        "min_price": "Precio Mínimo",
+        "max_price": "Precio Máximo",
+        "in_stock_only": "Solo en Stock"
+      },
+      "table": {
+        "product": "Producto",
+        "category": "Categoría",
+        "price": "Precio",
+        "stock": "Stock",
+        "status": "Estado",
+        "actions": "Acciones",
+        "no_products": "No se encontraron productos",
+        "no_products_description": "No hay productos que coincidan con los criterios de búsqueda.",
+        "create_first": "Crear tu primer producto",
+        "view": "Ver",
+        "edit": "Editar",
+        "delete": "Eliminar",
+        "duplicate": "Duplicar"
+      }
+    },
+    "form": {
+      "name": "Nombre del Producto",
+      "description": "Descripción",
+      "sku": "SKU",
+      "slug": "Slug",
+      "base_price": "Precio Base",
+      "sale_price": "Precio de Oferta",
+      "currency": "Moneda",
+      "category": "Categoría",
+      "status": "Estado",
+      "stock_quantity": "Cantidad de Stock",
+      "low_stock_threshold": "Umbral de Stock Bajo",
+      "manage_stock": "Habilitar gestión de stock",
+      "featured": "Producto destacado",
+      "on_sale": "En oferta",
+      "tags": "Etiquetas",
+      "save": "Guardar Producto",
+      "update": "Actualizar Producto",
+      "cancel": "Cancelar",
+      "create": "Crear Producto",
+      "generating": "Generando...",
+      "generate_sku": "Generar",
+      "generate_slug": "Generar"
+    },
+    "status": {
+      "active": "Activo",
+      "inactive": "Inactivo",
+      "draft": "Borrador"
+    },
+    "stock": {
+      "in_stock": "En Stock",
+      "out_of_stock": "Sin Stock",
+      "low_stock": "Stock Bajo",
+      "not_managed": "No gestionado",
+      "current_stock": "Stock Actual",
+      "threshold": "Umbral",
+      "units": "unidades",
+      "stock_disabled": "La gestión de stock está deshabilitada para este producto"
+    },
+    "pricing": {
+      "base_price": "Precio Base",
+      "sale_price": "Precio de Oferta",
+      "save_amount": "Ahorra {amount}",
+      "currency": "Moneda"
+    },
+    "actions": {
+      "view": "Ver",
+      "edit": "Editar",
+      "delete": "Eliminar",
+      "duplicate": "Duplicar Producto",
+      "back_to_products": "Volver a Productos",
+      "go_back": "Regresar"
+    },
+    "messages": {
+      "created": "Producto creado exitosamente",
+      "updated": "Producto actualizado exitosamente",
+      "deleted": "Producto eliminado exitosamente",
+      "duplicated": "Producto duplicado exitosamente",
+      "loading": "Cargando...",
+      "no_data": "No hay productos disponibles",
+      "confirm_delete": "¿Estás seguro de que quieres eliminar este producto?",
+      "all_sufficient_stock": "Todos los productos tienen stock suficiente"
+    },
+    "sections": {
+      "basic_info": "Información Básica",
+      "pricing": "Precios",
+      "stock_management": "Gestión de Stock",
+      "status_visibility": "Estado y Visibilidad",
+      "product_flags": "Banderas de Producto",
+      "product_image": "Imagen del Producto",
+      "product_details": "Detalles del Producto",
+      "recent_products": "Productos Recientes",
+      "low_stock_alert": "Alerta de Stock Bajo",
+      "filters": "Filtros"
+    },
+    "placeholders": {
+      "no_category": "Sin categoría",
+      "no_description": "No se proporcionó descripción",
+      "no_image": "Sin imagen de producto",
+      "select_category": "Seleccionar una categoría",
+      "min_price": "Mín",
+      "max_price": "Máx"
+    },
+    "validation": {
+      "name_required": "El nombre del producto es requerido",
+      "name_max": "El nombre del producto no debe exceder 255 caracteres",
+      "description_max": "La descripción no debe exceder 2000 caracteres",
+      "sku_unique": "El SKU debe ser único",
+      "slug_unique": "El slug debe ser único",
+      "base_price_required": "El precio base es requerido",
+      "base_price_numeric": "El precio base debe ser un número válido",
+      "sale_price_less": "El precio de oferta debe ser menor al precio base",
+      "currency_required": "La moneda es requerida",
+      "currency_exists": "La moneda seleccionada no está soportada",
+      "stock_quantity_required": "La cantidad de stock es requerida cuando la gestión de stock está habilitada",
+      "stock_quantity_min": "La cantidad de stock no puede ser negativa",
+      "threshold_required": "El umbral de stock bajo es requerido cuando la gestión de stock está habilitada",
+      "threshold_min": "El umbral de stock bajo debe ser al menos 1",
+      "status_required": "El estado del producto es requerido",
+      "status_invalid": "Estado seleccionado inválido",
+      "category_exists": "La categoría seleccionada no existe",
+      "tags_invalid": "Una o más etiquetas seleccionadas son inválidas"
+    },
+    "currency": {
+      "USD": "USD - Dólar Americano",
+      "EUR": "EUR - Euro",
+      "GBP": "GBP - Libra Esterlina",
+      "JPY": "JPY - Yen Japonés",
+      "CAD": "CAD - Dólar Canadiense",
+      "AUD": "AUD - Dólar Australiano"
+    }
+  }
+}
