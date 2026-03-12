@@ -1,94 +1,56 @@
 <template>
-  <!-- Mobile Floating Menu Button - Professional Design -->
-  <button
-    v-if="isMobile"
-    @click="toggleSidebar"
-    class="fixed top-20 left-2 z-50 w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 text-white rounded-full shadow-2xl hover:shadow-3xl transition-all duration-300 ease-out hover:scale-105 active:scale-95 lg:hidden flex items-center justify-center group"
-    :title="isMobileOpen ? 'Close menu' : 'Open menu'"
-  >
-    <!-- Background glow effect -->
-    <span class="absolute inset-0 bg-blue-400 rounded-full opacity-0 group-hover:opacity-20 transition-opacity duration-300 blur-xl"></span>
-
-    <!-- Icon container -->
-    <span class="relative flex items-center justify-center">
-      <Icon
-        v-if="!isMobileOpen"
-        name="menu"
-        category="ui"
-        class="w-6 h-6 transition-all duration-300 group-hover:rotate-12"
-      />
-      <Icon
-        v-else
-        name="close"
-        category="ui"
-        class="w-6 h-6 transition-all duration-300 group-hover:rotate-90"
-      />
-    </span>
-
-    <!-- Pulse animation when closed -->
-    <span
-      v-if="!isMobileOpen"
-      class="absolute inset-0 rounded-full border-2 border-blue-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-    ></span>
-  </button>
-
   <!-- Mobile Overlay -->
   <div
     v-if="isMobileOpen"
-    class="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm z-40 lg:hidden transition-opacity duration-300"
+    class="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
     @click="closeMobileSidebar"
   ></div>
 
   <!-- Sidebar -->
   <aside
-    class="fixed top-16 left-0 z-50 h-[calc(100vh-4rem)]
-    bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700
-    transform transition-all duration-300 ease-in-out
-    lg:relative lg:transform-none
-    ${isCollapsed ? 'lg:w-16 w-64' : 'w-64'}
-    ${isMobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-    "
+    :class="`
+      fixed top-16 left-0 z-50 h-[calc(100vh-4rem)]
+      bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700
+      transform transition-all duration-300 ease-in-out
+      lg:relative lg:transform-none
+      ${isCollapsed ? 'lg:w-16 w-64' : 'w-64'}
+      ${isMobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+    `"
   >
     <!-- Content Wrapper -->
     <div class="h-full flex flex-col">
 
       <!-- Navigation -->
-      <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
+      <nav class="flex-1 p-2.5 space-y-2 overflow-y-auto">
       <Link
         v-for="item in sidebarNavigationItems"
         :key="item.href"
-        :href="isActive(item.href) ? '#' : item.href"
-        class="flex items-center px-3 py-2.5 rounded-lg transition-colors group relative"
+        :href="item.href"
         :class="[
           isActive(item.href)
-            ? 'bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 text-white cursor-default shadow-md'
-            : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground cursor-pointer',
-          isCollapsed ? 'justify-center' : 'justify-start space-x-3'
+            ? 'bg-blue-50 dark:bg-blue-900 text-blue-700 dark:text-blue-300'
+            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800',
+          isCollapsed ? 'justify-center' : '',
+          'flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200'
         ]"
-        @click="isActive(item.href) ? $event.preventDefault() : null"
+        @click="closeMobileSidebar"
       >
 
-        <!-- Icon -->
-        <Icon
-          :name="item.name"
-          category="business"
-          :class="`
-            text-xl flex-shrink-0
-            ${isCollapsed ? 'w-6 h-6' : 'w-5 h-5'}
-          `"
-        />
+            <Icon
+              :name="item.name"
+              category="business"
+              :class="`
+                ${isCollapsed ? 'w-6 h-6' : 'w-5 h-5'}
+                ${isCollapsed ? '' : 'mr-3'}
+                transition-all duration-200
+              `"
+            />
 
-        <!-- Label and Badge (hidden when collapsed) -->
-        <div v-if="!isCollapsed" class="flex-1 flex items-center justify-between min-w-0">
-          <span class="font-medium truncate">{{ item.label }}</span>
-          <span
-            v-if="item.badge"
-            class="ml-auto px-2 py-1 text-xs rounded-full flex-shrink-0"
-            :class="getBadgeClass(item.badge.type)"
-          >
-            {{ item.badge.text }}
-          </span>
-        </div>
+            <span v-if="!isCollapsed" class="flex-1 transition-opacity duration-200">{{ item.label }}</span>
+
+            <Badge v-if="item.badge && !isCollapsed" variant="primary" size="sm">
+              {{ item.badge }}
+            </Badge>
       </Link>
     </nav>
 
@@ -152,7 +114,7 @@
     <!-- Collapse Toggle (Desktop) -->
     <button
       @click="toggleSidebar"
-      class="hidden lg:flex absolute -right-3 top-8 items-center justify-center w-6 h-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full shadow-md hover:shadow-lg transition-all duration-200 z-10"
+      class="hidden lg:flex absolute -right-4 top-8 items-center justify-center w-6 h-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full shadow-md hover:shadow-lg transition-all duration-200 z-10"
     >
       <Icon
         name="chevronLeft"
@@ -166,12 +128,11 @@
 <script setup>
 import { Link, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
+import Badge from "@/components/ui/Badge.vue";
 import { useSidebar } from '@/composables/useSidebar.js';
 import { useNavigation } from '@/composables/useNavigation.js';
 import { useAuth } from '@/composables/useAuth.js';
-import { UIIcons, BusinessIcons } from '@/icons';
 import Icon from '@/components/ui/Icon.vue';
-import Badge from '@/components/ui/Badge.vue';
 
 const page = usePage();
 
@@ -190,12 +151,8 @@ const { sidebarNavigationItems } = useNavigation();
 const {
     isCollapsed,
     isMobileOpen,
-    showExpandButton,
-    isMobile,
-    sidebarClasses,
     toggleSidebar,
     closeMobileSidebar,
-    isFirstLoad
 } = useSidebar();
 
 // Methods
@@ -208,43 +165,4 @@ const isActive = (href) => {
   // Handle exact and partial matches
   return currentUrl === href || currentUrl.startsWith(href);
 };
-
-const getBadgeClass = (type) => {
-  const classes = {
-    success: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
-    warning: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300',
-    error: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300',
-    info: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
-  };
-  return classes[type] || 'bg-muted text-muted-foreground';
-};
 </script>
-
-<style scoped>
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateX(-5px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-.animate-fade-in {
-  animation: fadeIn 0.2s ease-out forwards;
-}
-
-/* Prevenir parpadeo al cambiar de página */
-.animate-fade-in:not([data-first-render="true"]) {
-  animation: none;
-  opacity: 1 !important;
-  transform: translateX(0) !important;
-}
-
-/* Solo animar cuando el botón aparece por primera vez */
-.animate-fade-in[data-first-render="true"] {
-  animation: fadeIn 0.2s ease-out forwards;
-}
-</style>

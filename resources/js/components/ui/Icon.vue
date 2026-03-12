@@ -49,8 +49,7 @@ const iconData = computed(() => {
 });
 
 const iconClass = computed(() => {
-  const baseClass = props.size || iconData.value?.size || 'w-5 h-5';
-  return baseClass;
+    return props.size || iconData.value?.size || 'w-5 h-5';
 });
 
 const iconProps = computed(() => ({

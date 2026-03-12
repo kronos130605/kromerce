@@ -1,16 +1,11 @@
 <script setup>
 import { Link, usePage } from '@inertiajs/vue3';
-import { ref, onMounted, onBeforeUnmount } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useNavigation } from '@/composables/useNavigation.js';
 import { useAuth } from '@/composables/useAuth.js';
 import { useSidebar } from '@/composables/useSidebar.js';
-import { UIIcons } from '@/icons';
 import Icon from '@/components/ui/Icon.vue';
 import Badge from '@/components/ui/Badge.vue';
-
-const page = usePage();
-const { t } = useI18n();
 
 // Use auth composable
 const { user, displayName, userAvatar, userInitials, isCustomer } = useAuth();
@@ -22,13 +17,8 @@ const { sidebarNavigationItems } = useNavigation();
 const {
     isCollapsed,
     isMobileOpen,
-    showExpandButton,
-    isMobile,
-    sidebarClasses,
     toggleSidebar,
     closeMobileSidebar,
-    openMobileSidebar,
-    isFirstLoad
 } = useSidebar();
 </script>
 
@@ -157,7 +147,7 @@ const {
     <!-- Collapse Toggle (Desktop) -->
     <button
       @click="toggleSidebar"
-      class="hidden lg:flex absolute -right-3 top-8 items-center justify-center w-6 h-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full shadow-md hover:shadow-lg transition-all duration-200 z-10"
+      class="hidden lg:flex absolute -right-4 top-8 items-center justify-center w-6 h-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full shadow-md hover:shadow-lg transition-all duration-200 z-10"
     >
       <Icon
         name="chevronLeft"
