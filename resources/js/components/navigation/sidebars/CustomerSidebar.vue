@@ -157,7 +157,7 @@ const {
     <!-- Collapse Toggle (Desktop) -->
     <button
       @click="toggleSidebar"
-      class="hidden lg:flex absolute -right-3 top-8 items-center justify-center w-6 h-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full shadow-md hover:shadow-lg transition-all duration-200 z-10"
+      class="hidden lg:flex absolute -right-4 top-8 items-center justify-center w-6 h-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full shadow-md hover:shadow-lg transition-all duration-200 z-10"
     >
       <Icon
         name="chevronLeft"
