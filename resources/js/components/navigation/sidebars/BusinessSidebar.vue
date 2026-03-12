@@ -21,7 +21,7 @@
     <div class="h-full flex flex-col">
 
       <!-- Navigation -->
-      <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
+      <nav class="flex-1 p-2.5 space-y-2 overflow-y-auto">
       <Link
         v-for="item in sidebarNavigationItems"
         :key="item.href"
@@ -171,32 +171,3 @@ const isActive = (href) => {
   return currentUrl === href || currentUrl.startsWith(href);
 };
 </script>
-
-<style scoped>
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateX(-5px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-.animate-fade-in {
-  animation: fadeIn 0.2s ease-out forwards;
-}
-
-/* Prevenir parpadeo al cambiar de página */
-.animate-fade-in:not([data-first-render="true"]) {
-  animation: none;
-  opacity: 1 !important;
-  transform: translateX(0) !important;
-}
-
-/* Solo animar cuando el botón aparece por primera vez */
-.animate-fade-in[data-first-render="true"] {
-  animation: fadeIn 0.2s ease-out forwards;
-}
-</style>
