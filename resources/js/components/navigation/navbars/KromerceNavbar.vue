@@ -2,14 +2,16 @@
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import { usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
+import { useAuth } from '@/composables/useAuth.js';
+import { useDarkMode } from '@/composables/useDarkMode.js';
 import Button from '@/components/ui/Button.vue';
 import Badge from '@/components/ui/Badge.vue';
 import LanguageSelector from '@/components/shared/LanguageSelector.vue';
 
 const { t } = useI18n();
 const page = usePage();
-
-const user = computed(() => page.props.auth?.user);
+const { user } = useAuth();
+const { isDark, toggleDarkMode } = useDarkMode();
 
 const routeList = computed(() => [
   {
@@ -31,31 +33,6 @@ const routeList = computed(() => [
 ]);
 
 const isOpen = ref(false);
-const isDarkTheme = ref(false);
-
-let observer;
-
-const applyDarkClass = (enabled) => {
-  if (enabled) {
-    document.documentElement.classList.add('dark');
-  } else {
-    document.documentElement.classList.remove('dark');
-  }
-};
-
-const syncDarkThemeFromDom = () => {
-  isDarkTheme.value = document.documentElement.classList.contains('dark');
-};
-
-const toggleDarkMode = () => {
-  isDarkTheme.value = !isDarkTheme.value;
-  applyDarkClass(isDarkTheme.value);
-  try {
-    localStorage.setItem('kromerce_theme', isDarkTheme.value ? 'dark' : 'light');
-  } catch {
-    // ignore
-  }
-};
 
 const smoothScroll = (href) => {
   const element = document.querySelector(href);
@@ -66,23 +43,6 @@ const smoothScroll = (href) => {
 };
 
 onMounted(() => {
-  try {
-    const stored = localStorage.getItem('kromerce_theme');
-    if (stored === 'dark' || stored === 'light') {
-      applyDarkClass(stored === 'dark');
-    }
-  } catch {
-    // ignore
-  }
-
-  syncDarkThemeFromDom();
-
-  observer = new MutationObserver(syncDarkThemeFromDom);
-  observer.observe(document.documentElement, {
-    attributes: true,
-    attributeFilter: ['class'],
-  });
-
   // Add ID to hero section for navigation
   const hero = document.querySelector('section');
   if (hero) {
@@ -91,10 +51,7 @@ onMounted(() => {
 });
 
 onBeforeUnmount(() => {
-  if (observer) {
-    observer.disconnect();
-    observer = undefined;
-  }
+  // Cleanup if needed
 });
 </script>
 
@@ -102,7 +59,7 @@ onBeforeUnmount(() => {
   <header
     :class="[
       'fixed top-0 left-0 right-0 z-50 backdrop-blur-md transition-all duration-300',
-      isDarkTheme
+      isDark
         ? 'bg-gray-900/95 border-b border-gray-800'
         : 'bg-white/95 border-b border-border shadow-sm'
     ]"
@@ -117,7 +74,7 @@ onBeforeUnmount(() => {
               alt="Kromerce"
               :class="[
                 'h-8 w-auto object-contain transition-transform duration-300 group-hover:scale-110',
-                isDarkTheme ? 'filter brightness-0 invert' : ''
+                isDark ? 'filter brightness-0 invert' : ''
               ]"
             />
           </div>
@@ -131,7 +88,7 @@ onBeforeUnmount(() => {
             @click="smoothScroll(href)"
             :class="[
               'font-medium transition-colors relative group cursor-pointer',
-              isDarkTheme
+              isDark
                 ? 'text-gray-300 hover:text-white'
                 : 'text-foreground hover:text-foreground'
             ]"
@@ -152,7 +109,7 @@ onBeforeUnmount(() => {
               variant="secondary"
               :class="[
                 'text-xs',
-                isDarkTheme
+                isDark
                   ? 'bg-gray-800 text-gray-300 border-gray-700'
                   : 'bg-muted text-foreground'
               ]"
@@ -184,9 +141,9 @@ onBeforeUnmount(() => {
           <button
             @click="toggleDarkMode"
             class="p-2 rounded-lg hover:bg-accent transition-colors cursor-pointer"
-            :title="isDarkTheme ? t('nav.toggle_light') : t('nav.toggle_dark')"
+            :title="isDark ? t('nav.toggle_light') : t('nav.toggle_dark')"
           >
-            <span v-if="!isDarkTheme" class="text-xl">🌙</span>
+            <span v-if="!isDark" class="text-xl">🌙</span>
             <span v-else class="text-xl">☀️</span>
           </button>
         </div>
@@ -200,9 +157,9 @@ onBeforeUnmount(() => {
           <button
             @click="toggleDarkMode"
             class="p-2 rounded-lg hover:bg-accent transition-colors cursor-pointer"
-            :title="isDarkTheme ? t('nav.toggle_light') : t('nav.toggle_dark')"
+            :title="isDark ? t('nav.toggle_light') : t('nav.toggle_dark')"
           >
-            <span v-if="!isDarkTheme" class="text-xl">🌙</span>
+            <span v-if="!isDark" class="text-xl">🌙</span>
             <span v-else class="text-xl">☀️</span>
           </button>
 
@@ -224,7 +181,7 @@ onBeforeUnmount(() => {
         v-if="isOpen"
         :class="[
           'lg:hidden transition-all duration-300',
-          isDarkTheme
+          isDark
             ? 'bg-gray-900 border-t border-gray-800'
             : 'bg-background border-t border-border'
         ]"
@@ -237,14 +194,14 @@ onBeforeUnmount(() => {
             variant="ghost"
             :class="[
               'w-full justify-start transition-colors cursor-pointer',
-              isDarkTheme
+              isDark
                 ? 'text-gray-300 hover:text-white hover:bg-gray-800'
                 : 'text-foreground/80 hover:text-foreground hover:bg-accent'
             ]"
           >
             {{ label }}
           </Button>
-          <div :class="['pt-4 border-t', isDarkTheme ? 'border-gray-800' : 'border-border']">
+          <div :class="['pt-4 border-t', isDark ? 'border-gray-800' : 'border-border']">
             <!-- Authenticated User Mobile -->
             <div v-if="user" class="space-y-2">
               <div class="px-2 py-1 text-sm text-muted-foreground">

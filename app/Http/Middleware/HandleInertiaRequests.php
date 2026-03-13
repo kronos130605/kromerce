@@ -80,19 +80,6 @@ class HandleInertiaRequests extends Middleware
 
                 return 'customer';
             },
-            'tenant' => function () use ($request) {
-                $tenant = tenancy()->initialized ? tenant() : null;
-
-                if ($tenant) {
-                    return [
-                        'id' => $tenant->id,
-                        'name' => $tenant->name,
-                        'slug' => $tenant->slug,
-                    ];
-                }
-
-                return null;
-            },
             'ziggy' => function () use ($request) {
                 $ziggy = new \Tighten\Ziggy\Ziggy;
                 return array_merge($ziggy->toArray(), [

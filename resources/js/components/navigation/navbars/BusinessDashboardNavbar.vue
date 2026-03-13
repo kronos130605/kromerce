@@ -221,10 +221,10 @@ onBeforeUnmount(() => {
                 <p class="text-sm font-medium">{{ displayName }}</p>
                 <p class="text-xs text-muted-foreground">{{ user.email }}</p>
                 <div v-if="isBusinessOwner" class="mt-2">
-                  <Badge variant="secondary" class="text-xs">Business Owner</Badge>
+                  <Badge variant="secondary" class="text-xs">{{ t('roles.business_owner') }}</Badge>
                 </div>
                 <div v-else-if="isSuperAdmin" class="mt-2">
-                  <Badge variant="secondary" class="text-xs">Super Admin</Badge>
+                  <Badge variant="secondary" class="text-xs">{{ t('roles.super_admin') }}</Badge>
                 </div>
               </div>
 
@@ -239,8 +239,12 @@ onBeforeUnmount(() => {
                       : 'text-foreground hover:text-foreground hover:bg-accent'
                   ]"
                 >
-                  <span>👤</span>
-                  Profile Settings
+                  <Icon
+                    name="user"
+                    category="ui"
+                    class="h-4 w-4"
+                  />
+                  {{ t('profile.profile_settings') }}
                 </Link>
 
                 <Link
@@ -252,8 +256,12 @@ onBeforeUnmount(() => {
                       : 'text-foreground hover:text-foreground hover:bg-accent'
                   ]"
                 >
-                  <span>💳</span>
-                  Billing
+                  <Icon
+                    name="reports"
+                    category="business"
+                    class="h-4 w-4"
+                  />
+                  {{ t('profile.billing') }}
                 </Link>
               </div>
 
@@ -268,8 +276,12 @@ onBeforeUnmount(() => {
                       : 'text-red-600 hover:text-red-700 hover:bg-accent'
                   ]"
                 >
-                  <span>🚪</span>
-                  Logout
+                  <Icon
+                    name="logout"
+                    category="ui"
+                    class="h-4 w-4"
+                  />
+                  {{ t('common.logout') }}
                 </button>
               </div>
             </div>
@@ -349,8 +361,12 @@ onBeforeUnmount(() => {
                     : 'text-foreground/80 hover:text-foreground hover:bg-accent'
                 ]"
               >
-                <span>👤</span>
-                Profile Settings
+                <Icon
+                  name="user"
+                  category="ui"
+                  class="h-4 w-4"
+                />
+                {{ t('dashboard.profile_settings') }}
               </button>
 
               <button
@@ -362,8 +378,12 @@ onBeforeUnmount(() => {
                     : 'text-red-600 hover:text-red-700 hover:bg-accent'
                 ]"
               >
-                <span>🚪</span>
-                Logout
+                <Icon
+                  name="logout"
+                  category="ui"
+                  class="h-4 w-4"
+                />
+                {{ t('dashboard.logout') }}
               </button>
             </div>
           </div>

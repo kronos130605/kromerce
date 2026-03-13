@@ -72,8 +72,23 @@ Get-Content -Tail 20 \\wsl.localhost\Ubuntu\home\kronos\Code\kromerce\path\to\fi
 
 ### Search in Files
 ```powershell
+# ✅ WORKING: Search for text patterns in Vue/JS files recursively
+Get-ChildItem -Path "\\wsl.localhost\Ubuntu\home\kronos\Code\kromerce\resources\js" -Recurse -Include "*.vue","*.js" | Select-String -Pattern "your-pattern-here"
+
 # Search for text in files (use grep_search tool instead)
 # Note: For searching file contents, use the grep_search tool
+```
+
+### Search Examples
+```powershell
+# Search for page.props.auth.user usage
+Get-ChildItem -Path "\\wsl.localhost\Ubuntu\home\kronos\Code\kromerce\resources\js" -Recurse -Include "*.vue","*.js" | Select-String -Pattern "page\.props\.auth\.user"
+
+# Search for useAuth imports
+Get-ChildItem -Path "\\wsl.localhost\Ubuntu\home\kronos\Code\kromerce\resources\js" -Recurse -Include "*.vue","*.js" | Select-String -Pattern "useAuth"
+
+# Search for specific component usage
+Get-ChildItem -Path "\\wsl.localhost\Ubuntu\home\kronos\Code\kromerce\resources\js" -Recurse -Include "*.vue","*.js" | Select-String -Pattern "ComponentName"
 ```
 
 ## Directory Operations
@@ -308,6 +323,9 @@ $env:VARIABLE_NAME = "value"
 - `touch` - Unix command, use `New-Item -ItemType File` instead
 - `cat` - Unix command, use `Get-Content` instead
 - `grep` - Unix command, use `Select-String` or grep_search tool instead
+- `head` - Unix command, not available in PowerShell
+- `Select-String -Recurse` - Invalid parameter, use Get-ChildItem | Select-String instead
+- `find` - Unix command, use Get-ChildItem with filters instead
 
 ### ✅ Commands That Work
 - `Remove-Item` - For deleting files/directories
@@ -317,6 +335,7 @@ $env:VARIABLE_NAME = "value"
 - `Get-ChildItem` - For listing directory contents
 - `Get-Content` - For reading file contents
 - `Test-Path` - For checking if paths exist
+- `Get-ChildItem -Recurse -Include "*.vue","*.js" | Select-String -Pattern "pattern"` - For searching text in files
 - `npm` commands - Work as expected
 - `php artisan` commands - Work as expected
 - `git` commands - Work as expected
@@ -344,6 +363,9 @@ Get-ChildItem \\wsl.localhost\Ubuntu\home\kronos\Code\kromerce\path\to\directory
 
 # Check if file exists
 Test-Path \\wsl.localhost\Ubuntu\home\kronos\Code\kromerce\path\to\file
+
+# Search for patterns in Vue/JS files
+Get-ChildItem -Path "\\wsl.localhost\Ubuntu\home\kronos\Code\kromerce\resources\js" -Recurse -Include "*.vue","*.js" | Select-String -Pattern "your-pattern"
 
 # Install npm dependencies
 npm install

@@ -9,9 +9,9 @@ import FlashSaleBanner from '@/components/dashboard/FlashSaleBanner.vue';
 import FeaturedStores from '@/components/dashboard/FeaturedStores.vue';
 import AIRecommendations from '@/components/dashboard/AIRecommendations.vue';
 import QuickActions from '@/components/dashboard/QuickActions.vue';
+import { useAuth } from '@/composables/useAuth';
 
-const page = usePage();
-const user = computed(() => page.props.auth.user);
+const { user } = useAuth();
 const { t } = useI18n();
 
 // State management

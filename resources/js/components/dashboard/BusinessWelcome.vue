@@ -2,11 +2,13 @@
 import { computed } from 'vue';
 import { usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
+import { useAuth } from '@/composables/useAuth.js';
 
 const page = usePage();
-const user = computed(() => page.props.auth.user);
-const currentTenant = computed(() => page.props.current_tenant);
 const { t } = useI18n();
+
+// Use centralized auth composable
+const { user, currentTenant } = useAuth();
 
 // Business stats
 const businessStats = computed(() => ({
