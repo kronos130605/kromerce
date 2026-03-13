@@ -22,7 +22,7 @@ const form = useForm({
     password: '',
     password_confirmation: '',
     user_type: 'customer', // customer, business_owner
-    tenant_name: '', // solo para business_owner
+    store_name: '', // solo para business_owner
 });
 
 const passwordValue = ref('');
@@ -36,7 +36,7 @@ const submit = () => {
     form.post(route('register'), {
         onFinish: () => {
             form.reset('password', 'password_confirmation');
-            form.reset('tenant_name');
+            form.reset('store_name');
         },
     });
 };
@@ -294,7 +294,7 @@ onUnmounted(() => {
                             ]">{{ t('auth.business_name') }}</label>
                             <input
                                 type="text"
-                                v-model="form.tenant_name"
+                                v-model="form.store_name"
                                 :class="[
                                     'w-full px-4 py-3 border rounded-xl transition-colors',
                                     isDarkMode
@@ -304,8 +304,8 @@ onUnmounted(() => {
                                 :placeholder="t('auth.business_name_placeholder')"
                                 required
                             />
-                            <div v-if="form.errors.tenant_name" class="mt-1 text-sm text-red-600">
-                                {{ form.errors.tenant_name }}
+                            <div v-if="form.errors.store_name" class="mt-1 text-sm text-red-600">
+                                {{ form.errors.store_name }}
                             </div>
                         </div>
 

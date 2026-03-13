@@ -2,31 +2,31 @@
 
 namespace App\Services;
 
-use App\Models\Tenant;
+use App\Models\Store;
 
 class BrandingService
 {
-    protected ?Tenant $tenant = null;
+    protected ?Store $store = null;
 
     public function __construct()
     {
         if (tenancy()->initialized) {
-            $this->tenant = tenant();
+            $this->store = tenant();
         }
     }
 
-    public function getTenant(): ?Tenant
+    public function getStore(): ?Store
     {
-        return $this->tenant;
+        return $this->store;
     }
 
     public function getBrandingConfig(): array
     {
-        if (!$this->tenant) {
+        if (!$this->store) {
             return $this->getDefaultBranding();
         }
 
-        return $this->tenant->branding;
+        return $this->store->branding;
     }
 
     public function getDefaultBranding(): array
@@ -58,14 +58,14 @@ class BrandingService
 
     public function updateBranding(array $config): bool
     {
-        if (!$this->tenant) {
+        if (!$this->store) {
             return false;
         }
 
-        $currentConfig = $this->tenant->branding_config ?? [];
+        $currentConfig = $this->store->branding_config ?? [];
         $newConfig = array_merge($currentConfig, $config);
 
-        return $this->tenant->update(['branding_config' => $newConfig]);
+        return $this->store->update(['branding_config' => $newConfig]);
     }
 
     public function getLogoUrl(): ?string

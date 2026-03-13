@@ -3,7 +3,7 @@
 namespace App\Repositories;
 
 use App\Models\User;
-use App\Models\Tenant;
+use App\Models\Store;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -11,19 +11,19 @@ use Illuminate\Support\Facades\Log;
 class UserRoleRepository
 {
     /**
-     * Get user roles in tenant
+     * Get user roles in store
      */
-    public function getUserRoleInTenant(User $user, Tenant $tenant): ?string
+    public function getUserRoleInStore(User $user, Store $store): ?string
     {
         try {
-            return $user->tenants()
-                ->where('tenant_id', $tenant->id)
+            return $user->stores()
+                ->where('store_id', $store->id)
                 ->first()
                 ?->pivot->role ?? null;
         } catch (\Exception $e) {
-            Log::error('Error getting user role in tenant', [
+            Log::error('Error getting user role in store', [
                 'user_id' => $user->id,
-                'tenant_id' => $tenant->id,
+                'store_id' => $store->id,
                 'error' => $e->getMessage(),
             ]);
             return null;
@@ -63,26 +63,26 @@ class UserRoleRepository
     }
 
     /**
-     * Assign role to user in tenant
+     * Assign role to user in store
      */
-    public function assignRoleToUserInTenant(User $user, Tenant $tenant, string $role): bool
+    public function assignRoleToUserInStore(User $user, Store $store, string $role): bool
     {
         try {
             DB::beginTransaction();
             
-            // Update tenant_users pivot
-            $user->tenants()->syncWithoutDetaching([
-                $tenant->id => ['role' => $role]
+            // Update store_users pivot
+            $user->stores()->syncWithoutDetaching([
+                $store->id => ['role' => $role]
             ]);
             
             // Update Spatie model_has_roles
-            $this->assignSpatieRoleForTenant($user, $role, $tenant);
+            $this->assignSpatieRoleForStore($user, $role, $store);
             
             DB::commit();
             
-            Log::info('Role assigned to user in tenant', [
+            Log::info('Role assigned to user in store', [
                 'user_id' => $user->id,
-                'tenant_id' => $tenant->id,
+                'store_id' => $store->id,
                 'role' => $role,
             ]);
             
@@ -91,9 +91,9 @@ class UserRoleRepository
         } catch (\Exception $e) {
             DB::rollBack();
             
-            Log::error('Error assigning role to user in tenant', [
+            Log::error('Error assigning role to user in store', [
                 'user_id' => $user->id,
-                'tenant_id' => $tenant->id,
+                'store_id' => $store->id,
                 'role' => $role,
                 'error' => $e->getMessage(),
             ]);
@@ -103,24 +103,24 @@ class UserRoleRepository
     }
 
     /**
-     * Remove role from user in tenant
+     * Remove role from user in store
      */
-    public function removeRoleFromUserInTenant(User $user, Tenant $tenant): bool
+    public function removeRoleFromUserInStore(User $user, Store $store): bool
     {
         try {
             DB::beginTransaction();
             
-            // Remove from tenant_users pivot
-            $user->tenants()->detach($tenant->id);
+            // Remove from store_users pivot
+            $user->stores()->detach($store->id);
             
             // Remove from Spatie model_has_roles
-            $this->removeSpatieRoleForTenant($user, $tenant);
+            $this->removeSpatieRoleForStore($user, $store);
             
             DB::commit();
             
-            Log::info('Role removed from user in tenant', [
+            Log::info('Role removed from user in store', [
                 'user_id' => $user->id,
-                'tenant_id' => $tenant->id,
+                'store_id' => $store->id,
             ]);
             
             return true;
@@ -128,9 +128,9 @@ class UserRoleRepository
         } catch (\Exception $e) {
             DB::rollBack();
             
-            Log::error('Error removing role from user in tenant', [
+            Log::error('Error removing role from user in store', [
                 'user_id' => $user->id,
-                'tenant_id' => $tenant->id,
+                'store_id' => $store->id,
                 'error' => $e->getMessage(),
             ]);
             
@@ -139,12 +139,12 @@ class UserRoleRepository
     }
 
     /**
-     * Get all users with their roles in specific tenant
+     * Get all users with their roles in specific store
      */
-    public function getUsersWithRolesInTenant(Tenant $tenant): array
+    public function getUsersWithRolesInStore(Store $store): array
     {
         try {
-            return $tenant->users()
+            return $store->users()
                 ->withPivot('role')
                 ->get()
                 ->map(function ($user) {
@@ -155,8 +155,8 @@ class UserRoleRepository
                 })
                 ->toArray();
         } catch (\Exception $e) {
-            Log::error('Error getting users with roles in tenant', [
-                'tenant_id' => $tenant->id,
+            Log::error('Error getting users with roles in store', [
+                'store_id' => $store->id,
                 'error' => $e->getMessage(),
             ]);
             return [];
@@ -164,17 +164,17 @@ class UserRoleRepository
     }
 
     /**
-     * Check if user has specific role in tenant
+     * Check if user has specific role in store
      */
-    public function userHasRoleInTenant(User $user, Tenant $tenant, string $role): bool
+    public function userHasRoleInStore(User $user, Store $store, string $role): bool
     {
         try {
-            $userRole = $this->getUserRoleInTenant($user, $tenant);
+            $userRole = $this->getUserRoleInStore($user, $store);
             return $userRole === $role;
         } catch (\Exception $e) {
-            Log::error('Error checking user role in tenant', [
+            Log::error('Error checking user role in store', [
                 'user_id' => $user->id,
-                'tenant_id' => $tenant->id,
+                'store_id' => $store->id,
                 'role' => $role,
                 'error' => $e->getMessage(),
             ]);
@@ -200,9 +200,9 @@ class UserRoleRepository
     }
 
     /**
-     * Assign Spatie role for tenant context
+     * Assign Spatie role for store context
      */
-    private function assignSpatieRoleForTenant(User $user, string $role, Tenant $tenant): void
+    private function assignSpatieRoleForStore(User $user, string $role, Store $store): void
     {
         try {
             // Remove existing roles first
@@ -214,9 +214,9 @@ class UserRoleRepository
                 $user->assignRole($roleModel);
             }
         } catch (\Exception $e) {
-            Log::error('Error assigning Spatie role for tenant', [
+            Log::error('Error assigning Spatie role for store', [
                 'user_id' => $user->id,
-                'tenant_id' => $tenant->id,
+                'store_id' => $store->id,
                 'role' => $role,
                 'error' => $e->getMessage(),
             ]);
@@ -224,40 +224,40 @@ class UserRoleRepository
     }
 
     /**
-     * Remove Spatie role for tenant context
+     * Remove Spatie role for store context
      */
-    private function removeSpatieRoleForTenant(User $user, Tenant $tenant): void
+    private function removeSpatieRoleForStore(User $user, Store $store): void
     {
         try {
             $user->roles()->detach();
         } catch (\Exception $e) {
-            Log::error('Error removing Spatie role for tenant', [
+            Log::error('Error removing Spatie role for store', [
                 'user_id' => $user->id,
-                'tenant_id' => $tenant->id,
+                'store_id' => $store->id,
                 'error' => $e->getMessage(),
             ]);
         }
     }
 
     /**
-     * Sync roles between tenant_users and model_has_roles
+     * Sync roles between store_users and model_has_roles
      */
-    public function syncRoles(User $user, Tenant $tenant): bool
+    public function syncRoles(User $user, Store $store): bool
     {
         try {
-            $pivotRole = $this->getUserRoleInTenant($user, $tenant);
+            $pivotRole = $this->getUserRoleInStore($user, $store);
             $spatieRole = $this->getSpatieRoleNames($user);
             
             if ($pivotRole && !in_array($pivotRole, $spatieRole)) {
                 // Update Spatie to match pivot
-                $this->assignSpatieRoleForTenant($user, $pivotRole, $tenant);
+                $this->assignSpatieRoleForStore($user, $pivotRole, $store);
             }
             
             return true;
         } catch (\Exception $e) {
             Log::error('Error syncing roles', [
                 'user_id' => $user->id,
-                'tenant_id' => $tenant->id,
+                'store_id' => $store->id,
                 'error' => $e->getMessage(),
             ]);
             return false;

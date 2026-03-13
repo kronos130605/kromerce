@@ -40,7 +40,7 @@ class ProductCategory extends Model
             if (empty($category->slug)) {
                 $category->slug = Str::slug($category->name);
             }
-            
+
             // Set level based on parent
             if ($category->parent_id) {
                 $parent = static::find($category->parent_id);
@@ -58,7 +58,7 @@ class ProductCategory extends Model
     }
 
     /**
-     * Get the tenant that owns the category.
+     * Get the store that owns the category.
      */
     public function tenant(): BelongsTo
     {
@@ -125,7 +125,7 @@ class ProductCategory extends Model
     {
         $ancestors = $this->ancestors()->reverse();
         $path = $ancestors->pluck('name')->push($this->name);
-        
+
         return $path->implode(' > ');
     }
 
@@ -161,7 +161,7 @@ class ProductCategory extends Model
     public function getTotalProductsCount(): int
     {
         $categoryIds = $this->descendants->pluck('id')->push($this->id);
-        
+
         return ProductCategoryProduct::whereIn('category_id', $categoryIds)
             ->distinct('product_id')
             ->count('product_id');

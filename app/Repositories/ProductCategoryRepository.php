@@ -13,24 +13,24 @@ class ProductCategoryRepository extends BaseRepository
     }
 
     /**
-     * Get categories for tenant.
+     * Get categories for store.
      */
-    public function getForTenant(string $tenantId): Collection
+    public function getForStore(string $storeId): Collection
     {
         return $this->model
-            ->where('tenant_id', $tenantId)
+            ->where('store_id', $storeId)
             ->orderBy('level')
             ->orderBy('name')
             ->get();
     }
 
     /**
-     * Get root categories for tenant.
+     * Get root categories for store.
      */
-    public function getRootForTenant(string $tenantId): Collection
+    public function getRootForStore(string $storeId): Collection
     {
         return $this->model
-            ->where('tenant_id', $tenantId)
+            ->where('store_id', $storeId)
             ->whereNull('parent_id')
             ->orderBy('name')
             ->get();
@@ -58,12 +58,12 @@ class ProductCategoryRepository extends BaseRepository
     }
 
     /**
-     * Get category tree for tenant.
+     * Get category tree for store.
      */
-    public function getTreeForTenant(string $tenantId): Collection
+    public function getTreeForStore(string $storeId): Collection
     {
         return $this->model
-            ->where('tenant_id', $tenantId)
+            ->where('store_id', $storeId)
             ->with(['children' => function ($query) {
                 $query->orderBy('name');
             }])
@@ -73,12 +73,12 @@ class ProductCategoryRepository extends BaseRepository
     }
 
     /**
-     * Get active categories.
+     * Get active categories for store.
      */
-    public function getActiveForTenant(string $tenantId): Collection
+    public function getActiveForStore(string $storeId): Collection
     {
         return $this->model
-            ->where('tenant_id', $tenantId)
+            ->where('store_id', $storeId)
             ->where('is_active', true)
             ->orderBy('level')
             ->orderBy('name')
@@ -127,9 +127,9 @@ class ProductCategoryRepository extends BaseRepository
     /**
      * Get category statistics.
      */
-    public function getStatistics(string $tenantId): array
+    public function getStatistics(string $storeId): array
     {
-        $categories = $this->model->where('tenant_id', $tenantId);
+        $categories = $this->model->where('store_id', $storeId);
 
         return [
             'total_categories' => $categories->count(),
@@ -142,9 +142,9 @@ class ProductCategoryRepository extends BaseRepository
     /**
      * Count categories for tenant.
      */
-    public function countForTenant(string $tenantId): int
+    public function countForStore(string $storeId): int
     {
-        return $this->model->where('tenant_id', $tenantId)->count();
+        return $this->model->where('store_id', $storeId)->count();
     }
 
     /**
@@ -161,10 +161,10 @@ class ProductCategoryRepository extends BaseRepository
     /**
      * Get categories with product count.
      */
-    public function getWithProductCount(string $tenantId): Collection
+    public function getWithProductCount(string $storeId): Collection
     {
         return $this->model
-            ->where('tenant_id', $tenantId)
+            ->where('store_id', $storeId)
             ->withCount('products')
             ->orderBy('name')
             ->get();

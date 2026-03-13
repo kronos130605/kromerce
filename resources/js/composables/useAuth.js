@@ -4,7 +4,7 @@ import { usePage } from '@inertiajs/vue3';
 export function useAuth() {
     const page = usePage();
     const user = computed(() => page.props.auth?.user);
-    const currentTenant = computed(() => page.props.current_tenant);
+    const currentTenant = computed(() => page.props.current_store);
     const userRole = computed(() => page.props.user_role);
 
     // Check user roles - usando user_role directamente

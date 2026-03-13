@@ -15,37 +15,37 @@ class DashboardController extends Controller
     ) {}
 
     /**
-     * Display appropriate dashboard based on user role and tenant.
+     * Display appropriate dashboard based on user role and store.
      */
     public function index(Request $request): Response
     {
         try {
             $user = $request->user();
-            
-            // Use DashboardRoutingService to get or assign tenant for user
-            $tenant = $this->dashboardRoutingService->getOrAssignTenantForUser($user);
-            
+
+            // Use DashboardRoutingService to get or assign store for user
+            $store = $this->dashboardRoutingService->getOrAssignStoreForUser($user);
+
             // Get dashboard view and data using service
-            $dashboardView = $this->dashboardRoutingService->getDashboardViewForUser($user, $tenant);
-            $dashboardData = $this->dashboardRoutingService->getDashboardDataForUser($user, $tenant, $dashboardView);
-            
+            $dashboardView = $this->dashboardRoutingService->getDashboardViewForUser($user, $store);
+            $dashboardData = $this->dashboardRoutingService->getDashboardDataForUser($user, $store, $dashboardView);
+
             // For business users, use the new SPA structure
             if ($dashboardView === 'modules/dashboard/pages/DashboardBusiness') {
                 return Inertia::render('Business/Index', array_merge($dashboardData, [
                     'activeTab' => 'overview'
                 ]));
             }
-            
+
             return Inertia::render($dashboardView, $dashboardData);
-            
+
         } catch (\Exception $e) {
             Log::error('Dashboard error', [
                 'user_id' => $request->user()?->id,
-                'tenant_id' => tenant()?->id,
+                'store_id' => tenant()?->id,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            
+
             // Return error page with Inertia instead of JsonResponse
             return Inertia::render('modules/dashboard/pages/Error', [
                 'error' => 'Failed to load dashboard',

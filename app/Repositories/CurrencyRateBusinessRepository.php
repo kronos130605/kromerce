@@ -13,12 +13,12 @@ class CurrencyRateBusinessRepository extends BaseRepository
     }
 
     /**
-     * Get latest rate for tenant currency pair.
+     * Get latest rate for store currency pair.
      */
-    public function getLatestRate(string $tenantId, string $fromCurrency, string $toCurrency): ?CurrencyRateBusiness
+    public function getLatestRate(string $storeId, string $fromCurrency, string $toCurrency): ?CurrencyRateBusiness
     {
         return $this->model
-            ->where('tenant_id', $tenantId)
+            ->where('store_id', $storeId)
             ->where('from_currency', $fromCurrency)
             ->where('to_currency', $toCurrency)
             ->orderBy('effective_date', 'desc')
@@ -26,12 +26,12 @@ class CurrencyRateBusinessRepository extends BaseRepository
     }
 
     /**
-     * Get rate for tenant on specific date.
+     * Get rate for store on specific date.
      */
-    public function getRateForDate(string $tenantId, string $fromCurrency, string $toCurrency, string $date): ?CurrencyRateBusiness
+    public function getRateForDate(string $storeId, string $fromCurrency, string $toCurrency, string $date): ?CurrencyRateBusiness
     {
         return $this->model
-            ->where('tenant_id', $tenantId)
+            ->where('store_id', $storeId)
             ->where('from_currency', $fromCurrency)
             ->where('to_currency', $toCurrency)
             ->where('effective_date', '<=', $date)
@@ -40,20 +40,20 @@ class CurrencyRateBusinessRepository extends BaseRepository
     }
 
     /**
-     * Get all rates for tenant.
+     * Get all rates for store.
      */
-    public function getAllRatesForTenant(string $tenantId): Collection
+    public function getAllRatesForStore(string $storeId): Collection
     {
-        return $this->getBy(['tenant_id' => $tenantId]);
+        return $this->getBy(['store_id' => $storeId]);
     }
 
     /**
-     * Get all rates for tenant on date.
+     * Get all rates for store on date.
      */
-    public function getAllRatesForTenantOnDate(string $tenantId, string $date): Collection
+    public function getAllRatesForStoreOnDate(string $storeId, string $date): Collection
     {
         return $this->model
-            ->where('tenant_id', $tenantId)
+            ->where('store_id', $storeId)
             ->where('effective_date', $date)
             ->get();
     }
@@ -61,11 +61,11 @@ class CurrencyRateBusinessRepository extends BaseRepository
     /**
      * Update or create rate for tenant.
      */
-    public function updateOrCreateRate(string $tenantId, string $fromCurrency, string $toCurrency, float $rate, string $date, string $source = 'manual'): CurrencyRateBusiness
+    public function updateOrCreateRate(string $storeId, string $fromCurrency, string $toCurrency, float $rate, string $date, string $source = 'manual'): CurrencyRateBusiness
     {
         return $this->updateOrCreate(
             [
-                'tenant_id' => $tenantId,
+                'store_id' => $storeId,
                 'from_currency' => $fromCurrency,
                 'to_currency' => $toCurrency,
                 'effective_date' => $date,
@@ -80,10 +80,10 @@ class CurrencyRateBusinessRepository extends BaseRepository
     /**
      * Get rates for date range.
      */
-    public function getRatesForDateRange(string $tenantId, string $fromCurrency, string $toCurrency, string $startDate, string $endDate): Collection
+    public function getRatesForDateRange(string $storeId, string $fromCurrency, string $toCurrency, string $startDate, string $endDate): Collection
     {
         return $this->model
-            ->where('tenant_id', $tenantId)
+            ->where('store_id', $storeId)
             ->where('from_currency', $fromCurrency)
             ->where('to_currency', $toCurrency)
             ->whereBetween('effective_date', [$startDate, $endDate])
@@ -92,9 +92,9 @@ class CurrencyRateBusinessRepository extends BaseRepository
     }
 
     /**
-     * Batch update rates for tenant.
+     * Batch update rates for store.
      */
-    public function batchUpdateRates(string $tenantId, array $rates, string $date, string $source = 'manual'): array
+    public function batchUpdateRates(string $storeId, array $rates, string $date, string $source = 'manual'): array
     {
         $results = [];
         
@@ -104,7 +104,7 @@ class CurrencyRateBusinessRepository extends BaseRepository
                 $toCurrency = $currencyPair['to'];
                 
                 $updatedRate = $this->updateOrCreateRate(
-                    $tenantId,
+                    $storeId,
                     $fromCurrency,
                     $toCurrency,
                     $rate,
@@ -134,24 +134,24 @@ class CurrencyRateBusinessRepository extends BaseRepository
     }
 
     /**
-     * Clean up old rates for tenant.
+     * Clean up old rates for store.
      */
-    public function cleanupOldRates(string $tenantId, int $retentionYears): int
+    public function cleanupOldRates(string $storeId, int $retentionYears): int
     {
         $cutoffDate = now()->subYears($retentionYears)->format('Y-m-d');
         
         return $this->model
-            ->where('tenant_id', $tenantId)
+            ->where('store_id', $storeId)
             ->where('effective_date', '<', $cutoffDate)
             ->delete();
     }
 
     /**
-     * Delete custom rates for tenant currency pairs.
+     * Delete custom rates for store currency pairs.
      */
-    public function deleteCustomRates(string $tenantId, array $currencies, string $baseCurrency): int
+    public function deleteCustomRates(string $storeId, array $currencies, string $baseCurrency): int
     {
-        $query = $this->model->where('tenant_id', $tenantId);
+        $query = $this->model->where('store_id', $storeId);
         
         foreach ($currencies as $targetCurrency) {
             if ($targetCurrency !== $baseCurrency) {
@@ -166,30 +166,30 @@ class CurrencyRateBusinessRepository extends BaseRepository
     }
 
     /**
-     * Get tenants with custom rates.
+     * Get stores with custom rates.
      */
-    public function getTenantsWithCustomRates(): Collection
+    public function getStoresWithCustomRates(): Collection
     {
         return $this->model
-            ->select('tenant_id')
+            ->select('store_id')
             ->distinct()
-            ->pluck('tenant_id');
+            ->pluck('store_id');
     }
 
     /**
      * Get rate statistics for tenant.
      */
-    public function getRateStatistics(string $tenantId): array
+    public function getRateStatistics(string $storeId): array
     {
-        $totalRates = $this->model->where('tenant_id', $tenantId)->count();
+        $totalRates = $this->model->where('store_id', $storeId)->count();
         $uniquePairs = $this->model
-            ->where('tenant_id', $tenantId)
+            ->where('store_id', $storeId)
             ->select('from_currency', 'to_currency')
             ->distinct()
             ->count();
         
         $latestDate = $this->model
-            ->where('tenant_id', $tenantId)
+            ->where('store_id', $storeId)
             ->max('effective_date');
         
         return [

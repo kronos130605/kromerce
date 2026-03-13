@@ -43,9 +43,9 @@ class HandleInertiaRequests extends Middleware
                     return null;
                 },
             ],
-            'current_tenant' => function () use ($request) {
+            'current_store' => function () use ($request) {
                 if (tenancy()->initialized) {
-                    return tenant();
+                    return tenant(); // tenant() ahora retorna Store
                 }
                 return null;
             },
@@ -59,7 +59,7 @@ class HandleInertiaRequests extends Middleware
 
                 // Para dashboard, usar la misma lógica que DashboardRoutingService
                 if ($request->is('dashboard') || $request->is('business/dashboard')) {
-                    $tenant = tenancy()->initialized ? tenant() : null;
+                    $store = tenancy()->initialized ? tenant() : null; // tenant() ahora retorna Store
 
                     if (!$tenant) {
                         return 'customer';
@@ -67,15 +67,15 @@ class HandleInertiaRequests extends Middleware
 
                     // Usar RoleService con cache - ahora no hay redundancia real
                     return app(\App\Services\RoleService::class)
-                        ->getUserRoleInTenant($user, $tenant);
+                        ->getUserRoleInStore($user, $store); // getUserRoleInStore() para stores
                 }
 
                 // Para otras rutas, usar la lógica normal
-                $tenant = tenancy()->initialized ? tenant() : null;
+                $store = tenancy()->initialized ? tenant() : null; // tenant() ahora retorna Store
 
                 if ($user && $tenant) {
                     return app(\App\Services\RoleService::class)
-                        ->getUserRoleInTenant($user, $tenant);
+                        ->getUserRoleInStore($user, $store); // getUserRoleInStore() para stores
                 }
 
                 return 'customer';

@@ -33,7 +33,7 @@ class BusinessCurrencyConfig extends Model
     ];
 
     /**
-     * Get the tenant that owns the currency config.
+     * Get the store that owns the currency config.
      */
     public function tenant(): BelongsTo
     {

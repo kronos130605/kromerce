@@ -19,25 +19,25 @@ class RoleMiddleware
 
         $user = $request->user();
         
-        // Special handling for 'business' role - check if user has any business role in current tenant
+        // Special handling for 'business' role - check if user has any business role in current store
         if ($role === 'business') {
-            $tenant = tenant();
-            if (!$tenant) {
-                abort(403, 'Business access requires tenant');
+            $store = tenant();
+            if (!$store) {
+                abort(403, 'Business access requires store');
             }
             
-            // Check if user has any business role in the current tenant using tenant_users table
+            // Check if user has any business role in current store using store_users table
             $businessRoles = ['business_owner', 'owner', 'admin', 'manager', 'employee'];
-            $userRoleInTenant = $user->tenants()
-                ->where('tenants.id', $tenant->id)
-                ->whereIn('tenant_users.role', $businessRoles)
+            $userRoleInStore = $user->stores()
+                ->where('stores.id', $store->id)
+                ->whereIn('store_users.role', $businessRoles)
                 ->exists();
                 
-            if (!$userRoleInTenant) {
+            if (!$userRoleInStore) {
                 abort(403, 'Unauthorized - Business role required');
             }
         } else {
-            // For other roles, use the standard hasRole check
+            // For other roles, use standard hasRole check
             if (!$user->hasRole($role)) {
                 abort(403, 'Unauthorized');
             }

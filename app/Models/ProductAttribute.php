@@ -47,7 +47,7 @@ class ProductAttribute extends Model
     }
 
     /**
-     * Get the tenant that owns the attribute.
+     * Get the store that owns the attribute.
      */
     public function tenant(): BelongsTo
     {

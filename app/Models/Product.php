@@ -9,13 +9,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
+use App\Models\Store;
 
 class Product extends Model
 {
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'tenant_id',
+        'store_id',
         'name',
         'slug',
         'description',
@@ -118,11 +119,11 @@ class Product extends Model
     }
 
     /**
-     * Get the tenant that owns the product.
+     * Get the store that owns the product.
      */
-    public function tenant(): BelongsTo
+    public function store(): BelongsTo
     {
-        return $this->belongsTo(Tenant::class);
+        return $this->belongsTo(Store::class);
     }
 
     /**

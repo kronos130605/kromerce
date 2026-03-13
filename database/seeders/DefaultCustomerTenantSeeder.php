@@ -77,8 +77,8 @@ class DefaultCustomerTenantSeeder extends Seeder
                     ]);
 
                     // Establecer como tenant actual si no tiene uno
-                    if (!$user->current_tenant_id) {
-                        $user->current_tenant_id = $customerTenant->id;
+                    if (!$user->current_store_id) {
+                        $user->current_store_id = $customerTenant->id;
                         $user->save();
                     }
                 }

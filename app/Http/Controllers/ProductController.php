@@ -25,13 +25,13 @@ class ProductController extends Controller
     public function index(Request $request): Response|JsonResponse
     {
         try {
-            $tenant = $this->validateTenant();
+            $store = $this->validateStore();
 
             // Get products data using the service
             $filters = $request->all();
-            $products = $this->productService->getProductsForTenant($tenant, $filters);
-            $categories = $this->productService->getCategoriesForTenant($tenant);
-            $statistics = $this->productService->getStatisticsForTenant($tenant);
+            $products = $this->productService->getProductsForStore($store, $filters);
+            $categories = $this->productService->getCategoriesForStore($store);
+            $statistics = $this->productService->getStatisticsForStore($store);
 
             // Return products page with SPA structure
             return Inertia::render('Business/Index', [
@@ -63,8 +63,8 @@ class ProductController extends Controller
     public function create(ProductRequest $request): Response
     {
         try {
-            $tenant = $this->validateTenant();
-            $categories = $this->productService->getCategoriesForTenant($tenant);
+            $store = $this->validateStore();
+            $categories = $this->productService->getCategoriesForStore($store);
 
             return Inertia::render('modules/products/Products/Create', [
                 'categories' => $categories,
@@ -84,11 +84,11 @@ class ProductController extends Controller
     public function store(ProductRequest $request): JsonResponse
     {
         try {
-            $tenant = $this->validateTenant();
+            $store = $this->validateStore();
             $user = $request->user();
 
-            $product = $this->productService->createProductForTenant(
-                $tenant,
+            $product = $this->productService->createProductForStore(
+                $store,
                 $user,
                 $request->validated()
             );
@@ -106,8 +106,8 @@ class ProductController extends Controller
     public function show(ProductRequest $request, int $id): Response
     {
         try {
-            $tenant = $this->validateTenant();
-            $product = $this->productService->getProductForTenant($tenant, $id);
+            $store = $this->validateStore();
+            $product = $this->productService->getProductForStore($store, $id);
 
             if (!$product) {
                 return Inertia::render('modules/products/Products/Error', [
@@ -134,9 +134,9 @@ class ProductController extends Controller
     public function edit(ProductRequest $request, int $id): Response
     {
         try {
-            $tenant = $this->validateTenant();
-            $product = $this->productService->getProductForTenant($tenant, $id);
-            $categories = $this->productService->getCategoriesForTenant($tenant);
+            $store = $this->validateStore();
+            $product = $this->productService->getProductForStore($store, $id);
+            $categories = $this->productService->getCategoriesForStore($store);
 
             if (!$product) {
                 return Inertia::render('modules/products/Products/Error', [
@@ -164,10 +164,10 @@ class ProductController extends Controller
     public function update(ProductRequest $request, int $id): JsonResponse
     {
         try {
-            $tenant = $this->validateTenant();
+            $store = $this->validateStore();
 
-            $updated = $this->productService->updateProductForTenant(
-                $tenant,
+            $updated = $this->productService->updateProductForStore(
+                $store,
                 $id,
                 $request->validated()
             );
@@ -189,9 +189,9 @@ class ProductController extends Controller
     public function destroy(ProductRequest $request, int $id): JsonResponse
     {
         try {
-            $tenant = $this->validateTenant();
+            $store = $this->validateStore();
 
-            $deleted = $this->productService->deleteProductForTenant($tenant, $id);
+            $deleted = $this->productService->deleteProductForStore($store, $id);
 
             if (!$deleted) {
                 return $this->notFound('Product not found');

@@ -26,8 +26,8 @@ class CurrencyController extends Controller
      */
     public function index(Request $request): Response
     {
-        $tenant = $request->user()->tenant;
-        $currencyConfig = $this->configRepo->getOrCreateForTenant($tenant->id);
+        $store = $request->user()->currentStore();
+        $currencyConfig = $this->configRepo->getOrCreateForStore($store->id);
 
         return Inertia::render('modules/dashboard/DashboardCurrency', [
             'currencyConfig' => $currencyConfig,
@@ -51,10 +51,10 @@ class CurrencyController extends Controller
             'historical_retention_years' => 'required|integer|min:1|max:10',
         ]);
 
-        $tenant = $request->user()->tenant;
-        
+        $store = $request->user()->currentStore();
+
         $currencyConfig = $this->configRepo->updateOrCreate(
-            ['tenant_id' => $tenant->id],
+            ['store_id' => $store->id],
             array_merge($validated, [
                 'last_rate_update' => now()->format('Y-m-d'),
             ])
@@ -68,12 +68,12 @@ class CurrencyController extends Controller
     }
 
     /**
-     * Get current rates for the tenant.
+     * Get current rates for the store.
      */
     public function getCurrentRates(Request $request): JsonResponse
     {
-        $tenant = $request->user()->tenant;
-        $currencyConfig = $this->configRepo->getByTenantId($tenant->id);
+        $store = $request->user()->currentStore();
+        $currencyConfig = $this->configRepo->getByStoreId($store->id);
 
         if (!$currencyConfig) {
             return response()->json(['error' => 'Currency configuration not found'], 404);
@@ -86,7 +86,7 @@ class CurrencyController extends Controller
     }
 
     /**
-     * Update custom rates for the tenant.
+     * Update custom rates for the store.
      */
     public function updateCustomRates(Request $request): JsonResponse
     {
@@ -96,11 +96,11 @@ class CurrencyController extends Controller
             'effective_date' => 'required|date',
         ]);
 
-        $tenant = $request->user()->tenant;
-        
+        $store = $request->user()->currentStore();
+
         try {
             $results = $this->currencyService->updateCustomRates(
-                $tenant->id,
+                $store->id,
                 $validated['rates'],
                 $validated['effective_date']
             );
@@ -130,15 +130,15 @@ class CurrencyController extends Controller
             'end_date' => 'required|date|after_or_equal:start_date',
         ]);
 
-        $tenant = $request->user()->tenant;
-        
+        $store = $request->user()->currentStore();
+
         try {
             $history = $this->currencyService->getRateHistory(
                 $validated['from_currency'],
                 $validated['to_currency'],
                 $validated['start_date'],
                 $validated['end_date'],
-                $tenant->id
+                $store->id
             );
 
             return response()->json(['history' => $history]);
@@ -169,10 +169,10 @@ class CurrencyController extends Controller
             'currencies.*' => 'required|string|size:3',
         ]);
 
-        $tenant = $request->user()->tenant;
-        
+        $store = $request->user()->currentStore();
+
         try {
-            $deletedCount = $this->currencyService->resetToGlobal($tenant->id, $validated['currencies']);
+            $deletedCount = $this->currencyService->resetToGlobal($store->id, $validated['currencies']);
 
             return response()->json([
                 'success' => true,

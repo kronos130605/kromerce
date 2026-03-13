@@ -25,7 +25,7 @@ class CurrencyRateBusiness extends Model
     ];
 
     /**
-     * Get the tenant that owns the custom rate.
+     * Get the store that owns the custom rate.
      */
     public function tenant(): BelongsTo
     {
@@ -84,13 +84,13 @@ class CurrencyRateBusiness extends Model
         $rates = static::where('tenant_id', $tenantId)
             ->where('effective_date', $date)
             ->get();
-        
+
         $result = [];
         foreach ($rates as $rate) {
             $key = $rate->from_currency . '-' . $rate->to_currency;
             $result[$key] = $rate->rate;
         }
-        
+
         return $result;
     }
 
@@ -100,7 +100,7 @@ class CurrencyRateBusiness extends Model
     public static function cleanupOldRates(string $tenantId, int $retentionYears = 2): int
     {
         $cutoffDate = now()->subYears($retentionYears)->format('Y-m-d');
-        
+
         return static::where('tenant_id', $tenantId)
             ->where('effective_date', '<', $cutoffDate)
             ->delete();
@@ -112,7 +112,7 @@ class CurrencyRateBusiness extends Model
     public static function batchUpdateRates(string $tenantId, array $rates, string $date, string $source = 'manual'): array
     {
         $results = [];
-        
+
         foreach ($rates as $fromCurrency => $toCurrencies) {
             foreach ($toCurrencies as $toCurrency => $rate) {
                 try {
@@ -134,7 +134,7 @@ class CurrencyRateBusiness extends Model
                 }
             }
         }
-        
+
         return $results;
     }
 }

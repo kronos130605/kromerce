@@ -39,7 +39,7 @@ class ProductTag extends Model
     }
 
     /**
-     * Get the tenant that owns the tag.
+     * Get the store that owns the tag.
      */
     public function tenant(): BelongsTo
     {

@@ -526,7 +526,7 @@ class Product extends Model
     ];
     
     /**
-     * Get the tenant that owns the product.
+     * Get the store that owns the product.
      */
     public function tenant(): BelongsTo
     {

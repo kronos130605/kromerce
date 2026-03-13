@@ -2,88 +2,88 @@
 
 namespace App\Services;
 
-use App\Models\Tenant;
 use App\Models\User;
-use App\Repositories\TenantRepository;
+use App\Models\Store;
+use App\Repositories\StoreRepository;
 use App\Repositories\UserTenantRepository;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class TenantService
 {
-    private TenantRepository $tenantRepository;
+    private StoreRepository $storeRepository;
     private UserTenantRepository $userTenantRepository;
 
     public function __construct(
-        TenantRepository $tenantRepository,
+        StoreRepository $storeRepository,
         UserTenantRepository $userTenantRepository
     ) {
-        $this->tenantRepository = $tenantRepository;
+        $this->storeRepository = $storeRepository;
         $this->userTenantRepository = $userTenantRepository;
     }
+
     /**
-     * Get or create default tenant for user based on role
+     * Get or create default store for user based on role
      */
-    public function getOrCreateDefaultTenantForUser(User $user): ?Tenant
+    public function getOrCreateDefaultStoreForUser(User $user): ?Store
     {
         try {
             $userRoles = $user->roles->pluck('name')->toArray();
-            
-            // Determinar tenant slug según rol prioritario
-            $tenantSlug = $this->getDefaultTenantSlugForRoles($userRoles);
-            
-            // Buscar tenant existente
-            $tenant = $this->tenantRepository->findBySlug($tenantSlug);
-            
-            if (!$tenant) {
-                // Crear tenant por defecto
-                $tenant = $this->createDefaultTenant($tenantSlug, $userRoles);
+
+            // Determinar store slug según rol prioritario
+            $storeSlug = $this->getDefaultStoreSlugForRoles($userRoles);
+
+            // Buscar store existente
+            $store = $this->userTenantRepository->getUserFirstStore($user);
+
+            if (!$store) {
+                // Crear store por defecto
+                $store = $this->createDefaultStore($storeSlug, $userRoles);
             }
-            
-            return $tenant;
-            
+
+            return $store;
+
         } catch (\Exception $e) {
-            Log::error('Error getting or creating default tenant for user', [
+            Log::error('Error getting or creating default store for user', [
                 'user_id' => $user->id,
                 'user_email' => $user->email,
                 'error' => $e->getMessage(),
             ]);
-            
+
             return null;
         }
     }
 
     /**
-     * Assign tenant to user with appropriate role
+     * Assign store to user with appropriate role
      */
-    public function assignTenantToUser(User $user, Tenant $tenant, ?string $role = null): bool
+    public function assignStoreToUser(User $user, Store $store, ?string $role = null): bool
     {
         try {
             $role = $role ?? $this->getDefaultRoleForUser($user);
-            
-            // Usar repositorio para asignar tenant
-            return $this->userTenantRepository->attachUserToTenant($user, $tenant, $role);
-            
+
+            // Usar UserTenantRepository para asignar store
+            return $this->userTenantRepository->attachUserToStore($user, $store, $role);
+
         } catch (\Exception $e) {
-            Log::error('Error assigning tenant to user', [
+            Log::error('Error assigning store to user', [
                 'user_id' => $user->id,
-                'tenant_id' => $tenant->id,
+                'store_id' => $store->id,
                 'role' => $role,
                 'error' => $e->getMessage(),
             ]);
-            
+
             return false;
         }
     }
 
     /**
-     * Get default role for user in tenant
+     * Get default role for user in store
      */
     public function getDefaultRoleForUser(User $user): string
     {
         $userRoles = $user->roles->pluck('name')->toArray();
-        
-        // Prioridad de roles para tenant
+
+        // Prioridad de roles para store
         $rolePriority = [
             'business_owner' => 1,
             'admin' => 2,
@@ -91,111 +91,111 @@ class TenantService
             'employee' => 4,
             'customer' => 5,
         ];
-        
+
         $defaultRole = 'customer';
         $highestPriority = PHP_INT_MAX;
-        
+
         foreach ($userRoles as $role) {
             if (isset($rolePriority[$role]) && $rolePriority[$role] < $highestPriority) {
                 $defaultRole = $role;
                 $highestPriority = $rolePriority[$role];
             }
         }
-        
+
         return $defaultRole;
     }
 
     /**
-     * Get default tenant slug based on user roles
+     * Get default store slug based on user roles
      */
-    public function getDefaultTenantSlugForRoles(array $userRoles): string
+    public function getDefaultStoreSlugForRoles(array $userRoles): string
     {
-        // Si tiene rol de negocio, usar tenant de negocio por defecto
+        // Si tiene rol de negocio, usar store de negocio por defecto
         $businessRoles = ['business_owner', 'admin', 'manager', 'employee'];
-        
+
         foreach ($businessRoles as $role) {
             if (in_array($role, $userRoles)) {
                 return 'business-default';
             }
         }
-        
-        // Si solo es customer, usar tenant de customer por defecto
+
+        // Si solo es customer, usar store de customer por defecto
         return 'customers-default';
     }
 
     /**
-     * Create default tenant with appropriate settings
+     * Create default store with appropriate settings
      */
-    public function createDefaultTenant(string $slug, array $userRoles): ?Tenant
+    public function createDefaultStore(string $slug, array $userRoles): ?Store
     {
         try {
-            $settings = $this->getDefaultTenantSettings($slug, $userRoles);
+            $settings = $this->getDefaultStoreSettings($slug, $userRoles);
             $uuid = \Illuminate\Support\Str::uuid();
-            
+
             // Obtener el primer usuario disponible como owner
-            $ownerId = $this->tenantRepository->getAvailableOwnerId();
-            
+            $ownerId = $this->storeRepository->getAvailableOwnerId();
+
             if (!$ownerId) {
                 throw new \Exception('No available user found for owner_id');
             }
-            
-            // Usar repositorio para crear tenant
-            $tenantId = $this->tenantRepository->createDirect([
+
+            // Usar repositorio para crear store
+            $storeId = $this->storeRepository->createDirect([
                 'uuid' => $uuid,
-                'name' => $this->getDefaultTenantName($slug),
+                'name' => $this->getDefaultStoreName($slug),
                 'slug' => $slug,
                 'data' => json_encode($settings),
-                'is_active' => true,
+                'status' => 'active',
                 'owner_id' => $ownerId,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
-            
-            // Obtener el tenant creado
-            $tenant = $this->tenantRepository->findById($tenantId);
-            
-            if (!$tenant) {
-                throw new \Exception('Failed to retrieve created tenant');
+
+            // Obtener el store creado
+            $store = $this->storeRepository->findById($storeId);
+
+            if (!$store) {
+                throw new \Exception('Failed to retrieve created store');
             }
-            
-            Log::info('Default tenant created successfully', [
-                'tenant_id' => $tenant->id,
-                'tenant_uuid' => $tenant->uuid,
-                'tenant_slug' => $slug,
+
+            Log::info('Default store created successfully', [
+                'store_id' => $store->id,
+                'store_uuid' => $store->uuid,
+                'store_slug' => $slug,
                 'owner_id' => $ownerId,
                 'user_roles' => $userRoles,
             ]);
-            
-            return $tenant;
-            
+
+            return $store;
+
         } catch (\Exception $e) {
-            Log::error('Error creating default tenant', [
+            Log::error('Error creating default store', [
                 'slug' => $slug,
                 'user_roles' => $userRoles,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            
+
             return null;
         }
     }
 
     /**
-     * Get default tenant name
+     * Get default store name
      */
-    public function getDefaultTenantName(string $slug): string
+    public function getDefaultStoreName(string $slug): string
     {
         return match ($slug) {
             'business-default' => 'Business Default',
             'customers-default' => 'Customers Default',
-            default => 'Default Tenant',
+            default => 'Default Store',
         };
     }
 
     /**
-     * Get default tenant settings
+     * Get default store settings
      */
-    public function getDefaultTenantSettings(string $slug, array $userRoles): array
+    public function getDefaultStoreSettings(string $slug, array $userRoles): array
     {
         $baseSettings = [
             'theme' => 'default',
@@ -246,50 +246,50 @@ class TenantService
     }
 
     /**
-     * Check if user has any tenant
+     * Check if user has any store
      */
-    public function userHasTenants(User $user): bool
+    public function userHasStores(User $user): bool
     {
-        return $this->userTenantRepository->userHasTenants($user);
+        return $this->userTenantRepository->userHasStores($user);
     }
 
     /**
-     * Get user's first tenant
+     * Get user's first store
      */
-    public function getUserFirstTenant(User $user): ?Tenant
+    public function getUserFirstStore(User $user): ?Store
     {
-        return $this->userTenantRepository->getUserFirstTenant($user);
+        return $this->userTenantRepository->getUserFirstStore($user);
     }
 
     /**
-     * Get user's current tenant
+     * Get user's current store
      */
-    public function getUserCurrentTenant(User $user): ?Tenant
+    public function getUserCurrentStore(User $user): ?Store
     {
-        return $this->userTenantRepository->getUserCurrentTenant($user);
+        return $this->userTenantRepository->getUserCurrentStore($user);
     }
 
     /**
-     * Set user's current tenant
+     * Set user's current store
      */
-    public function setUserCurrentTenant(User $user, Tenant $tenant): bool
+    public function setUserCurrentStore(User $user, Store $store): bool
     {
-        return $this->userTenantRepository->setUserCurrentTenant($user, $tenant);
+        return $this->userTenantRepository->setUserCurrentStore($user, $store);
     }
 
     /**
-     * Get all tenants for user
+     * Get all stores for user
      */
-    public function getUserTenants(User $user): \Illuminate\Database\Eloquent\Collection
+    public function getUserStores(User $user): \Illuminate\Database\Eloquent\Collection
     {
-        return $this->userTenantRepository->getUserTenants($user);
+        return $this->userTenantRepository->getUserStores($user);
     }
 
     /**
-     * Remove user from tenant
+     * Remove user from store
      */
-    public function removeUserFromTenant(User $user, Tenant $tenant): bool
+    public function removeUserFromStore(User $user, Store $store): bool
     {
-        return $this->userTenantRepository->detachUserFromTenant($user, $tenant);
+        return $this->userTenantRepository->detachUserFromStore($user, $store);
     }
 }

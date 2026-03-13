@@ -9,6 +9,7 @@ use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
 use App\Traits\DarkModePreferences;
+use App\Models\Store;
 
 class User extends Authenticatable
 {
@@ -58,21 +59,21 @@ class User extends Authenticatable
         ];
     }
 
-    public function ownedTenants()
+    public function ownedStores()
     {
-        return $this->hasMany(Tenant::class, 'owner_id');
+        return $this->hasMany(Store::class, 'owner_id');
     }
 
-    public function tenants()
+    public function stores()
     {
-        return $this->belongsToMany(Tenant::class, 'tenant_users')
+        return $this->belongsToMany(Store::class, 'store_users')
             ->withPivot('role')
             ->withTimestamps();
     }
 
-    public function currentTenant()
+    public function currentStore()
     {
-        return $this->tenants()->first();
+        return $this->stores()->first();
     }
 
     public function isSuperAdmin()

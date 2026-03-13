@@ -26,7 +26,7 @@ class BrandingServiceProvider extends ServiceProvider
         // Share branding data with all views
         View::composer('*', function ($view) {
             $branding = app(BrandingService::class);
-            
+
             $view->with([
                 'branding' => $branding->getBrandingConfig(),
                 'css_variables' => $branding->getCSSVariables(),
@@ -34,7 +34,7 @@ class BrandingServiceProvider extends ServiceProvider
                 'favicon_url' => $branding->getFaviconUrl(),
                 'custom_css' => $branding->getCustomCSS(),
                 'is_dark_mode' => $branding->isDarkMode(),
-                'current_tenant' => $branding->getTenant(),
+                'current_store' => $branding->getTenant(),
             ]);
         });
     }

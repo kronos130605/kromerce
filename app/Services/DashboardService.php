@@ -42,7 +42,7 @@ class DashboardService
                 'auth' => [
                     'user' => auth()->user(),
                 ],
-                'current_tenant' => [
+                'current_store' => [
                     'id' => $tenant->id,
                     'name' => $tenant->name,
                     'slug' => $tenant->slug,
@@ -60,7 +60,7 @@ class DashboardService
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            
+
             throw new \Exception('Unable to load dashboard data: ' . $e->getMessage());
         }
     }
@@ -99,7 +99,7 @@ class DashboardService
     {
         try {
             $config = $this->configRepo->getByTenantId($tenant->id);
-            
+
             if (!$config) {
                 return [
                     'configured' => false,
@@ -123,7 +123,7 @@ class DashboardService
                 'tenant_id' => $tenant->id,
                 'error' => $e->getMessage(),
             ]);
-            
+
             return [
                 'configured' => false,
                 'message' => 'Error loading currency configuration',
@@ -149,7 +149,7 @@ class DashboardService
                 'tenant_id' => $tenant->id,
                 'error' => $e->getMessage(),
             ]);
-            
+
             return [
                 'byRevenue' => [],
                 'byViews' => [],
@@ -181,9 +181,9 @@ class DashboardService
             // Currency update alerts
             $config = $this->configRepo->getByTenantId($tenant->id);
             if ($config && $config->auto_update_rates) {
-                $daysSinceUpdate = $config->last_rate_update ? 
+                $daysSinceUpdate = $config->last_rate_update ?
                     Carbon::parse($config->last_rate_update)->diffInDays(now()) : 999;
-                
+
                 if ($daysSinceUpdate > 7) {
                     $alerts[] = [
                         'type' => 'info',
@@ -210,7 +210,7 @@ class DashboardService
                 'tenant_id' => $tenant->id,
                 'error' => $e->getMessage(),
             ]);
-            
+
             $alerts[] = [
                 'type' => 'error',
                 'message' => 'Error loading alerts',
@@ -238,7 +238,7 @@ class DashboardService
                 'tenant_id' => $tenant->id,
                 'error' => $e->getMessage(),
             ]);
-            
+
             return [
                 'monthlyRevenue' => [],
                 'productGrowth' => [],

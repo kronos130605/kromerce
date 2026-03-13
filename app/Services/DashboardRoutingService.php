@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use App\Models\User;
-use App\Models\Tenant;
+use App\Models\Store;
 use Illuminate\Support\Facades\Log;
 
 class DashboardRoutingService
@@ -15,28 +15,55 @@ class DashboardRoutingService
     ) {}
 
     /**
-     * Determine which dashboard view to show based on user role and tenant
+     * Get or assign store for user
      */
-    public function getDashboardViewForUser(User $user, ?Tenant $tenant): string
+    public function getOrAssignStoreForUser(User $user): ?Store
     {
         try {
-            // Si no hay tenant, es un customer
-            if (!$tenant) {
-                Log::info('No tenant found, showing customer dashboard', [
+            // Get existing stores for user
+            $stores = $this->tenantService->getUserStores($user);
+            
+            if ($stores->isNotEmpty()) {
+                // Return current store if exists
+                return $this->tenantService->getUserCurrentStore($user);
+            }
+            
+            // Create default store if none exists
+            return $this->tenantService->getOrCreateDefaultStoreForUser($user);
+            
+        } catch (\Exception $e) {
+            Log::error('Error getting or assigning store for user', [
+                'user_id' => $user->id,
+                'error' => $e->getMessage(),
+            ]);
+            
+            return null;
+        }
+    }
+
+    /**
+     * Determine which dashboard view to show based on user role and store
+     */
+    public function getDashboardViewForUser(User $user, ?Store $store): string
+    {
+        try {
+            // Si no hay store, es un customer
+            if (!$store) {
+                Log::info('No store found, showing customer dashboard', [
                     'user_id' => $user->id,
                     'user_email' => $user->email,
                 ]);
                 return 'Customer/Index';
             }
 
-            // Usar RoleService para obtener el rol del usuario en el tenant
+            // Usar RoleService para obtener el rol del usuario en el store
             // Ahora usa cache, así que no hay redundancia real con HandleInertiaRequests
-            $userRoleInTenant = $this->roleService->getUserRoleInTenant($user, $tenant);
+            $userRoleInStore = $this->roleService->getUserRoleInStore($user, $store);
 
             // Verificar roles de negocio
             $businessRoles = ['business_owner', 'owner', 'admin', 'manager', 'employee'];
 
-            if (in_array($userRoleInTenant, $businessRoles)) {
+            if (in_array($userRoleInStore, $businessRoles)) {
                 // Usuario con rol de negocio - usar nuevo dashboard
                 return 'Business/Index';
             } else {
@@ -47,213 +74,99 @@ class DashboardRoutingService
         } catch (\Exception $e) {
             Log::error('Error determining dashboard view', [
                 'user_id' => $user->id,
-                'tenant_id' => $tenant?->id,
+                'store_id' => $store?->id,
                 'error' => $e->getMessage(),
             ]);
-
-            // Fallback a dashboard de customer
+            
+            // Fallback a customer dashboard
             return 'Customer/Index';
         }
     }
 
     /**
-     * Get or assign tenant for user
+     * Get available stores for user
      */
-    public function getOrAssignTenantForUser(User $user): ?Tenant
+    public function getUserStores(User $user): array
     {
         try {
-            // Obtener tenant actual del usuario
-            $tenant = $this->tenantService->getUserCurrentTenant($user);
-
-            // Si no tiene tenant actual, obtener el primero disponible
-            if (!$tenant) {
-                $firstTenant = $this->tenantService->getUserFirstTenant($user);
-
-                if (!$firstTenant) {
-                    // Asignar tenant por defecto según rol del usuario
-                    $defaultTenant = $this->tenantService->getOrCreateDefaultTenantForUser($user);
-
-                    if ($defaultTenant) {
-                        // Asignar tenant por defecto al usuario
-                        $assigned = $this->tenantService->assignTenantToUser($user, $defaultTenant);
-
-                        if ($assigned) {
-                            $tenant = $defaultTenant;
-
-                            Log::info('User assigned to default tenant', [
-                                'user_id' => $user->id,
-                                'user_email' => $user->email,
-                                'user_roles' => $user->roles->pluck('name')->toArray(),
-                                'tenant_id' => $defaultTenant->id,
-                                'tenant_slug' => $defaultTenant->slug,
-                            ]);
-                        } else {
-                            Log::error('Failed to assign default tenant to user', [
-                                'user_id' => $user->id,
-                                'tenant_id' => $defaultTenant->id,
-                            ]);
-                            return null;
-                        }
-                    } else {
-                        Log::error('Could not create default tenant for user', [
-                            'user_id' => $user->id,
-                            'user_email' => $user->email,
-                        ]);
-                        return null;
-                    }
-                } else {
-                    // Establecer como tenant actual
-                    $this->tenantService->setUserCurrentTenant($user, $firstTenant);
-                    $tenant = $firstTenant;
-                }
-            }
-
-            return $tenant;
-
+            // Obtener stores del usuario usando TenantService
+            $stores = $this->tenantService->getUserStores($user);
+            
+            return [
+                'stores' => $stores,
+                'current_store' => $this->tenantService->getUserCurrentStore($user),
+                'total_stores' => $stores->count(),
+            ];
+            
         } catch (\Exception $e) {
-            Log::error('Error getting or assigning tenant for user', [
+            Log::error('Error getting user stores', [
                 'user_id' => $user->id,
-                'user_email' => $user->email,
                 'error' => $e->getMessage(),
             ]);
-
-            return null;
+            
+            return [
+                'stores' => collect(),
+                'current_store' => null,
+                'total_stores' => 0,
+            ];
         }
     }
 
     /**
-     * Get dashboard data for user
+     * Switch user to different store
      */
-    public function getDashboardDataForUser(User $user, ?Tenant $tenant, string $dashboardView): array
+    public function switchUserStore(User $user, Store $store): bool
     {
         try {
-            // Only get dashboard-specific data, user/tenant info is global
-            $dashboardData = [];
-
-            // Get products data for business dashboard
-            if ($dashboardView === 'Business/Index' && $tenant) {
-                try {
-                    $productStatistics = $this->productService->getStatisticsForTenant($tenant);
-                    $recentProducts = $this->productService->getLatestProductsForTenant($tenant, 5);
-                    $lowStockProducts = $this->productService->getLowStockProductsForTenant($tenant, 5);
-
-                    $dashboardData = [
-                        'productStatistics' => $productStatistics,
-                        'recentProducts' => $recentProducts,
-                        'lowStockProducts' => $lowStockProducts,
-                    ];
-                } catch (\Exception $e) {
-                    Log::error('Error getting product data for dashboard', [
-                        'user_id' => $user->id,
-                        'tenant_id' => $tenant->id,
-                        'error' => $e->getMessage(),
-                    ]);
-
-                    $dashboardData = [
-                        'productStatistics' => [],
-                        'recentProducts' => [],
-                        'lowStockProducts' => [],
-                    ];
-                }
+            // Verificar que el usuario tiene acceso a este store
+            if (!$this->tenantService->getUserStores($user)->contains('id', $store->id)) {
+                Log::warning('User trying to switch to unauthorized store', [
+                    'user_id' => $user->id,
+                    'store_id' => $store->id,
+                ]);
+                return false;
             }
 
-            return $dashboardData;
-
+            // Cambiar store actual
+            return $this->tenantService->setUserCurrentStore($user, $store);
+            
         } catch (\Exception $e) {
-            Log::error('Error getting dashboard data for user', [
+            Log::error('Error switching user store', [
                 'user_id' => $user->id,
-                'tenant_id' => $tenant?->id,
-                'dashboard_view' => $dashboardView,
+                'store_id' => $store->id,
                 'error' => $e->getMessage(),
             ]);
-
-            return [];
-        }
-    }
-
-    /**
-     * Check if user can access specific dashboard
-     */
-    public function userCanAccessDashboard(User $user, string $dashboardView): bool
-    {
-        try {
-            $tenant = $this->tenantService->getUserCurrentTenant($user);
-
-            if (!$tenant) {
-                // Sin tenant, solo puede acceder a customer dashboard
-                return $dashboardView === 'Customer/Index';
-            }
-
-            $userRole = $this->roleService->getUserRoleInTenant($user, $tenant);
-
-            switch ($dashboardView) {
-                case 'Business/Index':
-                    $businessRoles = ['business_owner', 'admin', 'manager', 'employee'];
-                    return in_array($userRole, $businessRoles);
-
-                case 'Customer/Index':
-                    return true; // Todos pueden acceder al customer dashboard
-
-                default:
-                    return false;
-            }
-
-        } catch (\Exception $e) {
-            Log::error('Error checking dashboard access', [
-                'user_id' => $user->id,
-                'dashboard_view' => $dashboardView,
-                'error' => $e->getMessage(),
-            ]);
-
+            
             return false;
         }
     }
 
     /**
-     * Get available dashboards for user
+     * Get store statistics for dashboard
      */
-    public function getAvailableDashboardsForUser(User $user): array
+    public function getStoreStatistics(Store $store): array
     {
         try {
-            $tenant = $this->tenantService->getUserCurrentTenant($user);
-
-            $dashboards = [];
-
-            // Customer dashboard siempre disponible
-            $dashboards[] = [
-                'name' => 'Customer/Index',
-                'label' => 'Customer Dashboard',
-                'accessible' => true,
+            return [
+                'total_products' => $store->products()->count(),
+                'active_products' => $store->products()->where('status', 'active')->count(),
+                'total_categories' => $store->categories()->count(),
+                'total_orders' => $store->orders()->count(),
+                'total_revenue' => $store->orders()->sum('total_amount'),
+                'recent_orders' => $store->orders()->latest()->take(5)->get(),
+                'low_stock_products' => $store->products()
+                    ->where('manage_stock', true)
+                    ->whereColumn('stock_quantity', '<=', 'low_stock_threshold')
+                    ->count(),
             ];
-
-            if ($tenant) {
-                $userRole = $this->roleService->getUserRoleInTenant($user, $tenant);
-                $businessRoles = ['business_owner', 'admin', 'manager', 'employee'];
-
-                if (in_array($userRole, $businessRoles)) {
-                    $dashboards[] = [
-                        'name' => 'Business/Index',
-                        'label' => 'Business Dashboard',
-                        'accessible' => true,
-                    ];
-                }
-            }
-
-            return $dashboards;
-
+            
         } catch (\Exception $e) {
-            Log::error('Error getting available dashboards for user', [
-                'user_id' => $user->id,
+            Log::error('Error getting store statistics', [
+                'store_id' => $store->id,
                 'error' => $e->getMessage(),
             ]);
-
-            return [
-                [
-                    'name' => 'Customer/Index',
-                    'label' => 'Customer Dashboard',
-                    'accessible' => true,
-                ]
-            ];
+            
+            return [];
         }
     }
 }
