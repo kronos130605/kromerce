@@ -9,7 +9,7 @@ use Inertia\Middleware;
 class HandleInertiaRequests extends Middleware
 {
     /**
-     * The root template that is loaded on the first page visit.
+     * The root template that is loaded on first page visit.
      *
      * @var string
      */
@@ -51,17 +51,15 @@ class HandleInertiaRequests extends Middleware
             },
             'user_role' => function () use ($request) {
                 $user = $request->user();
-
-                // Usar la misma lógica que DashboardRoutingService para consistencia
                 if (!$user) {
                     return 'customer';
                 }
-
-                // Para dashboard, usar la misma lógica que DashboardRoutingService
+                
+                // Usar la misma lógica que DashboardRoutingService para consistencia
                 if ($request->is('dashboard') || $request->is('business/dashboard')) {
                     $store = tenancy()->initialized ? tenant() : null; // tenant() ahora retorna Store
 
-                    if (!$tenant) {
+                    if (!$store) {
                         return 'customer';
                     }
 
@@ -69,15 +67,15 @@ class HandleInertiaRequests extends Middleware
                     return app(\App\Services\RoleService::class)
                         ->getUserRoleInStore($user, $store); // getUserRoleInStore() para stores
                 }
-
+                
                 // Para otras rutas, usar la lógica normal
                 $store = tenancy()->initialized ? tenant() : null; // tenant() ahora retorna Store
-
-                if ($user && $tenant) {
+                
+                if ($user && $store) {
                     return app(\App\Services\RoleService::class)
                         ->getUserRoleInStore($user, $store); // getUserRoleInStore() para stores
                 }
-
+                
                 return 'customer';
             },
             'ziggy' => function () use ($request) {
