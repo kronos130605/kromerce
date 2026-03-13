@@ -1,10 +1,9 @@
 <script setup>
 import { computed } from 'vue';
-import { usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
+import { useAuth } from '@/composables/useAuth';
 
-const page = usePage();
-const user = computed(() => page.props.auth.user);
+const { user } = useAuth();
 const { t } = useI18n();
 </script>
 

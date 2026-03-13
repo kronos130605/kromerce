@@ -127,16 +127,11 @@ class DashboardRoutingService
     public function getDashboardDataForUser(User $user, ?Tenant $tenant, string $dashboardView): array
     {
         try {
-            $commonData = [
-                'auth' => [
-                    'user' => $user,
-                ],
-                // user_role y tenant ahora se manejan globalmente en HandleInertiaRequests
-            ];
+            // Only get dashboard-specific data, user/tenant info is global
+            $dashboardData = [];
 
-            // Solo obtener datos específicos del dashboard si es business
+            // Get products data for business dashboard
             if ($dashboardView === 'Business/Index' && $tenant) {
-                // Obtener datos de productos para el dashboard
                 try {
                     $productStatistics = $this->productService->getStatisticsForTenant($tenant);
                     $recentProducts = $this->productService->getLatestProductsForTenant($tenant, 5);
@@ -160,11 +155,9 @@ class DashboardRoutingService
                         'lowStockProducts' => [],
                     ];
                 }
-            } else {
-                $dashboardData = [];
             }
 
-            return array_merge($commonData, $dashboardData);
+            return $dashboardData;
 
         } catch (\Exception $e) {
             Log::error('Error getting dashboard data for user', [
@@ -174,13 +167,7 @@ class DashboardRoutingService
                 'error' => $e->getMessage(),
             ]);
 
-            return [
-                'auth' => [
-                    'user' => $user,
-                ],
-                'user_role' => 'customer',
-                'tenant' => null,
-            ];
+            return [];
         }
     }
 

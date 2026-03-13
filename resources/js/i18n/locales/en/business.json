@@ -75,6 +75,7 @@
   },
   "profile": {
     "profile_settings": "Profile Settings",
+    "billing": "Billing",
     "notifications": "Notifications",
     "logout": "Logout"
   }

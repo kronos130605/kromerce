@@ -1,6 +1,7 @@
 <script setup>
 import { computed } from 'vue';
 import { usePage } from '@inertiajs/vue3';
+import { useAuth } from '@/composables/useAuth';
 
 // Import customer components
 import CustomerDashboardNavbar from '@/components/navigation/navbars/CustomerDashboardNavbar.vue';
@@ -10,6 +11,7 @@ import CustomerSidebar from '@/components/navigation/sidebars/CustomerSidebar.vu
 import DashboardContent from '@/modules/customer/content/DashboardContent.vue';
 
 const page = usePage();
+const { user } = useAuth();
 
 // Get active tab from props or default to overview
 const activeTab = computed(() => page.props.activeTab || 'overview');
@@ -42,7 +44,7 @@ const currentContent = computed(() => {
         <div class="px-4 pb-4 pt-[5rem] h-full">
           <component
             :is="currentContent"
-            :user="page.props.auth.user"
+            :user="user"
             :statistics="page.props.statistics"
           />
         </div>

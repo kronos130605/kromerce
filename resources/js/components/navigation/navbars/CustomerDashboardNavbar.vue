@@ -16,6 +16,7 @@ const {
     user,
     currentTenant,
     isBusinessOwner,
+    isSuperAdmin,
     displayName,
     userAvatar,
     userInitials,
@@ -220,49 +221,81 @@ onBeforeUnmount(() => {
             <div
               v-if="showUserDropdown"
               :class="[
-                'absolute right-0 mt-2 w-48 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none',
+                'absolute right-0 top-full mt-2 w-56 rounded-lg border shadow-lg py-2 z-50',
                 isDark
-                  ? 'bg-gray-800 border border-gray-700'
-                  : 'bg-white border border-gray-200'
+                  ? 'bg-gray-900 border-gray-800'
+                  : 'bg-background border-border'
               ]"
             >
-              <div class="py-1">
+              <!-- User Info -->
+              <div class="px-4 py-3 border-b" :class="isDark ? 'border-gray-800' : 'border-border'">
+                <p class="text-sm font-medium">{{ displayName }}</p>
+                <p class="text-xs text-muted-foreground">{{ user.email }}</p>
+                <div v-if="isBusinessOwner" class="mt-2">
+                  <Badge variant="secondary" class="text-xs">Business Owner</Badge>
+                </div>
+                <div v-else-if="isSuperAdmin" class="mt-2">
+                  <Badge variant="secondary" class="text-xs">Super Admin</Badge>
+                </div>
+                <div v-else class="mt-2">
+                  <Badge variant="secondary" class="text-xs">Customer</Badge>
+                </div>
+              </div>
+
+              <!-- Menu Items -->
+              <div class="py-2">
                 <Link
                   href="/profile"
                   :class="[
-                    'block px-4 py-2 text-sm transition-colors',
+                    'flex items-center gap-3 px-4 py-2 text-sm transition-colors',
                     isDark
-                      ? 'text-gray-300 hover:bg-gray-700'
-                      : 'text-gray-700 hover:bg-gray-100'
+                      ? 'text-gray-300 hover:text-white hover:bg-gray-800'
+                      : 'text-foreground hover:text-foreground hover:bg-accent'
                   ]"
                 >
-                  {{ t('navigation.profile') }}
+                  <Icon
+                    name="user"
+                    category="ui"
+                    class="h-4 w-4"
+                  />
+                  Profile Settings
                 </Link>
+
                 <Link
                   href="/settings"
                   :class="[
-                    'block px-4 py-2 text-sm transition-colors',
+                    'flex items-center gap-3 px-4 py-2 text-sm transition-colors',
                     isDark
-                      ? 'text-gray-300 hover:bg-gray-700'
-                      : 'text-gray-700 hover:bg-gray-100'
+                      ? 'text-gray-300 hover:text-white hover:bg-gray-800'
+                      : 'text-foreground hover:text-foreground hover:bg-accent'
                   ]"
                 >
-                  {{ t('navigation.settings') }}
+                  <Icon
+                    name="settings"
+                    category="ui"
+                    class="h-4 w-4"
+                  />
+                  Settings
                 </Link>
-                <div :class="[
-                  'border-t',
-                  isDark ? 'border-gray-700' : 'border-gray-200'
-                ]"></div>
+              </div>
+
+              <!-- Logout -->
+              <div class="pt-2 border-t" :class="isDark ? 'border-gray-800' : 'border-border'">
                 <button
                   @click="logout"
                   :class="[
-                    'block w-full text-left px-4 py-2 text-sm transition-colors',
+                    'flex items-center gap-3 w-full px-4 py-2 text-sm transition-colors text-left',
                     isDark
-                      ? 'text-gray-300 hover:bg-gray-700'
-                      : 'text-gray-700 hover:bg-gray-100'
+                      ? 'text-red-400 hover:text-red-300 hover:bg-gray-800'
+                      : 'text-red-600 hover:text-red-700 hover:bg-accent'
                   ]"
                 >
-                  {{ t('navigation.logout') }}
+                  <Icon
+                    name="logout"
+                    category="ui"
+                    class="h-4 w-4"
+                  />
+                  Logout
                 </button>
               </div>
             </div>
