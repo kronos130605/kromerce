@@ -34,10 +34,10 @@ import { useSidebar } from '@/composables/useSidebar.js';
 import { useRoleGuard } from '@/composables/useRoleGuard.js';
 
 // Import content components
-import DashboardContent from '@/modules/business/content/DashboardContent.vue';
-import ProductsContent from '@/modules/business/content/ProductsContent.vue';
-import OrdersContent from '@/modules/business/content/OrdersContent.vue';
-import AnalyticsContent from '@/modules/business/content/AnalyticsContent.vue';
+import DashboardContent from '@/modules/business/components/DashboardContent.vue';
+import ProductsContent from '@/modules/business/components/ProductsContent.vue';
+import OrdersContent from '@/modules/business/components/OrdersContent.vue';
+import AnalyticsContent from '@/modules/business/components/AnalyticsContent.vue';
 
 const page = usePage();
 const { t } = useI18n();

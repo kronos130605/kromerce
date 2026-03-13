@@ -1,6 +1,5 @@
 <script setup>
-import { computed, ref, onMounted } from 'vue';
-import { usePage } from '@inertiajs/vue3';
+import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 // Import dashboard components
@@ -15,11 +14,6 @@ const { user } = useAuth();
 const { t } = useI18n();
 
 // State management
-const searchQuery = ref('');
-const selectedCategory = ref('all');
-const priceRange = ref([0, 1000]);
-const sortBy = ref('recommended');
-const viewMode = ref('grid');
 const notifications = ref([]);
 const cartItems = ref(3);
 const wishlistItems = ref(12);
