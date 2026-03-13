@@ -3,7 +3,6 @@
 namespace App\Http\Middleware;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
@@ -54,7 +53,7 @@ class HandleInertiaRequests extends Middleware
                 if (!$user) {
                     return 'customer';
                 }
-                
+
                 // Usar la misma lógica que DashboardRoutingService para consistencia
                 if ($request->is('dashboard') || $request->is('business/dashboard')) {
                     $store = tenancy()->initialized ? tenant() : null; // tenant() ahora retorna Store
@@ -67,15 +66,15 @@ class HandleInertiaRequests extends Middleware
                     return app(\App\Services\RoleService::class)
                         ->getUserRoleInStore($user, $store); // getUserRoleInStore() para stores
                 }
-                
+
                 // Para otras rutas, usar la lógica normal
                 $store = tenancy()->initialized ? tenant() : null; // tenant() ahora retorna Store
-                
+
                 if ($user && $store) {
                     return app(\App\Services\RoleService::class)
                         ->getUserRoleInStore($user, $store); // getUserRoleInStore() para stores
                 }
-                
+
                 return 'customer';
             },
             'ziggy' => function () use ($request) {
