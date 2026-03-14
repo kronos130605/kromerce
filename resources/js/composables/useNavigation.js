@@ -31,7 +31,7 @@ export function useNavigation() {
     const adminNavigation = computed(() => [
         { href: '/dashboard', label: 'dashboard.nav_dashboard', name: 'settings' },
         { href: '#users', label: 'dashboard.nav_users', name: 'customers' },
-        { href: '#tenants', label: 'dashboard.nav_tenants', name: 'customers' },
+        { href: '#stores', label: 'dashboard.nav_stores', name: 'customers' },
         { href: '#analytics', label: 'dashboard.nav_analytics', name: 'analytics' },
         { href: '#settings', label: 'dashboard.nav_settings', name: 'settings' },
     ]);

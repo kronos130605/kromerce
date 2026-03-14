@@ -14,7 +14,7 @@ const { t } = useI18n();
 // Use auth composable
 const {
     user,
-    currentTenant,
+    currentStore,
     isBusinessOwner,
     isSuperAdmin,
     displayName,

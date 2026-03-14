@@ -14,7 +14,7 @@ const { t } = useI18n();
 // Use auth composable
 const {
     user,
-    currentTenant,
+    currentStore,
     isBusinessOwner,
     isSuperAdmin,
     displayName,
@@ -169,8 +169,8 @@ onBeforeUnmount(() => {
             <span class="absolute top-1 right-1 h-2 w-2 bg-red-500 rounded-full"></span>
           </button>
 
-          <!-- Tenant Info for Business Owners -->
-          <div v-if="isBusinessOwner && currentTenant" class="hidden lg:flex items-center gap-2">
+          <!-- Store Info for Business Owners -->
+          <div v-if="isBusinessOwner && currentStore" class="hidden lg:flex items-center gap-2">
             <Badge
               variant="secondary"
               :class="[
@@ -180,7 +180,7 @@ onBeforeUnmount(() => {
                   : 'bg-muted text-foreground'
               ]"
             >
-              {{ currentTenant.name }}
+              {{ currentStore.name }}
             </Badge>
           </div>
 

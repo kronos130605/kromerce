@@ -12,7 +12,7 @@ export function useRoleGuard() {
     const { isBusinessUser, isCustomer, userRole } = useAuth();
 
     /**
-     * Get current user's role in current tenant
+     * Get current user's role in current store
      */
     const currentUserRole = computed(() => userRole.value || 'customer');
 

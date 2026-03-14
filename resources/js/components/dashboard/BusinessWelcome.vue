@@ -8,7 +8,7 @@ const page = usePage();
 const { t } = useI18n();
 
 // Use centralized auth composable
-const { user, currentTenant } = useAuth();
+const { user, currentStore } = useAuth();
 
 // Business stats
 const businessStats = computed(() => ({
@@ -37,14 +37,14 @@ const businessStats = computed(() => ({
                 </p>
 
                 <!-- Business Info -->
-                <div v-if="currentTenant" class="flex items-center space-x-4">
-                    <div class="bg-white/20 backdrop-blur-sm rounded-xl px-4 py-2">
-                        <span class="text-blue-100 text-sm">{{ t('dashboard.tenant') }}:</span>
-                        <span class="font-semibold ml-2">{{ currentTenant.name }}</span>
-                    </div>
+                <div v-if="currentStore" class="flex items-center space-x-4">
                     <div class="bg-white/20 backdrop-blur-sm rounded-xl px-4 py-2">
                         <span class="text-blue-100 text-sm">{{ t('dashboard.store') }}:</span>
-                        <span class="font-mono ml-2">{{ currentTenant.slug }}.kromerce.test</span>
+                        <span class="font-semibold ml-2">{{ currentStore.name }}</span>
+                    </div>
+                    <div class="bg-white/20 backdrop-blur-sm rounded-xl px-4 py-2">
+                        <span class="text-blue-100 text-sm">{{ t('dashboard.domain') }}:</span>
+                        <span class="font-mono ml-2">{{ currentStore.slug }}.kromerce.test</span>
                     </div>
                 </div>
             </div>

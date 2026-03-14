@@ -4,7 +4,7 @@ import { usePage } from '@inertiajs/vue3';
 export function useAuth() {
     const page = usePage();
     const user = computed(() => page.props.auth?.user);
-    const currentTenant = computed(() => page.props.current_store);
+    const currentStore = computed(() => page.props.current_store);
     const userRole = computed(() => page.props.user_role);
 
     // Check user roles - usando user_role directamente
@@ -12,18 +12,14 @@ export function useAuth() {
 
     const isBusinessOwner = computed(() => {
         const role = userRole.value;
-        return role === 'business_owner' || role === 'owner';
+        return role === 'business_owner' || role === 'super_admin';
     });
 
-    const isOwner = computed(() => userRole.value === 'owner');
-    const isAdmin = computed(() => userRole.value === 'admin');
-    const isManager = computed(() => userRole.value === 'manager');
-    const isEmployee = computed(() => userRole.value === 'employee');
     const isSuperAdmin = computed(() => userRole.value === 'super_admin');
 
     // Business roles (for business dashboard) - única fuente de verdad
     const isBusinessUser = computed(() => {
-        const businessRoles = ['business_owner', 'owner', 'admin', 'manager', 'employee'];
+        const businessRoles = ['super_admin', 'business_owner'];
         return businessRoles.includes(userRole.value);
     });
 
@@ -31,10 +27,6 @@ export function useAuth() {
     const primaryRole = computed(() => {
         if (isSuperAdmin.value) return 'super_admin';
         if (isBusinessOwner.value) return 'business_owner';
-        if (isOwner.value) return 'owner';
-        if (isAdmin.value) return 'admin';
-        if (isManager.value) return 'manager';
-        if (isEmployee.value) return 'employee';
         if (isCustomer.value) return 'customer';
         return 'guest';
     });
@@ -47,42 +39,19 @@ export function useAuth() {
         if (isSuperAdmin.value) {
             perms.add('admin.access');
             perms.add('users.manage');
-            perms.add('tenants.manage');
+            perms.add('stores.manage');
             perms.add('analytics.view');
             perms.add('system.settings');
         }
 
         // Business owner permissions
-        if (isBusinessOwner.value || isOwner.value) {
+        if (isBusinessOwner.value) {
             perms.add('business.manage');
             perms.add('products.manage');
             perms.add('orders.manage');
             perms.add('analytics.view');
             perms.add('employees.manage');
             perms.add('settings.manage');
-        }
-
-        // Admin permissions
-        if (isAdmin.value) {
-            perms.add('business.manage');
-            perms.add('products.manage');
-            perms.add('orders.manage');
-            perms.add('analytics.view');
-            perms.add('employees.manage');
-        }
-
-        // Manager permissions
-        if (isManager.value) {
-            perms.add('products.view');
-            perms.add('orders.manage');
-            perms.add('analytics.view');
-            perms.add('employees.view');
-        }
-
-        // Employee permissions
-        if (isEmployee.value) {
-            perms.add('products.view');
-            perms.add('orders.view');
         }
 
         // Customer permissions
@@ -136,7 +105,7 @@ export function useAuth() {
     return {
         // User data
         user,
-        currentTenant,
+        currentStore,
         displayName,
         userAvatar,
         userInitials,
@@ -144,10 +113,6 @@ export function useAuth() {
         // Roles
         isCustomer,
         isBusinessOwner,
-        isOwner,
-        isAdmin,
-        isManager,
-        isEmployee,
         isSuperAdmin,
         isBusinessUser,
         primaryRole,
