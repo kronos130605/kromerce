@@ -4,7 +4,8 @@ namespace App\Services;
 
 use App\Models\Product;
 use App\Models\ProductVariant;
-use App\Repositories\BusinessCurrencyConfigRepository;
+use App\Repositories\Store\BusinessCurrencyConfigRepository;
+use App\Repositories\Store\StoreCurrencyConfigRepository;
 use App\Repositories\Product\ProductRepository;
 use Illuminate\Support\Collection;
 
@@ -28,7 +29,9 @@ class ProductPricingService
      */
     public function calculateProductPrices(Product $product, ?string $targetCurrency = null): array
     {
-        $currencyConfig = $this->configRepo->getByStoreId($product->store_id);
+        $currencyConfig = $this->configRepo->getBy([
+            'store_id' => $product->store_id
+        ]);
 
         if (!$currencyConfig) {
             return [];
@@ -105,7 +108,9 @@ class ProductPricingService
     public function calculateVariantPrices(ProductVariant $variant, ?string $targetCurrency = null): array
     {
         $product = $variant->product;
-        $currencyConfig = $this->configRepo->getByStoreId($product->store_id);
+        $currencyConfig = $this->configRepo->getBy([
+            'store_id' => $product->store_id
+        ]);
 
         if (!$currencyConfig) {
             return [];
@@ -308,42 +313,5 @@ class ProductPricingService
         }
 
         return $summary;
-    }
-
-    /**
-     * Update product prices when currency rates change.
-     */
-    public function updateProductPricesOnRateChange(string $storeId, array $affectedCurrencies): void
-    {
-        $products = Product::where('store_id', $storeId)->get();
-
-        foreach ($products as $product) {
-            // Recalculate prices for affected currencies
-            $this->calculateProductPrices($product);
-
-            // Update price history if needed
-            $this->recordPriceChangeOnRateUpdate($product, $affectedCurrencies);
-        }
-    }
-
-    /**
-     * Record price change due to rate update.
-     */
-    private function recordPriceChangeOnRateUpdate(Product $product, array $affectedCurrencies): void
-    {
-        foreach ($affectedCurrencies as $currency) {
-            if ($currency === $product->base_currency) {
-                continue; // Skip base currency
-            }
-
-            ProductPriceHistory::create([
-                'product_id' => $product->id,
-                'currency' => $currency,
-                'old_price' => null, // We don't track old converted prices
-                'new_price' => null, // We don't track new converted prices
-                'change_reason' => 'rate_update',
-                'notes' => "Currency rate updated for {$currency}",
-            ]);
-        }
     }
 }

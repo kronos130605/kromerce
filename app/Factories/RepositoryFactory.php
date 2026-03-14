@@ -44,6 +44,8 @@ class RepositoryFactory
             StoreCurrencyConfigRepository::class => new StoreCurrencyConfigRepository($model),
             StoreStatisticsRepository::class => new StoreStatisticsRepository($model),
             StoreConfigRepository::class => new StoreConfigRepository($model),
+            UserStoreRepository::class => new UserStoreRepository($model),
+            RoleRepository::class => new RoleRepository($model),
             default => throw new \InvalidArgumentException("Repository {$repositoryClass} is not supported")
         };
     }
@@ -123,4 +125,10 @@ class RepositoryFactory
     {
         return new RoleRepository(new Role());
     }
+
+    public static function userStoreRepository(): UserStoreRepository
+    {
+        return new UserStoreRepository(new User());
+    }
+
 }

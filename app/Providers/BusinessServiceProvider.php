@@ -21,8 +21,7 @@ use App\Services\ProductPricingService;
 use App\Services\ProductService;
 use App\Services\RoleService;
 use App\Services\StoreService;
-use App\Services\TenantConfigService;
-use App\Services\TenantService;
+use App\Services\StoreConfigService;
 use Illuminate\Support\ServiceProvider;
 
 class BusinessServiceProvider extends ServiceProvider
@@ -134,23 +133,23 @@ class BusinessServiceProvider extends ServiceProvider
                 RepositoryFactory::storeContactRepository(),
                 RepositoryFactory::storePaymentMethodRepository(),
                 RepositoryFactory::storeCurrencyConfigRepository(),
-                RepositoryFactory::storeStatisticsRepository()
+                RepositoryFactory::storeStatisticsRepository(),
+                RepositoryFactory::userStoreRepository()
             );
         });
 
         // Register Dashboard Routing Service with repositories
         $this->app->singleton(DashboardRoutingService::class, function ($app) {
             return new DashboardRoutingService(
-                $app->make(TenantService::class),
+                $app->make(StoreService::class),
                 $app->make(RoleService::class),
-                $app->make(ProductService::class),
-                RepositoryFactory::storeStatisticsRepository()
+                $app->make(ProductService::class)
             );
         });
 
-        // Register Tenant Config Service with repositories
-        $this->app->singleton(TenantConfigService::class, function ($app) {
-            return new TenantConfigService(
+        // Register Store Config Service with repositories
+        $this->app->singleton(StoreConfigService::class, function ($app) {
+            return new StoreConfigService(
                 RepositoryFactory::storeConfigRepository()
             );
         });
@@ -163,11 +162,15 @@ class BusinessServiceProvider extends ServiceProvider
             );
         });
 
-        // Register Tenant Service with repositories
-        $this->app->singleton(TenantService::class, function ($app) {
-            return new TenantService(
+        // Register Store Service with repositories
+        $this->app->singleton(StoreService::class, function ($app) {
+            return new StoreService(
                 RepositoryFactory::storeRepository(),
-                RepositoryFactory::userTenantRepository()
+                RepositoryFactory::storeContactRepository(),
+                RepositoryFactory::storePaymentMethodRepository(),
+                RepositoryFactory::storeCurrencyConfigRepository(),
+                RepositoryFactory::storeStatisticsRepository(),
+                RepositoryFactory::userStoreRepository()
             );
         });
 
@@ -184,14 +187,19 @@ class BusinessServiceProvider extends ServiceProvider
      */
     private function registerModelRelationships(): void
     {
-        // Tenant relationship with currency config
-        \App\Models\Tenant::resolveRelationUsing('currencyConfig', function ($tenant) {
-            return $tenant->hasOne(BusinessCurrencyConfig::class);
+        // Store relationship with currency config
+        \App\Models\Store::resolveRelationUsing('currencyConfig', function ($store) {
+            return $store->hasOne(BusinessCurrencyConfig::class);
         });
 
-        // User relationship with tenant (if not already defined)
-        \App\Models\User::resolveRelationUsing('tenant', function ($user) {
-            return $user->belongsTo(\App\Models\Tenant::class);
+        // User relationship with stores
+        \App\Models\User::resolveRelationUsing('stores', function ($user) {
+            return $user->hasMany(\App\Models\Store::class);
+        });
+
+        // User relationship with store (if not already defined)
+        \App\Models\User::resolveRelationUsing('store', function ($user) {
+            return $user->belongsTo(\App\Models\Store::class);
         });
     }
 }

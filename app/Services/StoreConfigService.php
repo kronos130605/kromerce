@@ -7,7 +7,7 @@ use App\Repositories\Store\StoreConfigRepository;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
-class TenantConfigService
+class StoreConfigService
 {
     private StoreConfigRepository $configRepo;
 
