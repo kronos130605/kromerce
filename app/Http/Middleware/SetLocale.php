@@ -38,17 +38,15 @@ class SetLocale
         // Set locale in session
         session(['locale' => $locale]);
 
-        // Load translations for frontend
+        // Load translations for frontend - ONLY current locale to avoid memory issues
         $translations = [];
-        foreach ($supportedLocales as $localeCode => $localeName) {
-            $translationPath = config('i18n.translation_files.path', resource_path('js/i18n/locales')) . "/{$localeCode}.json";
+        $translationPath = config('i18n.translation_files.path', resource_path('js/i18n/locales')) . "/{$locale}.json";
 
-            if (File::exists($translationPath)) {
-                $translations[$localeCode] = json_decode(File::get($translationPath), true);
-            }
+        if (File::exists($translationPath)) {
+            $translations = json_decode(File::get($translationPath), true);
         }
 
-        // Share translations with Inertia
+        // Share translations with Inertia - only current locale
         Inertia::share('translations', $translations);
         Inertia::share('currentLocale', $locale);
         Inertia::share('supportedLocales', $supportedLocales);

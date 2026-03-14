@@ -8,9 +8,8 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Stancl\Tenancy\Contracts\Tenant;
 
-class Store extends Model implements Tenant
+class Store extends Model
 {
     use HasFactory, SoftDeletes;
 
@@ -281,57 +280,5 @@ class Store extends Model implements Tenant
     public function getBannerUrlAttribute(): ?string
     {
         return $this->banner ? asset('storage/banners/' . $this->banner) : null;
-    }
-
-    /**
-     * Get the tenant key for Stancl Tenancy.
-     */
-    public function getTenantKey(): string
-    {
-        return (string) $this->getKey();
-    }
-
-    /**
-     * Get the tenant identifier for Stancl Tenancy.
-     */
-    public function getTenantIdentifier(): string
-    {
-        return 'store_' . $this->getKey();
-    }
-
-    /**
-     * Get the value of an internal key.
-     */
-    public function getInternal(string $key)
-    {
-        return $this->data[$key] ?? null;
-    }
-
-    /**
-     * Run the tenant initialization.
-     * @param callable $callback
-     */
-    public function run(callable $callback): void
-    {
-        // Initialize tenant-specific logic here
-    }
-
-    /**
-     * Set the internal tenant data.
-     * @param string $key
-     * @param $value
-     */
-    public function setInternal(string $key, $value): void
-    {
-        $this->data = $value;
-        $this->save();
-    }
-
-    /**
-     * Get the tenant key name.
-     */
-    public function getTenantKeyName(): string
-    {
-        return $this->getKeyName();
     }
 }

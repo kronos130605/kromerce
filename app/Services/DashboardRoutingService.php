@@ -48,28 +48,33 @@ class DashboardRoutingService
     public function getDashboardViewForUser(User $user, ?Store $store): string
     {
         try {
-            // Si no hay store, es un customer
+            // Check if user has business role even without store
+            $userPrimaryRole = $this->roleService->getUserPrimaryRole($user);
+            $businessRoles = config('roles.business_roles', ['business_owner']);
+
+            // If user has business role but no store, show business dashboard
+            if (!$store && in_array($userPrimaryRole, $businessRoles)) {
+                return config('roles.dashboard_views.business', 'Business/Index');
+            }
+
+            // Si no hay store y no es rol de negocio, es un customer
             if (!$store) {
-                Log::info('No store found, showing customer dashboard', [
-                    'user_id' => $user->id,
-                    'user_email' => $user->email,
-                ]);
-                return 'Customer/Index';
+                return config('roles.dashboard_views.customer', 'Customer/Index');
             }
 
             // Usar RoleService para obtener el rol del usuario en el store
             // Ahora usa cache, así que no hay redundancia real con HandleInertiaRequests
             $userRoleInStore = $this->roleService->getUserRoleInStore($user, $store);
 
-            // Verificar roles de negocio
-            $businessRoles = ['business_owner', 'owner', 'admin', 'manager', 'employee'];
+            // Get business roles from config
+            $businessRoles = config('roles.business_roles', ['business_owner']);
 
             if (in_array($userRoleInStore, $businessRoles)) {
                 // Usuario con rol de negocio - usar nuevo dashboard
-                return 'Business/Index';
+                return config('roles.dashboard_views.business', 'Business/Index');
             } else {
                 // Usuario sin rol de negocio - usar dashboard de customer
-                return 'Customer/Index';
+                return config('roles.dashboard_views.customer', 'Customer/Index');
             }
 
         } catch (\Exception $e) {
@@ -80,7 +85,7 @@ class DashboardRoutingService
             ]);
 
             // Fallback a customer dashboard
-            return 'Customer/Index';
+            return config('roles.dashboard_views.customer', 'Customer/Index');
         }
     }
 
@@ -148,10 +153,21 @@ class DashboardRoutingService
     public function getDashboardDataForUser(User $user, ?Store $store, string $dashboardView): array
     {
         try {
+            // Get user stores data efficiently
+            $userStoresData = $this->getUserStores($user);
+
             $data = [
-                'user' => $user,
-                'store' => $store,
-                'stores' => $this->getUserStores($user),
+                'user' => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                ], // Isolated user data - no model relationships
+                'store' => $store ? [
+                    'id' => $store->id,
+                    'name' => $store->name,
+                    'slug' => $store->slug,
+                ] : null, // Isolated store data - no model relationships
+                'stores' => [], // Empty array to avoid any relationship loading
             ];
 
             // Add store-specific data if store exists
@@ -167,7 +183,7 @@ class DashboardRoutingService
                     $data['activeTab'] = 'overview';
                     $data['canManageStore'] = $this->canUserManageStore($user, $store);
                     break;
-                    
+
                 case 'Customer/Index':
                     $data['recentOrders'] = $this->getCustomerRecentOrders($user);
                     $data['wishlist'] = $this->getCustomerWishlist($user);
@@ -185,9 +201,17 @@ class DashboardRoutingService
             ]);
 
             return [
-                'user' => $user,
-                'store' => $store,
-                'stores' => $this->getUserStores($user),
+                'user' => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                ],
+                'store' => $store ? [
+                    'id' => $store->id,
+                    'name' => $store->name,
+                    'slug' => $store->slug,
+                ] : null,
+                'stores' => collect(), // Empty collection to avoid issues
                 'error' => 'Failed to load dashboard data'
             ];
         }

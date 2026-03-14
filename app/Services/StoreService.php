@@ -313,8 +313,17 @@ class StoreService
             $store = $this->userStoreRepository->getUserFirstStore($user);
 
             if (!$store) {
-                // Crear store por defecto
-                $store = $this->createDefaultStore($storeSlug, $userRoles, $user);
+                // If no store found for user, check if default store exists by slug
+                $defaultStoreSlug = $this->getDefaultStoreSlugForRoles($userRoles);
+                $store = $this->storeRepository->getFirstBy(['slug' => $defaultStoreSlug]);
+
+                if (!$store) {
+                    // Create store por defecto
+                    $store = $this->createDefaultStore($defaultStoreSlug, $userRoles, $user);
+                } else {
+                    // Associate existing default store with user
+                    $this->userStoreRepository->attachUserToStore($user, $store, 'business_owner');
+                }
             }
 
             return $store;
@@ -360,14 +369,8 @@ class StoreService
     {
         $userRoles = $user->roles->pluck('name')->toArray();
 
-        // Prioridad de roles para store
-        $rolePriority = [
-            'business_owner' => 1,
-            'admin' => 2,
-            'manager' => 3,
-            'employee' => 4,
-            'customer' => 5,
-        ];
+        // Get role priority from config
+        $rolePriority = config('roles.role_priority');
 
         $defaultRole = 'customer';
         $highestPriority = PHP_INT_MAX;
@@ -387,17 +390,18 @@ class StoreService
      */
     public function getDefaultStoreSlugForRoles(array $userRoles): string
     {
-        // Si tiene rol de negocio, usar store de negocio por defecto
-        $businessRoles = ['business_owner', 'admin', 'manager', 'employee'];
+        // Get business roles from config
+        $businessRoles = config('roles.business_roles', ['business_owner']);
 
+        // Check if user has any business role
         foreach ($businessRoles as $role) {
             if (in_array($role, $userRoles)) {
-                return 'business-default';
+                return config('roles.default_store_slugs.business', 'business-default');
             }
         }
 
-        // Si solo es customer, usar store de customer por defecto
-        return 'customers-default';
+        // Default to customer store
+        return config('roles.default_store_slugs.customer', 'customers-default');
     }
 
     /**
@@ -440,6 +444,23 @@ class StoreService
             return $store;
 
         } catch (\Exception $e) {
+            // Check if it's a duplicate entry error
+            if (str_contains($e->getMessage(), 'Duplicate entry') && str_contains($e->getMessage(), $slug)) {
+                Log::warning('Store with slug already exists, attempting to retrieve existing store', [
+                    'slug' => $slug,
+                    'user_roles' => $userRoles,
+                    'error' => $e->getMessage(),
+                ]);
+
+                // Try to get existing store by slug
+                $existingStore = $this->storeRepository->getFirstBy(['slug' => $slug]);
+                if ($existingStore && $user) {
+                    // Associate user with existing store
+                    $this->userStoreRepository->attachUserToStore($user, $existingStore, 'business_owner');
+                    return $existingStore;
+                }
+            }
+
             Log::error('Error creating default store', [
                 'slug' => $slug,
                 'user_roles' => $userRoles,
@@ -468,52 +489,86 @@ class StoreService
      */
     public function getDefaultStoreSettings(string $slug, array $userRoles): array
     {
-        $baseSettings = [
-            'theme' => 'default',
-            'primary_color' => '#3B82F6',
-            'secondary_color' => '#10B981',
-            'accent_color' => '#F59E0B',
-            'default_currency' => 'USD',
-            'language' => 'es',
-            'timezone' => 'America/Mexico_City',
-            'enable_notifications' => true,
-            'created_by_system' => true,
-        ];
+        // Get base settings from config
+        $baseSettings = config('settings.base_settings');
 
-        if ($slug === 'customers-default') {
-            return array_merge($baseSettings, [
-                'show_flash_sales' => true,
-                'show_featured_stores' => true,
-                'show_ai_recommendations' => true,
-                'enable_wishlist' => true,
-                'enable_reviews' => true,
-                'layout' => [
-                    'sidebar_position' => 'left',
-                    'product_grid_columns' => 4,
-                    'show_product_ratings' => true,
-                    'show_product_compare' => true,
-                ],
-            ]);
-        }
+        // Get store type specific settings from config
+        $storeTypeSettings = config("settings.store_type_settings.{$slug}", []);
 
-        if ($slug === 'business-default') {
-            return array_merge($baseSettings, [
-                'show_analytics' => true,
-                'show_inventory_management' => true,
-                'show_order_management' => true,
-                'show_customer_management' => true,
-                'show_financial_reports' => true,
-                'enable_multi_currency' => true,
-                'layout' => [
-                    'sidebar_position' => 'left',
-                    'default_dashboard_view' => 'overview',
-                    'show_quick_actions' => true,
-                    'show_recent_activity' => true,
-                ],
-            ]);
-        }
+        // Merge base settings with store type specific settings
+        return array_merge($baseSettings, $storeTypeSettings);
+    }
 
-        return $baseSettings;
+    /**
+     * Get available themes from config
+     */
+    public function getAvailableThemes(): array
+    {
+        return config('settings.themes');
+    }
+
+    /**
+     * Get theme configuration by name
+     */
+    public function getThemeConfig(string $themeName): ?array
+    {
+        return config("settings.themes.{$themeName}");
+    }
+
+    /**
+     * Get supported currencies from config
+     */
+    public function getSupportedCurrencies(): array
+    {
+        return config('settings.currencies');
+    }
+
+    /**
+     * Get currency configuration by code
+     */
+    public function getCurrencyConfig(string $currencyCode): ?array
+    {
+        return config("settings.currencies.{$currencyCode}");
+    }
+
+    /**
+     * Get supported languages from config
+     */
+    public function getSupportedLanguages(): array
+    {
+        return config('settings.languages');
+    }
+
+    /**
+     * Get language configuration by code
+     */
+    public function getLanguageConfig(string $languageCode): ?array
+    {
+        return config("settings.languages.{$languageCode}");
+    }
+
+    /**
+     * Get common timezones from config
+     */
+    public function getCommonTimezones(): array
+    {
+        return config('settings.timezones');
+    }
+
+    /**
+     * Get layout defaults for store type
+     */
+    public function getLayoutDefaults(string $storeType): array
+    {
+        return config("settings.layout_defaults.{$storeType}", []);
+    }
+
+    /**
+     * Get feature flags for store type
+     */
+    public function getFeatureFlags(string $storeType): array
+    {
+        return config("settings.features.{$storeType}", []);
     }
 
     /**
@@ -538,5 +593,19 @@ class StoreService
     public function getUserStores(User $user): \Illuminate\Database\Eloquent\Collection
     {
         return $this->userStoreRepository->getUserStores($user);
+    }
+
+    /**
+     * Get basic store data for frontend (optimized for Inertia).
+     * Uses caching to avoid repeated database queries.
+     */
+    public function getBasicStoreDataForFrontend(int $storeId): ?array
+    {
+        // Cache for 30 minutes to improve performance
+        $cacheKey = "store_basic_data_{$storeId}";
+
+        return cache()->remember($cacheKey, 1800, function () use ($storeId) {
+            return $this->storeRepository->getBasicStoreData($storeId);
+        });
     }
 }

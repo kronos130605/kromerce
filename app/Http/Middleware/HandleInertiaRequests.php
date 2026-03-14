@@ -3,6 +3,8 @@
 namespace App\Http\Middleware;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
@@ -43,10 +45,31 @@ class HandleInertiaRequests extends Middleware
                 },
             ],
             'current_store' => function () use ($request) {
-                if (tenancy()->initialized) {
-                    return tenant(); // tenant() ahora retorna Store
+                $user = $request->user();
+                if (!$user) {
+                    return null;
                 }
-                return null;
+
+                // Cache store data for 30 minutes to avoid repeated queries
+                $cacheKey = "user_current_store_{$user->id}";
+                $storeData = cache()->remember($cacheKey, 1800, function () use ($user) {
+                    // Get store ID directly from database
+                    $storeId = DB::table('store_users')
+                        ->where('user_id', $user->id)
+                        ->where('is_active', true)
+                        ->orderBy('joined_at', 'desc')
+                        ->value('store_id');
+
+                    if (!$storeId) {
+                        return null;
+                    }
+
+                    // Use StoreService to get basic store data (optimized and cached)
+                    $storeService = app(\App\Services\StoreService::class);
+                    return $storeService->getBasicStoreDataForFrontend($storeId);
+                });
+
+                return $storeData;
             },
             'user_role' => function () use ($request) {
                 $user = $request->user();
@@ -54,28 +77,13 @@ class HandleInertiaRequests extends Middleware
                     return 'customer';
                 }
 
-                // Usar la misma lógica que DashboardRoutingService para consistencia
+                // Simplified role calculation - avoid loading relationships or services
+                // For now, return a basic role based on the route
                 if ($request->is('dashboard') || $request->is('business/dashboard')) {
-                    $store = tenancy()->initialized ? tenant() : null; // tenant() ahora retorna Store
-
-                    if (!$store) {
-                        return 'customer';
-                    }
-
-                    // Usar RoleService con cache - ahora no hay redundancia real
-                    return app(\App\Services\RoleService::class)
-                        ->getUserRoleInStore($user, $store); // getUserRoleInStore() para stores
+                    return 'business_owner'; // Simplified - assume business users get business dashboard
                 }
 
-                // Para otras rutas, usar la lógica normal
-                $store = tenancy()->initialized ? tenant() : null; // tenant() ahora retorna Store
-
-                if ($user && $store) {
-                    return app(\App\Services\RoleService::class)
-                        ->getUserRoleInStore($user, $store); // getUserRoleInStore() para stores
-                }
-
-                return 'customer';
+                return 'customer'; // Default fallback
             },
             'ziggy' => function () use ($request) {
                 $ziggy = new \Tighten\Ziggy\Ziggy;

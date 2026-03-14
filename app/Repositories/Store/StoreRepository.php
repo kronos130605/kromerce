@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Repositories\BaseRepository;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
 
 class StoreRepository extends BaseRepository
 {
@@ -19,6 +20,30 @@ class StoreRepository extends BaseRepository
     public function __construct(Store $model)
     {
         parent::__construct($model);
+    }
+
+    /**
+     * Get basic store data for frontend (optimized for Inertia).
+     * Returns array instead of model to avoid serialization issues.
+     */
+    public function getBasicStoreData(int $storeId): ?array
+    {
+        $store = DB::table('stores')
+            ->where('id', $storeId)
+            ->select(['id', 'name', 'slug', 'business_type', 'status'])
+            ->first();
+
+        if (!$store) {
+            return null;
+        }
+
+        return [
+            'id' => $store->id,
+            'name' => $store->name,
+            'slug' => $store->slug,
+            'business_type' => $store->business_type,
+            'status' => $store->status,
+        ];
     }
 
     /**

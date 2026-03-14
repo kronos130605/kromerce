@@ -23,7 +23,7 @@ class UserStoreRepository extends BaseRepository
      */
     public function attachUserToStore(User $user, Store $store, string $role): bool
     {
-        return $this->model->stores()->attach($store->id, [
+        return $user->stores()->attach($store->id, [
             'role' => $role,
             'is_active' => true,
             'joined_at' => now(),
@@ -35,7 +35,7 @@ class UserStoreRepository extends BaseRepository
      */
     public function userHasStores(User $user): bool
     {
-        return $this->model->stores()->exists();
+        return $user->stores()->exists();
     }
 
     /**
@@ -43,7 +43,7 @@ class UserStoreRepository extends BaseRepository
      */
     public function getUserFirstStore(User $user): ?Store
     {
-        return $this->model->stores()->first();
+        return $user->stores()->first();
     }
 
     /**
@@ -52,7 +52,7 @@ class UserStoreRepository extends BaseRepository
     public function getUserCurrentStore(User $user): ?Store
     {
         // Get the most recent store association
-        return $this->model->stores()
+        return $user->stores()
             ->wherePivot('is_active', true)
             ->latest('joined_at')
             ->first();
@@ -64,10 +64,10 @@ class UserStoreRepository extends BaseRepository
     public function setUserCurrentStore(User $user, Store $store): bool
     {
         // Deactivate all current store associations
-        $this->model->stores()->updateExistingPivot(['is_active' => false]);
+        $user->stores()->updateExistingPivot(['is_active' => false]);
 
         // Set the new store as current
-        return $this->model->stores()->updateExistingPivot($store->id, [
+        return $user->stores()->updateExistingPivot($store->id, [
             'is_active' => true,
             'joined_at' => now(),
         ]);
@@ -78,7 +78,7 @@ class UserStoreRepository extends BaseRepository
      */
     public function getUserStores(User $user): Collection
     {
-        return $this->model->stores()
+        return $user->stores()
             ->wherePivot('is_active', true)
             ->get();
     }
@@ -88,6 +88,40 @@ class UserStoreRepository extends BaseRepository
      */
     public function detachUserFromStore(User $user, Store $store): bool
     {
-        return $this->model->stores()->detach($store->id);
+        return $user->stores()->detach($store->id);
+    }
+
+    /**
+     * Check if role is valid according to config
+     */
+    public function isValidRole(string $role): bool
+    {
+        $availableRoles = config('roles.available_roles', []);
+        return isset($availableRoles[$role]);
+    }
+
+    /**
+     * Check if role is a business role according to config
+     */
+    public function isBusinessRole(string $role): bool
+    {
+        $businessRoles = config('roles.business_roles', []);
+        return in_array($role, $businessRoles);
+    }
+
+    /**
+     * Get available roles for assignment
+     */
+    public function getAvailableRoles(): array
+    {
+        return config('roles.available_roles', []);
+    }
+
+    /**
+     * Get business roles for assignment
+     */
+    public function getBusinessRoles(): array
+    {
+        return config('roles.business_roles', []);
     }
 }

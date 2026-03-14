@@ -19,6 +19,9 @@ return [
     'available_roles' => [
         'super_admin' => 'Super Administrator',
         'business_owner' => 'Business Owner',
+        'admin' => 'Administrator',
+        'manager' => 'Manager',
+        'employee' => 'Employee',
         'customer' => 'Customer',
     ],
 
@@ -29,6 +32,8 @@ return [
     'business_roles' => [
         'super_admin',
         'business_owner',
+        'admin',
+        'manager',
     ],
 
     /**
@@ -38,6 +43,8 @@ return [
     'store_management_roles' => [
         'super_admin',
         'business_owner',
+        'admin',
+        'manager',
     ],
 
     /**
@@ -48,7 +55,10 @@ return [
     'role_priority' => [
         'super_admin' => 1,
         'business_owner' => 2,
-        'customer' => 3,
+        'admin' => 3,
+        'manager' => 4,
+        'employee' => 5,
+        'customer' => 6,
     ],
 
     /**
@@ -85,6 +95,9 @@ return [
     'display_names' => [
         'super_admin' => 'Super Administrator',
         'business_owner' => 'Business Owner',
+        'admin' => 'Administrator',
+        'manager' => 'Manager',
+        'employee' => 'Employee',
         'customer' => 'Customer',
     ],
 
@@ -94,6 +107,9 @@ return [
     'descriptions' => [
         'super_admin' => 'Has full system access and can manage all users and stores',
         'business_owner' => 'Can create and manage their own stores and products',
+        'admin' => 'Can manage store operations and employees',
+        'manager' => 'Can manage daily store operations and inventory',
+        'employee' => 'Can handle sales and customer service',
         'customer' => 'Can browse products and place orders',
     ],
 ];
