@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
-use App\Models\Tenant;
 
 abstract class BaseRepository
 {
@@ -41,20 +40,20 @@ abstract class BaseRepository
     public function getBy(array $criteria, array $columns = ['*']): Collection
     {
         $query = $this->model->query();
-        
+
         foreach ($criteria as $key => $value) {
             if (!in_array($key, $this->allowedFields)) {
                 continue; // Skip invalid fields
             }
-            
+
             if (is_array($value)) {
                 $query->whereIn($key, $value);
             } else {
                 $query->where($key, $value);
             }
         }
-        
-        return $this->applyTenantScope($query)->get($columns);
+
+        return $query->get($columns);
     }
 
     /**
@@ -63,20 +62,20 @@ abstract class BaseRepository
     public function getFirstBy(array $criteria, array $columns = ['*']): ?Model
     {
         $query = $this->model->query();
-        
+
         foreach ($criteria as $key => $value) {
             if (!in_array($key, $this->allowedFields)) {
                 continue;
             }
-            
+
             if (is_array($value)) {
                 $query->whereIn($key, $value);
             } else {
                 $query->where($key, $value);
             }
         }
-        
-        return $this->applyTenantScope($query)->first($columns);
+
+        return $query->first($columns);
     }
 
     /**
@@ -101,11 +100,11 @@ abstract class BaseRepository
     public function update(int $id, array $data): bool
     {
         $model = $this->getById($id);
-        
+
         if (!$model) {
             return false;
         }
-        
+
         return $model->update($data);
     }
 
@@ -115,20 +114,20 @@ abstract class BaseRepository
     public function updateBy(array $criteria, array $data): int
     {
         $query = $this->model->query();
-        
+
         foreach ($criteria as $key => $value) {
             if (!in_array($key, $this->allowedFields)) {
                 continue;
             }
-            
+
             if (is_array($value)) {
                 $query->whereIn($key, $value);
             } else {
                 $query->where($key, $value);
             }
         }
-        
-        return $this->applyTenantScope($query)->update($data);
+
+        return $query->update($data);
     }
 
     /**
@@ -137,11 +136,11 @@ abstract class BaseRepository
     public function delete(int $id): bool
     {
         $model = $this->getById($id);
-        
+
         if (!$model) {
             return false;
         }
-        
+
         return $model->delete();
     }
 
@@ -151,20 +150,20 @@ abstract class BaseRepository
     public function deleteBy(array $criteria): int
     {
         $query = $this->model->query();
-        
+
         foreach ($criteria as $key => $value) {
             if (!in_array($key, $this->allowedFields)) {
                 continue;
             }
-            
+
             if (is_array($value)) {
                 $query->whereIn($key, $value);
             } else {
                 $query->where($key, $value);
             }
         }
-        
-        return $this->applyTenantScope($query)->delete();
+
+        return $query->delete();
     }
 
     /**
@@ -181,9 +180,9 @@ abstract class BaseRepository
     public function paginateWithFilters(array $filters = [], int $perPage = 15, array $columns = ['*']): LengthAwarePaginator
     {
         $query = $this->model->query();
-        
+
         $this->applyFilters($query, $filters);
-        
+
         return $query->paginate($perPage, $columns);
     }
 
@@ -196,13 +195,13 @@ abstract class BaseRepository
             if (is_null($value)) {
                 continue;
             }
-            
+
             // Validate field name
             $field = $this->extractFieldName($key);
             if (!in_array($field, $this->allowedFields)) {
                 continue;
             }
-            
+
             if (is_array($value)) {
                 $query->whereIn($field, $value);
             } elseif (str_contains($key, '_like')) {
@@ -215,7 +214,7 @@ abstract class BaseRepository
                 $query->where($field, $value);
             }
         }
-        
+
         return $query;
     }
 
@@ -225,11 +224,11 @@ abstract class BaseRepository
     public function count(array $criteria = []): int
     {
         $query = $this->model->query();
-        
+
         if (!empty($criteria)) {
             $this->applyFilters($query, $criteria);
         }
-        
+
         return $query->count();
     }
 
@@ -247,20 +246,20 @@ abstract class BaseRepository
     public function existsBy(array $criteria): bool
     {
         $query = $this->model->query();
-        
+
         foreach ($criteria as $key => $value) {
             if (!in_array($key, $this->allowedFields)) {
                 continue;
             }
-            
+
             if (is_array($value)) {
                 $query->whereIn($key, $value);
             } else {
                 $query->where($key, $value);
             }
         }
-        
-        return $this->applyTenantScope($query)->exists();
+
+        return $query->exists();
     }
 
     /**
@@ -345,24 +344,9 @@ abstract class BaseRepository
     public function first(array $columns = ['*']): ?Model
     {
         $query = $this->query ?? $this->model->query();
-        return $this->applyTenantScope($query)->first($columns);
+        return $query->first($columns);
     }
-    
-    /**
-     * Apply tenant scope to query.
-     */
-    protected function applyTenantScope(Builder $query, ?Tenant $tenant = null): Builder
-    {
-        if ($tenant) {
-            return $query->where('tenant_id', $tenant->id);
-        }
-        
-        if (tenant()) {
-            return $query->where('tenant_id', tenant()->id);
-        }
-        
-        return $query;
-    }
+
     
     /**
      * Extract field name from filter key.
@@ -371,7 +355,7 @@ abstract class BaseRepository
     {
         return str_replace(['_like', '_min', '_max'], '', $key);
     }
-    
+
     /**
      * Get allowed fields for filtering.
      */
@@ -379,7 +363,7 @@ abstract class BaseRepository
     {
         return $this->allowedFields;
     }
-    
+
     /**
      * Set allowed fields for filtering.
      */

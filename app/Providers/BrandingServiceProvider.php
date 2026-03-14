@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Services\BrandingService;
+use App\Factories\RepositoryFactory;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
@@ -14,7 +15,7 @@ class BrandingServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(BrandingService::class, function ($app) {
-            return new BrandingService();
+            return new BrandingService(RepositoryFactory::storeBrandingRepository());
         });
     }
 
@@ -34,7 +35,7 @@ class BrandingServiceProvider extends ServiceProvider
                 'favicon_url' => $branding->getFaviconUrl(),
                 'custom_css' => $branding->getCustomCSS(),
                 'is_dark_mode' => $branding->isDarkMode(),
-                'current_store' => $branding->getTenant(),
+                'current_store' => $branding->getStore(),
             ]);
         });
     }

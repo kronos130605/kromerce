@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Repositories;
+namespace App\Repositories\Product;
 
 use App\Models\ProductCategory;
+use App\Repositories\BaseRepository;
 use Illuminate\Database\Eloquent\Collection;
 
 class ProductCategoryRepository extends BaseRepository
@@ -140,7 +141,7 @@ class ProductCategoryRepository extends BaseRepository
     }
 
     /**
-     * Count categories for tenant.
+     * Count categories for store.
      */
     public function countForStore(string $storeId): int
     {

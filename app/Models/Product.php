@@ -262,15 +262,15 @@ class Product extends Model
     }
 
     /**
-     * Generate SKU based on tenant and product name.
+     * Generate SKU based on store and product name.
      */
     private function generateSku(): string
     {
-        $tenantSlug = $this->tenant->slug ?? 'TENANT';
+        $storeSlug = $this->store->slug ?? 'STORE';
         $productSlug = Str::upper(Str::substr(Str::slug($this->name), 0, 8));
         $random = strtoupper(Str::random(4));
 
-        return "{$tenantSlug}-{$productSlug}-{$random}";
+        return "{$storeSlug}-{$productSlug}-{$random}";
     }
 
     /**

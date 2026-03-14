@@ -14,7 +14,7 @@ class BusinessCurrencyConfig extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'tenant_id',
+        'store_id',
         'default_currency',
         'display_currencies',
         'use_custom_rates',
@@ -35,9 +35,9 @@ class BusinessCurrencyConfig extends Model
     /**
      * Get the store that owns the currency config.
      */
-    public function tenant(): BelongsTo
+    public function store(): BelongsTo
     {
-        return $this->belongsTo(Tenant::class);
+        return $this->belongsTo(Store::class);
     }
 
     /**
@@ -45,7 +45,7 @@ class BusinessCurrencyConfig extends Model
      */
     public function customRates(): HasMany
     {
-        return $this->hasMany(CurrencyRateBusiness::class, 'tenant_id', 'tenant_id');
+        return $this->hasMany(CurrencyRateBusiness::class, 'store_id', 'store_id');
     }
 
     /**
@@ -55,7 +55,7 @@ class BusinessCurrencyConfig extends Model
     public function getSupportedCurrenciesWithRates(): array
     {
         // Delegar al service para mantener arquitectura limpia
-        return app(\App\Services\CurrencyRateService::class)->getSupportedCurrenciesWithRates($this->tenant_id);
+        return app(\App\Services\CurrencyRateService::class)->getSupportedCurrenciesWithRates($this->store_id);
     }
 
     /**

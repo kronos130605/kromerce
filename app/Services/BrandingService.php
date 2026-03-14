@@ -3,13 +3,17 @@
 namespace App\Services;
 
 use App\Models\Store;
+use App\Repositories\Store\StoreBrandingRepository;
 
 class BrandingService
 {
     protected ?Store $store = null;
+    private StoreBrandingRepository $brandingRepo;
 
-    public function __construct()
+    public function __construct(StoreBrandingRepository $brandingRepo)
     {
+        $this->brandingRepo = $brandingRepo;
+
         if (tenancy()->initialized) {
             $this->store = tenant();
         }
@@ -23,29 +27,21 @@ class BrandingService
     public function getBrandingConfig(): array
     {
         if (!$this->store) {
-            return $this->getDefaultBranding();
+            return $this->brandingRepo->getDefaultBranding();
         }
 
-        return $this->store->branding;
+        return $this->brandingRepo->getBrandingConfig($this->store->id);
     }
 
     public function getDefaultBranding(): array
     {
-        return [
-            'primary_color' => '#3B82F6',
-            'secondary_color' => '#10B981',
-            'accent_color' => '#F59E0B',
-            'logo_url' => null,
-            'favicon_url' => null,
-            'custom_css' => null,
-            'theme' => 'light',
-        ];
+        return $this->brandingRepo->getDefaultBranding();
     }
 
     public function getCSSVariables(): string
     {
         $config = $this->getBrandingConfig();
-        
+
         return "
             :root {
                 --color-primary: {$config['primary_color']};
@@ -62,37 +58,42 @@ class BrandingService
             return false;
         }
 
-        $currentConfig = $this->store->branding_config ?? [];
-        $newConfig = array_merge($currentConfig, $config);
-
-        return $this->store->update(['branding_config' => $newConfig]);
+        return $this->brandingRepo->updateBrandingConfig($this->store->id, $config);
     }
 
     public function getLogoUrl(): ?string
     {
-        $config = $this->getBrandingConfig();
-        
-        return $config['logo_url'] ?? asset('images/logos/kromerce-business-text.png');
+        if (!$this->store) {
+            return asset('images/logos/kromerce-business-text.png');
+        }
+
+        return $this->brandingRepo->getLogoUrl($this->store->id);
     }
 
     public function getFaviconUrl(): ?string
     {
-        $config = $this->getBrandingConfig();
-        
-        return $config['favicon_url'] ?? asset('favicon.ico');
+        if (!$this->store) {
+            return asset('favicon.ico');
+        }
+
+        return $this->brandingRepo->getFaviconUrl($this->store->id);
     }
 
     public function getCustomCSS(): ?string
     {
-        $config = $this->getBrandingConfig();
-        
-        return $config['custom_css'] ?? null;
+        if (!$this->store) {
+            return null;
+        }
+
+        return $this->brandingRepo->getCustomCSS($this->store->id);
     }
 
     public function isDarkMode(): bool
     {
-        $config = $this->getBrandingConfig();
-        
-        return ($config['theme'] ?? 'light') === 'dark';
+        if (!$this->store) {
+            return false;
+        }
+
+        return $this->brandingRepo->isDarkMode($this->store->id);
     }
 }

@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Repositories;
+namespace App\Repositories\Currency;
 
 use App\Models\CurrencyRateGlobal;
+use App\Repositories\BaseRepository;
 use Illuminate\Database\Eloquent\Collection;
 
 class CurrencyRateGlobalRepository extends BaseRepository
@@ -35,14 +36,6 @@ class CurrencyRateGlobalRepository extends BaseRepository
             ->where('effective_date', '<=', $date)
             ->orderBy('effective_date', 'desc')
             ->first();
-    }
-
-    /**
-     * Get all rates for date.
-     */
-    public function getAllRatesForDate(string $date): Collection
-    {
-        return $this->getBy(['effective_date' => $date]);
     }
 
     /**
@@ -82,18 +75,18 @@ class CurrencyRateGlobalRepository extends BaseRepository
     public function getLatestRatesForPairs(array $currencyPairs, string $date = null): Collection
     {
         $query = $this->model->query();
-        
+
         foreach ($currencyPairs as $pair) {
             $query->orWhere(function ($q) use ($pair, $date) {
                 $q->where('from_currency', $pair['from'])
                   ->where('to_currency', $pair['to']);
             });
         }
-        
+
         if ($date) {
             $query->where('effective_date', '<=', $date);
         }
-        
+
         return $query->orderBy('effective_date', 'desc')->get();
     }
 
@@ -103,7 +96,7 @@ class CurrencyRateGlobalRepository extends BaseRepository
     public function cleanupOldRates(int $retentionYears): int
     {
         $cutoffDate = now()->subYears($retentionYears)->format('Y-m-d');
-        
+
         return $this->deleteBy([
             ['effective_date', '<', $cutoffDate]
         ]);
@@ -126,11 +119,28 @@ class CurrencyRateGlobalRepository extends BaseRepository
     public function getRatesBySource(string $source, string $date = null): Collection
     {
         $query = $this->model->where('source', $source);
-        
+
         if ($date) {
             $query->where('effective_date', $date);
         }
-        
+
         return $query->get();
+    }
+
+    /**
+     * Get history for currency pair, excluding specified dates.
+     */
+    public function getHistory(string $fromCurrency, string $toCurrency, string $startDate, string $endDate, array $excludeDates = []): Collection
+    {
+        $query = $this->model
+            ->where('from_currency', $fromCurrency)
+            ->where('to_currency', $toCurrency)
+            ->whereBetween('effective_date', [$startDate, $endDate]);
+
+        if (!empty($excludeDates)) {
+            $query->whereNotIn('effective_date', $excludeDates);
+        }
+
+        return $query->orderBy('effective_date')->get();
     }
 }

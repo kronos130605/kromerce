@@ -2,8 +2,9 @@
 
 namespace App\Services;
 
-use App\Models\User;
 use App\Models\Store;
+use App\Models\User;
+use App\Repositories\Store\StoreStatisticsRepository;
 use Illuminate\Support\Facades\Log;
 
 class DashboardRoutingService
@@ -11,7 +12,7 @@ class DashboardRoutingService
     public function __construct(
         private TenantService $tenantService,
         private RoleService $roleService,
-        private ProductService $productService
+        private StoreStatisticsRepository $statisticsRepo
     ) {}
 
     /**
@@ -22,21 +23,21 @@ class DashboardRoutingService
         try {
             // Get existing stores for user
             $stores = $this->tenantService->getUserStores($user);
-            
+
             if ($stores->isNotEmpty()) {
                 // Return current store if exists
                 return $this->tenantService->getUserCurrentStore($user);
             }
-            
+
             // Create default store if none exists
             return $this->tenantService->getOrCreateDefaultStoreForUser($user);
-            
+
         } catch (\Exception $e) {
             Log::error('Error getting or assigning store for user', [
                 'user_id' => $user->id,
                 'error' => $e->getMessage(),
             ]);
-            
+
             return null;
         }
     }
@@ -77,7 +78,7 @@ class DashboardRoutingService
                 'store_id' => $store?->id,
                 'error' => $e->getMessage(),
             ]);
-            
+
             // Fallback a customer dashboard
             return 'Customer/Index';
         }
@@ -91,19 +92,19 @@ class DashboardRoutingService
         try {
             // Obtener stores del usuario usando TenantService
             $stores = $this->tenantService->getUserStores($user);
-            
+
             return [
                 'stores' => $stores,
                 'current_store' => $this->tenantService->getUserCurrentStore($user),
                 'total_stores' => $stores->count(),
             ];
-            
+
         } catch (\Exception $e) {
             Log::error('Error getting user stores', [
                 'user_id' => $user->id,
                 'error' => $e->getMessage(),
             ]);
-            
+
             return [
                 'stores' => collect(),
                 'current_store' => null,
@@ -129,14 +130,14 @@ class DashboardRoutingService
 
             // Cambiar store actual
             return $this->tenantService->setUserCurrentStore($user, $store);
-            
+
         } catch (\Exception $e) {
             Log::error('Error switching user store', [
                 'user_id' => $user->id,
                 'store_id' => $store->id,
                 'error' => $e->getMessage(),
             ]);
-            
+
             return false;
         }
     }
@@ -148,24 +149,21 @@ class DashboardRoutingService
     {
         try {
             return [
-                'total_products' => $store->products()->count(),
-                'active_products' => $store->products()->where('status', 'active')->count(),
-                'total_categories' => $store->categories()->count(),
-                'total_orders' => $store->orders()->count(),
-                'total_revenue' => $store->orders()->sum('total_amount'),
-                'recent_orders' => $store->orders()->latest()->take(5)->get(),
-                'low_stock_products' => $store->products()
-                    ->where('manage_stock', true)
-                    ->whereColumn('stock_quantity', '<=', 'low_stock_threshold')
-                    ->count(),
+                'total_products' => $this->statisticsRepo->getProductsCount($store->id),
+                'active_products' => $this->statisticsRepo->getActiveProductsCount($store->id),
+                'total_categories' => $this->statisticsRepo->getCategoriesCount($store->id),
+                'total_orders' => $this->statisticsRepo->getOrdersCount($store->id),
+                'total_revenue' => $this->statisticsRepo->getTotalRevenue($store->id),
+                'recent_orders' => $this->statisticsRepo->getRecentOrders($store->id),
+                'low_stock_products' => $this->statisticsRepo->getLowStockProductsCount($store->id),
             ];
-            
+
         } catch (\Exception $e) {
             Log::error('Error getting store statistics', [
                 'store_id' => $store->id,
                 'error' => $e->getMessage(),
             ]);
-            
+
             return [];
         }
     }

@@ -2,24 +2,27 @@
 
 namespace App\Providers;
 
-use App\Services\CurrencyRateService;
-use App\Services\ProductPricingService;
-use App\Services\DashboardService;
-use App\Repositories\BaseRepository;
-use App\Repositories\BusinessCurrencyConfigRepository;
-use App\Repositories\CurrencyRateGlobalRepository;
-use App\Repositories\CurrencyRateBusinessRepository;
-use App\Repositories\CurrencyRateUpdateRepository;
-use App\Repositories\ProductRepository;
-use App\Repositories\ProductCategoryRepository;
-use App\Repositories\ProductTagRepository;
+use App\Factories\RepositoryFactory;
 use App\Models\BusinessCurrencyConfig;
-use App\Models\CurrencyRateGlobal;
 use App\Models\CurrencyRateBusiness;
+use App\Models\CurrencyRateGlobal;
 use App\Models\CurrencyRateUpdate;
-use App\Models\Product;
-use App\Models\ProductCategory;
-use App\Models\ProductTag;
+use App\Repositories\BusinessCurrencyConfigRepository;
+use App\Repositories\Currency\CurrencyRateBusinessRepository;
+use App\Repositories\Currency\CurrencyRateGlobalRepository;
+use App\Repositories\Currency\CurrencyRateUpdateRepository;
+use App\Repositories\Product\ProductCategoryRepository;
+use App\Repositories\Product\ProductRepository;
+use App\Repositories\Product\ProductTagRepository;
+use App\Services\CurrencyRateService;
+use App\Services\DashboardRoutingService;
+use App\Services\DashboardService;
+use App\Services\ProductPricingService;
+use App\Services\ProductService;
+use App\Services\RoleService;
+use App\Services\StoreService;
+use App\Services\TenantConfigService;
+use App\Services\TenantService;
 use Illuminate\Support\ServiceProvider;
 
 class BusinessServiceProvider extends ServiceProvider
@@ -31,7 +34,7 @@ class BusinessServiceProvider extends ServiceProvider
     {
         // Register Repositories
         $this->registerRepositories();
-        
+
         // Register Services
         $this->registerServices();
     }
@@ -43,7 +46,7 @@ class BusinessServiceProvider extends ServiceProvider
     {
         // Register model relationships
         $this->registerModelRelationships();
-        
+
         // Register commands
         if ($this->app->runningInConsole()) {
             $this->commands([
@@ -58,17 +61,7 @@ class BusinessServiceProvider extends ServiceProvider
      */
     private function registerRepositories(): void
     {
-        // Base Repository
-        $this->app->bind(BaseRepository::class, function ($app) {
-            // Base repository is abstract, should not be instantiated directly
-            return new class extends BaseRepository {
-                public function __construct() {
-                    // This is just for binding, actual repositories will extend this
-                }
-            };
-        });
-
-        // Currency Repositories
+        // Legacy currency repositories (still needed for complex dependencies)
         $this->app->bind(BusinessCurrencyConfigRepository::class, function ($app) {
             return new BusinessCurrencyConfigRepository(new BusinessCurrencyConfig());
         });
@@ -85,17 +78,17 @@ class BusinessServiceProvider extends ServiceProvider
             return new CurrencyRateUpdateRepository(new CurrencyRateUpdate());
         });
 
-        // Product Repositories
+        // Product repositories (can use factory)
         $this->app->bind(ProductRepository::class, function ($app) {
-            return new ProductRepository(new Product());
+            return RepositoryFactory::productRepository();
         });
 
         $this->app->bind(ProductCategoryRepository::class, function ($app) {
-            return new ProductCategoryRepository(new ProductCategory());
+            return RepositoryFactory::productCategoryRepository();
         });
 
         $this->app->bind(ProductTagRepository::class, function ($app) {
-            return new ProductTagRepository(new ProductTag());
+            return RepositoryFactory::productTagRepository();
         });
     }
 
@@ -131,6 +124,57 @@ class BusinessServiceProvider extends ServiceProvider
                 $app->make(ProductTagRepository::class),
                 $app->make(BusinessCurrencyConfigRepository::class),
                 $app->make(CurrencyRateService::class)
+            );
+        });
+
+        // Register Store Service with repositories
+        $this->app->singleton(StoreService::class, function ($app) {
+            return new StoreService(
+                RepositoryFactory::storeRepository(),
+                RepositoryFactory::storeContactRepository(),
+                RepositoryFactory::storePaymentMethodRepository(),
+                RepositoryFactory::storeCurrencyConfigRepository(),
+                RepositoryFactory::storeStatisticsRepository()
+            );
+        });
+
+        // Register Dashboard Routing Service with repositories
+        $this->app->singleton(DashboardRoutingService::class, function ($app) {
+            return new DashboardRoutingService(
+                $app->make(TenantService::class),
+                $app->make(RoleService::class),
+                $app->make(ProductService::class),
+                RepositoryFactory::storeStatisticsRepository()
+            );
+        });
+
+        // Register Tenant Config Service with repositories
+        $this->app->singleton(TenantConfigService::class, function ($app) {
+            return new TenantConfigService(
+                RepositoryFactory::storeConfigRepository()
+            );
+        });
+
+        // Register Role Service with repositories
+        $this->app->singleton(RoleService::class, function ($app) {
+            return new RoleService(
+                RepositoryFactory::userRoleRepository(),
+                RepositoryFactory::roleRepository()
+            );
+        });
+
+        // Register Tenant Service with repositories
+        $this->app->singleton(TenantService::class, function ($app) {
+            return new TenantService(
+                RepositoryFactory::storeRepository(),
+                RepositoryFactory::userTenantRepository()
+            );
+        });
+
+        // Register Product Service with repositories
+        $this->app->singleton(ProductService::class, function ($app) {
+            return new ProductService(
+                $app->make(\App\Factories\RepositoryFactory::class)
             );
         });
     }

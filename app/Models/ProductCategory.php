@@ -14,7 +14,7 @@ class ProductCategory extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'tenant_id',
+        'store_id',
         'name',
         'slug',
         'description',
@@ -60,9 +60,9 @@ class ProductCategory extends Model
     /**
      * Get the store that owns the category.
      */
-    public function tenant(): BelongsTo
+    public function store(): BelongsTo
     {
-        return $this->belongsTo(Tenant::class);
+        return $this->belongsTo(Store::class);
     }
 
     /**

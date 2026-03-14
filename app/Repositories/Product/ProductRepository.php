@@ -1,13 +1,11 @@
 <?php
 
-namespace App\Repositories;
+namespace App\Repositories\Product;
 
 use App\Models\Product;
 use App\Repositories\BaseRepository;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Facades\DB;
 
 class ProductRepository extends BaseRepository
 {
@@ -129,5 +127,130 @@ class ProductRepository extends BaseRepository
             $q->where('name', 'like', "%{$filters['search']}%")
               ->orWhere('description', 'like', "%{$filters['search']}%");
         });
+    }
+
+    /**
+     * Count products for store.
+     */
+    public function countForStore(int $storeId): int
+    {
+        return $this->model->where('store_id', $storeId)->count();
+    }
+
+    /**
+     * Count active products for store.
+     */
+    public function countActiveForStore(int $storeId): int
+    {
+        return $this->model
+            ->where('store_id', $storeId)
+            ->where('is_active', true)
+            ->count();
+    }
+
+    /**
+     * Count low stock products for store.
+     */
+    public function countLowStockForStore(int $storeId): int
+    {
+        return $this->model
+            ->where('store_id', $storeId)
+            ->where('manage_stock', true)
+            ->whereColumn('stock_quantity', '<=', 'low_stock_threshold')
+            ->count();
+    }
+
+    /**
+     * Get latest products for store.
+     */
+    public function getLatestForStore(int $storeId, int $limit = 5): Collection
+    {
+        return $this->model
+            ->where('store_id', $storeId)
+            ->orderBy('created_at', 'desc')
+            ->take($limit)
+            ->get();
+    }
+
+    /**
+     * Get recent price changes for store.
+     */
+    public function getRecentPriceChanges(int $storeId, int $limit = 10): Collection
+    {
+        // This would typically track price history, for now return recent products
+        return $this->model
+            ->where('store_id', $storeId)
+            ->orderBy('updated_at', 'desc')
+            ->take($limit)
+            ->get();
+    }
+
+    /**
+     * Get recent stock updates for store.
+     */
+    public function getRecentStockUpdates(int $storeId, int $limit = 5): Collection
+    {
+        return $this->model
+            ->where('store_id', $storeId)
+            ->where('manage_stock', true)
+            ->orderBy('updated_at', 'desc')
+            ->take($limit)
+            ->get();
+    }
+
+    /**
+     * Get top products by revenue for store.
+     */
+    public function getTopByRevenue(int $storeId, int $limit = 5): Collection
+    {
+        return $this->model
+            ->where('store_id', $storeId)
+            ->orderBy('base_price', 'desc')
+            ->take($limit)
+            ->get();
+    }
+
+    /**
+     * Get top products by views for store.
+     */
+    public function getTopByViews(int $storeId, int $limit = 5): Collection
+    {
+        // This would typically track views, for now return recent products
+        return $this->model
+            ->where('store_id', $storeId)
+            ->orderBy('created_at', 'desc')
+            ->take($limit)
+            ->get();
+    }
+
+    /**
+     * Get top products by sales for store.
+     */
+    public function getTopBySales(int $storeId, int $limit = 5): Collection
+    {
+        // This would typically track sales, for now return recent products
+        return $this->model
+            ->where('store_id', $storeId)
+            ->orderBy('created_at', 'desc')
+            ->take($limit)
+            ->get();
+    }
+
+    /**
+     * Get monthly revenue for store.
+     */
+    public function getMonthlyRevenue(int $storeId, int $months = 12): array
+    {
+        // This would typically calculate actual revenue, for now return empty array
+        return [];
+    }
+
+    /**
+     * Get product growth for store.
+     */
+    public function getProductGrowth(int $storeId, int $months = 6): array
+    {
+        // This would typically calculate growth metrics, for now return empty array
+        return [];
     }
 }

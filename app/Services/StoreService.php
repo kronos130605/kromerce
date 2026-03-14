@@ -4,13 +4,17 @@ namespace App\Services;
 
 use App\Models\Store;
 use App\Models\StoreContact;
-use App\Models\StorePaymentMethod;
 use App\Models\StoreCurrencyConfig;
-use App\Models\StoreUser;
-use App\Repositories\StoreRepository;
+use App\Models\StorePaymentMethod;
+use App\Repositories\Store\StoreContactRepository;
+use App\Repositories\Store\StoreCurrencyConfigRepository;
+use App\Repositories\Store\StorePaymentMethodRepository;
+use App\Repositories\Store\StoreRepository;
+use App\Repositories\Store\StoreStatisticsRepository;
 use App\Traits\HasStorePermissions;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class StoreService
@@ -18,10 +22,23 @@ class StoreService
     use HasStorePermissions;
 
     protected $storeRepository;
+    private $storeContactRepository;
+    private $storePaymentMethodRepository;
+    private $storeCurrencyConfigRepository;
+    private $storeStatisticsRepository;
 
-    public function __construct(StoreRepository $storeRepository)
-    {
+    public function __construct(
+        StoreRepository $storeRepository,
+        StoreContactRepository $storeContactRepository,
+        StorePaymentMethodRepository $storePaymentMethodRepository,
+        StoreCurrencyConfigRepository $storeCurrencyConfigRepository,
+        StoreStatisticsRepository $storeStatisticsRepository
+    ) {
         $this->storeRepository = $storeRepository;
+        $this->storeContactRepository = $storeContactRepository;
+        $this->storePaymentMethodRepository = $storePaymentMethodRepository;
+        $this->storeCurrencyConfigRepository = $storeCurrencyConfigRepository;
+        $this->storeStatisticsRepository = $storeStatisticsRepository;
     }
     /**
      * Create a new store with default configuration.
@@ -46,7 +63,8 @@ class StoreService
             ]);
 
             // Create default currency configuration
-            $store->currencyConfig()->create([
+            $this->storeCurrencyConfigRepository->create([
+                'store_id' => $store->id,
                 'default_currency' => $data['default_currency'] ?? 'USD',
                 'display_currencies' => $data['display_currencies'] ?? ['USD', 'EUR', 'CUP'],
                 'use_custom_rates' => false,
@@ -81,19 +99,28 @@ class StoreService
     public function updateStoreCurrencyConfig(Store $store, array $currencyData): StoreCurrencyConfig
     {
         try {
-            $store->currencyConfig()->update([
-                'default_currency' => $currencyData['default_currency'],
-                'display_currencies' => $currencyData['display_currencies'],
-                'use_custom_rates' => $currencyData['use_custom_rates'] ?? false,
-                'auto_update_rates' => $currencyData['auto_update_rates'] ?? false,
+            $config = $this->storeCurrencyConfigRepository->getFirstBy([
+                'store_id' => $store->id
             ]);
 
-            Log::info('Store currency config updated', [
-                'store_id' => $store->id,
-                'currencies' => $currencyData['display_currencies'],
-            ]);
+            if ($config) {
+                $this->storeCurrencyConfigRepository->update($config->id, [
+                    'default_currency' => $currencyData['default_currency'],
+                    'display_currencies' => $currencyData['display_currencies'],
+                    'use_custom_rates' => $currencyData['use_custom_rates'] ?? false,
+                    'auto_update_rates' => $currencyData['auto_update_rates'] ?? false,
+                ]);
+            } else {
+                $config = $this->storeCurrencyConfigRepository->create([
+                    'store_id' => $store->id,
+                    'default_currency' => $currencyData['default_currency'],
+                    'display_currencies' => $currencyData['display_currencies'],
+                    'use_custom_rates' => $currencyData['use_custom_rates'] ?? false,
+                    'auto_update_rates' => $currencyData['auto_update_rates'] ?? false,
+                ]);
+            }
 
-            return $store->currencyConfig;
+            return $config;
 
         } catch (\Exception $e) {
             Log::error('Failed to update store currency config', [
@@ -111,21 +138,14 @@ class StoreService
     public function addContact(Store $store, array $contactData): StoreContact
     {
         try {
-            $contact = $store->contacts()->create([
+            return $this->storeContactRepository->create([
+                'store_id' => $store->id,
                 'type' => $contactData['type'],
                 'value' => $contactData['value'],
                 'label' => $contactData['label'] ?? null,
                 'is_primary' => $contactData['is_primary'] ?? false,
                 'is_public' => $contactData['is_public'] ?? true,
             ]);
-
-            Log::info('Contact added to store', [
-                'store_id' => $store->id,
-                'contact_type' => $contactData['type'],
-                'contact_value' => $contactData['value'],
-            ]);
-
-            return $contact;
 
         } catch (\Exception $e) {
             Log::error('Failed to add contact to store', [
@@ -143,7 +163,8 @@ class StoreService
     public function addPaymentMethod(Store $store, array $paymentData): StorePaymentMethod
     {
         try {
-            $paymentMethod = $store->paymentMethods()->create([
+            return $this->storePaymentMethodRepository->create([
+                'store_id' => $store->id,
                 'method' => $paymentData['method'],
                 'provider' => $paymentData['provider'] ?? 'manual',
                 'config' => $paymentData['config'] ?? [],
@@ -154,14 +175,6 @@ class StoreService
                 'fixed_fee' => $paymentData['fixed_fee'] ?? 0,
                 'sort_order' => $paymentData['sort_order'] ?? 0,
             ]);
-
-            Log::info('Payment method added to store', [
-                'store_id' => $store->id,
-                'payment_method' => $paymentData['method'],
-                'provider' => $paymentData['provider'],
-            ]);
-
-            return $paymentMethod;
 
         } catch (\Exception $e) {
             Log::error('Failed to add payment method to store', [
@@ -179,17 +192,13 @@ class StoreService
     public function getStoreStatistics(Store $store): array
     {
         return [
-            'products_count' => $store->products()->count(),
-            'active_products' => $store->products()->where('status', 'active')->count(),
-            'total_contacts' => $store->contacts()->count(),
-            'primary_contacts' => $store->contacts()->where('is_primary', true)->count(),
-            'public_contacts' => $store->contacts()->where('is_public', true)->count(),
-            'total_payment_methods' => $store->paymentMethods()->count(),
-            'active_payment_methods' => $store->paymentMethods()->where('is_enabled', true)->count(),
-            'total_users' => $store->users()->count(),
-            'active_users' => $store->users()->where('is_active', true)->count(),
-            'created_at' => $store->created_at->format('Y-m-d H:i:s'),
-            'updated_at' => $store->updated_at->format('Y-m-d H:i:s'),
+            'products_count' => $this->storeStatisticsRepository->getProductsCount($store->id),
+            'active_products_count' => $this->storeStatisticsRepository->getActiveProductsCount($store->id),
+            'categories_count' => $this->storeStatisticsRepository->getCategoriesCount($store->id),
+            'orders_count' => $this->storeStatisticsRepository->getOrdersCount($store->id),
+            'total_revenue' => $this->storeStatisticsRepository->getTotalRevenue($store->id),
+            'recent_orders' => $this->storeStatisticsRepository->getRecentOrders($store->id),
+            'low_stock_products' => $this->storeStatisticsRepository->getLowStockProductsCount($store->id),
         ];
     }
 
@@ -200,7 +209,7 @@ class StoreService
     {
         try {
             $newStatus = $store->status === 'active' ? 'inactive' : 'active';
-            
+
             $store->update(['status' => $newStatus]);
 
             Log::info('Store status toggled', [
@@ -250,7 +259,7 @@ class StoreService
     public function canUserManageStore(int $userId, Store $store): bool
     {
         $user = Auth::user();
-        
+
         // Store owners can always manage their stores
         if ($store->owner_id === $userId) {
             return true;
@@ -275,7 +284,7 @@ class StoreService
     public function getAccessibleStores()
     {
         $user = Auth::user();
-        
+
         return Store::query()
             ->when(!$user->hasRole('admin'), function ($query) use ($user) {
                 $query->where('owner_id', $user->id)

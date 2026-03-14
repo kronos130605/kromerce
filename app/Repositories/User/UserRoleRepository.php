@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Repositories;
+namespace App\Repositories\User;
 
-use App\Models\User;
 use App\Models\Store;
+use App\Models\User;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -69,35 +69,35 @@ class UserRoleRepository
     {
         try {
             DB::beginTransaction();
-            
+
             // Update store_users pivot
             $user->stores()->syncWithoutDetaching([
                 $store->id => ['role' => $role]
             ]);
-            
+
             // Update Spatie model_has_roles
             $this->assignSpatieRoleForStore($user, $role, $store);
-            
+
             DB::commit();
-            
+
             Log::info('Role assigned to user in store', [
                 'user_id' => $user->id,
                 'store_id' => $store->id,
                 'role' => $role,
             ]);
-            
+
             return true;
-            
+
         } catch (\Exception $e) {
             DB::rollBack();
-            
+
             Log::error('Error assigning role to user in store', [
                 'user_id' => $user->id,
                 'store_id' => $store->id,
                 'role' => $role,
                 'error' => $e->getMessage(),
             ]);
-            
+
             return false;
         }
     }
@@ -109,31 +109,31 @@ class UserRoleRepository
     {
         try {
             DB::beginTransaction();
-            
+
             // Remove from store_users pivot
             $user->stores()->detach($store->id);
-            
+
             // Remove from Spatie model_has_roles
             $this->removeSpatieRoleForStore($user, $store);
-            
+
             DB::commit();
-            
+
             Log::info('Role removed from user in store', [
                 'user_id' => $user->id,
                 'store_id' => $store->id,
             ]);
-            
+
             return true;
-            
+
         } catch (\Exception $e) {
             DB::rollBack();
-            
+
             Log::error('Error removing role from user in store', [
                 'user_id' => $user->id,
                 'store_id' => $store->id,
                 'error' => $e->getMessage(),
             ]);
-            
+
             return false;
         }
     }
@@ -207,7 +207,7 @@ class UserRoleRepository
         try {
             // Remove existing roles first
             $user->roles()->detach();
-            
+
             // Assign new role
             $roleModel = DB::table('roles')->where('name', $role)->first();
             if ($roleModel) {
@@ -247,12 +247,12 @@ class UserRoleRepository
         try {
             $pivotRole = $this->getUserRoleInStore($user, $store);
             $spatieRole = $this->getSpatieRoleNames($user);
-            
+
             if ($pivotRole && !in_array($pivotRole, $spatieRole)) {
                 // Update Spatie to match pivot
                 $this->assignSpatieRoleForStore($user, $pivotRole, $store);
             }
-            
+
             return true;
         } catch (\Exception $e) {
             Log::error('Error syncing roles', [

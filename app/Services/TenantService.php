@@ -2,20 +2,20 @@
 
 namespace App\Services;
 
-use App\Models\User;
 use App\Models\Store;
-use App\Repositories\StoreRepository;
-use App\Repositories\UserTenantRepository;
+use App\Models\User;
+use App\Repositories\Store\StoreRepository;
+use App\Repositories\User\UserStoreRepository;
 use Illuminate\Support\Facades\Log;
 
 class TenantService
 {
     private StoreRepository $storeRepository;
-    private UserTenantRepository $userTenantRepository;
+    private UserStoreRepository $userTenantRepository;
 
     public function __construct(
         StoreRepository $storeRepository,
-        UserTenantRepository $userTenantRepository
+        UserStoreRepository $userTenantRepository
     ) {
         $this->storeRepository = $storeRepository;
         $this->userTenantRepository = $userTenantRepository;
@@ -152,19 +152,13 @@ class TenantService
             ]);
 
             // Obtener el store creado
-            $store = $this->storeRepository->findById($storeId);
+            $store = $this->storeRepository->getFirstBy([
+                'store_id' => $storeId
+            ]);
 
             if (!$store) {
                 throw new \Exception('Failed to retrieve created store');
             }
-
-            Log::info('Default store created successfully', [
-                'store_id' => $store->id,
-                'store_uuid' => $store->uuid,
-                'store_slug' => $slug,
-                'owner_id' => $ownerId,
-                'user_roles' => $userRoles,
-            ]);
 
             return $store;
 

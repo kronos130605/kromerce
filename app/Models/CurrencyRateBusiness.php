@@ -11,7 +11,7 @@ class CurrencyRateBusiness extends Model
     use HasFactory;
 
     protected $fillable = [
-        'tenant_id',
+        'store_id',
         'from_currency',
         'to_currency',
         'rate',
@@ -27,17 +27,17 @@ class CurrencyRateBusiness extends Model
     /**
      * Get the store that owns the custom rate.
      */
-    public function tenant(): BelongsTo
+    public function store(): BelongsTo
     {
-        return $this->belongsTo(Tenant::class);
+        return $this->belongsTo(Store::class);
     }
 
     /**
-     * Get the latest custom rate for a tenant and currency pair.
+     * Get the latest custom rate for a store and currency pair.
      */
-    public static function getLatestRate(string $tenantId, string $fromCurrency, string $toCurrency): ?self
+    public static function getLatestRate(string $storeId, string $fromCurrency, string $toCurrency): ?self
     {
-        return static::where('tenant_id', $tenantId)
+        return static::where('store_id', $storeId)
             ->where('from_currency', $fromCurrency)
             ->where('to_currency', $toCurrency)
             ->orderBy('effective_date', 'desc')
@@ -47,9 +47,9 @@ class CurrencyRateBusiness extends Model
     /**
      * Get custom rate for a specific date (or closest previous date).
      */
-    public static function getRateForDate(string $tenantId, string $fromCurrency, string $toCurrency, string $date): ?self
+    public static function getRateForDate(string $storeId, string $fromCurrency, string $toCurrency, string $date): ?self
     {
-        return static::where('tenant_id', $tenantId)
+        return static::where('store_id', $storeId)
             ->where('from_currency', $fromCurrency)
             ->where('to_currency', $toCurrency)
             ->where('effective_date', '<=', $date)
@@ -60,11 +60,11 @@ class CurrencyRateBusiness extends Model
     /**
      * Create or update custom rate for a specific date.
      */
-    public static function updateRate(string $tenantId, string $fromCurrency, string $toCurrency, float $rate, string $date, string $source = 'manual'): self
+    public static function updateRate(string $storeId, string $fromCurrency, string $toCurrency, float $rate, string $date, string $source = 'manual'): self
     {
         return static::updateOrCreate(
             [
-                'tenant_id' => $tenantId,
+                'store_id' => $storeId,
                 'from_currency' => $fromCurrency,
                 'to_currency' => $toCurrency,
                 'effective_date' => $date,
@@ -77,11 +77,11 @@ class CurrencyRateBusiness extends Model
     }
 
     /**
-     * Get all custom rates for a tenant on a specific date.
+     * Get all custom rates for a store on a specific date.
      */
-    public static function getAllRatesForTenant(string $tenantId, string $date): array
+    public static function getAllRatesForStore(string $storeId, string $date): array
     {
-        $rates = static::where('tenant_id', $tenantId)
+        $rates = static::where('store_id', $storeId)
             ->where('effective_date', $date)
             ->get();
 
@@ -95,28 +95,28 @@ class CurrencyRateBusiness extends Model
     }
 
     /**
-     * Clean up old rates for a tenant based on retention policy.
+     * Clean up old rates for a store based on retention policy.
      */
-    public static function cleanupOldRates(string $tenantId, int $retentionYears = 2): int
+    public static function cleanupOldRates(string $storeId, int $retentionYears = 2): int
     {
         $cutoffDate = now()->subYears($retentionYears)->format('Y-m-d');
 
-        return static::where('tenant_id', $tenantId)
+        return static::where('store_id', $storeId)
             ->where('effective_date', '<', $cutoffDate)
             ->delete();
     }
 
     /**
-     * Batch update rates for a tenant.
+     * Batch update rates for a store.
      */
-    public static function batchUpdateRates(string $tenantId, array $rates, string $date, string $source = 'manual'): array
+    public static function batchUpdateRates(string $storeId, array $rates, string $date, string $source = 'manual'): array
     {
         $results = [];
 
         foreach ($rates as $fromCurrency => $toCurrencies) {
             foreach ($toCurrencies as $toCurrency => $rate) {
                 try {
-                    $updatedRate = static::updateRate($tenantId, $fromCurrency, $toCurrency, $rate, $date, $source);
+                    $updatedRate = static::updateRate($storeId, $fromCurrency, $toCurrency, $rate, $date, $source);
                     $results[] = [
                         'from_currency' => $fromCurrency,
                         'to_currency' => $toCurrency,

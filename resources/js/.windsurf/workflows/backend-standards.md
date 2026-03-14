@@ -210,15 +210,13 @@ abstract class BaseService
 ```
 
 ### **Service Implementation Pattern**
+
 ```php
 <?php
 
 namespace App\Services;
 
-use App\Models\Tenant;
-use App\Models\Product;
-use App\Repositories\ProductRepository;
-use Illuminate\Pagination\LengthAwarePaginator;
+use App\Models\Product;use App\Models\Tenant;use App\Repositories\Product\ProductRepository;use Illuminate\Pagination\LengthAwarePaginator;
 
 class ProductService extends BaseService
 {

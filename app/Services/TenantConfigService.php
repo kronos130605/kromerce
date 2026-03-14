@@ -2,63 +2,64 @@
 
 namespace App\Services;
 
-use App\Models\Tenant;
+use App\Models\Store;
+use App\Repositories\Store\StoreConfigRepository;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
 class TenantConfigService
 {
+    private StoreConfigRepository $configRepo;
+
+    public function __construct(StoreConfigRepository $configRepo)
+    {
+        $this->configRepo = $configRepo;
+    }
+
     /**
-     * Get tenant configuration with caching
+     * Get store configuration with caching
      */
-    public function getTenantConfig(Tenant $tenant): array
+    public function getStoreConfig(Store $store): array
     {
         try {
-            $cacheKey = "tenant_config_{$tenant->id}";
-            
-            return Cache::remember($cacheKey, 3600, function () use ($tenant) {
-                return array_merge([
-                    'id' => $tenant->id,
-                    'name' => $tenant->name,
-                    'slug' => $tenant->slug,
-                    'type' => $tenant->type,
-                    'is_active' => $tenant->is_active,
-                ], $tenant->settings ?? []);
+            $cacheKey = "store_config_{$store->id}";
+
+            return Cache::remember($cacheKey, 3600, function () use ($store) {
+                return $this->configRepo->getStoreConfig($store->id);
             });
         } catch (\Exception $e) {
-            Log::error('Error getting tenant config', [
-                'tenant_id' => $tenant->id,
+            Log::error('Error getting store config', [
+                'store_id' => $store->id,
                 'error' => $e->getMessage(),
             ]);
-            
-            return $this->getDefaultConfig();
+
+            return $this->configRepo->getDefaultConfig();
         }
     }
 
     /**
-     * Update tenant configuration
+     * Update store configuration
      */
-    public function updateTenantConfig(Tenant $tenant, array $config): bool
+    public function updateStoreConfig(Store $store, array $config): bool
     {
         try {
-            $tenant->settings = array_merge($tenant->settings ?? [], $config);
-            $tenant->save();
-            
+            $result = $this->configRepo->updateStoreConfig($store->id, $config);
+
             // Clear cache
-            Cache::forget("tenant_config_{$tenant->id}");
-            
-            Log::info('Tenant config updated', [
-                'tenant_id' => $tenant->id,
+            Cache::forget("store_config_{$store->id}");
+
+            Log::info('Store config updated', [
+                'store_id' => $store->id,
                 'config_changes' => $config,
             ]);
-            
-            return true;
+
+            return $result;
         } catch (\Exception $e) {
-            Log::error('Error updating tenant config', [
-                'tenant_id' => $tenant->id,
+            Log::error('Error updating store config', [
+                'store_id' => $store->id,
                 'error' => $e->getMessage(),
             ]);
-            
+
             return false;
         }
     }
@@ -66,60 +67,36 @@ class TenantConfigService
     /**
      * Get theme configuration for frontend
      */
-    public function getThemeConfig(Tenant $tenant): array
+    public function getThemeConfig(Store $store): array
     {
-        $config = $this->getTenantConfig($tenant);
-        
-        return [
-            'theme' => $config['theme'] ?? 'default',
-            'primary_color' => $config['primary_color'] ?? '#3B82F6',
-            'secondary_color' => $config['secondary_color'] ?? '#10B981',
-            'accent_color' => $config['accent_color'] ?? '#F59E0B',
-            'special_events' => $config['special_events'] ?? [],
-        ];
+        return $this->configRepo->getThemeConfig($store->id);
     }
 
     /**
-     * Get feature flags for tenant
+     * Get feature flags for store
      */
-    public function getFeatureFlags(Tenant $tenant): array
+    public function getFeatureFlags(Store $store): array
     {
-        $config = $this->getTenantConfig($tenant);
-        
-        return [
-            'show_flash_sales' => $config['show_flash_sales'] ?? true,
-            'show_featured_stores' => $config['show_featured_stores'] ?? true,
-            'show_ai_recommendations' => $config['show_ai_recommendations'] ?? true,
-            'enable_notifications' => $config['enable_notifications'] ?? true,
-            'enable_wishlist' => $config['enable_wishlist'] ?? true,
-            'enable_reviews' => $config['enable_reviews'] ?? true,
-        ];
+        return $this->configRepo->getFeatureFlags($store->id);
     }
 
     /**
-     * Get layout configuration for tenant
+     * Get layout configuration for store
      */
-    public function getLayoutConfig(Tenant $tenant): array
+    public function getLayoutConfig(Store $store): array
     {
-        $config = $this->getTenantConfig($tenant);
-        
-        return [
-            'sidebar_position' => $config['layout']['sidebar_position'] ?? 'left',
-            'product_grid_columns' => $config['layout']['product_grid_columns'] ?? 4,
-            'show_product_ratings' => $config['layout']['show_product_ratings'] ?? true,
-            'show_product_compare' => $config['layout']['show_product_compare'] ?? true,
-        ];
+        return $this->configRepo->getLayoutConfig($store->id);
     }
 
     /**
      * Update seasonal theme
      */
-    public function updateSeasonalTheme(Tenant $tenant, string $theme, array $themeConfig): bool
+    public function updateSeasonalTheme(Store $store, string $theme, array $themeConfig): bool
     {
         $seasonalConfig = [
             'theme' => $theme,
             'special_events' => array_merge(
-                $this->getTenantConfig($tenant)['special_events'] ?? [],
+                $this->getStoreConfig($store)['special_events'] ?? [],
                 [
                     'current_season' => $theme,
                     'season_start' => now()->toDateString(),
@@ -139,63 +116,22 @@ class TenantConfigService
             $seasonalConfig['accent_color'] = $themeConfig['accent_color'];
         }
 
-        return $this->updateTenantConfig($tenant, $seasonalConfig);
+        return $this->updateStoreConfig($store, $seasonalConfig);
     }
 
     /**
-     * Get default configuration
+     * Check if store has seasonal theme active
      */
-    private function getDefaultConfig(): array
+    public function hasSeasonalTheme(Store $store): bool
     {
-        return [
-            'theme' => 'default',
-            'primary_color' => '#3B82F6',
-            'secondary_color' => '#10B981',
-            'accent_color' => '#F59E0B',
-            'show_flash_sales' => true,
-            'show_featured_stores' => true,
-            'show_ai_recommendations' => true,
-            'default_currency' => 'USD',
-            'language' => 'es',
-            'timezone' => 'America/Mexico_City',
-            'enable_notifications' => true,
-            'enable_wishlist' => true,
-            'enable_reviews' => true,
-            'special_events' => [],
-            'layout' => [
-                'sidebar_position' => 'left',
-                'product_grid_columns' => 4,
-                'show_product_ratings' => true,
-                'show_product_compare' => true,
-            ],
-        ];
-    }
-
-    /**
-     * Check if tenant has seasonal theme active
-     */
-    public function hasSeasonalTheme(Tenant $tenant): bool
-    {
-        $config = $this->getTenantConfig($tenant);
-        $specialEvents = $config['special_events'] ?? [];
-        
-        return isset($specialEvents['current_season']) && 
-               isset($specialEvents['season_start']) &&
-               $specialEvents['season_start'] <= now()->toDateString();
+        return $this->configRepo->hasSeasonalTheme($store->id);
     }
 
     /**
      * Get seasonal configuration
      */
-    public function getSeasonalConfig(Tenant $tenant): array
+    public function getSeasonalConfig(Store $store): array
     {
-        $config = $this->getTenantConfig($tenant);
-        $specialEvents = $config['special_events'] ?? [];
-        
-        if ($this->hasSeasonalTheme($tenant)) {
-            return $specialEvents['season_config'] ?? [];
-        }
-        
-        return [];
+        return $this->configRepo->getSeasonalConfig($store->id);
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Repositories;
+namespace App\Repositories\Store;
 
 use App\Models\StoreCurrencyConfig;
 use App\Repositories\BaseRepository;
@@ -17,40 +17,6 @@ class StoreCurrencyConfigRepository extends BaseRepository
     public function __construct(StoreCurrencyConfig $model)
     {
         parent::__construct($model);
-    }
-
-    /**
-     * Get config by store ID.
-     */
-    public function getByStoreId(int $storeId): ?StoreCurrencyConfig
-    {
-        return $this->getFirstBy(['store_id' => $storeId]);
-    }
-
-    /**
-     * Get or create config for store.
-     */
-    public function getOrCreateForStore(int $storeId): StoreCurrencyConfig
-    {
-        return $this->firstOrCreate(
-            ['store_id' => $storeId],
-            [
-                'default_currency' => 'USD',
-                'display_currencies' => ['USD', 'EUR', 'CUP'],
-                'use_custom_rates' => false,
-                'auto_update_rates' => false,
-                'rate_update_frequency' => 'weekly',
-                'historical_retention_years' => 2,
-            ]
-        );
-    }
-
-    /**
-     * Update config for store.
-     */
-    public function updateForStore(int $storeId, array $data): bool
-    {
-        return $this->updateBy(['store_id' => $storeId], $data);
     }
 
     /**

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Repositories;
+namespace App\Repositories\Product;
 
 use App\Models\ProductTag;
 use App\Repositories\BaseRepository;
@@ -26,6 +26,16 @@ class ProductTagRepository extends BaseRepository
             ->where('store_id', $storeId)
             ->orderBy('name')
             ->get();
+    }
+
+    /**
+     * Count tags for store.
+     */
+    public function countForStore(int $storeId): int
+    {
+        return $this->model
+            ->where('store_id', $storeId)
+            ->count();
     }
 
     /**

@@ -1,14 +1,13 @@
 <?php
 
-namespace App\Repositories;
+namespace App\Repositories\User;
 
-use App\Models\User;
 use App\Models\Store;
-use App\Models\StoreUser;
+use App\Models\User;
 use App\Repositories\BaseRepository;
 use Illuminate\Database\Eloquent\Collection;
 
-class UserTenantRepository extends BaseRepository
+class UserStoreRepository extends BaseRepository
 {
     protected array $allowedFields = [
         'user_id', 'store_id', 'role', 'is_active', 'joined_at'

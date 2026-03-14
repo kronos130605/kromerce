@@ -1,9 +1,11 @@
 <?php
 
-namespace App\Repositories;
+namespace App\Repositories\Currency;
 
 use App\Models\CurrencyRateBusiness;
+use App\Repositories\BaseRepository;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Collection as SupportCollection;
 
 class CurrencyRateBusinessRepository extends BaseRepository
 {
@@ -40,14 +42,6 @@ class CurrencyRateBusinessRepository extends BaseRepository
     }
 
     /**
-     * Get all rates for store.
-     */
-    public function getAllRatesForStore(string $storeId): Collection
-    {
-        return $this->getBy(['store_id' => $storeId]);
-    }
-
-    /**
      * Get all rates for store on date.
      */
     public function getAllRatesForStoreOnDate(string $storeId, string $date): Collection
@@ -59,11 +53,11 @@ class CurrencyRateBusinessRepository extends BaseRepository
     }
 
     /**
-     * Update or create rate for tenant.
+     * Update or create rate for store.
      */
     public function updateOrCreateRate(string $storeId, string $fromCurrency, string $toCurrency, float $rate, string $date, string $source = 'manual'): CurrencyRateBusiness
     {
-        return $this->updateOrCreate(
+        return $this->model->updateOrCreate(
             [
                 'store_id' => $storeId,
                 'from_currency' => $fromCurrency,
@@ -92,54 +86,12 @@ class CurrencyRateBusinessRepository extends BaseRepository
     }
 
     /**
-     * Batch update rates for store.
-     */
-    public function batchUpdateRates(string $storeId, array $rates, string $date, string $source = 'manual'): array
-    {
-        $results = [];
-        
-        foreach ($rates as $currencyPair => $rate) {
-            try {
-                $fromCurrency = $currencyPair['from'];
-                $toCurrency = $currencyPair['to'];
-                
-                $updatedRate = $this->updateOrCreateRate(
-                    $storeId,
-                    $fromCurrency,
-                    $toCurrency,
-                    $rate,
-                    $date,
-                    $source
-                );
-                
-                $results[] = [
-                    'from_currency' => $fromCurrency,
-                    'to_currency' => $toCurrency,
-                    'rate' => $rate,
-                    'success' => true,
-                    'id' => $updatedRate->id,
-                ];
-            } catch (\Exception $e) {
-                $results[] = [
-                    'from_currency' => $currencyPair['from'] ?? 'unknown',
-                    'to_currency' => $currencyPair['to'] ?? 'unknown',
-                    'rate' => $rate,
-                    'success' => false,
-                    'error' => $e->getMessage(),
-                ];
-            }
-        }
-        
-        return $results;
-    }
-
-    /**
      * Clean up old rates for store.
      */
     public function cleanupOldRates(string $storeId, int $retentionYears): int
     {
         $cutoffDate = now()->subYears($retentionYears)->format('Y-m-d');
-        
+
         return $this->model
             ->where('store_id', $storeId)
             ->where('effective_date', '<', $cutoffDate)
@@ -152,7 +104,7 @@ class CurrencyRateBusinessRepository extends BaseRepository
     public function deleteCustomRates(string $storeId, array $currencies, string $baseCurrency): int
     {
         $query = $this->model->where('store_id', $storeId);
-        
+
         foreach ($currencies as $targetCurrency) {
             if ($targetCurrency !== $baseCurrency) {
                 $query->orWhere(function ($q) use ($baseCurrency, $targetCurrency) {
@@ -161,41 +113,19 @@ class CurrencyRateBusinessRepository extends BaseRepository
                 });
             }
         }
-        
+
         return $query->delete();
     }
 
     /**
-     * Get stores with custom rates.
+     * Delete rate for specific store currency pair.
      */
-    public function getStoresWithCustomRates(): Collection
+    public function deleteRate(string $storeId, string $fromCurrency, string $toCurrency): int
     {
         return $this->model
-            ->select('store_id')
-            ->distinct()
-            ->pluck('store_id');
-    }
-
-    /**
-     * Get rate statistics for tenant.
-     */
-    public function getRateStatistics(string $storeId): array
-    {
-        $totalRates = $this->model->where('store_id', $storeId)->count();
-        $uniquePairs = $this->model
             ->where('store_id', $storeId)
-            ->select('from_currency', 'to_currency')
-            ->distinct()
-            ->count();
-        
-        $latestDate = $this->model
-            ->where('store_id', $storeId)
-            ->max('effective_date');
-        
-        return [
-            'total_rates' => $totalRates,
-            'unique_pairs' => $uniquePairs,
-            'latest_date' => $latestDate,
-        ];
+            ->where('from_currency', $fromCurrency)
+            ->where('to_currency', $toCurrency)
+            ->delete();
     }
 }

@@ -109,6 +109,14 @@ class Store extends Model
     }
 
     /**
+     * Get the domains for the store.
+     */
+    public function domains(): HasMany
+    {
+        return $this->hasMany(Domain::class);
+    }
+
+    /**
      * Get the shipping zones for the store.
      */
     public function shippingZones(): HasMany
@@ -159,10 +167,10 @@ class Store extends Model
     /**
      * Get the domains for the store.
      */
-    public function domains(): HasMany
-    {
-        return $this->hasMany(Domain::class);
-    }
+    // public function domains(): HasMany
+    // {
+    //     return $this->hasMany(Domain::class);
+    // }
 
     /**
      * Get the products for the store.
