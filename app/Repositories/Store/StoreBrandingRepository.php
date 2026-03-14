@@ -18,7 +18,23 @@ class StoreBrandingRepository extends BaseRepository
     public function getBrandingConfig(int $storeId): array
     {
         $store = $this->getById($storeId);
-        return $store ? $store->branding : $this->getDefaultBranding();
+        if (!$store) {
+            return $this->getDefaultBranding();
+        }
+        
+        // Get branding from data array
+        $data = $store->data ?? [];
+        $branding = $data['branding'] ?? $data['branding_config'] ?? [];
+        
+        // Ensure we always return a complete array with all required keys
+        $defaultBranding = $this->getDefaultBranding();
+        
+        if (!is_array($branding) || empty($branding)) {
+            return $defaultBranding;
+        }
+        
+        // Merge with defaults to ensure all keys exist
+        return array_merge($defaultBranding, $branding);
     }
 
     /**
@@ -31,10 +47,14 @@ class StoreBrandingRepository extends BaseRepository
             return false;
         }
 
-        $currentConfig = $store->branding_config ?? [];
-        $newConfig = array_merge($currentConfig, $config);
+        $currentData = $store->data ?? [];
+        $currentBranding = $currentData['branding'] ?? $currentData['branding_config'] ?? [];
+        $newBranding = array_merge($currentBranding, $config);
+        
+        // Update the data array with new branding config
+        $currentData['branding'] = $newBranding;
 
-        return $this->update($storeId, ['branding_config' => $newConfig]);
+        return $this->update($storeId, ['data' => $currentData]);
     }
 
     /**

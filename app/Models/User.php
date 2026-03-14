@@ -7,13 +7,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
-use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
 use App\Traits\DarkModePreferences;
 use App\Models\Store;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable, HasRoles, BelongsToTenant, DarkModePreferences;
+    use HasFactory, Notifiable, HasRoles, DarkModePreferences;
 
     /**
      * The attributes that are mass assignable.

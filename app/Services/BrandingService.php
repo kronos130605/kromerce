@@ -41,13 +41,19 @@ class BrandingService
     public function getCSSVariables(): string
     {
         $config = $this->getBrandingConfig();
+        
+        // Ensure all required keys exist with defaults
+        $primaryColor = $config['primary_color'] ?? '#3B82F6';
+        $secondaryColor = $config['secondary_color'] ?? '#10B981';
+        $accentColor = $config['accent_color'] ?? '#F59E0B';
+        $theme = $config['theme'] ?? 'light';
 
         return "
             :root {
-                --color-primary: {$config['primary_color']};
-                --color-secondary: {$config['secondary_color']};
-                --color-accent: {$config['accent_color']};
-                --theme-mode: {$config['theme']};
+                --color-primary: {$primaryColor};
+                --color-secondary: {$secondaryColor};
+                --color-accent: {$accentColor};
+                --theme-mode: {$theme};
             }
         ";
     }

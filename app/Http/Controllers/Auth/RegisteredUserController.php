@@ -91,7 +91,7 @@ class RegisteredUserController extends Controller
 
                 // Create domain for store
                 $store->domains()->create([
-                    'domain' => $request->store_name . '.' . config('tenancy.central_domains')[0] ?? 'kromerce.test',
+                    'domain' => Str::slug($request->store_name) . '.' . config('tenancy.central_domains')[0] ?? 'kromerce.test',
                 ]);
 
                 // Associate user with store

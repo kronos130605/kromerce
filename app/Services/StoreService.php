@@ -314,7 +314,7 @@ class StoreService
 
             if (!$store) {
                 // Crear store por defecto
-                $store = $this->createDefaultStore($storeSlug, $userRoles);
+                $store = $this->createDefaultStore($storeSlug, $userRoles, $user);
             }
 
             return $store;
@@ -403,14 +403,14 @@ class StoreService
     /**
      * Create default store with appropriate settings
      */
-    public function createDefaultStore(string $slug, array $userRoles): ?Store
+    public function createDefaultStore(string $slug, array $userRoles, ?User $user = null): ?Store
     {
         try {
             $settings = $this->getDefaultStoreSettings($slug, $userRoles);
             $uuid = \Illuminate\Support\Str::uuid();
 
-            // Obtener el primer usuario disponible como owner
-            $ownerId = $this->storeRepository->getAvailableOwnerId();
+            // Usar el usuario actual como owner, o buscar uno disponible
+            $ownerId = $user?->id ?? $this->storeRepository->getAvailableOwnerId();
 
             if (!$ownerId) {
                 throw new \Exception('No available user found for owner_id');
@@ -430,7 +430,7 @@ class StoreService
 
             // Obtener el store creado
             $store = $this->storeRepository->getFirstBy([
-                'store_id' => $storeId
+                'id' => $storeId
             ]);
 
             if (!$store) {

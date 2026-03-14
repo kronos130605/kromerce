@@ -4,6 +4,7 @@ namespace App\Repositories\Store;
 
 use App\Models\Store;
 use App\Repositories\BaseRepository;
+use Illuminate\Support\Facades\Schema;
 
 class StoreStatisticsRepository extends BaseRepository
 {
@@ -14,7 +15,17 @@ class StoreStatisticsRepository extends BaseRepository
 
     public function getProductsCount(int $storeId): int
     {
-        return $this->model::find($storeId)->products()->count();
+        if (!Schema::hasTable('products')) {
+            return 0;
+        }
+        
+        try {
+            return $this->model::where('id', $storeId)
+                ->withCount('products')
+                ->value('products_count') ?? 0;
+        } catch (\Exception $e) {
+            return 0;
+        }
     }
 
     public function getActiveProductsCount(int $storeId): int
@@ -26,25 +37,64 @@ class StoreStatisticsRepository extends BaseRepository
 
     public function getCategoriesCount(int $storeId): int
     {
-        return $this->model::find($storeId)->categories()->count();
+        if (!Schema::hasTable('product_categories')) {
+            return 0;
+        }
+        
+        try {
+            return $this->model::where('id', $storeId)
+                ->withCount('categories')
+                ->value('categories_count') ?? 0;
+        } catch (\Exception $e) {
+            return 0;
+        }
     }
 
     public function getOrdersCount(int $storeId): int
     {
-        return $this->model::find($storeId)->orders()->count();
+        if (!Schema::hasTable('orders')) {
+            return 0;
+        }
+        
+        try {
+            return $this->model::where('id', $storeId)
+                ->withCount('orders')
+                ->value('orders_count') ?? 0;
+        } catch (\Exception $e) {
+            return 0;
+        }
     }
 
     public function getTotalRevenue(int $storeId): float
     {
-        return $this->model::find($storeId)->orders()->sum('total_amount');
+        if (!Schema::hasTable('orders')) {
+            return 0;
+        }
+        
+        try {
+            return $this->model::where('id', $storeId)
+                ->withSum('orders', 'total_amount')
+                ->value('orders_sum_total_amount') ?? 0;
+        } catch (\Exception $e) {
+            return 0;
+        }
     }
 
-    public function getRecentOrders(int $storeId, int $limit = 5): \Illuminate\Database\Eloquent\Collection
+    public function getRecentOrders(int $storeId, int $limit = 5): \Illuminate\Support\Collection
     {
-        return $this->model::find($storeId)->orders()
-            ->latest()
-            ->take($limit)
-            ->get();
+        if (!Schema::hasTable('orders')) {
+            return collect();
+        }
+        
+        try {
+            return $this->model::where('id', $storeId)
+                ->orders()
+                ->latest()
+                ->take($limit)
+                ->get(['id', 'order_number', 'total_amount', 'status', 'created_at']);
+        } catch (\Exception $e) {
+            return collect();
+        }
     }
 
     public function getLowStockProductsCount(int $storeId): int

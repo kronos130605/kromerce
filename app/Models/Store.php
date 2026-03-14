@@ -4,11 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Stancl\Tenancy\Contracts\Tenant;
 
-class Store extends Model
+class Store extends Model implements Tenant
 {
     use HasFactory, SoftDeletes;
 
@@ -181,6 +183,22 @@ class Store extends Model
     }
 
     /**
+     * Get the categories for the store.
+     */
+    public function categories(): HasMany
+    {
+        return $this->hasMany(ProductCategory::class);
+    }
+
+    /**
+     * Get the orders for the store.
+     */
+    public function orders(): HasMany
+    {
+        return $this->hasMany(Order::class);
+    }
+
+    /**
      * Scope a query to only include active stores.
      */
     public function scopeActive($query)
@@ -209,12 +227,13 @@ class Store extends Model
      */
     public function getStatusAttribute(): string
     {
-        return match($this->status) {
+        $status = $this->getOriginal('status');
+        return match($status) {
             'active' => 'Active',
             'inactive' => 'Inactive',
             'maintenance' => 'Under Maintenance',
             'suspended' => 'Suspended',
-            default => $this->status,
+            default => $status ?? 'Unknown',
         };
     }
 
@@ -223,11 +242,12 @@ class Store extends Model
      */
     public function getBusinessTypeAttribute(): string
     {
-        return match($this->business_type) {
+        $businessType = $this->getOriginal('business_type');
+        return match($businessType) {
             'retail' => 'Retail',
             'wholesale' => 'Wholesale',
             'marketplace' => 'Marketplace',
-            default => $this->business_type,
+            default => $businessType ?? 'Unknown',
         };
     }
 
@@ -236,7 +256,7 @@ class Store extends Model
      */
     public function isActive(): bool
     {
-        return $this->status === 'active';
+        return $this->getOriginal('status') === 'active';
     }
 
     /**
@@ -261,5 +281,57 @@ class Store extends Model
     public function getBannerUrlAttribute(): ?string
     {
         return $this->banner ? asset('storage/banners/' . $this->banner) : null;
+    }
+
+    /**
+     * Get the tenant key for Stancl Tenancy.
+     */
+    public function getTenantKey(): string
+    {
+        return (string) $this->getKey();
+    }
+
+    /**
+     * Get the tenant identifier for Stancl Tenancy.
+     */
+    public function getTenantIdentifier(): string
+    {
+        return 'store_' . $this->getKey();
+    }
+
+    /**
+     * Get the value of an internal key.
+     */
+    public function getInternal(string $key)
+    {
+        return $this->data[$key] ?? null;
+    }
+
+    /**
+     * Run the tenant initialization.
+     * @param callable $callback
+     */
+    public function run(callable $callback): void
+    {
+        // Initialize tenant-specific logic here
+    }
+
+    /**
+     * Set the internal tenant data.
+     * @param string $key
+     * @param $value
+     */
+    public function setInternal(string $key, $value): void
+    {
+        $this->data = $value;
+        $this->save();
+    }
+
+    /**
+     * Get the tenant key name.
+     */
+    public function getTenantKeyName(): string
+    {
+        return $this->getKeyName();
     }
 }

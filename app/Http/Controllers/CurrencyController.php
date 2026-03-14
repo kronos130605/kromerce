@@ -207,7 +207,7 @@ class CurrencyController extends Controller
                 ];
             } else {
                 try {
-                    $rateInfo = $this->currencyService->getEffectiveRate($config->tenant_id, $baseCurrency, $currency);
+                    $rateInfo = $this->currencyService->getEffectiveRate($config->store_id, $baseCurrency, $currency);
                     $rates[$currency] = [
                         'from_currency' => $baseCurrency,
                         'to_currency' => $currency,

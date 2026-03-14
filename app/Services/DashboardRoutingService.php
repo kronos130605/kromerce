@@ -143,6 +143,96 @@ class DashboardRoutingService
     }
 
     /**
+     * Get dashboard data for user based on view and store
+     */
+    public function getDashboardDataForUser(User $user, ?Store $store, string $dashboardView): array
+    {
+        try {
+            $data = [
+                'user' => $user,
+                'store' => $store,
+                'stores' => $this->getUserStores($user),
+            ];
+
+            // Add store-specific data if store exists
+            if ($store) {
+                $data['statistics'] = $this->getStoreStatistics($store);
+                $data['user_role'] = $this->roleService->getUserRoleInStore($user, $store);
+            }
+
+            // Add view-specific data
+            switch ($dashboardView) {
+                case 'Business/Index':
+                case 'modules/dashboard/pages/DashboardBusiness':
+                    $data['activeTab'] = 'overview';
+                    $data['canManageStore'] = $this->canUserManageStore($user, $store);
+                    break;
+                    
+                case 'Customer/Index':
+                    $data['recentOrders'] = $this->getCustomerRecentOrders($user);
+                    $data['wishlist'] = $this->getCustomerWishlist($user);
+                    break;
+            }
+
+            return $data;
+
+        } catch (\Exception $e) {
+            Log::error('Error getting dashboard data for user', [
+                'user_id' => $user->id,
+                'store_id' => $store?->id,
+                'dashboard_view' => $dashboardView,
+                'error' => $e->getMessage(),
+            ]);
+
+            return [
+                'user' => $user,
+                'store' => $store,
+                'stores' => $this->getUserStores($user),
+                'error' => 'Failed to load dashboard data'
+            ];
+        }
+    }
+
+    /**
+     * Check if user can manage store
+     */
+    private function canUserManageStore(User $user, ?Store $store): bool
+    {
+        if (!$store) {
+            return false;
+        }
+
+        // Store owners can always manage their stores
+        if ($store->owner_id === $user->id) {
+            return true;
+        }
+
+        // Check user role in store
+        $userRole = $this->roleService->getUserRoleInStore($user, $store);
+        $manageableRoles = ['business_owner', 'owner', 'admin', 'manager'];
+
+        return in_array($userRole, $manageableRoles);
+    }
+
+    /**
+     * Get customer's recent orders
+     */
+    private function getCustomerRecentOrders(User $user): array
+    {
+        // TODO: Implement customer orders logic
+        return [];
+    }
+
+    /**
+     * Get customer's wishlist
+     */
+    private function getCustomerWishlist(User $user): array
+    {
+        // TODO: Implement customer wishlist logic
+        return [];
+    }
+
+    /**
      * Get store statistics for dashboard
      */
     public function getStoreStatistics(Store $store): array
