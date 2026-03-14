@@ -26,8 +26,8 @@ class RoleMiddleware
                 abort(403, 'Business access requires store');
             }
             
-            // Check if user has any business role in current store using store_users table
-            $businessRoles = ['business_owner', 'owner', 'admin', 'manager', 'employee'];
+            // Get business roles from config
+            $businessRoles = config('roles.store_management_roles', ['business_owner']);
             $userRoleInStore = $user->stores()
                 ->where('stores.id', $store->id)
                 ->whereIn('store_users.role', $businessRoles)

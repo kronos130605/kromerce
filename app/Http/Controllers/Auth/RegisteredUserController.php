@@ -38,7 +38,7 @@ class RegisteredUserController extends Controller
             'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
             'phone' => 'nullable|string|max:20',
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'user_type' => 'required|in:customer,business_owner',
+            'user_type' => 'required|in:' . implode(',', array_keys(config('roles.registration_types', ['customer', 'business_owner']))),
             'store_name' => 'required_if:user_type,business_owner|string|max:255|nullable',
         ]);
 
@@ -50,13 +50,15 @@ class RegisteredUserController extends Controller
             'is_active' => true,
         ]);
 
-        // Assign role
-        $user->assignRole($request->user_type);
+        // Assign role using config mapping
+        $userType = $request->user_type;
+        $role = config('roles.registration_types.' . $userType, $userType);
+        $user->assignRole($role);
 
         // Create store for business owners
         if ($request->user_type === 'business_owner') {
             // Creating a store
-            $store = DB::transaction(function () use ($request, $user) {
+            $store = DB::transaction(function () use ($request, $user, $role) {
                 // Generate UUID
                 $uuid = Str::uuid();
 
@@ -98,7 +100,7 @@ class RegisteredUserController extends Controller
                 DB::table('store_users')->insert([
                     'store_id' => $storeId,
                     'user_id' => $user->id,
-                    'role' => 'owner',
+                    'role' => $role, // Use the role from config mapping
                     'is_active' => true,
                     'joined_at' => now(),
                     'created_at' => now(),
