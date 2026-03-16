@@ -118,6 +118,19 @@ class UserStoreRepository extends BaseRepository
     }
 
     /**
+     * Get user's role in specific store
+     */
+    public function getUserRoleInStore(int $userId, int $storeId): ?string
+    {
+        return $this->model
+            ->join('store_users', 'users.id', '=', 'store_users.user_id')
+            ->where('users.id', $userId)
+            ->where('store_users.store_id', $storeId)
+            ->where('store_users.is_active', true)
+            ->value('store_users.role');
+    }
+
+    /**
      * Get business roles for assignment
      */
     public function getBusinessRoles(): array

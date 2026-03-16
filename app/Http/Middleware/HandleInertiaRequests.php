@@ -2,6 +2,8 @@
 
 namespace App\Http\Middleware;
 
+use App\Factories\RepositoryFactory;
+use App\Repositories\User\UserStoreRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -77,13 +79,19 @@ class HandleInertiaRequests extends Middleware
                     return 'customer';
                 }
 
-                // Simplified role calculation - avoid loading relationships or services
-                // For now, return a basic role based on the route
-                if ($request->is('dashboard') || $request->is('business/dashboard')) {
-                    return 'business_owner'; // Simplified - assume business users get business dashboard
+                // Get current store from session
+                $storeId = session('current_store_id');
+                if (!$storeId) {
+                    return 'customer';
                 }
 
-                return 'customer'; // Default fallback
+                // Use repository to get user's role in current store
+                $userStoreRepository = RepositoryFactory::userStoreRepository();
+                $userStore = $userStoreRepository->getUserRoleInStore($user->id, $storeId);
+
+                // Return the role directly from DB, not the display name
+                // available_roles is for display purposes, not for role mapping
+                return $userStore ?? 'customer';
             },
             'ziggy' => function () use ($request) {
                 $ziggy = new \Tighten\Ziggy\Ziggy;

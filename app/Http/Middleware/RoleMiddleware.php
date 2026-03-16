@@ -18,21 +18,33 @@ class RoleMiddleware
         }
 
         $user = $request->user();
-        
+
         // Special handling for 'business' role - check if user has any business role in current store
-        if ($role === 'business') {
-            $store = tenant();
-            if (!$store) {
+        if ($role === 'business_owner') {
+
+            // Get store from session instead of tenant()
+            $storeId = session('current_store_id');
+
+            if (!$storeId) {
+                // Try to get store from user
+                $store = $user->currentStore() ?: $user->stores()->first();
+                if ($store) {
+                    $storeId = $store->id;
+                    session(['current_store_id' => $storeId]);
+                }
+            }
+
+            if (!$storeId) {
                 abort(403, 'Business access requires store');
             }
-            
+
             // Get business roles from config
             $businessRoles = config('roles.store_management_roles', ['business_owner']);
             $userRoleInStore = $user->stores()
-                ->where('stores.id', $store->id)
+                ->where('stores.id', $storeId)
                 ->whereIn('store_users.role', $businessRoles)
                 ->exists();
-                
+
             if (!$userRoleInStore) {
                 abort(403, 'Unauthorized - Business role required');
             }

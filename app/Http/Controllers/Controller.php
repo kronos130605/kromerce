@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\StoreService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Routing\Controller as BaseController;
@@ -19,7 +20,12 @@ abstract class Controller extends BaseController
     protected function validateStore(Store $store = null): ?Store
     {
         if (!$store) {
-            $store = tenant();
+            // Use service to get store from current user
+            $user = request()->user();
+            if ($user) {
+                $storeService = app(StoreService::class);
+                $store = $storeService->getUserCurrentStore($user);
+            }
         }
 
         if (!$store) {

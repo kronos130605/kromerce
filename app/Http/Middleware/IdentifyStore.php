@@ -32,8 +32,10 @@ class IdentifyStore
                 $store = $user->currentStore() ?: $user->stores()->first();
 
                 if ($store) {
-                    tenancy()->initialize($store);
+                    // Share store with view instead of initializing tenancy
                     view()->share('current_store', $store);
+                    // Store in session for other middleware
+                    session(['current_store_id' => $store->id]);
 
                     return $next($request);
                 }
@@ -46,9 +48,10 @@ class IdentifyStore
         })->first();
 
         if ($store) {
-            // Initialize tenancy
-            tenancy()->initialize($store);
+            // Share store with view instead of initializing tenancy
             view()->share('current_store', $store);
+            // Store in session for other middleware
+            session(['current_store_id' => $store->id]);
 
             return $next($request);
         }

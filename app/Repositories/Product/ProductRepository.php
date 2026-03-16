@@ -6,12 +6,18 @@ use App\Models\Product;
 use App\Repositories\BaseRepository;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Log;
 
 class ProductRepository extends BaseRepository
 {
     protected array $allowedFields = [
-        'name', 'description', 'price', 'is_active', 'category_id',
-        'store_id', 'created_at', 'updated_at'
+        'name', 'slug', 'description', 'short_description', 'base_currency', 
+        'base_price', 'base_sale_price', 'cost_price', 'is_on_sale', 
+        'sale_type', 'sale_discount', 'sale_start_date', 'sale_end_date',
+        'sku', 'barcode', 'status', 'visibility', 'featured', 
+        'downloadable', 'virtual', 'product_type', 'manage_stock', 
+        'stock_quantity', 'stock_status', 'low_stock_threshold', 
+        'store_id', 'category_id', 'created_at', 'updated_at'
     ];
 
     public function __construct(Product $model)
@@ -252,5 +258,58 @@ class ProductRepository extends BaseRepository
     {
         // This would typically calculate growth metrics, for now return empty array
         return [];
+    }
+
+    /**
+     * Get product statistics for store.
+     */
+    public function getStatistics(int $storeId): array
+    {
+        try {
+            $stats = [
+                'total_products' => $this->model->where('store_id', $storeId)->count(),
+                'active_products' => $this->model->where('store_id', $storeId)->where('status', 'active')->count(),
+                'inactive_products' => $this->model->where('store_id', $storeId)->where('status', '!=', 'active')->count(),
+                'total_value' => $this->model->where('store_id', $storeId)->sum('base_price'),
+                'average_price' => $this->model->where('store_id', $storeId)->avg('base_price'),
+                'recent_products' => $this->model->where('store_id', $storeId)
+                    ->orderBy('created_at', 'desc')
+                    ->limit(5)
+                    ->count(),
+            ];
+
+            // Get products by category if categories exist
+            try {
+                $categoryStats = \DB::table('products')
+                    ->join('product_categories', 'products.category_id', '=', 'product_categories.id')
+                    ->where('products.store_id', $storeId)
+                    ->groupBy('product_categories.name')
+                    ->selectRaw('product_categories.name as category, COUNT(*) as count')
+                    ->get()
+                    ->pluck('count', 'category')
+                    ->toArray();
+
+                $stats['products_by_category'] = $categoryStats;
+            } catch (\Exception $e) {
+                $stats['products_by_category'] = [];
+            }
+
+            return $stats;
+        } catch (\Exception $e) {
+            Log::error('Error getting product statistics', [
+                'store_id' => $storeId,
+                'error' => $e->getMessage(),
+            ]);
+            
+            return [
+                'total_products' => 0,
+                'active_products' => 0,
+                'inactive_products' => 0,
+                'total_value' => 0,
+                'average_price' => 0,
+                'recent_products' => 0,
+                'products_by_category' => [],
+            ];
+        }
     }
 }

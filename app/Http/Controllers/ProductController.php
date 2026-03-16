@@ -16,7 +16,7 @@ class ProductController extends Controller
         private ProductService $productService
     ) {
         // Apply business role middleware to all product methods
-        $this->middleware('role:business');
+        $this->middleware('role:business_owner');
     }
 
     /**
@@ -49,11 +49,14 @@ class ProductController extends Controller
             ]);
 
         } catch (\Exception $e) {
-            Log::error('ProductController::index - Exception', [
+            Log::error('ProductController::index - ERROR', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
+                'user_id' => auth()->id(),
+                'path' => $request->path(),
             ]);
-            return $this->error('Failed to load products', 500);
+
+            throw $e;
         }
     }
 
