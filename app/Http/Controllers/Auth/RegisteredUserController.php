@@ -100,7 +100,6 @@ class RegisteredUserController extends Controller
                 DB::table('store_users')->insert([
                     'store_id' => $storeId,
                     'user_id' => $user->id,
-                    'role' => $role, // Use the role from config mapping
                     'is_active' => true,
                     'joined_at' => now(),
                     'created_at' => now(),

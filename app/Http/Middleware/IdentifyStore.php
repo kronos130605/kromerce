@@ -4,9 +4,8 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
-use App\Models\Store;
+use App\Services\StoreService;
 
 class IdentifyStore
 {
@@ -15,45 +14,16 @@ class IdentifyStore
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $hostname = $request->getHost();
-
         // Skip store identification for admin routes
         if ($request->is('admin/*') || $request->is('register') || $request->is('login')) {
             return $next($request);
         }
 
-        // Check if this is a central domain - if so, get store from authenticated user
-        $centralDomains = config('tenancy.central_domains', []);
-        if (in_array($hostname, $centralDomains)) {
-            $user = $request->user();
-
-            if ($user) {
-                // Get store from user's current store or first store
-                $store = $user->currentStore() ?: $user->stores()->first();
-
-                if ($store) {
-                    // Share store with view instead of initializing tenancy
-                    view()->share('current_store', $store);
-                    // Store in session for other middleware
-                    session(['current_store_id' => $store->id]);
-
-                    return $next($request);
-                }
-            }
-        }
-
-        // Try to find store by domain (for subdomain stores)
-        $store = Store::whereHas('domains', function ($query) use ($hostname) {
-            $query->where('domain', $hostname);
-        })->first();
+        $storeService = app(StoreService::class);
+        $store = $storeService->resolveCurrentStoreForRequest($request);
 
         if ($store) {
-            // Share store with view instead of initializing tenancy
             view()->share('current_store', $store);
-            // Store in session for other middleware
-            session(['current_store_id' => $store->id]);
-
-            return $next($request);
         }
 
         // No store found - continue without tenancy

@@ -4,10 +4,23 @@ namespace App\Policies;
 
 use App\Models\User;
 use App\Models\Product;
-use Illuminate\Auth\Access\Response;
+use App\Services\StoreService;
 
 class ProductPolicy
 {
+    private function getCurrentStoreId(User $user): ?int
+    {
+        $storeId = session('current_store_id');
+        if ($storeId) {
+            return (int) $storeId;
+        }
+
+        $storeService = app(StoreService::class);
+        $store = $storeService->getUserCurrentStore($user);
+
+        return $store?->id;
+    }
+
     /**
      * Determine whether the user can view any models.
      */
@@ -21,7 +34,8 @@ class ProductPolicy
      */
     public function view(User $user, Product $product): bool
     {
-        return $product->store_id === $user->current_store_id;
+        $storeId = $this->getCurrentStoreId($user);
+        return $storeId ? $product->store_id === $storeId : false;
     }
 
     /**
@@ -37,7 +51,8 @@ class ProductPolicy
      */
     public function update(User $user, Product $product): bool
     {
-        return $product->store_id === $user->current_store_id;
+        $storeId = $this->getCurrentStoreId($user);
+        return $storeId ? $product->store_id === $storeId : false;
     }
 
     /**
@@ -45,7 +60,8 @@ class ProductPolicy
      */
     public function delete(User $user, Product $product): bool
     {
-        return $product->store_id === $user->current_store_id;
+        $storeId = $this->getCurrentStoreId($user);
+        return $storeId ? $product->store_id === $storeId : false;
     }
 
     /**
@@ -53,7 +69,8 @@ class ProductPolicy
      */
     public function restore(User $user, Product $product): bool
     {
-        return $product->store_id === $user->current_store_id;
+        $storeId = $this->getCurrentStoreId($user);
+        return $storeId ? $product->store_id === $storeId : false;
     }
 
     /**
@@ -61,6 +78,7 @@ class ProductPolicy
      */
     public function forceDelete(User $user, Product $product): bool
     {
-        return $product->store_id === $user->current_store_id;
+        $storeId = $this->getCurrentStoreId($user);
+        return $storeId ? $product->store_id === $storeId : false;
     }
 }

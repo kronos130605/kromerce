@@ -20,12 +20,8 @@ abstract class Controller extends BaseController
     protected function validateStore(Store $store = null): ?Store
     {
         if (!$store) {
-            // Use service to get store from current user
-            $user = request()->user();
-            if ($user) {
-                $storeService = app(StoreService::class);
-                $store = $storeService->getUserCurrentStore($user);
-            }
+            $storeService = app(StoreService::class);
+            $store = $storeService->resolveCurrentStoreForRequest(request());
         }
 
         if (!$store) {

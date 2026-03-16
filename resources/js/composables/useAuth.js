@@ -5,30 +5,38 @@ export function useAuth() {
     const page = usePage();
     const user = computed(() => page.props.auth?.user);
     const currentStore = computed(() => page.props.current_store);
-    const userRole = computed(() => page.props.user_role);
 
-    // Check user roles - usando user_role directamente
-    const isCustomer = computed(() => userRole.value === 'customer');
+    const roleNames = computed(() => {
+        const roles = user.value?.roles;
+        if (!roles || !Array.isArray(roles)) {
+            return [];
+        }
 
-    const isBusinessOwner = computed(() => {
-        const role = userRole.value;
-        return role === 'business_owner' || role === 'super_admin';
+        return roles
+            .map((r) => (typeof r === 'string' ? r : r?.name))
+            .filter(Boolean);
     });
 
-    const isSuperAdmin = computed(() => userRole.value === 'super_admin');
+    const hasRole = (role) => roleNames.value.includes(role);
+    const hasAnyRole = (roles) => roles.some((r) => hasRole(r));
 
-    // Business roles (for business dashboard) - única fuente de verdad
-    const isBusinessUser = computed(() => {
-        const businessRoles = ['super_admin', 'business_owner'];
-        return businessRoles.includes(userRole.value);
+    const isSuperAdmin = computed(() => hasRole('super_admin'));
+    const isBusinessOwner = computed(() => hasAnyRole(['super_admin', 'business_owner']));
+    const isBusinessUser = computed(() => hasAnyRole(['super_admin', 'business_owner', 'admin', 'manager']));
+    const isCustomer = computed(() => {
+        if (!user.value) return false;
+        return !isBusinessUser.value;
     });
 
     // User role priority (for determining primary role)
     const primaryRole = computed(() => {
+        if (!user.value) return 'guest';
         if (isSuperAdmin.value) return 'super_admin';
-        if (isBusinessOwner.value) return 'business_owner';
-        if (isCustomer.value) return 'customer';
-        return 'guest';
+        if (hasRole('business_owner')) return 'business_owner';
+        if (hasRole('admin')) return 'admin';
+        if (hasRole('manager')) return 'manager';
+        if (hasRole('employee')) return 'employee';
+        return 'customer';
     });
 
     // User permissions
@@ -111,6 +119,9 @@ export function useAuth() {
         userInitials,
 
         // Roles
+        roleNames,
+        hasRole,
+        hasAnyRole,
         isCustomer,
         isBusinessOwner,
         isSuperAdmin,

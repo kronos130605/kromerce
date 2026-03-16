@@ -40,18 +40,17 @@ export function useNavigation() {
     const navigationItems = computed(() => {
         // Get auth values inside computed to ensure reactivity
         const { isCustomer, isBusinessUser, isSuperAdmin } = useAuth();
-        
-        // Wait for user role to be loaded
-        if (page.props.user_role === undefined) {
+
+        if (!page.props.auth?.user) {
             return [];
         }
-        
-        if (isCustomer.value) {
-            return customerNavigation.value;
+
+        if (isSuperAdmin.value) {
+            return adminNavigation.value;
         } else if (isBusinessUser.value) {
             return businessNavigation.value;
-        } else if (isSuperAdmin.value) {
-            return adminNavigation.value;
+        } else if (isCustomer.value) {
+            return customerNavigation.value;
         }
         
         return [];
@@ -62,9 +61,8 @@ export function useNavigation() {
         // Get auth values inside computed to ensure reactivity
         const { isCustomer, isBusinessUser, isSuperAdmin } = useAuth();
         const currentUrl = page.url;
-        
-        // Wait for user role to be loaded
-        if (page.props.user_role === undefined) {
+
+        if (!page.props.auth?.user) {
             return [];
         }
         

@@ -20,7 +20,6 @@ class StoreUser extends Model
     protected $fillable = [
         'store_id',
         'user_id',
-        'role',
         'permissions',
         'is_active',
         'joined_at',
@@ -71,29 +70,6 @@ class StoreUser extends Model
     public function scopeActive($query)
     {
         return $query->where('is_active', true);
-    }
-
-    /**
-     * Scope a query to filter by role.
-     */
-    public function scopeByRole($query, string $role)
-    {
-        return $query->where('role', $role);
-    }
-
-    /**
-     * Get the user's role as a human readable string.
-     */
-    public function getRoleAttribute(): string
-    {
-        return match($this->role) {
-            'owner' => 'Owner',
-            'admin' => 'Administrator',
-            'manager' => 'Manager',
-            'employee' => 'Employee',
-            'customer' => 'Customer',
-            default => ucfirst($this->role),
-        };
     }
 
     /**

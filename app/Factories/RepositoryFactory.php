@@ -10,7 +10,6 @@ use App\Models\StoreContact;
 use App\Models\StoreCurrencyConfig;
 use App\Models\StorePaymentMethod;
 use App\Models\User;
-use App\Repositories\BaseRepository;
 use App\Repositories\Product\ProductCategoryRepository;
 use App\Repositories\Product\ProductRepository;
 use App\Repositories\Product\ProductTagRepository;
@@ -29,31 +28,23 @@ use Spatie\Permission\Models\Role;
 class RepositoryFactory
 {
     /**
-     * Create a new repository instance.
+     * Backward compatibility for legacy static calls.
      */
-    private static function createRepository(string $repositoryClass, object $model): BaseRepository
+    public static function __callStatic(string $name, array $arguments)
     {
-        return match ($repositoryClass) {
-            ProductRepository::class => new ProductRepository($model),
-            ProductCategoryRepository::class => new ProductCategoryRepository($model),
-            ProductTagRepository::class => new ProductTagRepository($model),
-            StoreRepository::class => new StoreRepository($model),
-            StoreBrandingRepository::class => new StoreBrandingRepository($model),
-            StoreContactRepository::class => new StoreContactRepository($model),
-            StorePaymentMethodRepository::class => new StorePaymentMethodRepository($model),
-            StoreCurrencyConfigRepository::class => new StoreCurrencyConfigRepository($model),
-            StoreStatisticsRepository::class => new StoreStatisticsRepository($model),
-            StoreConfigRepository::class => new StoreConfigRepository($model),
-            UserStoreRepository::class => new UserStoreRepository($model),
-            RoleRepository::class => new RoleRepository($model),
-            default => throw new \InvalidArgumentException("Repository {$repositoryClass} is not supported")
-        };
+        $factory = app(self::class);
+
+        if (!method_exists($factory, $name)) {
+            throw new \BadMethodCallException("Method {$name} does not exist on " . self::class);
+        }
+
+        return $factory->{$name}(...$arguments);
     }
 
     /**
      * Get ProductRepository instance.
      */
-    public static function productRepository(): ProductRepository
+    public function productRepository(): ProductRepository
     {
         return new ProductRepository(new Product());
     }
@@ -61,7 +52,7 @@ class RepositoryFactory
     /**
      * Get ProductCategoryRepository instance.
      */
-    public static function productCategoryRepository(): ProductCategoryRepository
+    public function productCategoryRepository(): ProductCategoryRepository
     {
         return new ProductCategoryRepository(new ProductCategory());
     }
@@ -69,64 +60,59 @@ class RepositoryFactory
     /**
      * Get ProductTagRepository instance.
      */
-    public static function productTagRepository(): ProductTagRepository
+    public function productTagRepository(): ProductTagRepository
     {
         return new ProductTagRepository(new ProductTag());
     }
 
     // Store repositories
-    public static function storeRepository(): StoreRepository
+    public function storeRepository(): StoreRepository
     {
         return new StoreRepository(new Store());
     }
 
-    public static function storeBrandingRepository(): StoreBrandingRepository
+    public function storeBrandingRepository(): StoreBrandingRepository
     {
         return new StoreBrandingRepository(new Store());
     }
 
-    public static function storeContactRepository(): StoreContactRepository
+    public function storeContactRepository(): StoreContactRepository
     {
         return new StoreContactRepository(new StoreContact());
     }
 
-    public static function storePaymentMethodRepository(): StorePaymentMethodRepository
+    public function storePaymentMethodRepository(): StorePaymentMethodRepository
     {
         return new StorePaymentMethodRepository(new StorePaymentMethod());
     }
 
-    public static function storeCurrencyConfigRepository(): StoreCurrencyConfigRepository
+    public function storeCurrencyConfigRepository(): StoreCurrencyConfigRepository
     {
         return new StoreCurrencyConfigRepository(new StoreCurrencyConfig());
     }
 
-    public static function storeStatisticsRepository(): StoreStatisticsRepository
+    public function storeStatisticsRepository(): StoreStatisticsRepository
     {
         return new StoreStatisticsRepository(new Store());
     }
 
-    public static function storeConfigRepository(): StoreConfigRepository
+    public function storeConfigRepository(): StoreConfigRepository
     {
         return new StoreConfigRepository(new Store());
     }
 
     // User repositories
-    public static function userRoleRepository(): UserRoleRepository
+    public function userRoleRepository(): UserRoleRepository
     {
         return new UserRoleRepository();
     }
 
-    public static function userTenantRepository(): UserStoreRepository
-    {
-        return new UserStoreRepository(new User());
-    }
-
-    public static function roleRepository(): RoleRepository
+    public function roleRepository(): RoleRepository
     {
         return new RoleRepository(new Role());
     }
 
-    public static function userStoreRepository(): UserStoreRepository
+    public function userStoreRepository(): UserStoreRepository
     {
         return new UserStoreRepository(new User());
     }

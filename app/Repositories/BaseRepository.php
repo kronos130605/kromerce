@@ -9,13 +9,23 @@ use Illuminate\Database\Eloquent\Builder;
 
 abstract class BaseRepository
 {
-    protected Model|Builder $model;
+    protected Model $model;
     protected array $allowedFields = [];
     protected ?Builder $query = null;
 
     public function __construct(Model $model)
     {
         $this->model = $model;
+    }
+
+    protected function builder(): Builder
+    {
+        return $this->query ?? $this->model->newQuery();
+    }
+
+    protected function clearQuery(): void
+    {
+        $this->query = null;
     }
 
     /**
@@ -39,7 +49,7 @@ abstract class BaseRepository
      */
     public function getBy(array $criteria, array $columns = ['*']): Collection
     {
-        $query = $this->model->query();
+        $query = $this->model->newQuery();
 
         foreach ($criteria as $key => $value) {
             if (!in_array($key, $this->allowedFields)) {
@@ -61,7 +71,7 @@ abstract class BaseRepository
      */
     public function getFirstBy(array $criteria, array $columns = ['*']): ?Model
     {
-        $query = $this->model->query();
+        $query = $this->model->newQuery();
 
         foreach ($criteria as $key => $value) {
             if (!in_array($key, $this->allowedFields)) {
@@ -91,7 +101,13 @@ abstract class BaseRepository
      */
     public function createMany(array $data): Collection
     {
-        return $this->model->insert($data);
+        $created = new Collection();
+
+        foreach ($data as $row) {
+            $created->push($this->create($row));
+        }
+
+        return $created;
     }
 
     /**
@@ -113,7 +129,7 @@ abstract class BaseRepository
      */
     public function updateBy(array $criteria, array $data): int
     {
-        $query = $this->model->query();
+        $query = $this->model->newQuery();
 
         foreach ($criteria as $key => $value) {
             if (!in_array($key, $this->allowedFields)) {
@@ -149,7 +165,7 @@ abstract class BaseRepository
      */
     public function deleteBy(array $criteria): int
     {
-        $query = $this->model->query();
+        $query = $this->model->newQuery();
 
         foreach ($criteria as $key => $value) {
             if (!in_array($key, $this->allowedFields)) {
@@ -171,7 +187,9 @@ abstract class BaseRepository
      */
     public function paginate(int $perPage = 15, array $columns = ['*']): LengthAwarePaginator
     {
-        return $this->model->paginate($perPage, $columns);
+        $paginator = $this->builder()->paginate($perPage, $columns);
+        $this->clearQuery();
+        return $paginator;
     }
 
     /**
@@ -179,7 +197,7 @@ abstract class BaseRepository
      */
     public function paginateWithFilters(array $filters = [], int $perPage = 15, array $columns = ['*']): LengthAwarePaginator
     {
-        $query = $this->model->query();
+        $query = $this->model->newQuery();
 
         $this->applyFilters($query, $filters);
 
@@ -223,7 +241,7 @@ abstract class BaseRepository
      */
     public function count(array $criteria = []): int
     {
-        $query = $this->model->query();
+        $query = $this->model->newQuery();
 
         if (!empty($criteria)) {
             $this->applyFilters($query, $criteria);
@@ -237,7 +255,7 @@ abstract class BaseRepository
      */
     public function exists(int $id): bool
     {
-        return $this->model->where('id', $id)->exists();
+        return $this->model->newQuery()->where('id', $id)->exists();
     }
 
     /**
@@ -245,7 +263,7 @@ abstract class BaseRepository
      */
     public function existsBy(array $criteria): bool
     {
-        $query = $this->model->query();
+        $query = $this->model->newQuery();
 
         foreach ($criteria as $key => $value) {
             if (!in_array($key, $this->allowedFields)) {
@@ -267,7 +285,7 @@ abstract class BaseRepository
      */
     public function query(): Builder
     {
-        return $this->model->query();
+        return $this->model->newQuery();
     }
 
     /**
@@ -299,7 +317,7 @@ abstract class BaseRepository
      */
     public function with(array $relations): self
     {
-        $this->model = $this->model->with($relations);
+        $this->query = $this->builder()->with($relations);
         return $this;
     }
 
@@ -308,7 +326,7 @@ abstract class BaseRepository
      */
     public function withCount(array $relations): self
     {
-        $this->model = $this->model->withCount($relations);
+        $this->query = $this->builder()->withCount($relations);
         return $this;
     }
 
@@ -317,7 +335,7 @@ abstract class BaseRepository
      */
     public function orderBy(string $column, string $direction = 'asc'): self
     {
-        $this->model = $this->model->orderBy($column, $direction);
+        $this->query = $this->builder()->orderBy($column, $direction);
         return $this;
     }
 
@@ -326,7 +344,7 @@ abstract class BaseRepository
      */
     public function limit(int $limit): self
     {
-        $this->model = $this->model->limit($limit);
+        $this->query = $this->builder()->limit($limit);
         return $this;
     }
 
@@ -335,7 +353,9 @@ abstract class BaseRepository
      */
     public function get(array $columns = ['*']): Collection
     {
-        return $this->model->get($columns);
+        $results = $this->builder()->get($columns);
+        $this->clearQuery();
+        return $results;
     }
 
     /**
@@ -343,8 +363,9 @@ abstract class BaseRepository
      */
     public function first(array $columns = ['*']): ?Model
     {
-        $query = $this->query ?? $this->model->query();
-        return $query->first($columns);
+        $result = $this->builder()->first($columns);
+        $this->clearQuery();
+        return $result;
     }
 
     

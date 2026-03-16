@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Product;
 use App\Services\ProductService;
 use App\Http\Requests\ProductRequest;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -69,22 +71,21 @@ class ProductController extends Controller
             $store = $this->validateStore();
             $categories = $this->productService->getCategoriesForStore($store);
 
-            return Inertia::render('modules/products/Products/Create', [
+            return Inertia::render('Business/Index', [
+                'activeTab' => 'products',
+                'productsView' => 'create',
                 'categories' => $categories,
             ]);
 
         } catch (\Exception $e) {
-            return Inertia::render('modules/products/Products/Error', [
-                'error' => 'Failed to load product creation form',
-                'message' => $e->getMessage(),
-            ]);
+            throw $e;
         }
     }
 
     /**
      * Store a newly created product.
      */
-    public function store(ProductRequest $request): JsonResponse
+    public function store(ProductRequest $request): JsonResponse|RedirectResponse
     {
         try {
             $store = $this->validateStore();
@@ -96,114 +97,138 @@ class ProductController extends Controller
                 $request->validated()
             );
 
-            return $this->success($product, 'Product created successfully', 201);
+            if ($request->wantsJson()) {
+                return $this->success($product, 'Product created successfully', 201);
+            }
+
+            return redirect()->route('products.index');
 
         } catch (\Exception $e) {
-            return $this->error('Failed to create product', 500);
+            if ($request->wantsJson()) {
+                return $this->error('Failed to create product', 500);
+            }
+
+            throw $e;
         }
     }
 
     /**
      * Display the specified product.
      */
-    public function show(ProductRequest $request, int $id): Response
+    public function show(ProductRequest $request, Product $product): Response
     {
         try {
             $store = $this->validateStore();
-            $product = $this->productService->getProductForStore($store, $id);
+            $product = $this->productService->getProductForStore($store, $product->id);
 
             if (!$product) {
-                return Inertia::render('modules/products/Products/Error', [
-                    'error' => 'Product not found',
-                    'message' => 'The requested product could not be found.',
-                ]);
+                abort(404);
             }
 
-            return Inertia::render('modules/products/Products/Show', [
+            return Inertia::render('Business/Index', [
+                'activeTab' => 'products',
+                'productsView' => 'show',
                 'product' => $product,
             ]);
 
         } catch (\Exception $e) {
-            return Inertia::render('modules/products/Products/Error', [
-                'error' => 'Failed to load product',
-                'message' => $e->getMessage(),
-            ]);
+            throw $e;
         }
     }
 
     /**
      * Show the form for editing the specified product.
      */
-    public function edit(ProductRequest $request, int $id): Response
+    public function edit(ProductRequest $request, Product $product): Response
     {
         try {
             $store = $this->validateStore();
-            $product = $this->productService->getProductForStore($store, $id);
+            $product = $this->productService->getProductForStore($store, $product->id);
             $categories = $this->productService->getCategoriesForStore($store);
 
             if (!$product) {
-                return Inertia::render('modules/products/Products/Error', [
-                    'error' => 'Product not found',
-                    'message' => 'The requested product could not be found.',
-                ]);
+                abort(404);
             }
 
-            return Inertia::render('modules/products/Products/Edit', [
+            return Inertia::render('Business/Index', [
+                'activeTab' => 'products',
+                'productsView' => 'edit',
                 'product' => $product,
                 'categories' => $categories,
             ]);
 
         } catch (\Exception $e) {
-            return Inertia::render('modules/products/Products/Error', [
-                'error' => 'Failed to load product edit form',
-                'message' => $e->getMessage(),
-            ]);
+            throw $e;
         }
     }
 
     /**
      * Update the specified product.
      */
-    public function update(ProductRequest $request, int $id): JsonResponse
+    public function update(ProductRequest $request, Product $product): JsonResponse|RedirectResponse
     {
         try {
             $store = $this->validateStore();
 
             $updated = $this->productService->updateProductForStore(
                 $store,
-                $id,
+                $product->id,
                 $request->validated()
             );
 
             if (!$updated) {
-                return $this->notFound('Product not found');
+                if ($request->wantsJson()) {
+                    return $this->notFound('Product not found');
+                }
+
+                abort(404);
             }
 
-            return $this->success(null, 'Product updated successfully');
+            if ($request->wantsJson()) {
+                return $this->success(null, 'Product updated successfully');
+            }
+
+            return redirect()->route('products.show', $product);
 
         } catch (\Exception $e) {
-            return $this->error('Failed to update product', 500);
+            if ($request->wantsJson()) {
+                return $this->error('Failed to update product', 500);
+            }
+
+            throw $e;
         }
     }
 
     /**
      * Remove the specified product.
      */
-    public function destroy(ProductRequest $request, int $id): JsonResponse
+    public function destroy(ProductRequest $request, Product $product): JsonResponse|RedirectResponse
     {
         try {
             $store = $this->validateStore();
 
-            $deleted = $this->productService->deleteProductForStore($store, $id);
+            $deleted = $this->productService->deleteProductForStore($store, $product->id);
 
             if (!$deleted) {
-                return $this->notFound('Product not found');
+                if ($request->wantsJson()) {
+                    return $this->notFound('Product not found');
+                }
+
+                abort(404);
             }
 
-            return $this->noContent('Product deleted successfully');
+            if ($request->wantsJson()) {
+                return $this->noContent('Product deleted successfully');
+            }
+
+            return redirect()->route('products.index');
 
         } catch (\Exception $e) {
-            return $this->error('Failed to delete product', 500);
+            if ($request->wantsJson()) {
+                return $this->error('Failed to delete product', 500);
+            }
+
+            throw $e;
         }
     }
 }

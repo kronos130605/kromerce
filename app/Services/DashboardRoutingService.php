@@ -62,14 +62,7 @@ class DashboardRoutingService
                 return config('roles.dashboard_views.customer', 'Customer/Index');
             }
 
-            // Usar RoleService para obtener el rol del usuario en el store
-            // Ahora usa cache, así que no hay redundancia real con HandleInertiaRequests
-            $userRoleInStore = $this->roleService->getUserRoleInStore($user, $store);
-
-            // Get business roles from config
-            $businessRoles = config('roles.business_roles', ['business_owner']);
-
-            if (in_array($userRoleInStore, $businessRoles)) {
+            if ($userPrimaryRole && in_array($userPrimaryRole, $businessRoles)) {
                 // Usuario con rol de negocio - usar nuevo dashboard
                 return config('roles.dashboard_views.business', 'Business/Index');
             } else {
@@ -173,7 +166,6 @@ class DashboardRoutingService
             // Add store-specific data if store exists
             if ($store) {
                 $data['statistics'] = $this->getStoreStatistics($store);
-                $data['user_role'] = $this->roleService->getUserRoleInStore($user, $store);
             }
 
             // Add view-specific data
@@ -231,11 +223,10 @@ class DashboardRoutingService
             return true;
         }
 
-        // Check user role in store
-        $userRole = $this->roleService->getUserRoleInStore($user, $store);
-        $manageableRoles = ['business_owner', 'owner', 'admin', 'manager'];
+        $userPrimaryRole = $this->roleService->getUserPrimaryRole($user);
+        $manageableRoles = ['super_admin', 'business_owner', 'admin', 'manager'];
 
-        return in_array($userRole, $manageableRoles);
+        return $userPrimaryRole ? in_array($userPrimaryRole, $manageableRoles) : false;
     }
 
     /**

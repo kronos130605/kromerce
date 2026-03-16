@@ -16,6 +16,7 @@ use App\Repositories\User\UserStoreRepository;
 use App\Traits\HasStorePermissions;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -322,7 +323,7 @@ class StoreService
                     $store = $this->createDefaultStore($defaultStoreSlug, $userRoles, $user);
                 } else {
                     // Associate existing default store with user
-                    $this->userStoreRepository->attachUserToStore($user, $store, 'business_owner');
+                    $this->userStoreRepository->attachUserToStore($user, $store);
                 }
             }
 
@@ -342,47 +343,20 @@ class StoreService
     /**
      * Assign store to user with appropriate role
      */
-    public function assignStoreToUser(User $user, Store $store, ?string $role = null): bool
+    public function assignStoreToUser(User $user, Store $store): bool
     {
         try {
-            $role = $role ?? $this->getDefaultRoleForUser($user);
-
-            // Usar UserTenantRepository para asignar store
-            return $this->userStoreRepository->attachUserToStore($user, $store, $role);
+            return $this->userStoreRepository->attachUserToStore($user, $store);
 
         } catch (\Exception $e) {
             Log::error('Error assigning store to user', [
                 'user_id' => $user->id,
                 'store_id' => $store->id,
-                'role' => $role,
                 'error' => $e->getMessage(),
             ]);
 
             return false;
         }
-    }
-
-    /**
-     * Get default role for user in store
-     */
-    public function getDefaultRoleForUser(User $user): string
-    {
-        $userRoles = $user->roles->pluck('name')->toArray();
-
-        // Get role priority from config
-        $rolePriority = config('roles.role_priority');
-
-        $defaultRole = 'customer';
-        $highestPriority = PHP_INT_MAX;
-
-        foreach ($userRoles as $role) {
-            if (isset($rolePriority[$role]) && $rolePriority[$role] < $highestPriority) {
-                $defaultRole = $role;
-                $highestPriority = $rolePriority[$role];
-            }
-        }
-
-        return $defaultRole;
     }
 
     /**
@@ -456,7 +430,7 @@ class StoreService
                 $existingStore = $this->storeRepository->getFirstBy(['slug' => $slug]);
                 if ($existingStore && $user) {
                     // Associate user with existing store
-                    $this->userStoreRepository->attachUserToStore($user, $existingStore, 'business_owner');
+                    $this->userStoreRepository->attachUserToStore($user, $existingStore);
                     return $existingStore;
                 }
             }
@@ -561,6 +535,46 @@ class StoreService
     public function getLayoutDefaults(string $storeType): array
     {
         return config("settings.layout_defaults.{$storeType}", []);
+    }
+
+    public function resolveCurrentStoreForRequest(Request $request): ?Store
+    {
+        $hostname = $request->getHost();
+        $centralDomains = config('tenancy.central_domains', []);
+
+        if (!in_array($hostname, $centralDomains)) {
+            $store = Store::whereHas('domains', function ($query) use ($hostname) {
+                $query->where('domain', $hostname);
+            })->first();
+
+            if ($store) {
+                session(['current_store_id' => $store->id]);
+                return $store;
+            }
+        }
+
+        $user = $request->user();
+        if (!$user) {
+            return null;
+        }
+
+        $sessionStoreId = session('current_store_id');
+        if ($sessionStoreId) {
+            $hasAccess = $user->stores()->where('stores.id', $sessionStoreId)->exists();
+            if ($hasAccess) {
+                $store = Store::find($sessionStoreId);
+                if ($store) {
+                    return $store;
+                }
+            }
+        }
+
+        $store = $this->getUserCurrentStore($user) ?: $this->userStoreRepository->getUserFirstStore($user);
+        if ($store) {
+            session(['current_store_id' => $store->id]);
+        }
+
+        return $store;
     }
 
     /**

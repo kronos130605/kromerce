@@ -15,7 +15,9 @@ class BrandingServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(BrandingService::class, function ($app) {
-            return new BrandingService(RepositoryFactory::storeBrandingRepository());
+            return new BrandingService(
+                $app->make(RepositoryFactory::class)->storeBrandingRepository()
+            );
         });
     }
 

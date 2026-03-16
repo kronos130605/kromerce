@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Collection;
 class UserStoreRepository extends BaseRepository
 {
     protected array $allowedFields = [
-        'user_id', 'store_id', 'role', 'is_active', 'joined_at'
+        'user_id', 'store_id', 'is_active', 'joined_at'
     ];
 
     public function __construct(User $model)
@@ -21,10 +21,9 @@ class UserStoreRepository extends BaseRepository
     /**
      * Attach user to store.
      */
-    public function attachUserToStore(User $user, Store $store, string $role): bool
+    public function attachUserToStore(User $user, Store $store): bool
     {
         return $user->stores()->attach($store->id, [
-            'role' => $role,
             'is_active' => true,
             'joined_at' => now(),
         ]);
@@ -115,19 +114,6 @@ class UserStoreRepository extends BaseRepository
     public function getAvailableRoles(): array
     {
         return config('roles.available_roles', []);
-    }
-
-    /**
-     * Get user's role in specific store
-     */
-    public function getUserRoleInStore(int $userId, int $storeId): ?string
-    {
-        return $this->model
-            ->join('store_users', 'users.id', '=', 'store_users.user_id')
-            ->where('users.id', $userId)
-            ->where('store_users.store_id', $storeId)
-            ->where('store_users.is_active', true)
-            ->value('store_users.role');
     }
 
     /**

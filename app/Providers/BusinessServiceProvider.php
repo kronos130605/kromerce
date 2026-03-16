@@ -143,7 +143,7 @@ class BusinessServiceProvider extends ServiceProvider
             return new DashboardRoutingService(
                 $app->make(StoreService::class),
                 $app->make(RoleService::class),
-                $app->make(ProductService::class)
+                RepositoryFactory::storeStatisticsRepository()
             );
         });
 
@@ -157,20 +157,7 @@ class BusinessServiceProvider extends ServiceProvider
         // Register Role Service with repositories
         $this->app->singleton(RoleService::class, function ($app) {
             return new RoleService(
-                RepositoryFactory::userRoleRepository(),
                 RepositoryFactory::roleRepository()
-            );
-        });
-
-        // Register Store Service with repositories
-        $this->app->singleton(StoreService::class, function ($app) {
-            return new StoreService(
-                RepositoryFactory::storeRepository(),
-                RepositoryFactory::storeContactRepository(),
-                RepositoryFactory::storePaymentMethodRepository(),
-                RepositoryFactory::storeCurrencyConfigRepository(),
-                RepositoryFactory::storeStatisticsRepository(),
-                RepositoryFactory::userStoreRepository()
             );
         });
 
@@ -194,12 +181,9 @@ class BusinessServiceProvider extends ServiceProvider
 
         // User relationship with stores
         \App\Models\User::resolveRelationUsing('stores', function ($user) {
-            return $user->hasMany(\App\Models\Store::class);
-        });
-
-        // User relationship with store (if not already defined)
-        \App\Models\User::resolveRelationUsing('store', function ($user) {
-            return $user->belongsTo(\App\Models\Store::class);
+            return $user->belongsToMany(\App\Models\Store::class, 'store_users')
+                ->withPivot(['is_active', 'joined_at'])
+                ->withTimestamps();
         });
     }
 }

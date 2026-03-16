@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Log;
 class ProductRepository extends BaseRepository
 {
     protected array $allowedFields = [
+        'id',
         'name', 'slug', 'description', 'short_description', 'base_currency', 
         'base_price', 'base_sale_price', 'cost_price', 'is_on_sale', 
         'sale_type', 'sale_discount', 'sale_start_date', 'sale_end_date',

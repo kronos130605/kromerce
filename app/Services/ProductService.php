@@ -73,7 +73,7 @@ class ProductService
     {
         try {
             return $this->repositoryFactory->productRepository()
-                ->getById($productId, ['store_id' => $store->id]);
+                ->getFirstBy(['id' => $productId, 'store_id' => $store->id]);
         } catch (\Exception $e) {
             throw new \Exception('Failed to retrieve product: ' . $e->getMessage());
         }
@@ -85,8 +85,10 @@ class ProductService
     public function updateProductForStore(Store $store, int $productId, array $data): bool
     {
         try {
-            return $this->repositoryFactory->productRepository()
-                ->update($productId, array_merge($data, ['store_id' => $store->id]));
+            $updated = $this->repositoryFactory->productRepository()
+                ->updateBy(['id' => $productId, 'store_id' => $store->id], $data);
+
+            return $updated > 0;
         } catch (\Exception $e) {
             throw new \Exception('Failed to update product: ' . $e->getMessage());
         }
@@ -122,8 +124,10 @@ class ProductService
     public function deleteProductForStore(Store $store, int $productId): bool
     {
         try {
-            return $this->repositoryFactory->productRepository()
-                ->delete($productId, ['store_id' => $store->id]);
+            $deleted = $this->repositoryFactory->productRepository()
+                ->deleteBy(['id' => $productId, 'store_id' => $store->id]);
+
+            return $deleted > 0;
         } catch (\Exception $e) {
             throw new \Exception('Failed to delete product: ' . $e->getMessage());
         }
