@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Repositories\Store\BusinessCurrencyConfigRepository;
 use App\Services\CurrencyRateService;
-use App\Repositories\BusinessCurrencyConfigRepository;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Inertia\Inertia;
@@ -11,16 +11,10 @@ use Inertia\Response;
 
 class CurrencyController extends Controller
 {
-    private CurrencyRateService $currencyService;
-    private BusinessCurrencyConfigRepository $configRepo;
-
     public function __construct(
-        CurrencyRateService $currencyService,
-        BusinessCurrencyConfigRepository $configRepo
-    ) {
-        $this->currencyService = $currencyService;
-        $this->configRepo = $configRepo;
-    }
+        private CurrencyRateService $currencyService,
+        private BusinessCurrencyConfigRepository $configRepo
+    ) {}
     /**
      * Display the currency configuration page.
      */
@@ -31,7 +25,7 @@ class CurrencyController extends Controller
 
         return Inertia::render('modules/dashboard/DashboardCurrency', [
             'currencyConfig' => $currencyConfig,
-            'supportedCurrencies' => $currencyConfig->getSupportedCurrenciesWithRates(),
+            'supportedCurrencies' => $this->currencyService->getSupportedCurrenciesWithRates((string) $currencyConfig->store_id),
             'availableCurrencies' => $this->getAvailableCurrencies(),
         ]);
     }
@@ -229,73 +223,6 @@ class CurrencyController extends Controller
      */
     private function getAvailableCurrencies(): array
     {
-        return [
-            [
-                'code' => 'USD',
-                'name' => 'US Dollar',
-                'symbol' => '$',
-                'flag' => '🇺🇸',
-            ],
-            [
-                'code' => 'EUR',
-                'name' => 'Euro',
-                'symbol' => '€',
-                'flag' => '🇪🇺',
-            ],
-            [
-                'code' => 'GBP',
-                'name' => 'British Pound',
-                'symbol' => '£',
-                'flag' => '🇬🇧',
-            ],
-            [
-                'code' => 'JPY',
-                'name' => 'Japanese Yen',
-                'symbol' => '¥',
-                'flag' => '🇯🇵',
-            ],
-            [
-                'code' => 'COP',
-                'name' => 'Colombian Peso',
-                'symbol' => '$',
-                'flag' => '🇨🇴',
-            ],
-            [
-                'code' => 'MXN',
-                'name' => 'Mexican Peso',
-                'symbol' => '$',
-                'flag' => '🇲🇽',
-            ],
-            [
-                'code' => 'CAD',
-                'name' => 'Canadian Dollar',
-                'symbol' => 'C$',
-                'flag' => '🇨🇦',
-            ],
-            [
-                'code' => 'AUD',
-                'name' => 'Australian Dollar',
-                'symbol' => 'A$',
-                'flag' => '🇦🇺',
-            ],
-            [
-                'code' => 'CHF',
-                'name' => 'Swiss Franc',
-                'symbol' => 'Fr',
-                'flag' => '🇨🇭',
-            ],
-            [
-                'code' => 'CNY',
-                'name' => 'Chinese Yuan',
-                'symbol' => '¥',
-                'flag' => '🇨🇳',
-            ],
-            [
-                'code' => 'INR',
-                'name' => 'Indian Rupee',
-                'symbol' => '₹',
-                'flag' => '🇮🇳',
-            ],
-        ];
+        return array_values(config('currencies.supported', []));
     }
 }

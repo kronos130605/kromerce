@@ -49,35 +49,11 @@ class BusinessCurrencyConfig extends Model
     }
 
     /**
-     * Get all supported currencies with their current rates.
-     * Note: This method delegates to CurrencyRateService for clean architecture.
-     */
-    public function getSupportedCurrenciesWithRates(): array
-    {
-        // Delegar al service para mantener arquitectura limpia
-        return app(\App\Services\CurrencyRateService::class)->getSupportedCurrenciesWithRates($this->store_id);
-    }
-
-    /**
      * Get currency symbol.
      */
     private function getCurrencySymbol(string $currency): string
     {
-        $symbols = [
-            'USD' => '$',
-            'EUR' => '€',
-            'GBP' => '£',
-            'JPY' => '¥',
-            'COP' => '$',
-            'MXN' => '$',
-            'CAD' => 'C$',
-            'AUD' => 'A$',
-            'CHF' => 'Fr',
-            'CNY' => '¥',
-            'INR' => '₹',
-        ];
-
-        return $symbols[$currency] ?? $currency;
+        return config("currencies.supported.{$currency}.symbol", $currency);
     }
 
     /**
@@ -85,21 +61,7 @@ class BusinessCurrencyConfig extends Model
      */
     private function getCurrencyName(string $currency): string
     {
-        $names = [
-            'USD' => 'US Dollar',
-            'EUR' => 'Euro',
-            'GBP' => 'British Pound',
-            'JPY' => 'Japanese Yen',
-            'COP' => 'Colombian Peso',
-            'MXN' => 'Mexican Peso',
-            'CAD' => 'Canadian Dollar',
-            'AUD' => 'Australian Dollar',
-            'CHF' => 'Swiss Franc',
-            'CNY' => 'Chinese Yuan',
-            'INR' => 'Indian Rupee',
-        ];
-
-        return $names[$currency] ?? $currency;
+        return config("currencies.supported.{$currency}.name", $currency);
     }
 
     /**
@@ -107,20 +69,6 @@ class BusinessCurrencyConfig extends Model
      */
     private function getCurrencyFlag(string $currency): string
     {
-        $flags = [
-            'USD' => '🇺🇸',
-            'EUR' => '🇪🇺',
-            'GBP' => '🇬🇧',
-            'JPY' => '🇯🇵',
-            'COP' => '🇨🇴',
-            'MXN' => '🇲🇽',
-            'CAD' => '🇨🇦',
-            'AUD' => '🇦🇺',
-            'CHF' => '🇨🇭',
-            'CNY' => '🇨🇳',
-            'INR' => '🇮🇳',
-        ];
-
-        return $flags[$currency] ?? '🌍';
+        return config("currencies.supported.{$currency}.flag", '🌍');
     }
 }

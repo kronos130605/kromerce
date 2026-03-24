@@ -2,16 +2,33 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Product;
 use Illuminate\Foundation\Http\FormRequest;
 
 class ProductRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
-        return true; // User can manage products if they have tenant access
+        $user = $this->user();
+
+        if (!$user) {
+            return false;
+        }
+
+        $product = $this->route('product');
+
+        if ($product instanceof Product) {
+            return match($this->method()) {
+                'DELETE' => $user->can('delete', $product),
+                'PUT', 'PATCH' => $user->can('update', $product),
+                default => $user->can('view', $product),
+            };
+        }
+
+        return match($this->method()) {
+            'POST' => $user->can('create', Product::class),
+            default => $user->can('viewAny', Product::class),
+        };
     }
     
     /**

@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Log;
 class DashboardRoutingService
 {
     public function __construct(
-        private StoreService $storeService,
+        private StoreUserService $storeUserService,
         private RoleService $roleService,
         private StoreStatisticsRepository $statisticsRepo
     ) {}
@@ -21,16 +21,13 @@ class DashboardRoutingService
     public function getOrAssignStoreForUser(User $user): ?Store
     {
         try {
-            // Get existing stores for user
-            $stores = $this->storeService->getUserStores($user);
+            $stores = $this->storeUserService->getUserStores($user);
 
             if ($stores->isNotEmpty()) {
-                // Return current store if exists
-                return $this->storeService->getUserCurrentStore($user);
+                return $this->storeUserService->getUserCurrentStore($user);
             }
 
-            // Create default store if none exists
-            return $this->storeService->getOrCreateDefaultStoreForUser($user);
+            return $this->storeUserService->getOrCreateDefaultStoreForUser($user);
 
         } catch (\Exception $e) {
             Log::error('Error getting or assigning store for user', [
@@ -88,12 +85,11 @@ class DashboardRoutingService
     public function getUserStores(User $user): array
     {
         try {
-            // Obtener stores del usuario usando StoreService
-            $stores = $this->storeService->getUserStores($user);
+            $stores = $this->storeUserService->getUserStores($user);
 
             return [
                 'stores' => $stores,
-                'current_store' => $this->storeService->getUserCurrentStore($user),
+                'current_store' => $this->storeUserService->getUserCurrentStore($user),
                 'total_stores' => $stores->count(),
             ];
 
@@ -117,8 +113,7 @@ class DashboardRoutingService
     public function switchUserStore(User $user, Store $store): bool
     {
         try {
-            // Verificar que el usuario tiene acceso a este store
-            if (!$this->storeService->getUserStores($user)->contains('id', $store->id)) {
+            if (!$this->storeUserService->getUserStores($user)->contains('id', $store->id)) {
                 Log::warning('User trying to switch to unauthorized store', [
                     'user_id' => $user->id,
                     'store_id' => $store->id,
@@ -126,8 +121,7 @@ class DashboardRoutingService
                 return false;
             }
 
-            // Cambiar store actual
-            return $this->storeService->setUserCurrentStore($user, $store);
+            return $this->storeUserService->setUserCurrentStore($user, $store);
 
         } catch (\Exception $e) {
             Log::error('Error switching user store', [

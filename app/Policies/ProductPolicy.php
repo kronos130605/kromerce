@@ -2,83 +2,72 @@
 
 namespace App\Policies;
 
-use App\Models\User;
 use App\Models\Product;
-use App\Services\StoreService;
+use App\Models\User;
 
 class ProductPolicy
 {
-    private function getCurrentStoreId(User $user): ?int
+    public function before(User $user, string $ability): ?bool
     {
-        $storeId = session('current_store_id');
-        if ($storeId) {
-            return (int) $storeId;
+        if ($user->hasRole(['super_admin', 'admin'])) {
+            return true;
         }
 
-        $storeService = app(StoreService::class);
-        $store = $storeService->getUserCurrentStore($user);
-
-        return $store?->id;
+        return null;
     }
 
-    /**
-     * Determine whether the user can view any models.
-     */
     public function viewAny(User $user): bool
     {
-        return true;
+        return $user->hasRole(['business_owner', 'manager']);
     }
 
-    /**
-     * Determine whether the user can view the model.
-     */
     public function view(User $user, Product $product): bool
     {
-        $storeId = $this->getCurrentStoreId($user);
-        return $storeId ? $product->store_id === $storeId : false;
+        if (!$product->store) {
+            return false;
+        }
+
+        return $user->can('view', $product->store);
     }
 
-    /**
-     * Determine whether the user can create models.
-     */
     public function create(User $user): bool
     {
-        return true;
+        return $user->hasRole(['business_owner', 'manager']);
     }
 
-    /**
-     * Determine whether the user can update the model.
-     */
     public function update(User $user, Product $product): bool
     {
-        $storeId = $this->getCurrentStoreId($user);
-        return $storeId ? $product->store_id === $storeId : false;
+        if (!$product->store) {
+            return false;
+        }
+
+        return $user->can('manage', $product->store);
     }
 
-    /**
-     * Determine whether the user can delete the model.
-     */
     public function delete(User $user, Product $product): bool
     {
-        $storeId = $this->getCurrentStoreId($user);
-        return $storeId ? $product->store_id === $storeId : false;
+        if (!$product->store) {
+            return false;
+        }
+
+        return $user->can('manage', $product->store);
     }
 
-    /**
-     * Determine whether the user can restore the model.
-     */
     public function restore(User $user, Product $product): bool
     {
-        $storeId = $this->getCurrentStoreId($user);
-        return $storeId ? $product->store_id === $storeId : false;
+        if (!$product->store) {
+            return false;
+        }
+
+        return $user->can('manage', $product->store);
     }
 
-    /**
-     * Determine whether the user can permanently delete the model.
-     */
     public function forceDelete(User $user, Product $product): bool
     {
-        $storeId = $this->getCurrentStoreId($user);
-        return $storeId ? $product->store_id === $storeId : false;
+        if (!$product->store) {
+            return false;
+        }
+
+        return $user->can('delete', $product->store);
     }
 }

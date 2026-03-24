@@ -14,7 +14,8 @@ class StorePaymentMethodRepository extends BaseRepository
 
     public function getEnabledMethods(int $storeId): \Illuminate\Database\Eloquent\Collection
     {
-        return $this->model::where('store_id', $storeId)
+        return $this->model->newQuery()
+            ->where('store_id', $storeId)
             ->where('is_enabled', true)
             ->orderBy('sort_order')
             ->get();
@@ -22,7 +23,8 @@ class StorePaymentMethodRepository extends BaseRepository
 
     public function countEnabled(int $storeId): int
     {
-        return $this->model::where('store_id', $storeId)
+        return $this->model->newQuery()
+            ->where('store_id', $storeId)
             ->where('is_enabled', true)
             ->count();
     }

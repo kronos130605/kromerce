@@ -83,6 +83,14 @@ class UserStoreRepository extends BaseRepository
     }
 
     /**
+     * Check if user has access to a specific store.
+     */
+    public function userHasAccessToStore(User $user, int $storeId): bool
+    {
+        return $user->stores()->where('stores.id', $storeId)->exists();
+    }
+
+    /**
      * Remove user from store.
      */
     public function detachUserFromStore(User $user, Store $store): bool

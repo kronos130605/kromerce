@@ -20,7 +20,8 @@ class StoreStatisticsRepository extends BaseRepository
         }
         
         try {
-            return $this->model::where('id', $storeId)
+            return $this->model->newQuery()
+                ->where('id', $storeId)
                 ->withCount('products')
                 ->value('products_count') ?? 0;
         } catch (\Exception $e) {
@@ -30,9 +31,11 @@ class StoreStatisticsRepository extends BaseRepository
 
     public function getActiveProductsCount(int $storeId): int
     {
-        return $this->model::find($storeId)->products()
-            ->where('status', 'active')
-            ->count();
+        $store = $this->getById($storeId);
+        if (!$store) {
+            return 0;
+        }
+        return $store->products()->where('status', 'active')->count();
     }
 
     public function getCategoriesCount(int $storeId): int
@@ -42,7 +45,8 @@ class StoreStatisticsRepository extends BaseRepository
         }
         
         try {
-            return $this->model::where('id', $storeId)
+            return $this->model->newQuery()
+                ->where('id', $storeId)
                 ->withCount('categories')
                 ->value('categories_count') ?? 0;
         } catch (\Exception $e) {
@@ -57,7 +61,8 @@ class StoreStatisticsRepository extends BaseRepository
         }
         
         try {
-            return $this->model::where('id', $storeId)
+            return $this->model->newQuery()
+                ->where('id', $storeId)
                 ->withCount('orders')
                 ->value('orders_count') ?? 0;
         } catch (\Exception $e) {
@@ -72,7 +77,8 @@ class StoreStatisticsRepository extends BaseRepository
         }
         
         try {
-            return $this->model::where('id', $storeId)
+            return $this->model->newQuery()
+                ->where('id', $storeId)
                 ->withSum('orders', 'total_amount')
                 ->value('orders_sum_total_amount') ?? 0;
         } catch (\Exception $e) {
@@ -87,8 +93,11 @@ class StoreStatisticsRepository extends BaseRepository
         }
         
         try {
-            return $this->model::where('id', $storeId)
-                ->orders()
+            $store = $this->getById($storeId);
+            if (!$store) {
+                return collect();
+            }
+            return $store->orders()
                 ->latest()
                 ->take($limit)
                 ->get(['id', 'order_number', 'total_amount', 'status', 'created_at']);
@@ -99,7 +108,11 @@ class StoreStatisticsRepository extends BaseRepository
 
     public function getLowStockProductsCount(int $storeId): int
     {
-        return $this->model::find($storeId)->products()
+        $store = $this->getById($storeId);
+        if (!$store) {
+            return 0;
+        }
+        return $store->products()
             ->where('manage_stock', true)
             ->whereColumn('stock_quantity', '<=', 'low_stock_threshold')
             ->count();
@@ -107,44 +120,55 @@ class StoreStatisticsRepository extends BaseRepository
 
     public function getContactsCount(int $storeId): int
     {
-        return $this->model::find($storeId)->contacts()->count();
+        $store = $this->getById($storeId);
+        return $store ? $store->contacts()->count() : 0;
     }
 
     public function getPrimaryContactsCount(int $storeId): int
     {
-        return $this->model::find($storeId)->contacts()
-            ->where('is_primary', true)
-            ->count();
+        $store = $this->getById($storeId);
+        if (!$store) {
+            return 0;
+        }
+        return $store->contacts()->where('is_primary', true)->count();
     }
 
     public function getPublicContactsCount(int $storeId): int
     {
-        return $this->model::find($storeId)->contacts()
-            ->where('is_public', true)
-            ->count();
+        $store = $this->getById($storeId);
+        if (!$store) {
+            return 0;
+        }
+        return $store->contacts()->where('is_public', true)->count();
     }
 
     public function getPaymentMethodsCount(int $storeId): int
     {
-        return $this->model::find($storeId)->paymentMethods()->count();
+        $store = $this->getById($storeId);
+        return $store ? $store->paymentMethods()->count() : 0;
     }
 
     public function getActivePaymentMethodsCount(int $storeId): int
     {
-        return $this->model::find($storeId)->paymentMethods()
-            ->where('is_enabled', true)
-            ->count();
+        $store = $this->getById($storeId);
+        if (!$store) {
+            return 0;
+        }
+        return $store->paymentMethods()->where('is_enabled', true)->count();
     }
 
     public function getUsersCount(int $storeId): int
     {
-        return $this->model::find($storeId)->users()->count();
+        $store = $this->getById($storeId);
+        return $store ? $store->users()->count() : 0;
     }
 
     public function getActiveUsersCount(int $storeId): int
     {
-        return $this->model::find($storeId)->users()
-            ->where('is_active', true)
-            ->count();
+        $store = $this->getById($storeId);
+        if (!$store) {
+            return 0;
+        }
+        return $store->users()->where('is_active', true)->count();
     }
 }

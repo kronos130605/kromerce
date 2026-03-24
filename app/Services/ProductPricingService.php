@@ -29,7 +29,7 @@ class ProductPricingService
      */
     public function calculateProductPrices(Product $product, ?string $targetCurrency = null): array
     {
-        $currencyConfig = $this->configRepo->getBy([
+        $currencyConfig = $this->configRepo->getFirstBy([
             'store_id' => $product->store_id
         ]);
 
@@ -37,7 +37,7 @@ class ProductPricingService
             return [];
         }
 
-        $supportedCurrencies = $currencyConfig->getSupportedCurrenciesWithRates();
+        $supportedCurrencies = $this->currencyService->getSupportedCurrenciesWithRates((string) $product->store_id);
         $calculatedPrices = [];
 
         foreach ($supportedCurrencies as $currency => $currencyInfo) {
@@ -108,7 +108,7 @@ class ProductPricingService
     public function calculateVariantPrices(ProductVariant $variant, ?string $targetCurrency = null): array
     {
         $product = $variant->product;
-        $currencyConfig = $this->configRepo->getBy([
+        $currencyConfig = $this->configRepo->getFirstBy([
             'store_id' => $product->store_id
         ]);
 
@@ -116,7 +116,7 @@ class ProductPricingService
             return [];
         }
 
-        $supportedCurrencies = $currencyConfig->getSupportedCurrenciesWithRates();
+        $supportedCurrencies = $this->currencyService->getSupportedCurrenciesWithRates((string) $product->store_id);
         $calculatedPrices = [];
 
         foreach ($supportedCurrencies as $currency => $currencyInfo) {

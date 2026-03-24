@@ -2,34 +2,30 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Store;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
 class StoreRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
+        $user = $this->user();
+
+        if (!$user) {
+            return false;
+        }
+
         $store = $this->route('store');
-        
-        // Store owners can always manage their stores
-        if ($store && $store->owner_id === auth()->id()) {
-            return true;
+
+        if (!$store instanceof Store) {
+            return $user->hasRole(['admin', 'super_admin']);
         }
 
-        // Admins can manage all stores
-        if (auth()->user()->hasRole('admin')) {
-            return true;
-        }
-
-        // Store managers can update but not delete
-        if (in_array($this->method(), ['update', 'patch']) && auth()->user()->hasRole('manager')) {
-            return true;
-        }
-
-        return false;
+        return match($this->method()) {
+            'DELETE' => $user->can('delete', $store),
+            default => $user->can('update', $store),
+        };
     }
 
     /**

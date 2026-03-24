@@ -2,17 +2,10 @@
 
 namespace App\Factories;
 
-use App\Models\Product;
-use App\Models\ProductCategory;
-use App\Models\ProductTag;
-use App\Models\Store;
-use App\Models\StoreContact;
-use App\Models\StoreCurrencyConfig;
-use App\Models\StorePaymentMethod;
-use App\Models\User;
 use App\Repositories\Product\ProductCategoryRepository;
 use App\Repositories\Product\ProductRepository;
 use App\Repositories\Product\ProductTagRepository;
+use App\Repositories\Store\BusinessCurrencyConfigRepository;
 use App\Repositories\Store\StoreBrandingRepository;
 use App\Repositories\Store\StoreConfigRepository;
 use App\Repositories\Store\StoreContactRepository;
@@ -23,7 +16,6 @@ use App\Repositories\Store\StoreStatisticsRepository;
 use App\Repositories\User\RoleRepository;
 use App\Repositories\User\UserRoleRepository;
 use App\Repositories\User\UserStoreRepository;
-use Spatie\Permission\Models\Role;
 
 class RepositoryFactory
 {
@@ -41,80 +33,74 @@ class RepositoryFactory
         return $factory->{$name}(...$arguments);
     }
 
-    /**
-     * Get ProductRepository instance.
-     */
     public function productRepository(): ProductRepository
     {
-        return new ProductRepository(new Product());
+        return app()->make(ProductRepository::class);
     }
 
-    /**
-     * Get ProductCategoryRepository instance.
-     */
     public function productCategoryRepository(): ProductCategoryRepository
     {
-        return new ProductCategoryRepository(new ProductCategory());
+        return app()->make(ProductCategoryRepository::class);
     }
 
-    /**
-     * Get ProductTagRepository instance.
-     */
     public function productTagRepository(): ProductTagRepository
     {
-        return new ProductTagRepository(new ProductTag());
+        return app()->make(ProductTagRepository::class);
     }
 
-    // Store repositories
     public function storeRepository(): StoreRepository
     {
-        return new StoreRepository(new Store());
+        return app()->make(StoreRepository::class);
     }
 
     public function storeBrandingRepository(): StoreBrandingRepository
     {
-        return new StoreBrandingRepository(new Store());
+        return app()->make(StoreBrandingRepository::class);
     }
 
     public function storeContactRepository(): StoreContactRepository
     {
-        return new StoreContactRepository(new StoreContact());
+        return app()->make(StoreContactRepository::class);
     }
 
     public function storePaymentMethodRepository(): StorePaymentMethodRepository
     {
-        return new StorePaymentMethodRepository(new StorePaymentMethod());
+        return app()->make(StorePaymentMethodRepository::class);
     }
 
     public function storeCurrencyConfigRepository(): StoreCurrencyConfigRepository
     {
-        return new StoreCurrencyConfigRepository(new StoreCurrencyConfig());
+        return app()->make(StoreCurrencyConfigRepository::class);
     }
 
     public function storeStatisticsRepository(): StoreStatisticsRepository
     {
-        return new StoreStatisticsRepository(new Store());
+        return app()->make(StoreStatisticsRepository::class);
     }
 
     public function storeConfigRepository(): StoreConfigRepository
     {
-        return new StoreConfigRepository(new Store());
+        return app()->make(StoreConfigRepository::class);
     }
 
-    // User repositories
+    public function businessCurrencyConfigRepository(): BusinessCurrencyConfigRepository
+    {
+        return app()->make(BusinessCurrencyConfigRepository::class);
+    }
+
     public function userRoleRepository(): UserRoleRepository
     {
-        return new UserRoleRepository();
+        return app()->make(UserRoleRepository::class);
     }
 
     public function roleRepository(): RoleRepository
     {
-        return new RoleRepository(new Role());
+        return app()->make(RoleRepository::class);
     }
 
     public function userStoreRepository(): UserStoreRepository
     {
-        return new UserStoreRepository(new User());
+        return app()->make(UserStoreRepository::class);
     }
 
 }

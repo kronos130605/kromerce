@@ -98,6 +98,18 @@ class StoreRepository extends BaseRepository
     }
 
     /**
+     * Get store by domain hostname.
+     */
+    public function getByDomain(string $hostname): ?Store
+    {
+        return $this->model->newQuery()
+            ->whereHas('domains', function ($query) use ($hostname) {
+                $query->where('domain', $hostname);
+            })
+            ->first();
+    }
+
+    /**
      * Get available owner ID for store assignment.
      */
     public function getAvailableOwnerId(): ?int
@@ -105,10 +117,9 @@ class StoreRepository extends BaseRepository
         // Get first user that can be an owner
         $user = User::where(function ($query) {
             $query->whereHas('roles', function ($q) {
-                $q->whereIn('name', ['business_owner', 'admin', 'manager']);
-            })->orWhereDoesntHave('roles');
-        })
-        ->where('is_active', true)
+                $q->whereIn('name', ['admin', 'business_owner']);
+            });
+        })->where('is_active', true)
         ->first();
 
         return $user?->id;

@@ -6,16 +6,13 @@ use App\Models\Store;
 use App\Models\StoreContact;
 use App\Models\StoreCurrencyConfig;
 use App\Models\StorePaymentMethod;
-use App\Models\User;
 use App\Repositories\Store\StoreContactRepository;
 use App\Repositories\Store\StoreCurrencyConfigRepository;
 use App\Repositories\Store\StorePaymentMethodRepository;
 use App\Repositories\Store\StoreRepository;
 use App\Repositories\Store\StoreStatisticsRepository;
 use App\Repositories\User\UserStoreRepository;
-use App\Traits\HasStorePermissions;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -23,31 +20,14 @@ use Illuminate\Support\Facades\Log;
 
 class StoreService
 {
-    use HasStorePermissions;
-
-    protected $storeRepository;
-    private $storeContactRepository;
-    private $storePaymentMethodRepository;
-    private $storeCurrencyConfigRepository;
-    private $storeStatisticsRepository;
-
-    private $userStoreRepository;
-
     public function __construct(
-        StoreRepository $storeRepository,
-        StoreContactRepository $storeContactRepository,
-        StorePaymentMethodRepository $storePaymentMethodRepository,
-        StoreCurrencyConfigRepository $storeCurrencyConfigRepository,
-        StoreStatisticsRepository $storeStatisticsRepository,
-        UserStoreRepository $userStoreRepository
-    ) {
-        $this->storeRepository = $storeRepository;
-        $this->storeContactRepository = $storeContactRepository;
-        $this->storePaymentMethodRepository = $storePaymentMethodRepository;
-        $this->storeCurrencyConfigRepository = $storeCurrencyConfigRepository;
-        $this->storeStatisticsRepository = $storeStatisticsRepository;
-        $this->userStoreRepository = $userStoreRepository;
-    }
+        private StoreRepository $storeRepository,
+        private StoreContactRepository $storeContactRepository,
+        private StorePaymentMethodRepository $storePaymentMethodRepository,
+        private StoreCurrencyConfigRepository $storeCurrencyConfigRepository,
+        private StoreStatisticsRepository $storeStatisticsRepository,
+        private UserStoreRepository $userStoreRepository
+    ) {}
     /**
      * Create a new store with default configuration.
      */
@@ -256,31 +236,6 @@ class StoreService
     }
 
     /**
-     * Check if user can manage store.
-     */
-    public function canUserManageStore(int $userId, Store $store): bool
-    {
-        $user = Auth::user();
-
-        // Store owners can always manage their stores
-        if ($store->owner_id === $userId) {
-            return true;
-        }
-
-        // Admins can manage all stores
-        if ($user && $user->hasRole('admin')) {
-            return true;
-        }
-
-        // Store managers can update but not delete
-        if ($user && $user->hasRole('manager')) {
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
      * Get stores accessible to user.
      */
     public function getAccessibleStores(): Collection
@@ -299,253 +254,13 @@ class StoreService
             ->get();
     }
 
-    /**
-     * Get or create default store for user based on role
-     */
-    public function getOrCreateDefaultStoreForUser(User $user): ?Store
-    {
-        try {
-            $userRoles = $user->roles->pluck('name')->toArray();
-
-            // Determinar store slug según rol prioritario
-            $storeSlug = $this->getDefaultStoreSlugForRoles($userRoles);
-
-            // Buscar store existente
-            $store = $this->userStoreRepository->getUserFirstStore($user);
-
-            if (!$store) {
-                // If no store found for user, check if default store exists by slug
-                $defaultStoreSlug = $this->getDefaultStoreSlugForRoles($userRoles);
-                $store = $this->storeRepository->getFirstBy(['slug' => $defaultStoreSlug]);
-
-                if (!$store) {
-                    // Create store por defecto
-                    $store = $this->createDefaultStore($defaultStoreSlug, $userRoles, $user);
-                } else {
-                    // Associate existing default store with user
-                    $this->userStoreRepository->attachUserToStore($user, $store);
-                }
-            }
-
-            return $store;
-
-        } catch (\Exception $e) {
-            Log::error('Error getting or creating default store for user', [
-                'user_id' => $user->id,
-                'user_email' => $user->email,
-                'error' => $e->getMessage(),
-            ]);
-
-            return null;
-        }
-    }
-
-    /**
-     * Assign store to user with appropriate role
-     */
-    public function assignStoreToUser(User $user, Store $store): bool
-    {
-        try {
-            return $this->userStoreRepository->attachUserToStore($user, $store);
-
-        } catch (\Exception $e) {
-            Log::error('Error assigning store to user', [
-                'user_id' => $user->id,
-                'store_id' => $store->id,
-                'error' => $e->getMessage(),
-            ]);
-
-            return false;
-        }
-    }
-
-    /**
-     * Get default store slug based on user roles
-     */
-    public function getDefaultStoreSlugForRoles(array $userRoles): string
-    {
-        // Get business roles from config
-        $businessRoles = config('roles.business_roles', ['business_owner']);
-
-        // Check if user has any business role
-        foreach ($businessRoles as $role) {
-            if (in_array($role, $userRoles)) {
-                return config('roles.default_store_slugs.business', 'business-default');
-            }
-        }
-
-        // Default to customer store
-        return config('roles.default_store_slugs.customer', 'customers-default');
-    }
-
-    /**
-     * Create default store with appropriate settings
-     */
-    public function createDefaultStore(string $slug, array $userRoles, ?User $user = null): ?Store
-    {
-        try {
-            $settings = $this->getDefaultStoreSettings($slug, $userRoles);
-            $uuid = \Illuminate\Support\Str::uuid();
-
-            // Usar el usuario actual como owner, o buscar uno disponible
-            $ownerId = $user?->id ?? $this->storeRepository->getAvailableOwnerId();
-
-            if (!$ownerId) {
-                throw new \Exception('No available user found for owner_id');
-            }
-
-            // Usar repositorio para crear store
-            $storeId = $this->storeRepository->createDirect([
-                'uuid' => $uuid,
-                'name' => $this->getDefaultStoreName($slug),
-                'slug' => $slug,
-                'data' => json_encode($settings),
-                'status' => 'active',
-                'owner_id' => $ownerId,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-
-            // Obtener el store creado
-            $store = $this->storeRepository->getFirstBy([
-                'id' => $storeId
-            ]);
-
-            if (!$store) {
-                throw new \Exception('Failed to retrieve created store');
-            }
-
-            return $store;
-
-        } catch (\Exception $e) {
-            // Check if it's a duplicate entry error
-            if (str_contains($e->getMessage(), 'Duplicate entry') && str_contains($e->getMessage(), $slug)) {
-                Log::warning('Store with slug already exists, attempting to retrieve existing store', [
-                    'slug' => $slug,
-                    'user_roles' => $userRoles,
-                    'error' => $e->getMessage(),
-                ]);
-
-                // Try to get existing store by slug
-                $existingStore = $this->storeRepository->getFirstBy(['slug' => $slug]);
-                if ($existingStore && $user) {
-                    // Associate user with existing store
-                    $this->userStoreRepository->attachUserToStore($user, $existingStore);
-                    return $existingStore;
-                }
-            }
-
-            Log::error('Error creating default store', [
-                'slug' => $slug,
-                'user_roles' => $userRoles,
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-            ]);
-
-            return null;
-        }
-    }
-
-    /**
-     * Get default store name
-     */
-    public function getDefaultStoreName(string $slug): string
-    {
-        return match ($slug) {
-            'business-default' => 'Business Default',
-            'customers-default' => 'Customers Default',
-            default => 'Default Store',
-        };
-    }
-
-    /**
-     * Get default store settings
-     */
-    public function getDefaultStoreSettings(string $slug, array $userRoles): array
-    {
-        // Get base settings from config
-        $baseSettings = config('settings.base_settings');
-
-        // Get store type specific settings from config
-        $storeTypeSettings = config("settings.store_type_settings.{$slug}", []);
-
-        // Merge base settings with store type specific settings
-        return array_merge($baseSettings, $storeTypeSettings);
-    }
-
-    /**
-     * Get available themes from config
-     */
-    public function getAvailableThemes(): array
-    {
-        return config('settings.themes');
-    }
-
-    /**
-     * Get theme configuration by name
-     */
-    public function getThemeConfig(string $themeName): ?array
-    {
-        return config("settings.themes.{$themeName}");
-    }
-
-    /**
-     * Get supported currencies from config
-     */
-    public function getSupportedCurrencies(): array
-    {
-        return config('settings.currencies');
-    }
-
-    /**
-     * Get currency configuration by code
-     */
-    public function getCurrencyConfig(string $currencyCode): ?array
-    {
-        return config("settings.currencies.{$currencyCode}");
-    }
-
-    /**
-     * Get supported languages from config
-     */
-    public function getSupportedLanguages(): array
-    {
-        return config('settings.languages');
-    }
-
-    /**
-     * Get language configuration by code
-     */
-    public function getLanguageConfig(string $languageCode): ?array
-    {
-        return config("settings.languages.{$languageCode}");
-    }
-
-    /**
-     * Get common timezones from config
-     */
-    public function getCommonTimezones(): array
-    {
-        return config('settings.timezones');
-    }
-
-    /**
-     * Get layout defaults for store type
-     */
-    public function getLayoutDefaults(string $storeType): array
-    {
-        return config("settings.layout_defaults.{$storeType}", []);
-    }
-
     public function resolveCurrentStoreForRequest(Request $request): ?Store
     {
         $hostname = $request->getHost();
         $centralDomains = config('tenancy.central_domains', []);
 
         if (!in_array($hostname, $centralDomains)) {
-            $store = Store::whereHas('domains', function ($query) use ($hostname) {
-                $query->where('domain', $hostname);
-            })->first();
+            $store = $this->storeRepository->getByDomain($hostname);
 
             if ($store) {
                 session(['current_store_id' => $store->id]);
@@ -560,16 +275,18 @@ class StoreService
 
         $sessionStoreId = session('current_store_id');
         if ($sessionStoreId) {
-            $hasAccess = $user->stores()->where('stores.id', $sessionStoreId)->exists();
+            $hasAccess = $this->userStoreRepository->userHasAccessToStore($user, $sessionStoreId);
             if ($hasAccess) {
-                $store = Store::find($sessionStoreId);
+                $store = $this->storeRepository->getById($sessionStoreId);
                 if ($store) {
                     return $store;
                 }
             }
         }
 
-        $store = $this->getUserCurrentStore($user) ?: $this->userStoreRepository->getUserFirstStore($user);
+        $store = $this->userStoreRepository->getUserCurrentStore($user)
+            ?: $this->userStoreRepository->getUserFirstStore($user);
+
         if ($store) {
             session(['current_store_id' => $store->id]);
         }
@@ -577,48 +294,9 @@ class StoreService
         return $store;
     }
 
-    /**
-     * Get feature flags for store type
-     */
-    public function getFeatureFlags(string $storeType): array
-    {
-        return config("settings.features.{$storeType}", []);
-    }
-
-    /**
-     * Get user's current store
-     */
-    public function getUserCurrentStore(User $user): ?Store
-    {
-        return $this->userStoreRepository->getUserCurrentStore($user);
-    }
-
-    /**
-     * Set user's current store
-     */
-    public function setUserCurrentStore(User $user, Store $store): bool
-    {
-        return $this->userStoreRepository->setUserCurrentStore($user, $store);
-    }
-
-    /**
-     * Get all stores for user
-     */
-    public function getUserStores(User $user): \Illuminate\Database\Eloquent\Collection
-    {
-        return $this->userStoreRepository->getUserStores($user);
-    }
-
-    /**
-     * Get basic store data for frontend (optimized for Inertia).
-     * Uses caching to avoid repeated database queries.
-     */
     public function getBasicStoreDataForFrontend(int $storeId): ?array
     {
-        // Cache for 30 minutes to improve performance
-        $cacheKey = "store_basic_data_{$storeId}";
-
-        return cache()->remember($cacheKey, 1800, function () use ($storeId) {
+        return cache()->remember("store_basic_data_{$storeId}", 1800, function () use ($storeId) {
             return $this->storeRepository->getBasicStoreData($storeId);
         });
     }

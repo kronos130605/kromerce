@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Repositories\BusinessCurrencyConfigRepository;
+use App\Repositories\Store\BusinessCurrencyConfigRepository;
 use App\Repositories\Product\ProductCategoryRepository;
 use App\Repositories\Product\ProductRepository;
 use App\Repositories\Product\ProductTagRepository;

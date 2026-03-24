@@ -195,16 +195,6 @@ class Product extends Model
     }
 
     /**
-     * Get calculated prices in all supported currencies.
-     * Note: This method delegates to ProductPricingService for clean architecture.
-     */
-    public function getCalculatedPrices(): array
-    {
-        // Delegar al service para mantener arquitectura limpia
-        return app(\App\Services\ProductPricingService::class)->calculateProductPrices($this);
-    }
-
-    /**
      * Get current effective price (sale price if on sale, otherwise base price).
      */
     public function getCurrentPrice(): float

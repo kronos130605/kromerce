@@ -31,7 +31,7 @@ class ProductRepository extends BaseRepository
      */
     public function getForStore(int $storeId, array $filters = []): Collection
     {
-        $query = $this->model->where('store_id', $storeId);
+        $query = $this->model->newQuery()->where('store_id', $storeId);
 
         $this->applyProductFilters($query, $filters);
 
@@ -43,7 +43,7 @@ class ProductRepository extends BaseRepository
      */
     public function paginateForStore(int $storeId, array $filters = [], int $perPage = 15): LengthAwarePaginator
     {
-        $query = $this->model->where('store_id', $storeId);
+        $query = $this->model->newQuery()->where('store_id', $storeId);
 
         $this->applyProductFilters($query, $filters);
 
@@ -55,7 +55,7 @@ class ProductRepository extends BaseRepository
      */
     public function getActiveForStore(int $storeId): Collection
     {
-        return $this->model
+        return $this->model->newQuery()
             ->where('store_id', $storeId)
             ->where('is_active', true)
             ->get();
@@ -79,7 +79,7 @@ class ProductRepository extends BaseRepository
 
         $relationships = array_merge($defaultRelationships, $relationships);
 
-        return $this->model
+        return $this->model->newQuery()
             ->where('store_id', $storeId)
             ->with($relationships)
             ->get();
@@ -90,7 +90,7 @@ class ProductRepository extends BaseRepository
      */
     public function search(int $storeId, string $query, array $filters = []): Collection
     {
-        return $this->model
+        return $this->model->newQuery()
             ->where('store_id', $storeId)
             ->where(function ($q) use ($query) {
                 $q->where('name', 'like', "%{$query}%")
@@ -141,7 +141,7 @@ class ProductRepository extends BaseRepository
      */
     public function countForStore(int $storeId): int
     {
-        return $this->model->where('store_id', $storeId)->count();
+        return $this->model->newQuery()->where('store_id', $storeId)->count();
     }
 
     /**
@@ -149,7 +149,7 @@ class ProductRepository extends BaseRepository
      */
     public function countActiveForStore(int $storeId): int
     {
-        return $this->model
+        return $this->model->newQuery()
             ->where('store_id', $storeId)
             ->where('is_active', true)
             ->count();
@@ -160,7 +160,7 @@ class ProductRepository extends BaseRepository
      */
     public function countLowStockForStore(int $storeId): int
     {
-        return $this->model
+        return $this->model->newQuery()
             ->where('store_id', $storeId)
             ->where('manage_stock', true)
             ->whereColumn('stock_quantity', '<=', 'low_stock_threshold')
@@ -168,11 +168,24 @@ class ProductRepository extends BaseRepository
     }
 
     /**
+     * Get low stock products for store.
+     */
+    public function getLowStock(int $storeId): Collection
+    {
+        return $this->model->newQuery()
+            ->where('store_id', $storeId)
+            ->where('manage_stock', true)
+            ->whereColumn('stock_quantity', '<=', 'low_stock_threshold')
+            ->orderBy('stock_quantity', 'asc')
+            ->get();
+    }
+
+    /**
      * Get latest products for store.
      */
     public function getLatestForStore(int $storeId, int $limit = 5): Collection
     {
-        return $this->model
+        return $this->model->newQuery()
             ->where('store_id', $storeId)
             ->orderBy('created_at', 'desc')
             ->take($limit)
@@ -185,7 +198,7 @@ class ProductRepository extends BaseRepository
     public function getRecentPriceChanges(int $storeId, int $limit = 10): Collection
     {
         // This would typically track price history, for now return recent products
-        return $this->model
+        return $this->model->newQuery()
             ->where('store_id', $storeId)
             ->orderBy('updated_at', 'desc')
             ->take($limit)
@@ -197,7 +210,7 @@ class ProductRepository extends BaseRepository
      */
     public function getRecentStockUpdates(int $storeId, int $limit = 5): Collection
     {
-        return $this->model
+        return $this->model->newQuery()
             ->where('store_id', $storeId)
             ->where('manage_stock', true)
             ->orderBy('updated_at', 'desc')
@@ -210,7 +223,7 @@ class ProductRepository extends BaseRepository
      */
     public function getTopByRevenue(int $storeId, int $limit = 5): Collection
     {
-        return $this->model
+        return $this->model->newQuery()
             ->where('store_id', $storeId)
             ->orderBy('base_price', 'desc')
             ->take($limit)
@@ -223,7 +236,7 @@ class ProductRepository extends BaseRepository
     public function getTopByViews(int $storeId, int $limit = 5): Collection
     {
         // This would typically track views, for now return recent products
-        return $this->model
+        return $this->model->newQuery()
             ->where('store_id', $storeId)
             ->orderBy('created_at', 'desc')
             ->take($limit)
@@ -236,7 +249,7 @@ class ProductRepository extends BaseRepository
     public function getTopBySales(int $storeId, int $limit = 5): Collection
     {
         // This would typically track sales, for now return recent products
-        return $this->model
+        return $this->model->newQuery()
             ->where('store_id', $storeId)
             ->orderBy('created_at', 'desc')
             ->take($limit)
@@ -268,12 +281,12 @@ class ProductRepository extends BaseRepository
     {
         try {
             $stats = [
-                'total_products' => $this->model->where('store_id', $storeId)->count(),
-                'active_products' => $this->model->where('store_id', $storeId)->where('status', 'active')->count(),
-                'inactive_products' => $this->model->where('store_id', $storeId)->where('status', '!=', 'active')->count(),
-                'total_value' => $this->model->where('store_id', $storeId)->sum('base_price'),
-                'average_price' => $this->model->where('store_id', $storeId)->avg('base_price'),
-                'recent_products' => $this->model->where('store_id', $storeId)
+                'total_products' => $this->model->newQuery()->where('store_id', $storeId)->count(),
+                'active_products' => $this->model->newQuery()->where('store_id', $storeId)->where('status', 'active')->count(),
+                'inactive_products' => $this->model->newQuery()->where('store_id', $storeId)->where('status', '!=', 'active')->count(),
+                'total_value' => $this->model->newQuery()->where('store_id', $storeId)->sum('base_price'),
+                'average_price' => $this->model->newQuery()->where('store_id', $storeId)->avg('base_price'),
+                'recent_products' => $this->model->newQuery()->where('store_id', $storeId)
                     ->orderBy('created_at', 'desc')
                     ->limit(5)
                     ->count(),

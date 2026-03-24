@@ -11,21 +11,10 @@ abstract class BaseRepository
 {
     protected Model $model;
     protected array $allowedFields = [];
-    protected ?Builder $query = null;
 
     public function __construct(Model $model)
     {
         $this->model = $model;
-    }
-
-    protected function builder(): Builder
-    {
-        return $this->query ?? $this->model->newQuery();
-    }
-
-    protected function clearQuery(): void
-    {
-        $this->query = null;
     }
 
     /**
@@ -187,9 +176,7 @@ abstract class BaseRepository
      */
     public function paginate(int $perPage = 15, array $columns = ['*']): LengthAwarePaginator
     {
-        $paginator = $this->builder()->paginate($perPage, $columns);
-        $this->clearQuery();
-        return $paginator;
+        return $this->model->newQuery()->paginate($perPage, $columns);
     }
 
     /**
@@ -313,59 +300,19 @@ abstract class BaseRepository
     }
 
     /**
-     * Get records with relationships.
-     */
-    public function with(array $relations): self
-    {
-        $this->query = $this->builder()->with($relations);
-        return $this;
-    }
-
-    /**
-     * Get records with count of relationships.
-     */
-    public function withCount(array $relations): self
-    {
-        $this->query = $this->builder()->withCount($relations);
-        return $this;
-    }
-
-    /**
-     * Order by column.
-     */
-    public function orderBy(string $column, string $direction = 'asc'): self
-    {
-        $this->query = $this->builder()->orderBy($column, $direction);
-        return $this;
-    }
-
-    /**
-     * Limit results.
-     */
-    public function limit(int $limit): self
-    {
-        $this->query = $this->builder()->limit($limit);
-        return $this;
-    }
-
-    /**
-     * Get results from modified query.
+     * Get all results.
      */
     public function get(array $columns = ['*']): Collection
     {
-        $results = $this->builder()->get($columns);
-        $this->clearQuery();
-        return $results;
+        return $this->model->newQuery()->get($columns);
     }
 
     /**
-     * Get first result from modified query.
+     * Get first result.
      */
     public function first(array $columns = ['*']): ?Model
     {
-        $result = $this->builder()->first($columns);
-        $this->clearQuery();
-        return $result;
+        return $this->model->newQuery()->first($columns);
     }
 
     

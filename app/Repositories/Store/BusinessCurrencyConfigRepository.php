@@ -23,7 +23,7 @@ class BusinessCurrencyConfigRepository extends BaseRepository
      */
     public function getNeedingRateUpdate(): Collection
     {
-        return $this->model
+        return $this->model->newQuery()
             ->where('auto_update_rates', true)
             ->where(function ($query) {
                 $query->whereNull('last_rate_update')
@@ -56,5 +56,23 @@ class BusinessCurrencyConfigRepository extends BaseRepository
         return $this->updateBy(['store_id' => $storeId], [
             'last_rate_update' => now()
         ]);
+    }
+
+    /**
+     * Get or create currency config for store.
+     */
+    public function getOrCreateForStore(string $storeId): BusinessCurrencyConfig
+    {
+        return $this->firstOrCreate(
+            ['store_id' => $storeId],
+            [
+                'default_currency' => config('currencies.default', 'USD'),
+                'display_currencies' => config('currencies.default_display', ['USD', 'EUR', 'COP']),
+                'use_custom_rates' => false,
+                'auto_update_rates' => false,
+                'rate_update_frequency' => 'weekly',
+                'historical_retention_years' => 2,
+            ]
+        );
     }
 }

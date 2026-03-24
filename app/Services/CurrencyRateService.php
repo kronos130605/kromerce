@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Repositories\BusinessCurrencyConfigRepository;
+use App\Repositories\Store\BusinessCurrencyConfigRepository;
 use App\Repositories\Currency\CurrencyRateBusinessRepository;
 use App\Repositories\Currency\CurrencyRateGlobalRepository;
 use App\Repositories\Currency\CurrencyRateUpdateRepository;
@@ -33,7 +33,7 @@ class CurrencyRateService
     public function updateDailyRates(): array
     {
         $today = now()->format('Y-m-d');
-        $currencies = ['USD', 'EUR', 'GBP', 'JPY', 'COP', 'MXN', 'CAD', 'AUD', 'CHF', 'CNY', 'INR'];
+        $currencies = array_keys(config('currencies.supported', []));
         $results = [];
         $totalUpdated = 0;
 

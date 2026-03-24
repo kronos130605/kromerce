@@ -2,8 +2,8 @@
 
 namespace App\Providers;
 
+use App\Repositories\Store\StoreBrandingRepository;
 use App\Services\BrandingService;
-use App\Factories\RepositoryFactory;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
@@ -16,7 +16,7 @@ class BrandingServiceProvider extends ServiceProvider
     {
         $this->app->singleton(BrandingService::class, function ($app) {
             return new BrandingService(
-                $app->make(RepositoryFactory::class)->storeBrandingRepository()
+                $app->make(StoreBrandingRepository::class)
             );
         });
     }

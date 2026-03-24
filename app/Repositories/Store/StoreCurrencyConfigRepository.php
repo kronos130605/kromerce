@@ -24,7 +24,7 @@ class StoreCurrencyConfigRepository extends BaseRepository
      */
     public function getNeedingRateUpdate(): Collection
     {
-        return $this->model
+        return $this->model->newQuery()
             ->where('auto_update_rates', true)
             ->where(function ($query) {
                 $query->whereNull('last_rate_update')

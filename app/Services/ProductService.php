@@ -2,9 +2,10 @@
 
 namespace App\Services;
 
-use App\Factories\RepositoryFactory;
 use App\Models\Store;
 use App\Models\User;
+use App\Repositories\Product\ProductCategoryRepository;
+use App\Repositories\Product\ProductRepository;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
@@ -12,7 +13,8 @@ use Illuminate\Support\Collection;
 class ProductService
 {
     public function __construct(
-        private RepositoryFactory $repositoryFactory
+        private ProductRepository $productRepository,
+        private ProductCategoryRepository $productCategoryRepository
     ) {}
 
     /**
@@ -21,7 +23,7 @@ class ProductService
     public function getProductsForStore(Store $store, array $filters = []): LengthAwarePaginator
     {
         try {
-            return $this->repositoryFactory->productRepository()->paginateForStore($store->id, $filters);
+            return $this->productRepository->paginateForStore($store->id, $filters);
         } catch (\Exception $e) {
             throw new \Exception('Failed to retrieve products: ' . $e->getMessage());
         }
@@ -33,7 +35,7 @@ class ProductService
     public function getCategoriesForStore(Store $store): Collection
     {
         try {
-            return $this->repositoryFactory->productCategoryRepository()->getForStore($store->id);
+            return $this->productCategoryRepository->getForStore($store->id);
         } catch (\Exception $e) {
             throw new \Exception('Failed to retrieve categories: ' . $e->getMessage());
         }
@@ -45,7 +47,7 @@ class ProductService
     public function getStatisticsForStore(Store $store): array
     {
         try {
-            return $this->repositoryFactory->productRepository()->getStatistics($store->id);
+            return $this->productRepository->getStatistics($store->id);
         } catch (\Exception $e) {
             throw new \Exception('Failed to retrieve statistics: ' . $e->getMessage());
         }
@@ -60,7 +62,7 @@ class ProductService
             $data['store_id'] = $store->id;
             $data['created_by'] = $user->id;
 
-            return $this->repositoryFactory->productRepository()->create($data);
+            return $this->productRepository->create($data);
         } catch (\Exception $e) {
             throw new \Exception('Failed to create product: ' . $e->getMessage());
         }
@@ -72,7 +74,7 @@ class ProductService
     public function getProductForStore(Store $store, int $productId): ?Model
     {
         try {
-            return $this->repositoryFactory->productRepository()
+            return $this->productRepository
                 ->getFirstBy(['id' => $productId, 'store_id' => $store->id]);
         } catch (\Exception $e) {
             throw new \Exception('Failed to retrieve product: ' . $e->getMessage());
@@ -85,7 +87,7 @@ class ProductService
     public function updateProductForStore(Store $store, int $productId, array $data): bool
     {
         try {
-            $updated = $this->repositoryFactory->productRepository()
+            $updated = $this->productRepository
                 ->updateBy(['id' => $productId, 'store_id' => $store->id], $data);
 
             return $updated > 0;
@@ -100,7 +102,7 @@ class ProductService
     public function getLatestProductsForStore(Store $store, int $limit = 5): Collection
     {
         try {
-            return $this->repositoryFactory->productRepository()->getLatestForStore($store->id, $limit);
+            return $this->productRepository->getLatestForStore($store->id, $limit);
         } catch (\Exception $e) {
             throw new \Exception('Failed to retrieve latest products: ' . $e->getMessage());
         }
@@ -112,7 +114,7 @@ class ProductService
     public function getLowStockProductsForStore(Store $store, int $limit = 5): Collection
     {
         try {
-            return $this->repositoryFactory->productRepository()->getLowStock($store->id)->take($limit);
+            return $this->productRepository->getLowStock($store->id)->take($limit);
         } catch (\Exception $e) {
             throw new \Exception('Failed to retrieve low stock products: ' . $e->getMessage());
         }
@@ -124,7 +126,7 @@ class ProductService
     public function deleteProductForStore(Store $store, int $productId): bool
     {
         try {
-            $deleted = $this->repositoryFactory->productRepository()
+            $deleted = $this->productRepository
                 ->deleteBy(['id' => $productId, 'store_id' => $store->id]);
 
             return $deleted > 0;
