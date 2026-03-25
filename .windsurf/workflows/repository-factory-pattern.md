@@ -1,15 +1,15 @@
 ---
-description: Repository Factory (instanciación consistente + DI)
+description: Repository Factory & Dependency Injection (Fase 2)
 ---
 
-# Repository Factory
+# Repository Factory & DI (Fase 2)
 
-Este workflow define cómo usar `RepositoryFactory` sin inconsistencias.
+Este workflow define el patrón de repositorios y inyección de dependencias post-refactor.
 
 ## Objetivo
 
 - Instanciación consistente de repositorios.
-- Reducir dependencias en services (inyectas `RepositoryFactory`).
+- **Inyección directa de repositorios en services** (no RepositoryFactory como dependencia).
 
 ## Reglas
 

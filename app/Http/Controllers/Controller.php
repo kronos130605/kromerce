@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use App\Services\StoreService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Validation\ValidatesRequests;
@@ -35,7 +36,7 @@ abstract class Controller extends BaseController
     /**
      * Validate user access to store.
      */
-    protected function validateUserStoreAccess(\App\Models\User $user, Store $store): bool
+    protected function validateUserStoreAccess(User $user, Store $store): bool
     {
         if ($user->isSuperAdmin()) {
             return true;

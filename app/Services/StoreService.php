@@ -296,8 +296,10 @@ class StoreService
 
     public function getBasicStoreDataForFrontend(int $storeId): ?array
     {
-        return cache()->remember("store_basic_data_{$storeId}", 1800, function () use ($storeId) {
-            return $this->storeRepository->getBasicStoreData($storeId);
-        });
+        return cache()->remember(
+            "store_basic_data_{$storeId}",
+            1800,
+            fn () => $this->storeRepository->getBasicStoreData($storeId)
+        );
     }
 }
