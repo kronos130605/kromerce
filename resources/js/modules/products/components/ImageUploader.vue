@@ -18,13 +18,13 @@
             </svg>
             <div class="mt-4">
                 <p class="text-lg font-medium text-gray-900">
-                    Drop images here or click to upload
+                    {{ t('products.imageUploader.drop_hint') }}
                 </p>
                 <p class="text-sm text-gray-500 mt-1">
-                    PNG, JPG, GIF up to 10MB each
+                    {{ t('products.imageUploader.formats') }}
                 </p>
                 <p class="text-sm text-gray-500">
-                    {{ images.length }}/{{ maxImages }} images uploaded
+                    {{ t('products.imageUploader.uploaded_count', { count: images.length, max: maxImages }) }}
                 </p>
             </div>
             
@@ -40,7 +40,7 @@
 
         <!-- Image Gallery -->
         <div v-if="images.length > 0" class="mt-6">
-            <h3 class="text-lg font-medium text-gray-900 mb-4">Product Images</h3>
+            <h3 class="text-lg font-medium text-gray-900 mb-4">{{ t('products.imageUploader.product_images') }}</h3>
             
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 <div
@@ -58,11 +58,11 @@
                     </div>
                     
                     <!-- Primary Badge -->
-                    <div
+                <div
                         v-if="image.is_primary"
                         class="absolute top-2 left-2 bg-blue-500 text-white text-xs px-2 py-1 rounded-full"
                     >
-                        Primary
+                        {{ t('products.imageUploader.primary') }}
                     </div>
                     
                     <!-- Actions Overlay -->
@@ -72,7 +72,7 @@
                             v-if="!image.is_primary"
                             @click="setAsPrimary(index)"
                             class="p-2 bg-white rounded-full hover:bg-blue-50 text-blue-600"
-                            title="Set as primary image"
+                            :title="t('products.imageUploader.set_primary')"
                         >
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
@@ -83,7 +83,7 @@
                         <button
                             @click="editImage(index)"
                             class="p-2 bg-white rounded-full hover:bg-gray-50 text-gray-600"
-                            title="Edit image details"
+                            :title="t('products.imageUploader.edit_details')"
                         >
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
@@ -94,7 +94,7 @@
                         <button
                             @click="removeImage(index)"
                             class="p-2 bg-white rounded-full hover:bg-red-50 text-red-600"
-                            title="Remove image"
+                            :title="t('products.imageUploader.remove')"
                         >
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
@@ -108,7 +108,7 @@
                             v-if="index > 0"
                             @click="moveImage(index, index - 1)"
                             class="p-1 bg-white rounded shadow-md hover:bg-gray-50"
-                            title="Move left"
+                            :title="t('products.imageUploader.move_left')"
                         >
                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
@@ -118,7 +118,7 @@
                             v-if="index < images.length - 1"
                             @click="moveImage(index, index + 1)"
                             class="p-1 bg-white rounded shadow-md hover:bg-gray-50"
-                            title="Move right"
+                            :title="t('products.imageUploader.move_right')"
                         >
                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
@@ -139,32 +139,32 @@
                 class="bg-white rounded-lg p-6 max-w-md w-full mx-4"
                 @click.stop
             >
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">Edit Image Details</h3>
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">{{ t('products.imageUploader.edit_modal_title') }}</h3>
                 
                 <div class="space-y-4">
                     <!-- Alt Text -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">
-                            Alt Text
+                            {{ t('products.imageUploader.alt_text') }}
                         </label>
                         <input
                             v-model="editingImageData.alt"
                             type="text"
                             class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            placeholder="Describe the image for accessibility"
+                            :placeholder="t('products.imageUploader.alt_placeholder')"
                         >
                     </div>
                     
                     <!-- Title -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">
-                            Title
+                            {{ t('products.imageUploader.title') }}
                         </label>
                         <input
                             v-model="editingImageData.title"
                             type="text"
                             class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            placeholder="Image title"
+                            :placeholder="t('products.imageUploader.title_placeholder')"
                         >
                     </div>
                 </div>
@@ -174,13 +174,13 @@
                         @click="closeEditModal"
                         class="btn btn-outline"
                     >
-                        Cancel
+                        {{ t('products.imageUploader.cancel') }}
                     </button>
                     <button
                         @click="saveImageEdit"
                         class="btn btn-primary"
                     >
-                        Save Changes
+                        {{ t('products.imageUploader.save_changes') }}
                     </button>
                 </div>
             </div>
@@ -189,7 +189,10 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const props = defineProps({
     modelValue: {
@@ -271,7 +274,7 @@ const processFiles = (files) => {
     
     filesToProcess.forEach(file => {
         if (file.size > props.maxSize) {
-            alert(`File ${file.name} is too large. Maximum size is ${props.maxSize / 1024 / 1024}MB.`)
+            alert(t('products.imageUploader.file_too_large', { name: file.name, size: props.maxSize / 1024 / 1024 }))
             return
         }
         

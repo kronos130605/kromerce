@@ -36,18 +36,11 @@ class ProductController extends Controller
             $statistics = $this->productService->getStatisticsForStore($store);
 
             // Return products page with SPA structure
-            return Inertia::render('Business/Index', [
-                'activeTab' => 'products',
+            return Inertia::render('products/Index', [
                 'products' => $products,
                 'categories' => $categories,
                 'filters' => $filters,
                 'statistics' => $statistics,
-                'dashboard_data' => [
-                    'totalProducts' => $statistics['total_products'] ?? 0,
-                    'activeProducts' => $statistics['active_products'] ?? 0,
-                    'lowStock' => $statistics['low_stock'] ?? 0,
-                    'outOfStock' => $statistics['out_of_stock'] ?? 0,
-                ]
             ]);
 
         } catch (\Exception $e) {
@@ -64,22 +57,13 @@ class ProductController extends Controller
 
     /**
      * Show the form for creating a new product.
+     * 
+     * @deprecated Use modal in products/Index instead
      */
-    public function create(ProductRequest $request): Response
+    public function create(ProductRequest $request): RedirectResponse
     {
-        try {
-            $store = $this->validateStore();
-            $categories = $this->productService->getCategoriesForStore($store);
-
-            return Inertia::render('Business/Index', [
-                'activeTab' => 'products',
-                'productsView' => 'create',
-                'categories' => $categories,
-            ]);
-
-        } catch (\Exception $e) {
-            throw $e;
-        }
+        // Redirect to products index with modal trigger
+        return redirect()->route('products.index', ['modal' => 'create']);
     }
 
     /**
@@ -114,52 +98,24 @@ class ProductController extends Controller
 
     /**
      * Display the specified product.
+     * 
+     * @deprecated Use modal in products/Index instead
      */
-    public function show(ProductRequest $request, Product $product): Response
+    public function show(ProductRequest $request, Product $product): RedirectResponse
     {
-        try {
-            $store = $this->validateStore();
-            $product = $this->productService->getProductForStore($store, $product->id);
-
-            if (!$product) {
-                abort(404);
-            }
-
-            return Inertia::render('Business/Index', [
-                'activeTab' => 'products',
-                'productsView' => 'show',
-                'product' => $product,
-            ]);
-
-        } catch (\Exception $e) {
-            throw $e;
-        }
+        // Redirect to products index with modal trigger
+        return redirect()->route('products.index', ['modal' => 'view', 'product' => $product->id]);
     }
 
     /**
      * Show the form for editing the specified product.
+     * 
+     * @deprecated Use modal in products/Index instead
      */
-    public function edit(ProductRequest $request, Product $product): Response
+    public function edit(ProductRequest $request, Product $product): RedirectResponse
     {
-        try {
-            $store = $this->validateStore();
-            $product = $this->productService->getProductForStore($store, $product->id);
-            $categories = $this->productService->getCategoriesForStore($store);
-
-            if (!$product) {
-                abort(404);
-            }
-
-            return Inertia::render('Business/Index', [
-                'activeTab' => 'products',
-                'productsView' => 'edit',
-                'product' => $product,
-                'categories' => $categories,
-            ]);
-
-        } catch (\Exception $e) {
-            throw $e;
-        }
+        // Redirect to products index with modal trigger
+        return redirect()->route('products.index', ['modal' => 'edit', 'product' => $product->id]);
     }
 
     /**

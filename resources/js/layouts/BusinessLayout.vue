@@ -11,7 +11,12 @@
       <!-- Main Content -->
       <main class="flex-1 overflow-y-auto">
         <div class="px-4 pb-4 pt-[5rem] h-full">
+          <!-- Render slot content if provided, otherwise use dynamic component -->
+          <slot v-if="$slots.default">
+            <!-- Content passed via slot -->
+          </slot>
           <component
+            v-else
             :is="currentContent"
             :products="page.props.products"
             :categories="page.props.categories"

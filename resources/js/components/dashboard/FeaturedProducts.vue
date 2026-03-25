@@ -52,8 +52,7 @@ const featuredProducts = ref([
 ]);
 
 const addToCart = (product) => {
-    console.log('Adding to cart:', product.name);
-    // Aquí iría la lógica para añadir al carrito
+    // TODO: Implementar lógica para añadir al carrito
 };
 </script>
 

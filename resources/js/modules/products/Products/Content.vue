@@ -23,25 +23,25 @@ const inStock = ref(props.filters.in_stock || false);
 
 const statsCards = computed(() => [
     {
-        title: t('products_management.statistics.total_products'),
+        title: t('products.statistics.total_products'),
         value: props.statistics.total_products || 0,
         icon: 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4',
         color: 'blue'
     },
     {
-        title: t('products_management.statistics.active_products'),
+        title: t('products.statistics.active_products'),
         value: props.statistics.active_products || 0,
         icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z',
         color: 'green'
     },
     {
-        title: t('products_management.statistics.low_stock'),
+        title: t('products.statistics.low_stock'),
         value: props.statistics.low_stock || 0,
         icon: 'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z',
         color: 'yellow'
     },
     {
-        title: t('products_management.statistics.out_of_stock'),
+        title: t('products.statistics.out_of_stock'),
         value: props.statistics.out_of_stock || 0,
         icon: 'M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
         color: 'red'
@@ -117,29 +117,29 @@ const isOutOfStock = (product) => {
 
     <!-- Filters -->
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
-        <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">{{ t('products_management.list.filters.title') }}</h3>
+        <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">{{ t('products.list.filters.title') }}</h3>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    {{ t('products_management.list.filters.search') }}
+                    {{ t('products.list.filters.search') }}
                 </label>
                 <input
                     v-model="searchQuery"
                     type="text"
-                    :placeholder="t('products_management.list.search_placeholder')"
+                    :placeholder="t('products.list.search_placeholder')"
                     class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
                 />
             </div>
 
             <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    {{ t('products_management.list.filters.category') }}
+                    {{ t('products.list.filters.category') }}
                 </label>
                 <select
                     v-model="selectedCategory"
                     class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
                 >
-                    <option value="">{{ t('products_management.list.filters.all_categories') }}</option>
+                    <option value="">{{ t('products.list.filters.all_categories') }}</option>
                     <option v-for="category in categories" :key="category.id" :value="category.id">
                         {{ category.name }}
                     </option>
@@ -148,34 +148,34 @@ const isOutOfStock = (product) => {
 
             <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    {{ t('products_management.list.filters.status') }}
+                    {{ t('products.list.filters.status') }}
                 </label>
                 <select
                     v-model="selectedStatus"
                     class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
                 >
-                    <option value="">{{ t('products_management.list.filters.all_status') }}</option>
-                    <option value="active">{{ t('products_management.list.filters.active') }}</option>
-                    <option value="inactive">{{ t('products_management.list.filters.inactive') }}</option>
-                    <option value="draft">{{ t('products_management.list.filters.draft') }}</option>
+                    <option value="">{{ t('products.list.filters.all_status') }}</option>
+                    <option value="active">{{ t('products.list.filters.active') }}</option>
+                    <option value="inactive">{{ t('products.list.filters.inactive') }}</option>
+                    <option value="draft">{{ t('products.list.filters.draft') }}</option>
                 </select>
             </div>
 
             <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    {{ t('products_management.list.filters.price_range') }}
+                    {{ t('products.list.filters.price_range') }}
                 </label>
                 <div class="flex space-x-2">
                     <input
                         v-model="minPrice"
                         type="number"
-                        :placeholder="t('products_management.list.filters.min_price')"
+                        :placeholder="t('products.list.filters.min_price')"
                         class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
                     />
                     <input
                         v-model="maxPrice"
                         type="number"
-                        :placeholder="t('products_management.list.filters.max_price')"
+                        :placeholder="t('products.list.filters.max_price')"
                         class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
                     />
                 </div>
@@ -189,7 +189,7 @@ const isOutOfStock = (product) => {
                     type="checkbox"
                     class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
                 />
-                <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">{{ t('products_management.list.filters.in_stock_only') }}</span>
+                <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">{{ t('products.list.filters.in_stock_only') }}</span>
             </label>
 
             <div class="flex space-x-3">
@@ -197,13 +197,13 @@ const isOutOfStock = (product) => {
                     @click="clearFilters"
                     class="px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
                 >
-                    {{ t('products_management.list.clear_filters') }}
+                    {{ t('products.list.clear_filters') }}
                 </button>
                 <button
                     @click="applyFilters"
                     class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                 >
-                    {{ t('products_management.list.apply_filters') }}
+                    {{ t('products.list.apply_filters') }}
                 </button>
             </div>
         </div>
@@ -216,22 +216,22 @@ const isOutOfStock = (product) => {
                 <thead class="bg-gray-50 dark:bg-gray-700">
                 <tr>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        {{ t('products_management.list.table.product') }}
+                        {{ t('products.list.table.product') }}
                     </th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        {{ t('products_management.list.table.category') }}
+                        {{ t('products.list.table.category') }}
                     </th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        {{ t('products_management.list.table.price') }}
+                        {{ t('products.list.table.price') }}
                     </th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        {{ t('products_management.list.table.stock') }}
+                        {{ t('products.list.table.stock') }}
                     </th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        {{ t('products_management.list.table.status') }}
+                        {{ t('products.list.table.status') }}
                     </th>
                     <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        {{ t('products_management.list.table.actions') }}
+                        {{ t('products.list.table.actions') }}
                     </th>
                 </tr>
                 </thead>
@@ -243,10 +243,10 @@ const isOutOfStock = (product) => {
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293H8m0 0l2.586 2.586a1 1 0 01.707.293l2.414-2.586a1 1 0 01.707-.293H16m-2-2h2M6 13h2" />
                             </svg>
                             <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                                {{ t('products_management.list.table.no_products') }}
+                                {{ t('products.list.table.no_products') }}
                             </h3>
                             <p class="text-gray-500 dark:text-gray-400 mb-4">
-                                {{ t('products_management.list.table.no_products_description') }}
+                                {{ t('products.list.table.no_products_description') }}
                             </p>
                             <Link
                                 href="/products/create"
@@ -255,7 +255,7 @@ const isOutOfStock = (product) => {
                                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                                 </svg>
-                                {{ t('products_management.list.table.create_first') }}
+                                {{ t('products.list.table.create_first') }}
                             </Link>
                         </div>
                     </td>
@@ -324,19 +324,19 @@ const isOutOfStock = (product) => {
                                 :href="`/products/${product.id}`"
                                 class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
                             >
-                                {{ t('products_management.list.table.view') }}
+                                {{ t('products.list.table.view') }}
                             </Link>
                             <Link
                                 :href="`/products/${product.id}/edit`"
                                 class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300"
                             >
-                                {{ t('products_management.list.table.edit') }}
+                                {{ t('products.list.table.edit') }}
                             </Link>
                             <button
                                 @click="deleteProduct(product.id)"
                                 class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
                             >
-                                {{ t('products_management.list.table.delete') }}
+                                {{ t('products.list.table.delete') }}
                             </button>
                         </div>
                     </td>
@@ -349,7 +349,7 @@ const isOutOfStock = (product) => {
     <!-- Pagination -->
     <div v-if="products.links && products.links.length > 0" class="mt-6 flex items-center justify-between">
         <div class="text-sm text-gray-700 dark:text-gray-300">
-            {{ t('products_management.list.showing_results', {
+            {{ t('products.list.showing_results', {
             from: products.from || 0,
             to: products.to || 0,
             total: products.total || 0
@@ -361,14 +361,14 @@ const isOutOfStock = (product) => {
                 :href="products.prev_page_url"
                 class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
             >
-                {{ t('products_management.list.previous') }}
+                {{ t('products.list.previous') }}
             </Link>
             <Link
                 v-if="products.next_page_url"
                 :href="products.next_page_url"
                 class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
             >
-                {{ t('products_management.list.next') }}
+                {{ t('products.list.next') }}
             </Link>
         </div>
     </div>

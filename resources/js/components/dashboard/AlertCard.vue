@@ -55,7 +55,7 @@ const handleAction = () => {
         window.location.reload()
     } else {
         // Emitir evento o llamar a función específica
-        console.log('Action:', props.alert.action)
+        // TODO: Implementar manejo de acción específica
     }
 }
 </script>

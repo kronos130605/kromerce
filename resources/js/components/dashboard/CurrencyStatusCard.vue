@@ -80,7 +80,7 @@ const formatDate = (date) => {
 
 const handleUpdateRates = () => {
     // Emitir evento o llamar a función para actualizar tasas
-    console.log('Update rates requested')
+    // TODO: Implementar actualización de tasas
 }
 
 const handleConfigure = () => {

@@ -39,9 +39,6 @@ const logout = () => {
 // Use navigation composable
 const { navigationItems } = useNavigation();
 
-// Debug: Verificar items de navegación
-console.log('CustomerDashboardNavbar - navigationItems:', navigationItems.value);
-
 onMounted(() => {
   // Close dropdown when clicking outside
   onDocumentClick = (event) => {

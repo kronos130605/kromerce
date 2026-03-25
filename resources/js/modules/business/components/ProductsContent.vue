@@ -34,7 +34,7 @@ const product = computed(() => page.props.product || null);
                 <div class="flex justify-between items-center mb-6">
                     <div>
                         <h3 class="text-2xl font-bold text-gray-900 dark:text-white">{{ t('dashboard.nav_products') }}</h3>
-                        <p class="text-gray-600 dark:text-gray-400 mt-1">{{ t('products_management.overview') }}</p>
+                        <p class="text-gray-600 dark:text-gray-400 mt-1">{{ t('products.overview') }}</p>
                     </div>
                     <Link
                         href="/products/create"
@@ -43,7 +43,7 @@ const product = computed(() => page.props.product || null);
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                         </svg>
-                        {{ t('products_management.add_new') }}
+                        {{ t('products.add_new') }}
                     </Link>
                 </div>
 
@@ -57,7 +57,7 @@ const product = computed(() => page.props.product || null);
                                 </svg>
                             </div>
                             <div class="ml-4">
-                                <p class="text-sm text-gray-600">{{ t('products_management.statistics.total_products') }}</p>
+                                <p class="text-sm text-gray-600">{{ t('products.statistics.total_products') }}</p>
                                 <p class="text-2xl font-bold text-gray-900">{{ dashboardData.totalProducts || 0 }}</p>
                             </div>
                         </div>
@@ -71,7 +71,7 @@ const product = computed(() => page.props.product || null);
                                 </svg>
                             </div>
                             <div class="ml-4">
-                                <p class="text-sm text-gray-600">{{ t('products_management.statistics.active_products') }}</p>
+                                <p class="text-sm text-gray-600">{{ t('products.statistics.active_products') }}</p>
                                 <p class="text-2xl font-bold text-gray-900">{{ dashboardData.activeProducts || 0 }}</p>
                             </div>
                         </div>
@@ -85,7 +85,7 @@ const product = computed(() => page.props.product || null);
                                 </svg>
                             </div>
                             <div class="ml-4">
-                                <p class="text-sm text-gray-600">{{ t('products_management.statistics.low_stock') }}</p>
+                                <p class="text-sm text-gray-600">{{ t('products.statistics.low_stock') }}</p>
                                 <p class="text-2xl font-bold text-gray-900">{{ dashboardData.lowStock || 0 }}</p>
                             </div>
                         </div>
@@ -99,7 +99,7 @@ const product = computed(() => page.props.product || null);
                                 </svg>
                             </div>
                             <div class="ml-4">
-                                <p class="text-sm text-gray-600">{{ t('products_management.statistics.out_of_stock') }}</p>
+                                <p class="text-sm text-gray-600">{{ t('products.statistics.out_of_stock') }}</p>
                                 <p class="text-2xl font-bold text-gray-900">{{ dashboardData.outOfStock || 0 }}</p>
                             </div>
                         </div>
@@ -112,14 +112,14 @@ const product = computed(() => page.props.product || null);
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
                         </svg>
-                        {{ t('products_management.import_products') }}
+                        {{ t('products.import_products') }}
                     </button>
 
                     <button class="inline-flex items-center px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                         </svg>
-                        {{ t('products_management.export_products') }}
+                        {{ t('products.export_products') }}
                     </button>
                 </div>
             </div>
