@@ -166,14 +166,6 @@ class Store extends Model
     }
 
     /**
-     * Get the domains for the store.
-     */
-    // public function domains(): HasMany
-    // {
-    //     return $this->hasMany(Domain::class);
-    // }
-
-    /**
      * Get the products for the store.
      */
     public function products(): HasMany

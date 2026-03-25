@@ -41,7 +41,7 @@ class DashboardController extends Controller
         } catch (\Exception $e) {
             Log::error('Dashboard error', [
                 'user_id' => $request->user()?->id,
-                'store_id' => tenant()?->id,
+                'store_id' => session('current_store_id'),
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);

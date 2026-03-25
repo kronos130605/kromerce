@@ -21,7 +21,8 @@ class Domain extends Model
     }
 
     /**
-     * Get the store that owns the domain (legacy tenant support).
+     * Get the store that owns the domain (legacy alias - deprecated, use store()).
+     * @deprecated Use store() instead
      */
     public function tenant(): BelongsTo
     {

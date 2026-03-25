@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Models\Store;
 use App\Repositories\Store\StoreBrandingRepository;
 use App\Services\BrandingService;
 use Illuminate\Support\Facades\View;
@@ -16,7 +17,10 @@ class BrandingServiceProvider extends ServiceProvider
     {
         $this->app->singleton(BrandingService::class, function ($app) {
             return new BrandingService(
-                $app->make(StoreBrandingRepository::class)
+                $app->make(StoreBrandingRepository::class),
+                session('current_store_id') 
+                    ? $app->make(Store::class)->find(session('current_store_id'))
+                    : null
             );
         });
     }

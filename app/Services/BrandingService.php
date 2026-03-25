@@ -10,13 +10,12 @@ class BrandingService
     protected ?Store $store = null;
     private StoreBrandingRepository $brandingRepo;
 
-    public function __construct(StoreBrandingRepository $brandingRepo)
-    {
+    public function __construct(
+        StoreBrandingRepository $brandingRepo,
+        Store $store = null
+    ) {
         $this->brandingRepo = $brandingRepo;
-
-        if (tenancy()->initialized) {
-            $this->store = tenant();
-        }
+        $this->store = $store;
     }
 
     public function getStore(): ?Store
@@ -41,7 +40,7 @@ class BrandingService
     public function getCSSVariables(): string
     {
         $config = $this->getBrandingConfig();
-        
+
         // Ensure all required keys exist with defaults
         $primaryColor = $config['primary_color'] ?? '#3B82F6';
         $secondaryColor = $config['secondary_color'] ?? '#10B981';
