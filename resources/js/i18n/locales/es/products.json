@@ -15,13 +15,20 @@
       "title": "No hay productos",
       "description": "Comienza creando tu primer producto"
     },
+    "validation": {
+      "name_required": "El nombre es obligatorio.",
+      "price_required": "El precio es obligatorio."
+    },
     "fields": {
       "product": "Producto",
       "name": "Nombre",
       "description": "Descripción",
+      "base_price": "Precio Base",
+      "sale_price": "Precio de Oferta",
       "price": "Precio",
       "compare_price": "Precio comparación",
       "cost": "Costo",
+      "currency": "Moneda",
       "sku": "SKU",
       "barcode": "Código de barras",
       "status": "Estado",
@@ -190,7 +197,9 @@
       "barcode": "Ej: 123456789",
       "seo_title": "Título para SEO",
       "seo_description": "Descripción corta para SEO",
-      "seo_keywords": "producto, categoría, etiqueta"
+      "seo_keywords": "producto, categoría, etiqueta",
+      "base_price": "0.00",
+      "sale_price": "0.00"
     },
     "imageUploader": {
       "drop_hint": "Arrastra imágenes aquí o haz clic para subir",

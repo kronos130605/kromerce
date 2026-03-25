@@ -211,16 +211,16 @@ const currentStepData = props.steps[props.currentStep];
                                     <div class="relative">
                                         <span class="absolute left-3 top-2 text-gray-500">$</span>
                                         <input
-                                            :value="form.price"
-                                            @input="updateForm('price', $event.target.value)"
+                                            :value="form.base_price"
+                                            @input="updateForm('base_price', $event.target.value)"
                                             type="number"
                                             step="0.01"
                                             min="0"
                                             class="w-full pl-8 pr-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                            :class="{ 'border-red-500': errors.price }"
+                                            :class="{ 'border-red-500': errors.base_price }"
                                         />
                                     </div>
-                                    <p v-if="errors.price" class="mt-1 text-sm text-red-600">{{ errors.price }}</p>
+                                    <p v-if="errors.base_price" class="mt-1 text-sm text-red-600">{{ errors.base_price }}</p>
                                 </div>
 
                                 <div>
@@ -230,8 +230,8 @@ const currentStepData = props.steps[props.currentStep];
                                     <div class="relative">
                                         <span class="absolute left-3 top-2 text-gray-500">$</span>
                                         <input
-                                            :value="form.compare_price"
-                                            @input="updateForm('compare_price', $event.target.value)"
+                                            :value="form.sale_price"
+                                            @input="updateForm('sale_price', $event.target.value)"
                                             type="number"
                                             step="0.01"
                                             min="0"
@@ -281,6 +281,26 @@ const currentStepData = props.steps[props.currentStep];
                                         type="text"
                                         class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                     />
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                        {{ t('products.fields.currency') }}
+                                    </label>
+                                    <select
+                                        :value="form.base_currency"
+                                        @change="updateForm('base_currency', $event.target.value)"
+                                        class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    >
+                                        <option value="USD">USD - US Dollar</option>
+                                        <option value="EUR">EUR - Euro</option>
+                                        <option value="GBP">GBP - British Pound</option>
+                                        <option value="JPY">JPY - Japanese Yen</option>
+                                        <option value="CAD">CAD - Canadian Dollar</option>
+                                        <option value="AUD">AUD - Australian Dollar</option>
+                                    </select>
                                 </div>
                             </div>
 

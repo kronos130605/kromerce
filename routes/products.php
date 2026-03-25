@@ -1,18 +1,27 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProductController;
-use App\Http\Controllers\CurrencyController;
 
 /*
 |--------------------------------------------------------------------------
-| Product Routes - DISABLED - MOVED TO web.php
+| Product Routes
 |--------------------------------------------------------------------------
+|
+| Rutas para gestión de productos del negocio.
+| Todas las rutas requieren autenticación y resolución de store.
+|
 */
 
-// This file has been moved to web.php to avoid bootstrap loading issues
-// All product routes are now defined in routes/web.php
-
-// If you need to re-enable this file, remove the routes from web.php
-// and update bootstrap/app.php to load this file again.
+Route::middleware(['auth', 'verified', 'App\Http\Middleware\IdentifyStore'])
+    ->prefix('products')
+    ->name('products.')
+    ->group(function () {
+        Route::get('/', [ProductController::class, 'index'])->name('index');
+        Route::get('/create', [ProductController::class, 'create'])->name('create');
+        Route::post('/', [ProductController::class, 'store'])->name('store');
+        Route::get('/{product}', [ProductController::class, 'show'])->name('show');
+        Route::get('/{product}/edit', [ProductController::class, 'edit'])->name('edit');
+        Route::put('/{product}', [ProductController::class, 'update'])->name('update');
+        Route::delete('/{product}', [ProductController::class, 'destroy'])->name('destroy');
+    });

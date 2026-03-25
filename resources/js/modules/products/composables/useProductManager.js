@@ -28,11 +28,12 @@ export function useProductManager(options = {}) {
     const form = ref({
         name: '',
         description: '',
-        price: '',
-        compare_price: '',
+        base_price: '',
+        sale_price: '',
         cost: '',
         sku: '',
         barcode: '',
+        base_currency: 'USD',
         stock_quantity: 0,
         low_stock_threshold: 10,
         manage_stock: true,
@@ -57,7 +58,7 @@ export function useProductManager(options = {}) {
 
     // Computed
     const canSave = computed(() => {
-        return form.value.name && form.value.price && !loading.value;
+        return form.value.name && form.value.base_price && !loading.value;
     });
 
     const isFirstStep = computed(() => currentStep.value === 0);
@@ -125,8 +126,8 @@ export function useProductManager(options = {}) {
                 }
                 break;
             case 'pricing':
-                if (!form.value.price || form.value.price <= 0) {
-                    errors.value.price = t('products.validation.price_required');
+                if (!form.value.base_price || form.value.base_price <= 0) {
+                    errors.value.base_price = t('products.validation.price_required');
                 }
                 break;
         }
@@ -198,11 +199,12 @@ export function useProductManager(options = {}) {
         form.value = {
             name: '',
             description: '',
-            price: '',
-            compare_price: '',
+            base_price: '',
+            sale_price: '',
             cost: '',
             sku: '',
             barcode: '',
+            base_currency: 'USD',
             stock_quantity: 0,
             low_stock_threshold: 10,
             manage_stock: true,
@@ -222,11 +224,12 @@ export function useProductManager(options = {}) {
         form.value = {
             name: product.name || '',
             description: product.description || '',
-            price: product.price || '',
-            compare_price: product.compare_price || '',
+            base_price: product.base_price || '',
+            sale_price: product.sale_price || '',
             cost: product.cost || '',
             sku: product.sku || '',
             barcode: product.barcode || '',
+            base_currency: product.base_currency || 'USD',
             stock_quantity: product.stock_quantity || 0,
             low_stock_threshold: product.low_stock_threshold || 10,
             manage_stock: product.manage_stock ?? true,
@@ -251,8 +254,8 @@ export function useProductManager(options = {}) {
         if (!form.value.name?.trim()) {
             errors.value.name = t('products.validation.name_required');
         }
-        if (!form.value.price || form.value.price <= 0) {
-            errors.value.price = t('products.validation.price_required');
+        if (!form.value.base_price || form.value.base_price <= 0) {
+            errors.value.base_price = t('products.validation.price_required');
         }
 
         return Object.keys(errors.value).length === 0;
