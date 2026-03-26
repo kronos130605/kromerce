@@ -72,7 +72,7 @@ const getStatusColor = (status) => ({
     draft: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
 }[status] || 'bg-gray-100 text-gray-800');
 
-const formatPrice = (price) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(price);
+const formatPrice = (price, currency = 'USD') => new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(price);
 </script>
 
 <template>
@@ -81,8 +81,8 @@ const formatPrice = (price) => new Intl.NumberFormat('en-US', { style: 'currency
             <!-- Header -->
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
-                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ t('products.title') }}</h1>
-                    <p class="text-gray-600 dark:text-gray-400 mt-1">{{ t('products.subtitle') }}</p>
+                    <h1 class="text-xl font-bold text-gray-900 dark:text-white">{{ t('products.title') }}</h1>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">{{ t('products.subtitle') }}</p>
                 </div>
                 <button @click="openCreate" class="btn btn-primary">
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -103,7 +103,7 @@ const formatPrice = (price) => new Intl.NumberFormat('en-US', { style: 'currency
                         </div>
                         <div class="ml-3">
                             <p class="text-xs text-gray-600 dark:text-gray-400">{{ stat.title }}</p>
-                            <p class="text-lg font-bold text-gray-900 dark:text-white">{{ stat.value }}</p>
+                            <p class="text-base font-bold text-gray-900 dark:text-white">{{ stat.value }}</p>
                         </div>
                     </div>
                 </div>
@@ -126,13 +126,13 @@ const formatPrice = (price) => new Intl.NumberFormat('en-US', { style: 'currency
                                 <div class="flex items-center">
                                     <div class="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-lg">📦</div>
                                     <div class="ml-3">
-                                        <p class="font-medium text-gray-900 dark:text-white">{{ product.name }}</p>
+                                        <p class="text-sm font-medium text-gray-900 dark:text-white">{{ product.name }}</p>
                                         <p class="text-xs text-gray-500">{{ product.sku || '-' }}</p>
                                     </div>
                                 </div>
                             </td>
                             <td class="px-4 py-3">
-                                <span class="font-medium text-gray-900 dark:text-white">{{ formatPrice(product.price) }}</span>
+                                <span class="text-sm font-medium text-gray-900 dark:text-white">{{ formatPrice(product.base_price, product.base_currency) }}</span>
                             </td>
                             <td class="px-4 py-3">
                                 <span :class="['px-2 py-1 rounded-full text-xs font-medium capitalize', getStatusColor(product.status)]">
@@ -165,8 +165,8 @@ const formatPrice = (price) => new Intl.NumberFormat('en-US', { style: 'currency
 
             <!-- Empty State -->
             <div v-if="!products.data?.length" class="text-center py-12 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
-                <div class="text-6xl mb-4">📦</div>
-                <h3 class="text-lg font-medium text-gray-900 dark:text-white">{{ t('products.empty.title') }}</h3>
+                <div class="text-4xl mb-4">📦</div>
+                <h3 class="text-base font-medium text-gray-900 dark:text-white">{{ t('products.empty.title') }}</h3>
                 <button @click="openCreate" class="mt-4 btn btn-primary">{{ t('products.add_first') }}</button>
             </div>
         </div>

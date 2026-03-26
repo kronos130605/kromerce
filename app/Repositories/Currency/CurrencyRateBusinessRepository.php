@@ -118,6 +118,20 @@ class CurrencyRateBusinessRepository extends BaseRepository
     }
 
     /**
+     * Check if currency code exists in any rate for store.
+     */
+    public function currencyExists(string $storeId, string $currency): bool
+    {
+        return $this->model
+            ->where('store_id', $storeId)
+            ->where(function ($q) use ($currency) {
+                $q->where('from_currency', $currency)
+                  ->orWhere('to_currency', $currency);
+            })
+            ->exists();
+    }
+
+    /**
      * Delete rate for specific store currency pair.
      */
     public function deleteRate(string $storeId, string $fromCurrency, string $toCurrency): int

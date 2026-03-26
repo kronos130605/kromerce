@@ -9,6 +9,8 @@ class CurrencyRateGlobal extends Model
 {
     use HasFactory;
 
+    protected $table = 'currency_rates_global';
+
     protected $fillable = [
         'from_currency',
         'to_currency',

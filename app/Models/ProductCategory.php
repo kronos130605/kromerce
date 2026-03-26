@@ -87,9 +87,8 @@ class ProductCategory extends Model
      */
     public function products(): BelongsToMany
     {
-        return $this->belongsToMany(Product::class, 'product_category_product')
+        return $this->belongsToMany(Product::class, 'product_category_product', 'category_id', 'product_id')
             ->withPivot('order')
-            ->withTimestamps()
             ->orderBy('pivot_order');
     }
 

@@ -15,6 +15,9 @@ class Product extends Model
 {
     use HasFactory, SoftDeletes;
 
+    protected $keyType = 'string';
+    public $incrementing = false;
+
     protected $fillable = [
         'store_id',
         'name',
@@ -91,6 +94,11 @@ class Product extends Model
         parent::boot();
 
         static::creating(function ($product) {
+            // Generate UUID if not provided
+            if (empty($product->id)) {
+                $product->id = (string) Str::uuid();
+            }
+
             if (empty($product->slug)) {
                 $product->slug = Str::slug($product->name);
             }
@@ -147,9 +155,8 @@ class Product extends Model
      */
     public function categories(): BelongsToMany
     {
-        return $this->belongsToMany(ProductCategory::class, 'product_category_product')
+        return $this->belongsToMany(ProductCategory::class, 'product_category_product', 'product_id', 'category_id')
             ->withPivot('order')
-            ->withTimestamps()
             ->orderBy('pivot_order');
     }
 
@@ -158,8 +165,7 @@ class Product extends Model
      */
     public function tags(): BelongsToMany
     {
-        return $this->belongsToMany(ProductTag::class, 'product_product_tag')
-            ->withTimestamps();
+        return $this->belongsToMany(ProductTag::class, 'product_product_tag', 'product_id', 'tag_id');
     }
 
     /**

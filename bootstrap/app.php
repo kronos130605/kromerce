@@ -11,12 +11,7 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         api: __DIR__.'/../routes/api.php',
         then: function () {
-            Route::middleware(['auth', 'verified'])
-                ->prefix('products')
-                ->name('products.')
-                ->group(base_path('routes/products.php'));
-            
-            Route::middleware(['auth', 'verified'])
+            Route::middleware(['auth', 'verified', 'tenant'])
                 ->prefix('stores')
                 ->name('stores.')
                 ->group(base_path('routes/store_api.php'));

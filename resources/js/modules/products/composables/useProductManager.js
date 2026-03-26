@@ -3,6 +3,42 @@ import { router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 
 /**
+ * Upload temporary images after product creation
+ */
+const uploadTemporaryImages = async (productId, images) => {
+    const temporaryImages = images.filter(img => img.isTemporary && img.file);
+    const results = [];
+
+    for (const image of temporaryImages) {
+        try {
+            const formData = new FormData();
+            formData.append('image', image.file);
+            formData.append('is_primary', image.is_primary ? '1' : '0');
+            formData.append('order', image.order);
+            formData.append('alt', image.alt || '');
+            formData.append('title', image.title || '');
+
+            const response = await fetch(`/products/${productId}/images`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                },
+                body: formData
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                results.push(data.data);
+            }
+        } catch (error) {
+            console.error('Failed to upload temporary image:', error);
+        }
+    }
+
+    return results;
+};
+
+/**
  * Composable para gestión de productos con patrón modal/slider
  *
  * @param {Object} options - Configuración inicial
@@ -136,13 +172,29 @@ export function useProductManager(options = {}) {
     };
 
     // CRUD
-    const save = () => {
+    const save = async () => {
         if (!validateAllSteps()) return;
 
         loading.value = true;
         const payload = buildPayload();
+        // Remove temporary images from payload - they'll be uploaded separately
+        const temporaryImages = form.value.images.filter(img => img.isTemporary);
+        payload.images = form.value.images.filter(img => !img.isTemporary).map(img => ({
+            id: img.id,
+            url: img.url,
+            alt: img.alt,
+            title: img.title,
+            order: img.order,
+            is_primary: img.is_primary
+        }));
 
         if (isEditing.value && selectedProduct.value?.id) {
+            // Handle new images for existing product first
+            const newImages = temporaryImages;
+            if (newImages.length > 0) {
+                await uploadTemporaryImages(selectedProduct.value.id, newImages);
+            }
+
             router.put(`/products/${selectedProduct.value.id}`, payload, {
                 preserveScroll: true,
                 onSuccess: () => {
@@ -159,7 +211,16 @@ export function useProductManager(options = {}) {
         } else {
             router.post('/products', payload, {
                 preserveScroll: true,
-                onSuccess: () => {
+                onSuccess: async (page) => {
+                    // Find the newly created product by matching name and sku
+                    const newProduct = page.props?.products?.data?.find(p => 
+                        p.name === payload.name && p.sku === payload.sku
+                    );
+                    const newProductId = newProduct?.id;
+                    
+                    if (newProductId && temporaryImages.length > 0) {
+                        await uploadTemporaryImages(newProductId, temporaryImages);
+                    }
                     closeModal();
                     refreshProducts();
                 },

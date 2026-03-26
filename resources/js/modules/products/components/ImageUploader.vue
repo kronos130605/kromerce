@@ -9,24 +9,33 @@
             class="border-2 border-dashed rounded-lg p-8 text-center transition-colors"
             :class="[
                 isDragging ? 'border-blue-500 bg-blue-50' : 'border-gray-300',
-                images.length >= maxImages ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:border-blue-400'
+                images.length >= maxImages || uploading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:border-blue-400'
             ]"
             @click="triggerFileInput"
         >
-            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
-            </svg>
-            <div class="mt-4">
-                <p class="text-lg font-medium text-gray-900">
-                    {{ t('products.imageUploader.drop_hint') }}
-                </p>
-                <p class="text-sm text-gray-500 mt-1">
-                    {{ t('products.imageUploader.formats') }}
-                </p>
-                <p class="text-sm text-gray-500">
-                    {{ t('products.imageUploader.uploaded_count', { count: images.length, max: maxImages }) }}
-                </p>
+            <div v-if="uploading" class="text-center">
+                <svg class="animate-spin mx-auto h-12 w-12 text-blue-500" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                </svg>
+                <p class="mt-4 text-sm text-gray-600">{{ t('common.loading') }}</p>
             </div>
+            <template v-else>
+                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                </svg>
+                <div class="mt-4">
+                    <p class="text-sm font-medium text-gray-900">
+                        {{ t('products.imageUploader.drop_hint') }}
+                    </p>
+                    <p class="text-xs text-gray-500 mt-1">
+                        {{ t('products.imageUploader.formats') }}
+                    </p>
+                    <p class="text-xs text-gray-500">
+                        {{ t('products.imageUploader.uploaded_count', { count: images.length, max: maxImages }) }}
+                    </p>
+                </div>
+            </template>
             
             <input
                 ref="fileInput"
@@ -35,6 +44,7 @@
                 :multiple="maxImages > 1"
                 @change="handleFileSelect"
                 class="hidden"
+                :disabled="uploading"
             >
         </div>
 
@@ -209,7 +219,11 @@ const props = defineProps({
     },
     maxSize: {
         type: Number,
-        default: 10 * 1024 * 1024 // 10MB
+        default: 5 * 1024 * 1024 // 5MB max
+    },
+    productId: {
+        type: String,
+        default: null
     }
 })
 
@@ -220,6 +234,7 @@ const isDragging = ref(false)
 const images = ref([...props.modelValue])
 const editingImage = ref(null)
 const editingImageData = ref({})
+const uploading = ref(false)
 
 // Watch for changes and emit
 watch(images, (newValue) => {
@@ -267,37 +282,111 @@ const handleDragEnter = (event) => {
     }
 }
 
-const processFiles = (files) => {
+const processFiles = async (files) => {
     const imageFiles = files.filter(file => file.type.startsWith('image/'))
     const remainingSlots = props.maxImages - images.value.length
     const filesToProcess = imageFiles.slice(0, remainingSlots)
     
-    filesToProcess.forEach(file => {
+    for (const file of filesToProcess) {
         if (file.size > props.maxSize) {
-            alert(t('products.imageUploader.file_too_large', { name: file.name, size: props.maxSize / 1024 / 1024 }))
-            return
+            const maxSizeMB = (props.maxSize / 1024 / 1024).toFixed(0)
+            const fileSizeMB = (file.size / 1024 / 1024).toFixed(2)
+            alert(`El archivo "${file.name}" (${fileSizeMB}MB) excede el límite de ${maxSizeMB}MB. Por favor, reduce el tamaño de la imagen o usa una imagen más pequeña.`)
+            continue
         }
-        
-        const reader = new FileReader()
-        reader.onload = (e) => {
-            const newImage = {
-                id: null, // Will be set by backend
-                url: e.target.result,
-                preview: e.target.result,
-                alt: '',
-                title: '',
-                order: images.value.length,
-                is_primary: images.value.length === 0 // First image is primary
+
+        // If no productId yet, just store preview temporarily
+        if (!props.productId) {
+            const reader = new FileReader()
+            reader.onload = (e) => {
+                const newImage = {
+                    id: null,
+                    file: file, // Keep file reference for later upload
+                    url: e.target.result,
+                    preview: e.target.result,
+                    alt: '',
+                    title: '',
+                    order: images.value.length,
+                    is_primary: images.value.length === 0,
+                    isTemporary: true
+                }
+                images.value.push(newImage)
             }
-            
-            images.value.push(newImage)
+            reader.readAsDataURL(file)
+        } else {
+            // Upload immediately to server
+            await uploadImage(file)
         }
-        reader.readAsDataURL(file)
-    })
+    }
 }
 
-const removeImage = (index) => {
+const uploadImage = async (file, isPrimary = false) => {
+    if (!props.productId) return
+
+    uploading.value = true
+    
+    try {
+        const formData = new FormData()
+        formData.append('image', file)
+        formData.append('is_primary', (isPrimary || images.value.length === 0) ? '1' : '0')
+        formData.append('order', images.value.length)
+        
+        const response = await fetch(`/products/${props.productId}/images`, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+            },
+            body: formData
+        })
+
+        if (!response.ok) {
+            throw new Error('Upload failed')
+        }
+
+        const data = await response.json()
+        
+        if (data.success) {
+            images.value.push({
+                id: data.data.id,
+                url: data.data.thumbnail_url || data.data.url, // Use thumbnail for preview
+                full_url: data.data.url, // Keep full size for viewing
+                preview: data.data.thumbnail_url || data.data.url,
+                alt: data.data.alt || '',
+                title: data.data.title || '',
+                order: data.data.order,
+                is_primary: data.data.is_primary,
+                isTemporary: false
+            })
+        }
+    } catch (error) {
+        console.error('Upload error:', error)
+        alert('Failed to upload image. Please try again.')
+    } finally {
+        uploading.value = false
+    }
+}
+
+const removeImage = async (index) => {
     const removedImage = images.value[index]
+    
+    // If image is saved on server, delete it
+    if (removedImage.id && props.productId && !removedImage.isTemporary) {
+        try {
+            const response = await fetch(`/products/${props.productId}/images/${removedImage.id}`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                }
+            })
+            
+            if (!response.ok) {
+                console.error('Failed to delete image from server')
+            }
+        } catch (error) {
+            console.error('Delete error:', error)
+        }
+    }
+    
     images.value.splice(index, 1)
     
     // If we removed the primary image, set the first remaining image as primary

@@ -128,6 +128,19 @@ class CurrencyRateGlobalRepository extends BaseRepository
     }
 
     /**
+     * Check if currency code exists in any rate.
+     */
+    public function currencyExists(string $currency): bool
+    {
+        return $this->model
+            ->where(function ($q) use ($currency) {
+                $q->where('from_currency', $currency)
+                  ->orWhere('to_currency', $currency);
+            })
+            ->exists();
+    }
+
+    /**
      * Get history for currency pair, excluding specified dates.
      */
     public function getHistory(string $fromCurrency, string $toCurrency, string $startDate, string $endDate, array $excludeDates = []): Collection

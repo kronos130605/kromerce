@@ -5,10 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use App\Services\ProductService;
 use App\Http\Requests\ProductRequest;
+use App\Http\Requests\ProductImageRequest;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Log;
+use Intervention\Image\Laravel\Facades\Image;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -85,7 +87,7 @@ class ProductController extends Controller
                 return $this->success($product, 'Product created successfully', 201);
             }
 
-            return redirect()->route('products.index');
+            return redirect()->route('products.index')->with('product_id', $product->id);
 
         } catch (\Exception $e) {
             if ($request->wantsJson()) {
@@ -185,6 +187,125 @@ class ProductController extends Controller
             }
 
             throw $e;
+        }
+    }
+
+    /**
+     * Upload image for a product with thumbnail generation.
+     */
+    public function uploadImage(ProductImageRequest $request, Product $product): JsonResponse
+    {
+        try {
+            $store = $this->validateStore();
+
+            // Verify product belongs to the store
+            if ($product->store_id !== $store->id) {
+                return $this->error('Product not found', 404);
+            }
+
+            $file = $request->file('image');
+            $filename = uniqid() . '.' . $file->getClientOriginalExtension();
+            $directory = 'products/' . $product->id;
+
+            // Store original image
+            $originalPath = $file->storeAs($directory, $filename, 'public');
+
+            // Create thumbnail (300x300, cropped)
+            $thumbnailFilename = 'thumb_' . $filename;
+            $thumbnailPath = storage_path('app/public/' . $directory . '/' . $thumbnailFilename);
+
+            $image = Image::read($file->getRealPath());
+            $image->cover(300, 300);
+            $image->save($thumbnailPath, quality: 80);
+
+            // Create medium size (800x800, fitted)
+            $mediumFilename = 'medium_' . $filename;
+            $mediumPath = storage_path('app/public/' . $directory . '/' . $mediumFilename);
+
+            $mediumImage = Image::read($file->getRealPath());
+            $mediumImage->scaleDown(800, 800);
+            $mediumImage->save($mediumPath, quality: 85);
+
+            // Parse values from request
+            $isPrimary = $request->booleanIsPrimary();
+            $order = $request->integerOrder($product->images()->count());
+
+            // Create image record with all sizes
+            $baseUrl = config('app.url') . ':8080';
+            $imageRecord = $product->images()->create([
+                'url' => $baseUrl . '/storage/' . $originalPath,
+                'thumbnail_url' => $baseUrl . '/storage/' . $directory . '/' . $thumbnailFilename,
+                'medium_url' => $baseUrl . '/storage/' . $directory . '/' . $mediumFilename,
+                'alt' => $request->input('alt', $product->name),
+                'title' => $request->input('title'),
+                'is_primary' => $isPrimary,
+                'order' => $order,
+            ]);
+
+            // If this is the first image or is_primary is true, set as primary
+            if ($isPrimary || $product->images()->count() === 1) {
+                $product->images()->where('id', '!=', $imageRecord->id)->update(['is_primary' => false]);
+                $imageRecord->update(['is_primary' => true]);
+            }
+
+            return $this->success([
+                'id' => $imageRecord->id,
+                'url' => $imageRecord->url,
+                'thumbnail_url' => $imageRecord->thumbnail_url,
+                'medium_url' => $imageRecord->medium_url,
+                'alt' => $imageRecord->alt,
+                'title' => $imageRecord->title,
+                'is_primary' => $imageRecord->is_primary,
+                'order' => $imageRecord->order,
+            ], 'Image uploaded successfully', 201);
+
+        } catch (\Exception $e) {
+            Log::error('ProductController::uploadImage - ERROR', [
+                'error' => $e->getMessage(),
+                'product_id' => $product->id ?? null,
+                'user_id' => auth()->id(),
+            ]);
+
+            return $this->error('Failed to upload image: ' . $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * Delete image from a product.
+     */
+    public function deleteImage(Request $request, Product $product, $imageId): JsonResponse
+    {
+        try {
+            $store = $this->validateStore();
+
+            // Verify product belongs to the store
+            if ($product->store_id !== $store->id) {
+                return $this->error('Product not found', 404);
+            }
+
+            $image = $product->images()->find($imageId);
+
+            if (!$image) {
+                return $this->notFound('Image not found');
+            }
+
+            // Delete the file from storage
+            $path = str_replace(asset('storage/'), '', $image->url);
+            \Storage::disk('public')->delete($path);
+
+            // Delete the record
+            $image->delete();
+
+            return $this->success(null, 'Image deleted successfully');
+
+        } catch (\Exception $e) {
+            Log::error('ProductController::deleteImage - ERROR', [
+                'error' => $e->getMessage(),
+                'product_id' => $product->id ?? null,
+                'image_id' => $imageId,
+            ]);
+
+            return $this->error('Failed to delete image', 500);
         }
     }
 }

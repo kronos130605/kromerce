@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Http\Resources\ProductResource;
 use App\Models\Store;
 use App\Models\User;
 use App\Repositories\Product\ProductCategoryRepository;
@@ -23,7 +24,18 @@ class ProductService
     public function getProductsForStore(Store $store, array $filters = []): LengthAwarePaginator
     {
         try {
-            return $this->productRepository->paginateForStore($store->id, $filters);
+            $paginator = $this->productRepository->paginateForStore($store->id, $filters);
+            
+            // Transform items using ProductResource to ensure proper serialization
+            $transformedItems = ProductResource::collection($paginator->getCollection())->toArray(request());
+            
+            return new LengthAwarePaginator(
+                $transformedItems,
+                $paginator->total(),
+                $paginator->perPage(),
+                $paginator->currentPage(),
+                ['path' => $paginator->path()]
+            );
         } catch (\Exception $e) {
             throw new \Exception('Failed to retrieve products: ' . $e->getMessage());
         }
