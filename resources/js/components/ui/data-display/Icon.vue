@@ -17,7 +17,7 @@
 
 <script setup>
 import { computed } from 'vue';
-import { getIcon } from '@/icons';
+import { getIcon } from '@/icons/index.js';
 
 const props = defineProps({
   name: {

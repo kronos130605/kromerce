@@ -1,7 +1,7 @@
 <script setup>
 import { Link } from '@inertiajs/vue3';
-import SkeletonLoader from './SkeletonLoader.vue';
-import EmptyState from './EmptyState.vue';
+import SkeletonLoader from '../feedback/SkeletonLoader.vue';
+import EmptyState from '../feedback/EmptyState.vue';
 
 const props = defineProps({
     items: {
@@ -66,8 +66,8 @@ const emit = defineEmits(['itemClick']);
                 <p v-if="description" class="text-gray-600 dark:text-gray-300 mt-1">{{ description }}</p>
             </div>
             <slot name="header" />
-            
-            <Link v-if="viewAllLink" :href="viewAllLink" 
+
+            <Link v-if="viewAllLink" :href="viewAllLink"
                   class="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium flex items-center space-x-1">
                 <span>{{ viewAllText }}</span>
                 <span>→</span>
@@ -102,7 +102,7 @@ const emit = defineEmits(['itemClick']);
                             <div v-if="item.rank" class="w-8 h-8 bg-gradient-to-br from-blue-500 to-emerald-600 rounded-lg flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
                                 {{ item.rank }}
                             </div>
-                            
+
                             <!-- Icon/Image -->
                             <div v-if="item.icon || item.image" class="w-12 h-12 bg-gray-200 dark:bg-gray-600 rounded-lg flex items-center justify-center text-2xl flex-shrink-0">
                                 {{ item.icon || item.image }}
@@ -117,7 +117,7 @@ const emit = defineEmits(['itemClick']);
                                 <p v-if="item.subtitle || item.description" class="text-sm text-gray-600 dark:text-gray-400 mt-1">
                                     {{ item.subtitle || item.description }}
                                 </p>
-                                
+
                                 <!-- Metadata row -->
                                 <div v-if="item.metadata" class="flex items-center space-x-3 text-sm text-gray-500 dark:text-gray-400 mt-2">
                                     <span v-for="(meta, i) in item.metadata" :key="i">{{ meta }}</span>
@@ -131,13 +131,13 @@ const emit = defineEmits(['itemClick']);
                                 <p class="font-semibold text-gray-900 dark:text-white">{{ item.value || item.amount }}</p>
                                 <p v-if="item.change" :class="item.change.class || 'text-xs'">{{ item.change.text }}</p>
                             </div>
-                            
+
                             <div v-if="item.status" :class="item.status.class">
                                 {{ item.status.text }}
                             </div>
 
                             <!-- Action button -->
-                            <button v-if="item.action" 
+                            <button v-if="item.action"
                                     @click.stop="item.action.handler"
                                     :class="item.action.class || 'p-2 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/30'">
                                 <span v-if="item.action.icon">{{ item.action.icon }}</span>

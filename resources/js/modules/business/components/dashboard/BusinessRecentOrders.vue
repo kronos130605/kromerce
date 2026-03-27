@@ -2,7 +2,7 @@
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Link, router } from '@inertiajs/vue3';
-import DashboardList from '@/components/ui/DashboardList.vue';
+import DashboardList from '@/components/ui/data-display/DashboardList.vue';
 
 const { t } = useI18n();
 

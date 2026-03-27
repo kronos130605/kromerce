@@ -3,11 +3,11 @@ import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 // Import dashboard components
-import CustomerWelcome from '@/components/dashboard/CustomerWelcome.vue';
-import FlashSaleBanner from '@/components/dashboard/FlashSaleBanner.vue';
-import FeaturedStores from '@/components/dashboard/FeaturedStores.vue';
-import AIRecommendations from '@/components/dashboard/AIRecommendations.vue';
-import QuickActions from '@/components/dashboard/QuickActions.vue';
+import CustomerWelcome from '@/modules/customer/components/dashboard/CustomerWelcome.vue';
+import CustomerFlashSaleBanner from '@/modules/customer/components/dashboard/CustomerFlashSaleBanner.vue';
+import CustomerFeaturedStores from '@/modules/customer/components/dashboard/CustomerFeaturedStores.vue';
+import CustomerAiRecommendations from '@/modules/customer/components/dashboard/CustomerAIRecommendations.vue';
+import CustomerQuickActions from '@/modules/customer/components/dashboard/CustomerQuickActions.vue';
 import { useAuth } from '@/composables/useAuth';
 
 const { user } = useAuth();
@@ -182,7 +182,7 @@ onMounted(() => {
             <CustomerWelcome :user="userProfile" :currentTime="currentTime" />
 
             <!-- Flash Sale Banner -->
-            <FlashSaleBanner :endTime="liveStats.flashSaleEnds" />
+            <CustomerFlashSaleBanner :endTime="liveStats.flashSaleEnds" />
 
             <!-- Live Stats -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -244,13 +244,13 @@ onMounted(() => {
             </div>
 
             <!-- Quick Actions -->
-            <QuickActions :cartItems="cartItems" :wishlistItems="wishlistItems" />
+            <CustomerQuickActions :cartItems="cartItems" :wishlistItems="wishlistItems" />
 
             <!-- Featured Stores -->
-            <FeaturedStores />
+            <CustomerFeaturedStores />
 
             <!-- AI Recommendations -->
-            <AIRecommendations />
+            <CustomerAiRecommendations />
 
             <!-- Recent Orders -->
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">

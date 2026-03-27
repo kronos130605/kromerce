@@ -1,7 +1,7 @@
 <script setup>
 import { computed } from 'vue';
 import GuestLayout from '@/layouts/GuestLayout.vue';
-import PrimaryButton from '@/components/ui/PrimaryButton.vue';
+import PrimaryButton from '@/components/ui/buttons/PrimaryButton.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 
 const props = defineProps({

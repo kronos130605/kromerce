@@ -128,11 +128,11 @@
 <script setup>
 import { Link, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
-import Badge from "@/components/ui/Badge.vue";
+import Badge from "@/components/ui/data-display/Badge.vue";
 import { useSidebar } from '@/composables/useSidebar.js';
 import { useNavigation } from '@/composables/useNavigation.js';
 import { useAuth } from '@/composables/useAuth.js';
-import Icon from '@/components/ui/Icon.vue';
+import Icon from '@/components/ui/data-display/Icon.vue';
 
 const page = usePage();
 

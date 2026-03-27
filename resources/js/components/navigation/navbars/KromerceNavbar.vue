@@ -4,8 +4,8 @@ import { usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import { useAuth } from '@/composables/useAuth.js';
 import { useDarkMode } from '@/composables/useDarkMode.js';
-import Button from '@/components/ui/Button.vue';
-import Badge from '@/components/ui/Badge.vue';
+import Button from '@/components/ui/buttons/Button.vue';
+import Badge from '@/components/ui/data-display/Badge.vue';
 import LanguageSelector from '@/components/shared/LanguageSelector.vue';
 
 const { t } = useI18n();

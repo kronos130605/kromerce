@@ -3,8 +3,8 @@ import { Link, usePage } from '@inertiajs/vue3';
 import { useNavigation } from '@/composables/useNavigation.js';
 import { useAuth } from '@/composables/useAuth.js';
 import { useSidebar } from '@/composables/useSidebar.js';
-import Icon from '@/components/ui/Icon.vue';
-import Badge from '@/components/ui/Badge.vue';
+import Icon from '@/components/ui/data-display/Icon.vue';
+import Badge from '@/components/ui/data-display/Badge.vue';
 
 const page = usePage();
 

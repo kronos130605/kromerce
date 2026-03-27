@@ -17,7 +17,7 @@
                 </div>
             </div>
         </div>
-        
+
         <!-- User Stats -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
             <div class="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
@@ -43,7 +43,7 @@
 <script setup>
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useAuth } from '@/composables/useAuth';
+import { useAuth } from '@/composables/useAuth.js';
 
 const { user } = useAuth();
 const { t } = useI18n();
