@@ -2,7 +2,7 @@
 import GuestLayout from '@/layouts/GuestLayout.vue';
 import InputError from '@/components/ui/forms/InputError.vue';
 import InputLabel from '@/components/ui/forms/InputLabel.vue';
-import PrimaryButton from '@/components/ui/buttons/PrimaryButton.vue';
+import Button from '@/components/ui/buttons/Button.vue';
 import TextInput from '@/components/ui/forms/TextInput.vue';
 import { Head, useForm } from '@inertiajs/vue3';
 
@@ -56,12 +56,13 @@ const submit = () => {
             </div>
 
             <div class="mt-4 flex items-center justify-end">
-                <PrimaryButton
+                <Button
+                    variant="default"
                     :class="{ 'opacity-25': form.processing }"
                     :disabled="form.processing"
                 >
                     Email Password Reset Link
-                </PrimaryButton>
+                </Button>
             </div>
         </form>
     </GuestLayout>
