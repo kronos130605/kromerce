@@ -39,16 +39,29 @@ return new class extends Migration
      */
     private function dropTenantIdForeignKeyIfExists(): void
     {
+        $driver = DB::getDriverName();
+        
+        // Get current database name based on driver
+        $databaseName = match($driver) {
+            'pgsql' => DB::selectOne('SELECT current_database() as name')->name,
+            'mysql', 'mariadb' => DB::selectOne('SELECT DATABASE() as name')->name,
+            'sqlite' => 'main',
+            default => null,
+        };
+
+        if (!$databaseName) {
+            return;
+        }
+
         try {
-            // Try to get the foreign key name
             $foreignKey = DB::selectOne("
                 SELECT CONSTRAINT_NAME 
                 FROM information_schema.KEY_COLUMN_USAGE 
-                WHERE TABLE_SCHEMA = DATABASE() 
+                WHERE TABLE_SCHEMA = ?
                 AND TABLE_NAME = 'domains' 
                 AND COLUMN_NAME = 'tenant_id'
                 AND REFERENCED_TABLE_NAME IS NOT NULL
-            ");
+            ", [$databaseName]);
 
             if ($foreignKey && isset($foreignKey->CONSTRAINT_NAME)) {
                 Schema::table('domains', function (Blueprint $table) use ($foreignKey) {
