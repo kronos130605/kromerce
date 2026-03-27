@@ -316,6 +316,11 @@
     "reviews": "reseñas",
     "events": "Eventos",
     "analytics": "Análisis",
+    "confirmation": {
+      "title": "¿Estás seguro?",
+      "confirm": "Confirmar",
+      "cancel": "Cancelar"
+    },
     "multiselect_hint": "Puedes elegir múltiples opciones"
   },
   "navigation": {

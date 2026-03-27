@@ -228,7 +228,7 @@ const originalPrice = computed(() => {
                                 <span v-if="!images.length" class="absolute inset-0 flex items-center justify-center text-6xl">📦</span>
                                 
                                 <template v-else>
-                                    <TransitionGroup name="fade" mode="out-in">
+                                    <Transition name="fade" mode="out-in">
                                         <img 
                                             :key="currentImage?.id"
                                             :src="currentImage?.medium_url || currentImage?.url" 
@@ -236,7 +236,7 @@ const originalPrice = computed(() => {
                                             class="w-full h-full object-cover"
                                             loading="eager"
                                         />
-                                    </TransitionGroup>
+                                    </Transition>
                                     
                                     <!-- Navigation Arrows -->
                                     <button 

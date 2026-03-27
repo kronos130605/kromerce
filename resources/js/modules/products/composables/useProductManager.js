@@ -92,6 +92,15 @@ export function useProductManager(options = {}) {
 
     const errors = ref({});
 
+    // Confirmation modal state
+    const isConfirmModalOpen = ref(false);
+    const confirmModalConfig = ref({
+        title: '',
+        message: '',
+        danger: false,
+        onConfirm: null,
+    });
+
     // Computed
     const canSave = computed(() => {
         return form.value.name && form.value.base_price && !loading.value;
@@ -213,11 +222,11 @@ export function useProductManager(options = {}) {
                 preserveScroll: true,
                 onSuccess: async (page) => {
                     // Find the newly created product by matching name and sku
-                    const newProduct = page.props?.products?.data?.find(p => 
+                    const newProduct = page.props?.products?.data?.find(p =>
                         p.name === payload.name && p.sku === payload.sku
                     );
                     const newProductId = newProduct?.id;
-                    
+
                     if (newProductId && temporaryImages.length > 0) {
                         await uploadTemporaryImages(newProductId, temporaryImages);
                     }
@@ -235,20 +244,44 @@ export function useProductManager(options = {}) {
     };
 
     const confirmDelete = (product) => {
-        if (!confirm(t('products.messages.delete_confirmation', { name: product.name }))) {
-            return;
-        }
+        confirmModalConfig.value = {
+            title: t('products.messages.delete_title'),
+            message: t('products.messages.confirm_delete', { name: product.name }),
+            danger: true,
+            onConfirm: () => executeDelete(product),
+        };
+        isConfirmModalOpen.value = true;
+    };
 
+    const executeDelete = (product) => {
         loading.value = true;
+        // Close modal immediately - the redirect will refresh the page anyway
+        closeConfirmModal();
+        
         router.delete(`/products/${product.id}`, {
             preserveScroll: true,
             onSuccess: () => {
+                // Modal already closed, just refresh data
                 refreshProducts();
+            },
+            onError: (errors) => {
+                console.error('Delete failed:', errors);
+                alert(t('products.messages.delete_failed'));
             },
             onFinish: () => {
                 loading.value = false;
             },
         });
+    };
+
+    const closeConfirmModal = () => {
+        isConfirmModalOpen.value = false;
+        confirmModalConfig.value = {
+            title: '',
+            message: '',
+            danger: false,
+            onConfirm: null,
+        };
     };
 
     const refreshProducts = () => {
@@ -336,6 +369,10 @@ export function useProductManager(options = {}) {
         steps,
         errors,
 
+        // Confirmation modal state
+        isConfirmModalOpen,
+        confirmModalConfig,
+
         // Computed
         canSave,
         isFirstStep,
@@ -356,6 +393,7 @@ export function useProductManager(options = {}) {
         // CRUD
         save,
         confirmDelete,
+        closeConfirmModal,
         refreshProducts,
     };
 }

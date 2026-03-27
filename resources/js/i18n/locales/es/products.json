@@ -151,6 +151,7 @@
       "current_stock": "Stock Actual",
       "threshold": "Umbral",
       "units": "unidades",
+      "managing_stock": "Estado del inventario",
       "stock_disabled": "La gestión de stock está deshabilitada para este producto"
     },
     "pricing": {
@@ -174,6 +175,7 @@
       "duplicated": "Producto duplicado exitosamente",
       "loading": "Cargando...",
       "no_data": "No hay productos disponibles",
+      "delete_title": "Eliminar producto",
       "confirm_delete": "¿Estás seguro de que quieres eliminar este producto?",
       "all_sufficient_stock": "Todos los productos tienen stock suficiente"
     },
