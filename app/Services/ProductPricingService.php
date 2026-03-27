@@ -2,10 +2,11 @@
 
 namespace App\Services;
 
-use App\Repositories\BusinessCurrencyConfigRepository;
-use App\Repositories\ProductRepository;
 use App\Models\Product;
 use App\Models\ProductVariant;
+use App\Repositories\Store\BusinessCurrencyConfigRepository;
+use App\Repositories\Store\StoreCurrencyConfigRepository;
+use App\Repositories\Product\ProductRepository;
 use Illuminate\Support\Collection;
 
 class ProductPricingService
@@ -28,13 +29,15 @@ class ProductPricingService
      */
     public function calculateProductPrices(Product $product, ?string $targetCurrency = null): array
     {
-        $currencyConfig = $this->configRepo->getByTenantId($product->tenant_id);
-        
+        $currencyConfig = $this->configRepo->getFirstBy([
+            'store_id' => $product->store_id
+        ]);
+
         if (!$currencyConfig) {
             return [];
         }
 
-        $supportedCurrencies = $currencyConfig->getSupportedCurrenciesWithRates();
+        $supportedCurrencies = $this->currencyService->getSupportedCurrenciesWithRates((string) $product->store_id);
         $calculatedPrices = [];
 
         foreach ($supportedCurrencies as $currency => $currencyInfo) {
@@ -56,7 +59,7 @@ class ProductPricingService
                 $product->base_price,
                 $product->base_currency,
                 $currency,
-                $product->tenant_id
+                $product->store_id
             );
 
             // Calculate sale price if applicable
@@ -65,7 +68,7 @@ class ProductPricingService
                     $product->base_sale_price,
                     $product->base_currency,
                     $currency,
-                    $product->tenant_id
+                    $product->store_id
                 );
             }
 
@@ -75,7 +78,7 @@ class ProductPricingService
                     $product->cost_price,
                     $product->base_currency,
                     $currency,
-                    $product->tenant_id
+                    $product->store_id
                 );
 
                 // Calculate margin
@@ -105,13 +108,15 @@ class ProductPricingService
     public function calculateVariantPrices(ProductVariant $variant, ?string $targetCurrency = null): array
     {
         $product = $variant->product;
-        $currencyConfig = $this->configRepo->getByTenantId($product->tenant_id);
-        
+        $currencyConfig = $this->configRepo->getFirstBy([
+            'store_id' => $product->store_id
+        ]);
+
         if (!$currencyConfig) {
             return [];
         }
 
-        $supportedCurrencies = $currencyConfig->getSupportedCurrenciesWithRates();
+        $supportedCurrencies = $this->currencyService->getSupportedCurrenciesWithRates((string) $product->store_id);
         $calculatedPrices = [];
 
         foreach ($supportedCurrencies as $currency => $currencyInfo) {
@@ -136,7 +141,7 @@ class ProductPricingService
                 $basePrice,
                 $baseCurrency,
                 $currency,
-                $product->tenant_id
+                $product->store_id
             );
 
             // Calculate sale price
@@ -146,7 +151,7 @@ class ProductPricingService
                     $salePrice,
                     $baseCurrency,
                     $currency,
-                    $product->tenant_id
+                    $product->store_id
                 );
             }
 
@@ -157,7 +162,7 @@ class ProductPricingService
                     $costPrice,
                     $baseCurrency,
                     $currency,
-                    $product->tenant_id
+                    $product->store_id
                 );
 
                 // Calculate margin
@@ -176,15 +181,15 @@ class ProductPricingService
     /**
      * Convert amount between currencies using historical rates if needed.
      */
-    private function convertAmount(float $amount, string $fromCurrency, string $toCurrency, string $tenantId): float
+    private function convertAmount(float $amount, string $fromCurrency, string $toCurrency, string $storeId): float
     {
         if ($fromCurrency === $toCurrency) {
             return $amount;
         }
 
         try {
-            $conversion = $this->currencyService->calculatePrice($amount, $fromCurrency, $toCurrency, $tenantId);
-            
+            $conversion = $this->currencyService->calculatePrice($amount, $fromCurrency, $toCurrency, $storeId);
+
             return $conversion['amount'];
         } catch (\Exception $e) {
             // Fallback to 1:1 if rate not found
@@ -203,7 +208,7 @@ class ProductPricingService
                 $product->historical_cost_amount,
                 $product->historical_cost_currency,
                 $targetCurrency,
-                $product->tenant_id,
+                $product->store_id,
                 $product->historical_cost_date
             );
 
@@ -212,7 +217,7 @@ class ProductPricingService
                 $product->historical_cost_amount,
                 $product->historical_cost_currency,
                 $targetCurrency,
-                $product->tenant_id
+                $product->store_id
             );
 
             return [
@@ -276,23 +281,23 @@ class ProductPricingService
 
         foreach ($products as $product) {
             $prices = $this->calculateProductPrices($product, $targetCurrency);
-            
+
             if (isset($prices['price'])) {
                 $summary['total_value'] += $prices['price'];
             }
-            
+
             if (isset($prices['cost_price'])) {
                 $summary['total_cost'] += $prices['cost_price'];
             }
-            
+
             if (isset($prices['margin'])) {
                 $summary['total_margin'] += $prices['margin'];
             }
-            
+
             if ($product->is_on_sale) {
                 $summary['products_on_sale']++;
             }
-            
+
             if (!$product->isInStock()) {
                 $summary['out_of_stock']++;
             } elseif ($product->hasLowStock()) {
@@ -308,42 +313,5 @@ class ProductPricingService
         }
 
         return $summary;
-    }
-
-    /**
-     * Update product prices when currency rates change.
-     */
-    public function updateProductPricesOnRateChange(string $tenantId, array $affectedCurrencies): void
-    {
-        $products = Product::where('tenant_id', $tenantId)->get();
-        
-        foreach ($products as $product) {
-            // Recalculate prices for affected currencies
-            $this->calculateProductPrices($product);
-            
-            // Update price history if needed
-            $this->recordPriceChangeOnRateUpdate($product, $affectedCurrencies);
-        }
-    }
-
-    /**
-     * Record price change due to rate update.
-     */
-    private function recordPriceChangeOnRateUpdate(Product $product, array $affectedCurrencies): void
-    {
-        foreach ($affectedCurrencies as $currency) {
-            if ($currency === $product->base_currency) {
-                continue; // Skip base currency
-            }
-
-            ProductPriceHistory::create([
-                'product_id' => $product->id,
-                'currency' => $currency,
-                'old_price' => null, // We don't track old converted prices
-                'new_price' => null, // We don't track new converted prices
-                'change_reason' => 'rate_update',
-                'notes' => "Currency rate updated for {$currency}",
-            ]);
-        }
     }
 }

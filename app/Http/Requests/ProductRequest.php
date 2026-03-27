@@ -2,16 +2,46 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Product;
+use App\Repositories\Currency\CurrencyRateGlobalRepository;
+use App\Repositories\Currency\CurrencyRateBusinessRepository;
 use Illuminate\Foundation\Http\FormRequest;
 
 class ProductRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
+    private CurrencyRateGlobalRepository $currencyRateGlobalRepo;
+    private CurrencyRateBusinessRepository $currencyRateBusinessRepo;
+
+    public function __construct(
+        CurrencyRateGlobalRepository $currencyRateGlobalRepo,
+        CurrencyRateBusinessRepository $currencyRateBusinessRepo
+    ) {
+        $this->currencyRateGlobalRepo = $currencyRateGlobalRepo;
+        $this->currencyRateBusinessRepo = $currencyRateBusinessRepo;
+    }
+
     public function authorize(): bool
     {
-        return true; // User can manage products if they have tenant access
+        $user = $this->user();
+
+        if (!$user) {
+            return false;
+        }
+
+        $product = $this->route('product');
+
+        if ($product instanceof Product) {
+            return match($this->method()) {
+                'DELETE' => $user->can('delete', $product),
+                'PUT', 'PATCH' => $user->can('update', $product),
+                default => $user->can('view', $product),
+            };
+        }
+
+        return match($this->method()) {
+            'POST' => $user->can('create', Product::class),
+            default => $user->can('viewAny', Product::class),
+        };
     }
     
     /**
@@ -29,7 +59,25 @@ class ProductRequest extends FormRequest
             // Pricing
             'base_price' => 'required|numeric|min:0|max:999999.99',
             'sale_price' => 'nullable|numeric|min:0|max:999999.99|lt:base_price',
-            'base_currency' => 'required|string|size:3|exists:currencies,code',
+            'base_currency' => [
+                'required',
+                'string',
+                'size:3',
+                function (string $attribute, mixed $value, \Closure $fail) {
+                    $code = strtoupper((string) $value);
+                    $storeId = $this->route('store')?->id ?? $this->input('store_id');
+
+                    $existsInGlobal = $this->currencyRateGlobalRepo->currencyExists($code);
+                    
+                    $existsInBusiness = $storeId 
+                        ? $this->currencyRateBusinessRepo->currencyExists($storeId, $code)
+                        : false;
+
+                    if (!$existsInGlobal && !$existsInBusiness) {
+                        $fail('Selected currency is not supported');
+                    }
+                },
+            ],
             
             // Stock management
             'manage_stock' => 'sometimes|boolean',

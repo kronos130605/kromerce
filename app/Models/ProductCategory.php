@@ -14,7 +14,7 @@ class ProductCategory extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'tenant_id',
+        'store_id',
         'name',
         'slug',
         'description',
@@ -40,7 +40,7 @@ class ProductCategory extends Model
             if (empty($category->slug)) {
                 $category->slug = Str::slug($category->name);
             }
-            
+
             // Set level based on parent
             if ($category->parent_id) {
                 $parent = static::find($category->parent_id);
@@ -58,11 +58,11 @@ class ProductCategory extends Model
     }
 
     /**
-     * Get the tenant that owns the category.
+     * Get the store that owns the category.
      */
-    public function tenant(): BelongsTo
+    public function store(): BelongsTo
     {
-        return $this->belongsTo(Tenant::class);
+        return $this->belongsTo(Store::class);
     }
 
     /**
@@ -87,9 +87,8 @@ class ProductCategory extends Model
      */
     public function products(): BelongsToMany
     {
-        return $this->belongsToMany(Product::class, 'product_category_product')
+        return $this->belongsToMany(Product::class, 'product_category_product', 'category_id', 'product_id')
             ->withPivot('order')
-            ->withTimestamps()
             ->orderBy('pivot_order');
     }
 
@@ -125,7 +124,7 @@ class ProductCategory extends Model
     {
         $ancestors = $this->ancestors()->reverse();
         $path = $ancestors->pluck('name')->push($this->name);
-        
+
         return $path->implode(' > ');
     }
 
@@ -161,7 +160,7 @@ class ProductCategory extends Model
     public function getTotalProductsCount(): int
     {
         $categoryIds = $this->descendants->pluck('id')->push($this->id);
-        
+
         return ProductCategoryProduct::whereIn('category_id', $categoryIds)
             ->distinct('product_id')
             ->count('product_id');

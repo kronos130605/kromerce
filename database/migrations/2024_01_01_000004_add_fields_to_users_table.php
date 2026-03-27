@@ -15,7 +15,7 @@ return new class extends Migration
             $table->string('phone')->nullable();
             $table->string('avatar_url')->nullable();
             $table->boolean('is_active')->default(true);
-            $table->string('current_tenant_id')->nullable();
+            $table->string('current_store_id')->nullable();
         });
     }
 
@@ -25,7 +25,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn(['phone', 'avatar_url', 'is_active', 'current_tenant_id']);
+            $table->dropColumn(['phone', 'avatar_url', 'is_active', 'current_store_id']);
         });
     }
 };

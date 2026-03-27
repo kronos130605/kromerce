@@ -9,12 +9,12 @@ import {useAuth} from "@/composables/useAuth.js";
  */
 export function useRoleGuard() {
     const page = usePage();
-    const { isBusinessUser, isCustomer, userRole } = useAuth();
+    const { isBusinessUser, isCustomer, primaryRole } = useAuth();
 
     /**
-     * Get current user's role in current tenant
+     * Get current user's role in current store
      */
-    const currentUserRole = computed(() => userRole.value || 'customer');
+    const currentUserRole = computed(() => primaryRole.value || 'customer');
 
     /**
      * Check if user can access business routes
@@ -30,11 +30,6 @@ export function useRoleGuard() {
      * Guard function to protect business routes
      */
     const requireBusinessRole = (fallbackRoute = 'dashboard') => {
-        // Wait for props to be loaded during navigation
-        if (page.props.user_role === undefined) {
-            return true; // Allow navigation to complete
-        }
-
         if (!canAccessBusiness.value) {
             router.visit(fallbackRoute);
             return false;

@@ -115,7 +115,7 @@ class ProductVariant extends Model
      */
     private function generateSku(): string
     {
-        $tenantSlug = $this->product->tenant->slug ?? 'TENANT';
+        $storeSlug = $this->product->store->slug ?? 'STORE';
         $productSlug = Str::upper(Str::substr(Str::slug($this->product->name), 0, 6));
         
         // Add attribute identifiers
@@ -129,7 +129,7 @@ class ProductVariant extends Model
         
         $random = strtoupper(Str::random(3));
         
-        return "{$tenantSlug}-{$productSlug}{$attrPart}-{$random}";
+        return "{$storeSlug}-{$productSlug}{$attrPart}-{$random}";
     }
 
     /**

@@ -2,13 +2,12 @@
 
 namespace App\Services;
 
-use App\Repositories\ProductRepository;
-use App\Repositories\ProductCategoryRepository;
-use App\Repositories\ProductTagRepository;
-use App\Repositories\BusinessCurrencyConfigRepository;
-use App\Services\CurrencyRateService;
-use Illuminate\Support\Facades\Log;
+use App\Repositories\Store\BusinessCurrencyConfigRepository;
+use App\Repositories\Product\ProductCategoryRepository;
+use App\Repositories\Product\ProductRepository;
+use App\Repositories\Product\ProductTagRepository;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class DashboardService
 {
@@ -33,34 +32,34 @@ class DashboardService
     }
 
     /**
-     * Get complete dashboard data for a tenant.
+     * Get complete dashboard data for a store.
      */
-    public function getDashboardData($tenant): array
+    public function getDashboardData($store): array
     {
         try {
             return [
                 'auth' => [
                     'user' => auth()->user(),
                 ],
-                'current_tenant' => [
-                    'id' => $tenant->id,
-                    'name' => $tenant->name,
-                    'slug' => $tenant->slug,
+                'current_store' => [
+                    'id' => $store->id,
+                    'name' => $store->name,
+                    'slug' => $store->slug,
                 ],
-                'statistics' => $this->getBusinessStatistics($tenant),
-                'recentActivity' => $this->getRecentActivity($tenant),
-                'currencyStatus' => $this->getCurrencyStatus($tenant),
-                'topProducts' => $this->getTopProducts($tenant),
-                'alerts' => $this->getBusinessAlerts($tenant),
-                'chartData' => $this->getChartData($tenant),
+                'statistics' => $this->getBusinessStatistics($store),
+                'recentActivity' => $this->getRecentActivity($store),
+                'currencyStatus' => $this->getCurrencyStatus($store),
+                'topProducts' => $this->getTopProducts($store),
+                'alerts' => $this->getBusinessAlerts($store),
+                'chartData' => $this->getChartData($store),
             ];
         } catch (\Exception $e) {
             Log::error('Dashboard data error', [
-                'tenant_id' => $tenant->id,
+                'store_id' => $store->id,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            
+
             throw new \Exception('Unable to load dashboard data: ' . $e->getMessage());
         }
     }
@@ -68,38 +67,38 @@ class DashboardService
     /**
      * Get business statistics.
      */
-    public function getBusinessStatistics($tenant): array
+    public function getBusinessStatistics($store): array
     {
         return [
-            'totalProducts' => $this->productRepo->countForTenant($tenant->id),
-            'activeProducts' => $this->productRepo->countActiveForTenant($tenant->id),
-            'lowStockProducts' => $this->productRepo->countLowStockForTenant($tenant->id),
-            'totalCategories' => $this->categoryRepo->countForTenant($tenant->id),
-            'totalTags' => $this->tagRepo->countForTenant($tenant->id),
-            'recentProducts' => $this->productRepo->getLatestForTenant($tenant->id, 5),
+            'totalProducts' => $this->productRepo->countForStore($store->id),
+            'activeProducts' => $this->productRepo->countActiveForStore($store->id),
+            'lowStockProducts' => $this->productRepo->countLowStockForStore($store->id),
+            'totalCategories' => $this->categoryRepo->countForStore($store->id),
+            'totalTags' => $this->tagRepo->countForStore($store->id),
+            'recentProducts' => $this->productRepo->getLatestForStore($store->id, 5),
         ];
     }
 
     /**
      * Get recent activity for the business.
      */
-    public function getRecentActivity($tenant): array
+    public function getRecentActivity($store): array
     {
         return [
-            'recentPriceChanges' => $this->productRepo->getRecentPriceChanges($tenant->id, 10),
-            'newProducts' => $this->productRepo->getLatestForTenant($tenant->id, 5),
-            'stockUpdates' => $this->productRepo->getRecentStockUpdates($tenant->id, 5),
+            'recentPriceChanges' => $this->productRepo->getRecentPriceChanges($store->id, 10),
+            'newProducts' => $this->productRepo->getLatestForStore($store->id, 5),
+            'stockUpdates' => $this->productRepo->getRecentStockUpdates($store->id, 5),
         ];
     }
 
     /**
      * Get currency configuration status.
      */
-    public function getCurrencyStatus($tenant): array
+    public function getCurrencyStatus($store): array
     {
         try {
-            $config = $this->configRepo->getByTenantId($tenant->id);
-            
+            $config = $this->configRepo->getByStoreId($store->id);
+
             if (!$config) {
                 return [
                     'configured' => false,
@@ -115,15 +114,15 @@ class DashboardService
                 'lastRateUpdate' => $config->last_rate_update,
                 'autoUpdateEnabled' => $config->auto_update_rates,
                 'useCustomRates' => $config->use_custom_rates,
-                'currentRates' => $this->currencyService->getSupportedCurrenciesWithRates($tenant->id),
+                'currentRates' => $this->currencyService->getSupportedCurrenciesWithRates($store->id),
                 'setupRequired' => false,
             ];
         } catch (\Exception $e) {
             Log::error('Currency status error', [
-                'tenant_id' => $tenant->id,
+                'store_id' => $store->id,
                 'error' => $e->getMessage(),
             ]);
-            
+
             return [
                 'configured' => false,
                 'message' => 'Error loading currency configuration',
@@ -136,20 +135,20 @@ class DashboardService
     /**
      * Get top performing products.
      */
-    public function getTopProducts($tenant): array
+    public function getTopProducts($store): array
     {
         try {
             return [
-                'byRevenue' => $this->productRepo->getTopByRevenue($tenant->id, 5),
-                'byViews' => $this->productRepo->getTopByViews($tenant->id, 5),
-                'bySales' => $this->productRepo->getTopBySales($tenant->id, 5),
+                'byRevenue' => $this->productRepo->getTopByRevenue($store->id, 5),
+                'byViews' => $this->productRepo->getTopByViews($store->id, 5),
+                'bySales' => $this->productRepo->getTopBySales($store->id, 5),
             ];
         } catch (\Exception $e) {
             Log::error('Top products error', [
-                'tenant_id' => $tenant->id,
+                'store_id' => $store->id,
                 'error' => $e->getMessage(),
             ]);
-            
+
             return [
                 'byRevenue' => [],
                 'byViews' => [],
@@ -161,13 +160,13 @@ class DashboardService
     /**
      * Get business alerts and notifications.
      */
-    public function getBusinessAlerts($tenant): array
+    public function getBusinessAlerts($store): array
     {
         $alerts = [];
 
         try {
             // Low stock alerts
-            $lowStock = $this->productRepo->countLowStockForTenant($tenant->id);
+            $lowStock = $this->productRepo->countLowStockForStore($store->id);
             if ($lowStock > 0) {
                 $alerts[] = [
                     'type' => 'warning',
@@ -179,11 +178,11 @@ class DashboardService
             }
 
             // Currency update alerts
-            $config = $this->configRepo->getByTenantId($tenant->id);
+            $config = $this->configRepo->getByStoreId($store->id);
             if ($config && $config->auto_update_rates) {
-                $daysSinceUpdate = $config->last_rate_update ? 
+                $daysSinceUpdate = $config->last_rate_update ?
                     Carbon::parse($config->last_rate_update)->diffInDays(now()) : 999;
-                
+
                 if ($daysSinceUpdate > 7) {
                     $alerts[] = [
                         'type' => 'info',
@@ -207,10 +206,10 @@ class DashboardService
 
         } catch (\Exception $e) {
             Log::error('Alerts error', [
-                'tenant_id' => $tenant->id,
+                'store_id' => $store->id,
                 'error' => $e->getMessage(),
             ]);
-            
+
             $alerts[] = [
                 'type' => 'error',
                 'message' => 'Error loading alerts',
@@ -225,20 +224,20 @@ class DashboardService
     /**
      * Get chart data for dashboard.
      */
-    public function getChartData($tenant): array
+    public function getChartData($store): array
     {
         try {
             return [
-                'monthlyRevenue' => $this->productRepo->getMonthlyRevenue($tenant->id, 12),
-                'productGrowth' => $this->productRepo->getProductGrowth($tenant->id, 6),
-                'currencyPerformance' => $this->currencyService->getCurrencyPerformance($tenant->id, 30),
+                'monthlyRevenue' => $this->productRepo->getMonthlyRevenue($store->id, 12),
+                'productGrowth' => $this->productRepo->getProductGrowth($store->id, 6),
+                'currencyPerformance' => $this->currencyService->getCurrencyPerformance($store->id, 30),
             ];
         } catch (\Exception $e) {
             Log::error('Chart data error', [
-                'tenant_id' => $tenant->id,
+                'store_id' => $store->id,
                 'error' => $e->getMessage(),
             ]);
-            
+
             return [
                 'monthlyRevenue' => [],
                 'productGrowth' => [],

@@ -2,25 +2,47 @@
 
 namespace App\Providers;
 
-use App\Services\CurrencyRateService;
-use App\Services\ProductPricingService;
-use App\Services\DashboardService;
-use App\Repositories\BaseRepository;
-use App\Repositories\BusinessCurrencyConfigRepository;
-use App\Repositories\CurrencyRateGlobalRepository;
-use App\Repositories\CurrencyRateBusinessRepository;
-use App\Repositories\CurrencyRateUpdateRepository;
-use App\Repositories\ProductRepository;
-use App\Repositories\ProductCategoryRepository;
-use App\Repositories\ProductTagRepository;
+use App\Factories\RepositoryFactory;
 use App\Models\BusinessCurrencyConfig;
-use App\Models\CurrencyRateGlobal;
 use App\Models\CurrencyRateBusiness;
+use App\Models\CurrencyRateGlobal;
 use App\Models\CurrencyRateUpdate;
 use App\Models\Product;
 use App\Models\ProductCategory;
 use App\Models\ProductTag;
+use App\Models\Store;
+use App\Models\StoreContact;
+use App\Models\StoreCurrencyConfig;
+use App\Models\StorePaymentMethod;
+use App\Models\User;
+use App\Repositories\Store\BusinessCurrencyConfigRepository;
+use App\Repositories\Currency\CurrencyRateBusinessRepository;
+use App\Repositories\Currency\CurrencyRateGlobalRepository;
+use App\Repositories\Currency\CurrencyRateUpdateRepository;
+use App\Repositories\Product\ProductCategoryRepository;
+use App\Repositories\Product\ProductRepository;
+use App\Repositories\Product\ProductTagRepository;
+use App\Repositories\Store\StoreBrandingRepository;
+use App\Repositories\Store\StoreConfigRepository;
+use App\Repositories\Store\StoreContactRepository;
+use App\Repositories\Store\StoreCurrencyConfigRepository;
+use App\Repositories\Store\StorePaymentMethodRepository;
+use App\Repositories\Store\StoreRepository;
+use App\Repositories\Store\StoreStatisticsRepository;
+use App\Repositories\User\RoleRepository;
+use App\Repositories\User\UserRoleRepository;
+use App\Repositories\User\UserStoreRepository;
+use App\Services\CurrencyRateService;
+use App\Services\DashboardRoutingService;
+use App\Services\DashboardService;
+use App\Services\ProductPricingService;
+use App\Services\ProductService;
+use App\Services\RoleService;
+use App\Services\StoreService;
+use App\Services\StoreConfigService;
+use App\Services\StoreUserService;
 use Illuminate\Support\ServiceProvider;
+use Spatie\Permission\Models\Role;
 
 class BusinessServiceProvider extends ServiceProvider
 {
@@ -31,7 +53,7 @@ class BusinessServiceProvider extends ServiceProvider
     {
         // Register Repositories
         $this->registerRepositories();
-        
+
         // Register Services
         $this->registerServices();
     }
@@ -43,7 +65,7 @@ class BusinessServiceProvider extends ServiceProvider
     {
         // Register model relationships
         $this->registerModelRelationships();
-        
+
         // Register commands
         if ($this->app->runningInConsole()) {
             $this->commands([
@@ -58,45 +80,60 @@ class BusinessServiceProvider extends ServiceProvider
      */
     private function registerRepositories(): void
     {
-        // Base Repository
-        $this->app->bind(BaseRepository::class, function ($app) {
-            // Base repository is abstract, should not be instantiated directly
-            return new class extends BaseRepository {
-                public function __construct() {
-                    // This is just for binding, actual repositories will extend this
-                }
-            };
-        });
+        // Currency repositories
+        $this->app->singleton(BusinessCurrencyConfigRepository::class,
+            fn() => new BusinessCurrencyConfigRepository(new BusinessCurrencyConfig()));
 
-        // Currency Repositories
-        $this->app->bind(BusinessCurrencyConfigRepository::class, function ($app) {
-            return new BusinessCurrencyConfigRepository(new BusinessCurrencyConfig());
-        });
+        $this->app->singleton(CurrencyRateGlobalRepository::class,
+            fn() => new CurrencyRateGlobalRepository(new CurrencyRateGlobal()));
 
-        $this->app->bind(CurrencyRateGlobalRepository::class, function ($app) {
-            return new CurrencyRateGlobalRepository(new CurrencyRateGlobal());
-        });
+        $this->app->singleton(CurrencyRateBusinessRepository::class,
+            fn() => new CurrencyRateBusinessRepository(new CurrencyRateBusiness()));
 
-        $this->app->bind(CurrencyRateBusinessRepository::class, function ($app) {
-            return new CurrencyRateBusinessRepository(new CurrencyRateBusiness());
-        });
+        $this->app->singleton(CurrencyRateUpdateRepository::class,
+            fn() => new CurrencyRateUpdateRepository(new CurrencyRateUpdate()));
 
-        $this->app->bind(CurrencyRateUpdateRepository::class, function ($app) {
-            return new CurrencyRateUpdateRepository(new CurrencyRateUpdate());
-        });
+        // Product repositories
+        $this->app->singleton(ProductRepository::class,
+            fn() => new ProductRepository(new Product()));
 
-        // Product Repositories
-        $this->app->bind(ProductRepository::class, function ($app) {
-            return new ProductRepository(new Product());
-        });
+        $this->app->singleton(ProductCategoryRepository::class,
+            fn() => new ProductCategoryRepository(new ProductCategory()));
 
-        $this->app->bind(ProductCategoryRepository::class, function ($app) {
-            return new ProductCategoryRepository(new ProductCategory());
-        });
+        $this->app->singleton(ProductTagRepository::class,
+            fn() => new ProductTagRepository(new ProductTag()));
 
-        $this->app->bind(ProductTagRepository::class, function ($app) {
-            return new ProductTagRepository(new ProductTag());
-        });
+        // Store repositories
+        $this->app->singleton(StoreRepository::class,
+            fn() => new StoreRepository(new Store()));
+
+        $this->app->singleton(StoreBrandingRepository::class,
+            fn() => new StoreBrandingRepository(new Store()));
+
+        $this->app->singleton(StoreContactRepository::class,
+            fn() => new StoreContactRepository(new StoreContact()));
+
+        $this->app->singleton(StorePaymentMethodRepository::class,
+            fn() => new StorePaymentMethodRepository(new StorePaymentMethod()));
+
+        $this->app->singleton(StoreCurrencyConfigRepository::class,
+            fn() => new StoreCurrencyConfigRepository(new StoreCurrencyConfig()));
+
+        $this->app->singleton(StoreStatisticsRepository::class,
+            fn() => new StoreStatisticsRepository(new Store()));
+
+        $this->app->singleton(StoreConfigRepository::class,
+            fn() => new StoreConfigRepository(new Store()));
+
+        // User repositories
+        $this->app->singleton(RoleRepository::class,
+            fn() => new RoleRepository(new Role()));
+
+        $this->app->singleton(UserRoleRepository::class,
+            fn() => new UserRoleRepository());
+
+        $this->app->singleton(UserStoreRepository::class,
+            fn() => new UserStoreRepository(new User()));
     }
 
     /**
@@ -133,6 +170,57 @@ class BusinessServiceProvider extends ServiceProvider
                 $app->make(CurrencyRateService::class)
             );
         });
+
+        // Register Store Service with repositories
+        $this->app->singleton(StoreService::class, function ($app) {
+            return new StoreService(
+                $app->make(StoreRepository::class),
+                $app->make(StoreContactRepository::class),
+                $app->make(StorePaymentMethodRepository::class),
+                $app->make(StoreCurrencyConfigRepository::class),
+                $app->make(StoreStatisticsRepository::class),
+                $app->make(UserStoreRepository::class)
+            );
+        });
+
+        // Register Store User Service
+        $this->app->singleton(StoreUserService::class, function ($app) {
+            return new StoreUserService(
+                $app->make(UserStoreRepository::class),
+                $app->make(StoreRepository::class)
+            );
+        });
+
+        // Register Dashboard Routing Service
+        $this->app->singleton(DashboardRoutingService::class, function ($app) {
+            return new DashboardRoutingService(
+                $app->make(StoreUserService::class),
+                $app->make(RoleService::class),
+                $app->make(StoreStatisticsRepository::class)
+            );
+        });
+
+        // Register Store Config Service
+        $this->app->singleton(StoreConfigService::class, function ($app) {
+            return new StoreConfigService(
+                $app->make(StoreConfigRepository::class)
+            );
+        });
+
+        // Register Role Service
+        $this->app->singleton(RoleService::class, function ($app) {
+            return new RoleService(
+                $app->make(RoleRepository::class)
+            );
+        });
+
+        // Register Product Service
+        $this->app->singleton(ProductService::class, function ($app) {
+            return new ProductService(
+                $app->make(ProductRepository::class),
+                $app->make(ProductCategoryRepository::class)
+            );
+        });
     }
 
     /**
@@ -140,14 +228,16 @@ class BusinessServiceProvider extends ServiceProvider
      */
     private function registerModelRelationships(): void
     {
-        // Tenant relationship with currency config
-        \App\Models\Tenant::resolveRelationUsing('currencyConfig', function ($tenant) {
-            return $tenant->hasOne(BusinessCurrencyConfig::class);
+        // Store relationship with currency config
+        \App\Models\Store::resolveRelationUsing('currencyConfig', function ($store) {
+            return $store->hasOne(BusinessCurrencyConfig::class);
         });
 
-        // User relationship with tenant (if not already defined)
-        \App\Models\User::resolveRelationUsing('tenant', function ($user) {
-            return $user->belongsTo(\App\Models\Tenant::class);
+        // User relationship with stores
+        \App\Models\User::resolveRelationUsing('stores', function ($user) {
+            return $user->belongsToMany(\App\Models\Store::class, 'store_users')
+                ->withPivot(['is_active', 'joined_at'])
+                ->withTimestamps();
         });
     }
 }

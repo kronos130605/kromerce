@@ -8,7 +8,7 @@ import CustomerDashboardNavbar from '@/components/navigation/navbars/CustomerDas
 import CustomerSidebar from '@/components/navigation/sidebars/CustomerSidebar.vue';
 
 // Import content components
-import DashboardContent from '@/modules/customer/content/DashboardContent.vue';
+import DashboardContent from '@/modules/customer/components/DashboardContent.vue';
 
 const page = usePage();
 const { user } = useAuth();

@@ -9,13 +9,17 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
+use App\Models\Store;
 
 class Product extends Model
 {
     use HasFactory, SoftDeletes;
 
+    protected $keyType = 'string';
+    public $incrementing = false;
+
     protected $fillable = [
-        'tenant_id',
+        'store_id',
         'name',
         'slug',
         'description',
@@ -90,6 +94,11 @@ class Product extends Model
         parent::boot();
 
         static::creating(function ($product) {
+            // Generate UUID if not provided
+            if (empty($product->id)) {
+                $product->id = (string) Str::uuid();
+            }
+
             if (empty($product->slug)) {
                 $product->slug = Str::slug($product->name);
             }
@@ -118,11 +127,11 @@ class Product extends Model
     }
 
     /**
-     * Get the tenant that owns the product.
+     * Get the store that owns the product.
      */
-    public function tenant(): BelongsTo
+    public function store(): BelongsTo
     {
-        return $this->belongsTo(Tenant::class);
+        return $this->belongsTo(Store::class);
     }
 
     /**
@@ -146,9 +155,8 @@ class Product extends Model
      */
     public function categories(): BelongsToMany
     {
-        return $this->belongsToMany(ProductCategory::class, 'product_category_product')
+        return $this->belongsToMany(ProductCategory::class, 'product_category_product', 'product_id', 'category_id')
             ->withPivot('order')
-            ->withTimestamps()
             ->orderBy('pivot_order');
     }
 
@@ -157,8 +165,7 @@ class Product extends Model
      */
     public function tags(): BelongsToMany
     {
-        return $this->belongsToMany(ProductTag::class, 'product_product_tag')
-            ->withTimestamps();
+        return $this->belongsToMany(ProductTag::class, 'product_product_tag', 'product_id', 'tag_id');
     }
 
     /**
@@ -191,16 +198,6 @@ class Product extends Model
     public function priceHistory(): HasMany
     {
         return $this->hasMany(ProductPriceHistory::class)->orderBy('created_at', 'desc');
-    }
-
-    /**
-     * Get calculated prices in all supported currencies.
-     * Note: This method delegates to ProductPricingService for clean architecture.
-     */
-    public function getCalculatedPrices(): array
-    {
-        // Delegar al service para mantener arquitectura limpia
-        return app(\App\Services\ProductPricingService::class)->calculateProductPrices($this);
     }
 
     /**
@@ -261,15 +258,15 @@ class Product extends Model
     }
 
     /**
-     * Generate SKU based on tenant and product name.
+     * Generate SKU based on store and product name.
      */
     private function generateSku(): string
     {
-        $tenantSlug = $this->tenant->slug ?? 'TENANT';
+        $storeSlug = $this->store->slug ?? 'STORE';
         $productSlug = Str::upper(Str::substr(Str::slug($this->name), 0, 8));
         $random = strtoupper(Str::random(4));
 
-        return "{$tenantSlug}-{$productSlug}-{$random}";
+        return "{$storeSlug}-{$productSlug}-{$random}";
     }
 
     /**

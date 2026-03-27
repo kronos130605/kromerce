@@ -2,50 +2,105 @@
 
 namespace App\Factories;
 
-use App\Repositories\BaseRepository;
-use App\Repositories\ProductRepository;
-use App\Repositories\ProductCategoryRepository;
-use App\Repositories\ProductTagRepository;
-use App\Models\Product;
-use App\Models\ProductCategory;
-use App\Models\ProductTag;
+use App\Repositories\Product\ProductCategoryRepository;
+use App\Repositories\Product\ProductRepository;
+use App\Repositories\Product\ProductTagRepository;
+use App\Repositories\Store\BusinessCurrencyConfigRepository;
+use App\Repositories\Store\StoreBrandingRepository;
+use App\Repositories\Store\StoreConfigRepository;
+use App\Repositories\Store\StoreContactRepository;
+use App\Repositories\Store\StoreCurrencyConfigRepository;
+use App\Repositories\Store\StorePaymentMethodRepository;
+use App\Repositories\Store\StoreRepository;
+use App\Repositories\Store\StoreStatisticsRepository;
+use App\Repositories\User\RoleRepository;
+use App\Repositories\User\UserRoleRepository;
+use App\Repositories\User\UserStoreRepository;
 
 class RepositoryFactory
 {
     /**
-     * Create a new repository instance.
+     * Backward compatibility for legacy static calls.
      */
-    private static function createRepository(string $repositoryClass, object $model): BaseRepository
+    public static function __callStatic(string $name, array $arguments)
     {
-        return match ($repositoryClass) {
-            ProductRepository::class => new ProductRepository($model),
-            ProductCategoryRepository::class => new ProductCategoryRepository($model),
-            ProductTagRepository::class => new ProductTagRepository($model),
-            default => throw new \InvalidArgumentException("Repository {$repositoryClass} is not supported")
-        };
+        $factory = app(self::class);
+
+        if (!method_exists($factory, $name)) {
+            throw new \BadMethodCallException("Method {$name} does not exist on " . self::class);
+        }
+
+        return $factory->{$name}(...$arguments);
     }
 
-    /**
-     * Get ProductRepository instance.
-     */
-    public static function productRepository(): ProductRepository
+    public function productRepository(): ProductRepository
     {
-        return new ProductRepository(new Product());
+        return app()->make(ProductRepository::class);
     }
 
-    /**
-     * Get ProductCategoryRepository instance.
-     */
-    public static function productCategoryRepository(): ProductCategoryRepository
+    public function productCategoryRepository(): ProductCategoryRepository
     {
-        return new ProductCategoryRepository(new ProductCategory());
+        return app()->make(ProductCategoryRepository::class);
     }
 
-    /**
-     * Get ProductTagRepository instance.
-     */
-    public static function productTagRepository(): ProductTagRepository
+    public function productTagRepository(): ProductTagRepository
     {
-        return new ProductTagRepository(new ProductTag());
+        return app()->make(ProductTagRepository::class);
     }
+
+    public function storeRepository(): StoreRepository
+    {
+        return app()->make(StoreRepository::class);
+    }
+
+    public function storeBrandingRepository(): StoreBrandingRepository
+    {
+        return app()->make(StoreBrandingRepository::class);
+    }
+
+    public function storeContactRepository(): StoreContactRepository
+    {
+        return app()->make(StoreContactRepository::class);
+    }
+
+    public function storePaymentMethodRepository(): StorePaymentMethodRepository
+    {
+        return app()->make(StorePaymentMethodRepository::class);
+    }
+
+    public function storeCurrencyConfigRepository(): StoreCurrencyConfigRepository
+    {
+        return app()->make(StoreCurrencyConfigRepository::class);
+    }
+
+    public function storeStatisticsRepository(): StoreStatisticsRepository
+    {
+        return app()->make(StoreStatisticsRepository::class);
+    }
+
+    public function storeConfigRepository(): StoreConfigRepository
+    {
+        return app()->make(StoreConfigRepository::class);
+    }
+
+    public function businessCurrencyConfigRepository(): BusinessCurrencyConfigRepository
+    {
+        return app()->make(BusinessCurrencyConfigRepository::class);
+    }
+
+    public function userRoleRepository(): UserRoleRepository
+    {
+        return app()->make(UserRoleRepository::class);
+    }
+
+    public function roleRepository(): RoleRepository
+    {
+        return app()->make(RoleRepository::class);
+    }
+
+    public function userStoreRepository(): UserStoreRepository
+    {
+        return app()->make(UserStoreRepository::class);
+    }
+
 }

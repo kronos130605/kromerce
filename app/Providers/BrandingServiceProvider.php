@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Models\Store;
+use App\Repositories\Store\StoreBrandingRepository;
 use App\Services\BrandingService;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -14,7 +16,12 @@ class BrandingServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(BrandingService::class, function ($app) {
-            return new BrandingService();
+            return new BrandingService(
+                $app->make(StoreBrandingRepository::class),
+                session('current_store_id') 
+                    ? $app->make(Store::class)->find(session('current_store_id'))
+                    : null
+            );
         });
     }
 
@@ -26,7 +33,7 @@ class BrandingServiceProvider extends ServiceProvider
         // Share branding data with all views
         View::composer('*', function ($view) {
             $branding = app(BrandingService::class);
-            
+
             $view->with([
                 'branding' => $branding->getBrandingConfig(),
                 'css_variables' => $branding->getCSSVariables(),
@@ -34,7 +41,7 @@ class BrandingServiceProvider extends ServiceProvider
                 'favicon_url' => $branding->getFaviconUrl(),
                 'custom_css' => $branding->getCustomCSS(),
                 'is_dark_mode' => $branding->isDarkMode(),
-                'current_tenant' => $branding->getTenant(),
+                'current_store' => $branding->getStore(),
             ]);
         });
     }

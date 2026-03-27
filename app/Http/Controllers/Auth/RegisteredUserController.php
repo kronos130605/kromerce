@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use App\Models\Tenant;
+use App\Models\Store;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -38,8 +38,8 @@ class RegisteredUserController extends Controller
             'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
             'phone' => 'nullable|string|max:20',
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'user_type' => 'required|in:customer,business_owner',
-            'tenant_name' => 'required_if:user_type,business_owner|string|max:255|nullable',
+            'user_type' => 'required|in:' . implode(',', array_keys(config('roles.registration_types', ['customer', 'business_owner']))),
+            'store_name' => 'required_if:user_type,business_owner|string|max:255|nullable',
         ]);
 
         $user = User::create([
@@ -50,55 +50,63 @@ class RegisteredUserController extends Controller
             'is_active' => true,
         ]);
 
-        // Assign role
-        $user->assignRole($request->user_type);
+        // Assign role using config mapping
+        $userType = $request->user_type;
+        $role = config('roles.registration_types.' . $userType, $userType);
+        $user->assignRole($role);
 
-        // Create tenant for business owners
+        // Create store for business owners
         if ($request->user_type === 'business_owner') {
-            $tenant = DB::transaction(function () use ($request, $user) {
-                // Generate UUID first
+            // Creating a store
+            $store = DB::transaction(function () use ($request, $user, $role) {
+                // Generate UUID
                 $uuid = Str::uuid();
-                
-                // Insert tenant manually to bypass tenancy package interception
-                $tenantId = DB::table('tenants')->insertGetId([
-                    'name' => $request->tenant_name,
-                    'slug' => Str::slug($request->tenant_name),
+
+                // Insert store manually to bypass tenancy package interception
+                $storeId = DB::table('stores')->insertGetId([
+                    'name' => $request->store_name,
+                    'slug' => Str::slug($request->store_name),
                     'owner_id' => $user->id,
                     'uuid' => $uuid,
-                    'data' => json_encode([
-                        'name' => $request->tenant_name,
-                        'slug' => Str::slug($request->tenant_name),
-                        'owner_id' => $user->id,
-                        'branding_config' => [
-                            'primary_color' => '#3B82F6',
-                            'secondary_color' => '#10B981',
-                            'accent_color' => '#F59E0B',
-                            'theme' => 'light',
-                        ],
-                    ]),
-                    'branding_config' => json_encode([
-                        'primary_color' => '#3B82F6',
-                        'secondary_color' => '#10B981',
-                        'accent_color' => '#F59E0B',
-                        'theme' => 'light',
-                    ]),
+                    'business_type' => 'retail',
+                    'status' => 'active',
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
 
-                // Get the tenant instance for relationships
-                $tenant = Tenant::find($tenantId);
-
-                // Create domain for tenant
-                $tenant->domains()->create([
-                    'domain' => $tenant->slug . '.' . config('tenancy.central_domains')[0] ?? 'kromerce.test',
+                // Create default currency configuration for store
+                DB::table('store_currency_configs')->insert([
+                    'id' => $uuid,
+                    'store_id' => $storeId,
+                    'default_currency' => 'USD',
+                    'display_currencies' => json_encode(['USD', 'EUR', 'CUP']),
+                    'use_custom_rates' => false,
+                    'auto_update_rates' => false,
+                    'rate_update_frequency' => 'weekly',
+                    'historical_retention_years' => 2,
+                    'created_at' => now(),
+                    'updated_at' => now(),
                 ]);
 
-                // Associate user with tenant
-                $user->tenants()->attach($tenant->id, ['role' => 'owner']);
-                $user->update(['current_tenant_id' => $tenant->id]);
+                // Get the store instance for relationships
+                $store = \App\Models\Store::find($storeId);
 
-                return $tenant;
+                // Create domain for store
+                $store->domains()->create([
+                    'domain' => Str::slug($request->store_name) . '.' . config('tenancy.central_domains')[0] ?? 'kromerce.test',
+                ]);
+
+                // Associate user with store
+                DB::table('store_users')->insert([
+                    'store_id' => $storeId,
+                    'user_id' => $user->id,
+                    'is_active' => true,
+                    'joined_at' => now(),
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+
+                return $store;
             });
         }
 

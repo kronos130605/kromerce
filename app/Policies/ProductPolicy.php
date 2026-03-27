@@ -2,65 +2,72 @@
 
 namespace App\Policies;
 
-use App\Models\User;
 use App\Models\Product;
-use Illuminate\Auth\Access\Response;
+use App\Models\User;
 
 class ProductPolicy
 {
-    /**
-     * Determine whether the user can view any models.
-     */
+    public function before(User $user, string $ability): ?bool
+    {
+        if ($user->hasRole(['super_admin', 'admin'])) {
+            return true;
+        }
+
+        return null;
+    }
+
     public function viewAny(User $user): bool
     {
-        return true;
+        return $user->hasRole(['business_owner', 'manager']);
     }
 
-    /**
-     * Determine whether the user can view the model.
-     */
     public function view(User $user, Product $product): bool
     {
-        return $product->tenant_id === $user->tenant_id;
+        if (!$product->store) {
+            return false;
+        }
+
+        return $user->can('view', $product->store);
     }
 
-    /**
-     * Determine whether the user can create models.
-     */
     public function create(User $user): bool
     {
-        return true;
+        return $user->hasRole(['business_owner', 'manager']);
     }
 
-    /**
-     * Determine whether the user can update the model.
-     */
     public function update(User $user, Product $product): bool
     {
-        return $product->tenant_id === $user->tenant_id;
+        if (!$product->store) {
+            return false;
+        }
+
+        return $user->can('manage', $product->store);
     }
 
-    /**
-     * Determine whether the user can delete the model.
-     */
     public function delete(User $user, Product $product): bool
     {
-        return $product->tenant_id === $user->tenant_id;
+        if (!$product->store) {
+            return false;
+        }
+
+        return $user->can('manage', $product->store);
     }
 
-    /**
-     * Determine whether the user can restore the model.
-     */
     public function restore(User $user, Product $product): bool
     {
-        return $product->tenant_id === $user->tenant_id;
+        if (!$product->store) {
+            return false;
+        }
+
+        return $user->can('manage', $product->store);
     }
 
-    /**
-     * Determine whether the user can permanently delete the model.
-     */
     public function forceDelete(User $user, Product $product): bool
     {
-        return $product->tenant_id === $user->tenant_id;
+        if (!$product->store) {
+            return false;
+        }
+
+        return $user->can('delete', $product->store);
     }
 }

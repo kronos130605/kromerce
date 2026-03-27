@@ -1,11 +1,14 @@
 <script setup>
-import { Link, useForm } from '@inertiajs/vue3';
+import { Link, useForm, router } from '@inertiajs/vue3';
 import { ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 const props = defineProps({
     product: Object,
     categories: Array,
 });
+
+const { t } = useI18n();
 
 const form = useForm({
     name: props.product.name,
@@ -62,70 +65,63 @@ const generateSlug = () => {
 const submit = () => {
     form.put(`/products/${props.product.id}`, {
         onSuccess: () => {
-            // Redirect to product show page
-            window.location.href = `/products/${props.product.id}`;
+            router.visit(`/products/${props.product.id}`);
         },
     });
 };
 
 // Cancel and go back
 const cancel = () => {
-    window.location.href = `/products/${props.product.id}`;
+    router.visit(`/products/${props.product.id}`);
 };
 </script>
 
 <template>
-    <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
-        <!-- Header -->
-        <div class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex justify-between items-center py-6">
-                    <div class="flex items-center space-x-4">
-                        <Link
-                            :href="`/products/${product.id}`"
-                            class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
-                        >
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                            </svg>
-                        </Link>
-                        <div>
-                            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Edit Product</h1>
-                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                                Update product information
-                            </p>
-                        </div>
-                    </div>
-                    <div class="flex space-x-3">
-                        <button
-                            @click="cancel"
-                            class="px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            @click="submit"
-                            :disabled="form.processing"
-                            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                            <span v-if="form.processing">Updating...</span>
-                            <span v-else>Update Product</span>
-                        </button>
-                    </div>
+    <div class="max-w-4xl mx-auto">
+        <div class="flex justify-between items-center mb-6">
+            <div class="flex items-center space-x-4">
+                <Link
+                    :href="`/products/${product.id}`"
+                    class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+                >
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                </Link>
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ t('products.form.update') }}</h1>
+                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                        {{ t('products.management') }}
+                    </p>
                 </div>
+            </div>
+            <div class="flex space-x-3">
+                <button
+                    @click="cancel"
+                    class="px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                >
+                    {{ t('products.form.cancel') }}
+                </button>
+                <button
+                    @click="submit"
+                    :disabled="form.processing"
+                    class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                    <span v-if="form.processing">{{ t('products.messages.loading') }}</span>
+                    <span v-else>{{ t('products.form.update') }}</span>
+                </button>
             </div>
         </div>
 
-        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <form @submit.prevent="submit" class="space-y-6">
+        <form @submit.prevent="submit" class="space-y-6">
                 <!-- Basic Information -->
                 <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-                    <h2 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Basic Information</h2>
+                    <h2 class="text-lg font-medium text-gray-900 dark:text-white mb-4">{{ t('products.sections.basic_info') }}</h2>
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="md:col-span-2">
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Product Name *
+                                {{ t('products.form.name') }} *
                             </label>
                             <input
                                 v-model="form.name"
@@ -141,7 +137,7 @@ const cancel = () => {
                         
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                SKU
+                                {{ t('products.form.sku') }}
                             </label>
                             <div class="flex space-x-2">
                                 <input
@@ -167,7 +163,7 @@ const cancel = () => {
                         
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Slug
+                                {{ t('products.form.slug') }}
                             </label>
                             <div class="flex space-x-2">
                                 <input
@@ -193,7 +189,7 @@ const cancel = () => {
                         
                         <div class="md:col-span-2">
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Description
+                                {{ t('products.form.description') }}
                             </label>
                             <textarea
                                 v-model="form.description"
@@ -210,12 +206,12 @@ const cancel = () => {
 
                 <!-- Pricing -->
                 <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-                    <h2 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Pricing</h2>
+                    <h2 class="text-lg font-medium text-gray-900 dark:text-white mb-4">{{ t('products.sections.pricing') }}</h2>
                     
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Base Price *
+                                {{ t('products.form.base_price') }} *
                             </label>
                             <div class="relative">
                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -238,7 +234,7 @@ const cancel = () => {
                         
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Sale Price
+                                {{ t('products.form.sale_price') }}
                             </label>
                             <div class="relative">
                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -340,12 +336,12 @@ const cancel = () => {
 
                 <!-- Status and Visibility -->
                 <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-                    <h2 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Status and Visibility</h2>
+                    <h2 class="text-lg font-medium text-gray-900 dark:text-white mb-4">{{ t('products.sections.status_visibility') }}</h2>
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Status *
+                                {{ t('products.form.status') }} *
                             </label>
                             <select
                                 v-model="form.status"
@@ -353,9 +349,9 @@ const cancel = () => {
                                 class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
                                 :class="{ 'border-red-500': form.errors.status }"
                             >
-                                <option value="draft">Draft</option>
-                                <option value="active">Active</option>
-                                <option value="inactive">Inactive</option>
+                                <option value="draft">{{ t('products.status.draft') }}</option>
+                                <option value="active">{{ t('products.status.active') }}</option>
+                                <option value="inactive">{{ t('products.status.inactive') }}</option>
                             </select>
                             <p v-if="form.errors.status" class="mt-1 text-sm text-red-600 dark:text-red-400">
                                 {{ form.errors.status }}
@@ -364,14 +360,14 @@ const cancel = () => {
                         
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Category
+                                {{ t('products.form.category') }}
                             </label>
                             <select
                                 v-model="form.category_id"
                                 class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
                                 :class="{ 'border-red-500': form.errors.category_id }"
                             >
-                                <option value="">No category</option>
+                                <option value="">{{ t('products.placeholders.no_category') }}</option>
                                 <option v-for="category in categories" :key="category.id" :value="category.id">
                                     {{ category.name }}
                                 </option>
@@ -389,7 +385,7 @@ const cancel = () => {
                                     class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
                                 />
                                 <span class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                                    Featured product
+                                    {{ t('products.form.featured') }}
                                 </span>
                             </label>
                         </div>
@@ -402,13 +398,12 @@ const cancel = () => {
                                     class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
                                 />
                                 <span class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                                    On sale
+                                    {{ t('products.form.on_sale') }}
                                 </span>
                             </label>
                         </div>
                     </div>
                 </div>
             </form>
-        </div>
     </div>
 </template>

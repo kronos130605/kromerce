@@ -11,7 +11,12 @@
       <!-- Main Content -->
       <main class="flex-1 overflow-y-auto">
         <div class="px-4 pb-4 pt-[5rem] h-full">
+          <!-- Render slot content if provided, otherwise use dynamic component -->
+          <slot v-if="$slots.default">
+            <!-- Content passed via slot -->
+          </slot>
           <component
+            v-else
             :is="currentContent"
             :products="page.props.products"
             :categories="page.props.categories"
@@ -34,10 +39,10 @@ import { useSidebar } from '@/composables/useSidebar.js';
 import { useRoleGuard } from '@/composables/useRoleGuard.js';
 
 // Import content components
-import DashboardContent from '@/modules/business/content/DashboardContent.vue';
-import ProductsContent from '@/modules/business/content/ProductsContent.vue';
-import OrdersContent from '@/modules/business/content/OrdersContent.vue';
-import AnalyticsContent from '@/modules/business/content/AnalyticsContent.vue';
+import DashboardContent from '@/modules/business/components/DashboardContent.vue';
+import ProductsContent from '@/modules/business/components/ProductsContent.vue';
+import OrdersContent from '@/modules/business/components/OrdersContent.vue';
+import AnalyticsContent from '@/modules/business/components/AnalyticsContent.vue';
 
 const page = usePage();
 const { t } = useI18n();

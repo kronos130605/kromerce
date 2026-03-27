@@ -9,11 +9,12 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
         commands: __DIR__.'/../routes/console.php',
+        api: __DIR__.'/../routes/api.php',
         then: function () {
             Route::middleware(['auth', 'verified', 'tenant'])
-                ->prefix('products')
-                ->name('products.')
-                ->group(base_path('routes/products.php'));
+                ->prefix('stores')
+                ->name('stores.')
+                ->group(base_path('routes/store_api.php'));
         },
         health: '/up',
     )
@@ -29,7 +30,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // Register middleware aliases
         $middleware->alias([
-            'tenant' => \App\Http\Middleware\IdentifyTenant::class,
+            'tenant' => \App\Http\Middleware\IdentifyStore::class,
             'role' => \App\Http\Middleware\RoleMiddleware::class,
         ]);
     })

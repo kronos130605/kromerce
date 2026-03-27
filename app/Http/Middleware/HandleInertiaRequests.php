@@ -3,13 +3,12 @@
 namespace App\Http\Middleware;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
 {
     /**
-     * The root template that is loaded on the first page visit.
+     * The root template that is loaded on first page visit.
      *
      * @var string
      */
@@ -43,42 +42,14 @@ class HandleInertiaRequests extends Middleware
                     return null;
                 },
             ],
-            'current_tenant' => function () use ($request) {
-                if (tenancy()->initialized) {
-                    return tenant();
-                }
-                return null;
-            },
-            'user_role' => function () use ($request) {
-                $user = $request->user();
-
-                // Usar la misma lógica que DashboardRoutingService para consistencia
-                if (!$user) {
-                    return 'customer';
+            'current_store' => function () use ($request) {
+                $storeService = app(\App\Services\StoreService::class);
+                $store = $storeService->resolveCurrentStoreForRequest($request);
+                if (!$store) {
+                    return null;
                 }
 
-                // Para dashboard, usar la misma lógica que DashboardRoutingService
-                if ($request->is('dashboard') || $request->is('business/dashboard')) {
-                    $tenant = tenancy()->initialized ? tenant() : null;
-
-                    if (!$tenant) {
-                        return 'customer';
-                    }
-
-                    // Usar RoleService con cache - ahora no hay redundancia real
-                    return app(\App\Services\RoleService::class)
-                        ->getUserRoleInTenant($user, $tenant);
-                }
-
-                // Para otras rutas, usar la lógica normal
-                $tenant = tenancy()->initialized ? tenant() : null;
-
-                if ($user && $tenant) {
-                    return app(\App\Services\RoleService::class)
-                        ->getUserRoleInTenant($user, $tenant);
-                }
-
-                return 'customer';
+                return $storeService->getBasicStoreDataForFrontend($store->id);
             },
             'ziggy' => function () use ($request) {
                 $ziggy = new \Tighten\Ziggy\Ziggy;

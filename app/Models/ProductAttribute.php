@@ -14,7 +14,7 @@ class ProductAttribute extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'tenant_id',
+        'store_id',
         'name',
         'slug',
         'type',
@@ -47,11 +47,11 @@ class ProductAttribute extends Model
     }
 
     /**
-     * Get the tenant that owns the attribute.
+     * Get the store that owns the attribute.
      */
-    public function tenant(): BelongsTo
+    public function store(): BelongsTo
     {
-        return $this->belongsTo(Tenant::class);
+        return $this->belongsTo(Store::class);
     }
 
     /**

@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Repositories\Store\BusinessCurrencyConfigRepository;
 use App\Services\CurrencyRateService;
-use App\Repositories\BusinessCurrencyConfigRepository;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Inertia\Inertia;
@@ -11,27 +11,21 @@ use Inertia\Response;
 
 class CurrencyController extends Controller
 {
-    private CurrencyRateService $currencyService;
-    private BusinessCurrencyConfigRepository $configRepo;
-
     public function __construct(
-        CurrencyRateService $currencyService,
-        BusinessCurrencyConfigRepository $configRepo
-    ) {
-        $this->currencyService = $currencyService;
-        $this->configRepo = $configRepo;
-    }
+        private CurrencyRateService $currencyService,
+        private BusinessCurrencyConfigRepository $configRepo
+    ) {}
     /**
      * Display the currency configuration page.
      */
     public function index(Request $request): Response
     {
-        $tenant = $request->user()->tenant;
-        $currencyConfig = $this->configRepo->getOrCreateForTenant($tenant->id);
+        $store = $request->user()->currentStore();
+        $currencyConfig = $this->configRepo->getOrCreateForStore($store->id);
 
         return Inertia::render('modules/dashboard/DashboardCurrency', [
             'currencyConfig' => $currencyConfig,
-            'supportedCurrencies' => $currencyConfig->getSupportedCurrenciesWithRates(),
+            'supportedCurrencies' => $this->currencyService->getSupportedCurrenciesWithRates((string) $currencyConfig->store_id),
             'availableCurrencies' => $this->getAvailableCurrencies(),
         ]);
     }
@@ -51,10 +45,10 @@ class CurrencyController extends Controller
             'historical_retention_years' => 'required|integer|min:1|max:10',
         ]);
 
-        $tenant = $request->user()->tenant;
-        
+        $store = $request->user()->currentStore();
+
         $currencyConfig = $this->configRepo->updateOrCreate(
-            ['tenant_id' => $tenant->id],
+            ['store_id' => $store->id],
             array_merge($validated, [
                 'last_rate_update' => now()->format('Y-m-d'),
             ])
@@ -68,12 +62,12 @@ class CurrencyController extends Controller
     }
 
     /**
-     * Get current rates for the tenant.
+     * Get current rates for the store.
      */
     public function getCurrentRates(Request $request): JsonResponse
     {
-        $tenant = $request->user()->tenant;
-        $currencyConfig = $this->configRepo->getByTenantId($tenant->id);
+        $store = $request->user()->currentStore();
+        $currencyConfig = $this->configRepo->getByStoreId($store->id);
 
         if (!$currencyConfig) {
             return response()->json(['error' => 'Currency configuration not found'], 404);
@@ -86,7 +80,7 @@ class CurrencyController extends Controller
     }
 
     /**
-     * Update custom rates for the tenant.
+     * Update custom rates for the store.
      */
     public function updateCustomRates(Request $request): JsonResponse
     {
@@ -96,11 +90,11 @@ class CurrencyController extends Controller
             'effective_date' => 'required|date',
         ]);
 
-        $tenant = $request->user()->tenant;
-        
+        $store = $request->user()->currentStore();
+
         try {
             $results = $this->currencyService->updateCustomRates(
-                $tenant->id,
+                $store->id,
                 $validated['rates'],
                 $validated['effective_date']
             );
@@ -130,15 +124,15 @@ class CurrencyController extends Controller
             'end_date' => 'required|date|after_or_equal:start_date',
         ]);
 
-        $tenant = $request->user()->tenant;
-        
+        $store = $request->user()->currentStore();
+
         try {
             $history = $this->currencyService->getRateHistory(
                 $validated['from_currency'],
                 $validated['to_currency'],
                 $validated['start_date'],
                 $validated['end_date'],
-                $tenant->id
+                $store->id
             );
 
             return response()->json(['history' => $history]);
@@ -169,10 +163,10 @@ class CurrencyController extends Controller
             'currencies.*' => 'required|string|size:3',
         ]);
 
-        $tenant = $request->user()->tenant;
-        
+        $store = $request->user()->currentStore();
+
         try {
-            $deletedCount = $this->currencyService->resetToGlobal($tenant->id, $validated['currencies']);
+            $deletedCount = $this->currencyService->resetToGlobal($store->id, $validated['currencies']);
 
             return response()->json([
                 'success' => true,
@@ -207,7 +201,7 @@ class CurrencyController extends Controller
                 ];
             } else {
                 try {
-                    $rateInfo = $this->currencyService->getEffectiveRate($config->tenant_id, $baseCurrency, $currency);
+                    $rateInfo = $this->currencyService->getEffectiveRate($config->store_id, $baseCurrency, $currency);
                     $rates[$currency] = [
                         'from_currency' => $baseCurrency,
                         'to_currency' => $currency,
@@ -229,73 +223,6 @@ class CurrencyController extends Controller
      */
     private function getAvailableCurrencies(): array
     {
-        return [
-            [
-                'code' => 'USD',
-                'name' => 'US Dollar',
-                'symbol' => '$',
-                'flag' => '🇺🇸',
-            ],
-            [
-                'code' => 'EUR',
-                'name' => 'Euro',
-                'symbol' => '€',
-                'flag' => '🇪🇺',
-            ],
-            [
-                'code' => 'GBP',
-                'name' => 'British Pound',
-                'symbol' => '£',
-                'flag' => '🇬🇧',
-            ],
-            [
-                'code' => 'JPY',
-                'name' => 'Japanese Yen',
-                'symbol' => '¥',
-                'flag' => '🇯🇵',
-            ],
-            [
-                'code' => 'COP',
-                'name' => 'Colombian Peso',
-                'symbol' => '$',
-                'flag' => '🇨🇴',
-            ],
-            [
-                'code' => 'MXN',
-                'name' => 'Mexican Peso',
-                'symbol' => '$',
-                'flag' => '🇲🇽',
-            ],
-            [
-                'code' => 'CAD',
-                'name' => 'Canadian Dollar',
-                'symbol' => 'C$',
-                'flag' => '🇨🇦',
-            ],
-            [
-                'code' => 'AUD',
-                'name' => 'Australian Dollar',
-                'symbol' => 'A$',
-                'flag' => '🇦🇺',
-            ],
-            [
-                'code' => 'CHF',
-                'name' => 'Swiss Franc',
-                'symbol' => 'Fr',
-                'flag' => '🇨🇭',
-            ],
-            [
-                'code' => 'CNY',
-                'name' => 'Chinese Yuan',
-                'symbol' => '¥',
-                'flag' => '🇨🇳',
-            ],
-            [
-                'code' => 'INR',
-                'name' => 'Indian Rupee',
-                'symbol' => '₹',
-                'flag' => '🇮🇳',
-            ],
-        ];
+        return array_values(config('currencies.supported', []));
     }
 }

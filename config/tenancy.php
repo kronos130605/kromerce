@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'tenant_model' => \App\Models\Tenant::class,
+    'tenant_model' => \App\Models\Store::class,
 
     'central_domains' => [
         'kromerce.test',

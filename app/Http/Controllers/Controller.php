@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
+use App\Services\StoreService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Routing\Controller as BaseController;
-use App\Models\Tenant;
+use App\Models\Store;
 use App\Traits\ApiResponse;
 use Illuminate\Support\Facades\Log;
 
@@ -14,31 +16,32 @@ abstract class Controller extends BaseController
     use AuthorizesRequests, ValidatesRequests, ApiResponse;
 
     /**
-     * Validate tenant context.
+     * Validate store context.
      */
-    protected function validateTenant(Tenant $tenant = null): ?Tenant
+    protected function validateStore(Store $store = null): ?Store
     {
-        if (!$tenant) {
-            $tenant = tenant();
+        if (!$store) {
+            $storeService = app(StoreService::class);
+            $store = $storeService->resolveCurrentStoreForRequest(request());
         }
 
-        if (!$tenant) {
-            Log::error('validateTenant: no tenant found, throwing exception');
-            throw new \Exception('No tenant context found');
+        if (!$store) {
+            Log::error('validateStore: no store found, throwing exception');
+            throw new \Exception('No store context found');
         }
 
-        return $tenant;
+        return $store;
     }
 
     /**
-     * Validate user access to tenant.
+     * Validate user access to store.
      */
-    protected function validateUserTenantAccess(\App\Models\User $user, Tenant $tenant): bool
+    protected function validateUserStoreAccess(User $user, Store $store): bool
     {
         if ($user->isSuperAdmin()) {
             return true;
         }
 
-        return $user->tenants()->where('tenants.id', $tenant->id)->exists();
+        return $user->stores()->where('stores.id', $store->id)->exists();
     }
 }
