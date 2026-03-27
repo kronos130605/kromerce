@@ -5,9 +5,9 @@ import { useI18n } from 'vue-i18n';
 import { useAuth } from '@/composables/useAuth.js';
 import { useDarkMode } from '@/composables/useDarkMode.js';
 import { useNavigation } from '@/composables/useNavigation.js';
-import Badge from '@/components/ui/Badge.vue';
+import Badge from '@/components/ui/data-display/Badge.vue';
 import LanguageSelector from '@/components/shared/LanguageSelector.vue';
-import Icon from '@/components/ui/Icon.vue';
+import Icon from '@/components/ui/data-display/Icon.vue';
 
 const { t } = useI18n();
 

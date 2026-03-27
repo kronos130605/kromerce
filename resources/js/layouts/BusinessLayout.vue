@@ -39,10 +39,10 @@ import { useSidebar } from '@/composables/useSidebar.js';
 import { useRoleGuard } from '@/composables/useRoleGuard.js';
 
 // Import content components
-import DashboardContent from '@/modules/business/components/DashboardContent.vue';
-import ProductsContent from '@/modules/business/components/ProductsContent.vue';
-import OrdersContent from '@/modules/business/components/OrdersContent.vue';
-import AnalyticsContent from '@/modules/business/components/AnalyticsContent.vue';
+import BusinessDashboardContent from '@/modules/business/components/BusinessDashboardContent.vue';
+import BusinessProductsContent from '@/modules/business/components/BusinessProductsContent.vue';
+import BusinessOrdersContent from '@/modules/business/components/BusinessOrdersContent.vue';
+import BusinessAnalyticsContent from '@/modules/business/components/BusinessAnalyticsContent.vue';
 
 const page = usePage();
 const { t } = useI18n();
@@ -63,17 +63,17 @@ const activeTab = computed(() => page.props.activeTab || 'overview');
 
 // Content components mapping
 const contentComponents = {
-    overview: DashboardContent,
-    products: ProductsContent,
-    orders: OrdersContent,
-    analytics: AnalyticsContent,
-    marketing: AnalyticsContent, // Temporal, luego crear MarketingContent
-    settings: AnalyticsContent, // Temporal, luego crear SettingsContent
+    overview: BusinessDashboardContent,
+    products: BusinessProductsContent,
+    orders: BusinessOrdersContent,
+    analytics: BusinessAnalyticsContent,
+    marketing: BusinessAnalyticsContent, // Temporal, luego crear MarketingContent
+    settings: BusinessAnalyticsContent, // Temporal, luego crear SettingsContent
 };
 
 // Get current component based on active tab
 const currentContent = computed(() => {
-    return contentComponents[activeTab.value] || DashboardContent;
+    return contentComponents[activeTab.value] || BusinessDashboardContent;
 });
 
 // Listen for toggle sidebar event

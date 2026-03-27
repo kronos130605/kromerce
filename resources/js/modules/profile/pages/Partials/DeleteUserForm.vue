@@ -1,10 +1,9 @@
 <script setup>
-import DangerButton from '@/components/ui/DangerButton.vue';
-import InputError from '@/components/ui/InputError.vue';
-import InputLabel from '@/components/ui/InputLabel.vue';
+import Button from '@/components/ui/buttons/Button.vue';
+import InputError from '@/components/ui/forms/InputError.vue';
+import InputLabel from '@/components/ui/forms/InputLabel.vue';
 import Modal from '@/components/shared/Modal.vue';
-import SecondaryButton from '@/components/ui/SecondaryButton.vue';
-import TextInput from '@/components/ui/TextInput.vue';
+import TextInput from '@/components/ui/forms/TextInput.vue';
 import { useForm } from '@inertiajs/vue3';
 import { nextTick, ref } from 'vue';
 
@@ -52,7 +51,7 @@ const closeModal = () => {
             </p>
         </header>
 
-        <DangerButton @click="confirmUserDeletion">Delete Account</DangerButton>
+        <Button variant="destructive" @click="confirmUserDeletion">Delete Account</Button>
 
         <Modal :show="confirmingUserDeletion" @close="closeModal">
             <div class="p-6">
@@ -89,18 +88,19 @@ const closeModal = () => {
                 </div>
 
                 <div class="mt-6 flex justify-end">
-                    <SecondaryButton @click="closeModal">
+                    <Button variant="secondary" @click="closeModal">
                         Cancel
-                    </SecondaryButton>
+                    </Button>
 
-                    <DangerButton
+                    <Button
+                        variant="destructive"
                         class="ms-3"
                         :class="{ 'opacity-25': form.processing }"
                         :disabled="form.processing"
                         @click="deleteUser"
                     >
                         Delete Account
-                    </DangerButton>
+                    </Button>
                 </div>
             </div>
         </Modal>

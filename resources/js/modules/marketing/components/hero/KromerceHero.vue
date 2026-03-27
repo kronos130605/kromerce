@@ -1,8 +1,8 @@
 <script setup>
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import Button from '@/components/ui/Button.vue';
-import Badge from '@/components/ui/Badge.vue';
+import Button from '@/components/ui/buttons/Button.vue';
+import Badge from '@/components/ui/data-display/Badge.vue';
 import { Sun, Moon, Star } from 'lucide-vue-next';
 
 const { t } = useI18n();
@@ -90,8 +90,8 @@ const stars = Array.from({ length: 50 }, (_, i) => ({
             animationDelay: `${star.delay}s`
           }"
         >
-          <Star 
-            class="text-white/80" 
+          <Star
+            class="text-white/80"
             :style="{
               width: `${star.size * 4}px`,
               height: `${star.size * 4}px`

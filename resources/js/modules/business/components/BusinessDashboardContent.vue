@@ -4,13 +4,15 @@ import { usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 
 // Import business dashboard components
-import BusinessWelcome from '@/components/dashboard/BusinessWelcome.vue';
-import BusinessStats from '@/components/dashboard/BusinessStats.vue';
-import BusinessQuickActions from '@/components/dashboard/BusinessQuickActions.vue';
-import TopProducts from '@/components/dashboard/TopProducts.vue';
-import RecentOrders from '@/components/dashboard/RecentOrders.vue';
-import BusinessCurrencyStatus from '@/components/dashboard/BusinessCurrencyStatus.vue';
-import BusinessAnalytics from '@/components/dashboard/BusinessAnalytics.vue';
+import BusinessWelcome from '@/modules/business/components/dashboard/BusinessWelcome.vue';
+import BusinessStats from '@/modules/business/components/dashboard/BusinessStats.vue';
+import BusinessQuickActions from '@/modules/business/components/dashboard/BusinessQuickActions.vue';
+import BusinessTopProducts from '@/modules/business/components/dashboard/BusinessTopProducts.vue';
+import BusinessRecentOrders from '@/modules/business/components/dashboard/BusinessRecentOrders.vue';
+import BusinessCurrencyStatus from '@/modules/business/components/dashboard/BusinessCurrencyStatus.vue';
+import BusinessAttentionRequired from '@/modules/business/components/dashboard/BusinessAttentionRequired.vue';
+import BusinessActivityFeed from '@/modules/business/components/dashboard/BusinessActivityFeed.vue';
+import BusinessAnalytics from '@/modules/business/components/dashboard/BusinessAnalytics.vue';
 
 const page = usePage();
 const { t } = useI18n();
@@ -63,22 +65,32 @@ const formatPrice = (price, currency) => {
         <!-- Business Quick Actions -->
         <BusinessQuickActions />
 
-        <!-- Currency Status -->
-        <BusinessCurrencyStatus :currency-status="dashboardData.currencyStatus || {}" />
+        <!-- Attention Required -->
+        <BusinessAttentionRequired :alerts="dashboardData.alerts || []" />
+
+        <!-- Activity Feed -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <BusinessActivityFeed :activities="dashboardData.activities || []" />
+
+            <!-- Currency Status -->
+            <div>
+                <BusinessCurrencyStatus :currency-status="dashboardData.currencyStatus || {}" />
+            </div>
+        </div>
 
         <!-- Analytics Overview -->
-        <BusinessAnalytics :chart-data="dashboardData.chartData || {}" />
+        <BusinessAnalytics :chart-data="dashboardData.chartData || {}" class="mt-8" />
 
         <!-- Main Content Grid -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <!-- Top Products -->
             <div class="lg:col-span-2">
-                <TopProducts />
+                <BusinessTopProducts :products="dashboardData.topProducts || []" />
             </div>
 
             <!-- Recent Orders -->
             <div class="lg:col-span-1">
-                <RecentOrders />
+                <BusinessRecentOrders :orders="dashboardData.recentOrders || []" />
             </div>
         </div>
     </div>
