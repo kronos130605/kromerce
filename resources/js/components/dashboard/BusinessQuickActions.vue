@@ -5,9 +5,37 @@ import { Link } from '@inertiajs/vue3';
 
 const { t } = useI18n();
 
-const quickActions = computed(() => [
+// Organized action sections
+const createActions = computed(() => [
     {
-        id: 1,
+        id: 'create-product',
+        title: t('dashboard.add_product'),
+        description: t('dashboard.create_new_product'),
+        icon: '➕',
+        color: 'from-green-500 to-emerald-600',
+        href: '/products?modal=create'
+    },
+    {
+        id: 'create-order',
+        title: t('dashboard.add_order'),
+        description: t('dashboard.create_new_order'),
+        icon: '🛒',
+        color: 'from-blue-500 to-indigo-600',
+        href: '/orders?modal=create'
+    },
+    {
+        id: 'create-discount',
+        title: t('dashboard.add_discount'),
+        description: t('dashboard.create_promotion'),
+        icon: '🏷️',
+        color: 'from-purple-500 to-pink-600',
+        href: '/marketing/discounts/create'
+    }
+]);
+
+const manageActions = computed(() => [
+    {
+        id: 'manage-products',
         title: t('dashboard.product_catalog'),
         description: t('dashboard.manage_inventory'),
         icon: '📦',
@@ -16,49 +44,49 @@ const quickActions = computed(() => [
         badge: { type: 'success', text: '156 ' + t('dashboard.items') }
     },
     {
-        id: 2,
-        title: 'Add Product',
-        description: 'Create a new product for your catalog',
-        icon: '➕',
-        color: 'from-green-500 to-emerald-600',
-        href: '/products/create',
-        badge: null
-    },
-    {
-        id: 3,
+        id: 'manage-orders',
         title: t('dashboard.order_management'),
         description: t('dashboard.process_orders'),
-        icon: '🛒',
+        icon: '📋',
         color: 'from-emerald-500 to-teal-600',
-        href: '#orders',
+        href: '/orders',
         badge: { type: 'warning', text: '23 ' + t('dashboard.pending') }
     },
     {
-        id: 4,
-        title: t('dashboard.marketing_tools'),
-        description: t('dashboard.create_campaigns'),
-        icon: '📈',
-        color: 'from-indigo-500 to-purple-600',
-        href: '#marketing',
-        badge: { type: 'info', text: '3 ' + t('dashboard.active') }
-    },
-    {
-        id: 5,
-        title: t('dashboard.business_insights'),
-        description: t('dashboard.view_analytics'),
-        icon: '💡',
+        id: 'manage-customers',
+        title: t('dashboard.customers'),
+        description: t('dashboard.manage_customers'),
+        icon: '👥',
         color: 'from-amber-500 to-orange-600',
-        href: '#insights',
-        badge: null
+        href: '/customers',
+        badge: { type: 'info', text: '1,289 ' + t('dashboard.total') }
+    }
+]);
+
+const analyzeActions = computed(() => [
+    {
+        id: 'analytics-sales',
+        title: t('dashboard.sales_analytics'),
+        description: t('dashboard.view_sales_reports'),
+        icon: '📊',
+        color: 'from-indigo-500 to-purple-600',
+        href: '/analytics/sales'
     },
     {
-        id: 6,
-        title: t('dashboard.customer_service'),
-        description: t('dashboard.manage_support'),
-        icon: '💬',
+        id: 'analytics-products',
+        title: t('dashboard.product_insights'),
+        description: t('dashboard.top_performers'),
+        icon: '🏆',
         color: 'from-rose-500 to-pink-600',
-        href: '#support',
-        badge: { type: 'danger', text: '8 ' + t('dashboard.urgent') }
+        href: '/analytics/products'
+    },
+    {
+        id: 'analytics-marketing',
+        title: t('dashboard.marketing_performance'),
+        description: t('dashboard.campaign_results'),
+        icon: '📈',
+        color: 'from-cyan-500 to-blue-600',
+        href: '/analytics/marketing'
     }
 ]);
 
@@ -74,52 +102,94 @@ const getBadgeColor = (type) => {
 </script>
 
 <template>
-    <div class="space-y-6 mt-8">
-        <!-- Header -->
-        <div class="flex items-center justify-between">
-            <div>
-                <h3 class="text-2xl font-bold text-gray-900 dark:text-white">{{ t('dashboard.quick_actions') }}</h3>
-                <p class="text-gray-600 dark:text-gray-300 mt-1">{{ t('dashboard.manage_business_efficiently') }}</p>
+    <div class="space-y-8 mt-8">
+        <!-- Create Section -->
+        <div>
+            <div class="flex items-center space-x-2 mb-4">
+                <div class="w-8 h-8 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg flex items-center justify-center">
+                    <span class="text-white text-sm">➕</span>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ t('dashboard.create_new') }}</h3>
             </div>
-            <div class="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-        </div>
-        
-        <!-- Actions Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <Link v-for="action in quickActions" :key="action.id"
-               :href="action.href"
-               class="group relative overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700 p-6 hover:border-gray-300 dark:hover:border-gray-600 hover:shadow-lg transition-all duration-300">
-                <!-- Background gradient on hover -->
-                <div :class="`absolute inset-0 bg-gradient-to-br ${action.color} opacity-0 group-hover:opacity-5 transition-opacity`"></div>
-                
-                <div class="relative flex items-start space-x-4">
-                    <!-- Icon -->
-                    <div :class="`w-12 h-12 bg-gradient-to-br ${action.color} rounded-xl flex items-center justify-center flex-shrink-0 shadow-md`">
-                        <span class="text-white text-xl">{{ action.icon }}</span>
-                    </div>
-                    
-                    <!-- Content -->
-                    <div class="flex-1 min-w-0">
-                        <div class="flex items-center justify-between mb-1">
-                            <h4 class="text-base font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <Link v-for="action in createActions" :key="action.id"
+                   :href="action.href"
+                   class="group relative overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700 p-5 hover:border-gray-300 dark:hover:border-gray-600 hover:shadow-lg transition-all duration-300">
+                    <div :class="`absolute inset-0 bg-gradient-to-br ${action.color} opacity-0 group-hover:opacity-5 transition-opacity`"></div>
+                    <div class="relative flex items-center space-x-3">
+                        <div :class="`w-10 h-10 bg-gradient-to-br ${action.color} rounded-lg flex items-center justify-center shadow-md`">
+                            <span class="text-white text-lg">{{ action.icon }}</span>
+                        </div>
+                        <div>
+                            <h4 class="font-medium text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                                 {{ action.title }}
                             </h4>
-                            <svg class="w-5 h-5 text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-400 group-hover:translate-x-1 transition-all flex-shrink-0" 
-                                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                            </svg>
-                        </div>
-                        <p class="text-sm text-gray-600 dark:text-gray-400">{{ action.description }}</p>
-                        
-                        <!-- Badge -->
-                        <div v-if="action.badge" class="mt-2">
-                            <span :class="`inline-flex items-center px-2 py-1 text-xs font-medium rounded-full ${getBadgeColor(action.badge.type)}`">
-                                {{ action.badge.text }}
-                            </span>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ action.description }}</p>
                         </div>
                     </div>
+                </Link>
+            </div>
+        </div>
+
+        <!-- Manage Section -->
+        <div>
+            <div class="flex items-center space-x-2 mb-4">
+                <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-emerald-600 rounded-lg flex items-center justify-center">
+                    <span class="text-white text-sm">📦</span>
                 </div>
-            </Link>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ t('dashboard.manage') }}</h3>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <Link v-for="action in manageActions" :key="action.id"
+                   :href="action.href"
+                   class="group relative overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700 p-5 hover:border-gray-300 dark:hover:border-gray-600 hover:shadow-lg transition-all duration-300">
+                    <div :class="`absolute inset-0 bg-gradient-to-br ${action.color} opacity-0 group-hover:opacity-5 transition-opacity`"></div>
+                    <div class="relative flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <div :class="`w-10 h-10 bg-gradient-to-br ${action.color} rounded-lg flex items-center justify-center shadow-md`">
+                                <span class="text-white text-lg">{{ action.icon }}</span>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                                    {{ action.title }}
+                                </h4>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">{{ action.description }}</p>
+                            </div>
+                        </div>
+                        <span v-if="action.badge" :class="`px-2 py-1 text-xs font-medium rounded-full ${getBadgeColor(action.badge.type)}`">
+                            {{ action.badge.text }}
+                        </span>
+                    </div>
+                </Link>
+            </div>
+        </div>
+
+        <!-- Analyze Section -->
+        <div>
+            <div class="flex items-center space-x-2 mb-4">
+                <div class="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center">
+                    <span class="text-white text-sm">📊</span>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ t('dashboard.analyze') }}</h3>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <Link v-for="action in analyzeActions" :key="action.id"
+                   :href="action.href"
+                   class="group relative overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700 p-5 hover:border-gray-300 dark:hover:border-gray-600 hover:shadow-lg transition-all duration-300">
+                    <div :class="`absolute inset-0 bg-gradient-to-br ${action.color} opacity-0 group-hover:opacity-5 transition-opacity`"></div>
+                    <div class="relative flex items-center space-x-3">
+                        <div :class="`w-10 h-10 bg-gradient-to-br ${action.color} rounded-lg flex items-center justify-center shadow-md`">
+                            <span class="text-white text-lg">{{ action.icon }}</span>
+                        </div>
+                        <div>
+                            <h4 class="font-medium text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                                {{ action.title }}
+                            </h4>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ action.description }}</p>
+                        </div>
+                    </div>
+                </Link>
+            </div>
         </div>
     </div>
 </template>

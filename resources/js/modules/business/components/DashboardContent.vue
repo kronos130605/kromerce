@@ -10,6 +10,8 @@ import BusinessQuickActions from '@/components/dashboard/BusinessQuickActions.vu
 import TopProducts from '@/components/dashboard/TopProducts.vue';
 import RecentOrders from '@/components/dashboard/RecentOrders.vue';
 import BusinessCurrencyStatus from '@/components/dashboard/BusinessCurrencyStatus.vue';
+import AttentionRequired from '@/components/dashboard/AttentionRequired.vue';
+import ActivityFeed from '@/components/dashboard/ActivityFeed.vue';
 import BusinessAnalytics from '@/components/dashboard/BusinessAnalytics.vue';
 
 const page = usePage();
@@ -63,22 +65,32 @@ const formatPrice = (price, currency) => {
         <!-- Business Quick Actions -->
         <BusinessQuickActions />
 
-        <!-- Currency Status -->
-        <BusinessCurrencyStatus :currency-status="dashboardData.currencyStatus || {}" />
+        <!-- Attention Required -->
+        <AttentionRequired :alerts="dashboardData.alerts || []" />
+
+        <!-- Activity Feed -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <ActivityFeed :activities="dashboardData.activities || []" />
+
+            <!-- Currency Status -->
+            <div>
+                <BusinessCurrencyStatus :currency-status="dashboardData.currencyStatus || {}" />
+            </div>
+        </div>
 
         <!-- Analytics Overview -->
-        <BusinessAnalytics :chart-data="dashboardData.chartData || {}" />
+        <BusinessAnalytics :chart-data="dashboardData.chartData || {}" class="mt-8" />
 
         <!-- Main Content Grid -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <!-- Top Products -->
             <div class="lg:col-span-2">
-                <TopProducts />
+                <TopProducts :products="dashboardData.topProducts || []" />
             </div>
 
             <!-- Recent Orders -->
             <div class="lg:col-span-1">
-                <RecentOrders />
+                <RecentOrders :orders="dashboardData.recentOrders || []" />
             </div>
         </div>
     </div>

@@ -7,6 +7,7 @@ import { useProductManager } from '../composables/useProductManager.js';
 import ProductModal from '../components/ProductModal.vue';
 import DataTable from '@/components/shared/DataTable.vue';
 import ConfirmationModal from '@/components/shared/ConfirmationModal.vue';
+import ProductView from '../components/ProductView.vue';
 
 const { t } = useI18n();
 const page = usePage();
