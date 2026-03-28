@@ -36,16 +36,28 @@ return new class extends Migration
      */
     private function dropTenantIdForeignKeyIfExists(string $tableName): void
     {
+        $driver = DB::getDriverName();
+        
+        $databaseName = match($driver) {
+            'pgsql' => DB::selectOne('SELECT current_database() as name')->name,
+            'mysql', 'mariadb' => DB::selectOne('SELECT DATABASE() as name')->name,
+            'sqlite' => 'main',
+            default => null,
+        };
+
+        if (!$databaseName) {
+            return;
+        }
+
         try {
-            // Try to get the foreign key name
             $foreignKey = DB::selectOne("
                 SELECT CONSTRAINT_NAME 
                 FROM information_schema.KEY_COLUMN_USAGE 
-                WHERE TABLE_SCHEMA = DATABASE() 
+                WHERE TABLE_SCHEMA = ?
                 AND TABLE_NAME = ? 
                 AND COLUMN_NAME = 'tenant_id'
                 AND REFERENCED_TABLE_NAME IS NOT NULL
-            ", [$tableName]);
+            ", [$databaseName, $tableName]);
 
             if ($foreignKey && isset($foreignKey->CONSTRAINT_NAME)) {
                 Schema::table($tableName, function (Blueprint $table) use ($foreignKey) {
@@ -85,16 +97,28 @@ return new class extends Migration
      */
     private function dropStoreIdForeignKeyIfExists(string $tableName): void
     {
+        $driver = DB::getDriverName();
+        
+        $databaseName = match($driver) {
+            'pgsql' => DB::selectOne('SELECT current_database() as name')->name,
+            'mysql', 'mariadb' => DB::selectOne('SELECT DATABASE() as name')->name,
+            'sqlite' => 'main',
+            default => null,
+        };
+
+        if (!$databaseName) {
+            return;
+        }
+
         try {
-            // Try to get the foreign key name
             $foreignKey = DB::selectOne("
                 SELECT CONSTRAINT_NAME 
                 FROM information_schema.KEY_COLUMN_USAGE 
-                WHERE TABLE_SCHEMA = DATABASE() 
+                WHERE TABLE_SCHEMA = ?
                 AND TABLE_NAME = ? 
                 AND COLUMN_NAME = 'store_id'
                 AND REFERENCED_TABLE_NAME IS NOT NULL
-            ", [$tableName]);
+            ", [$databaseName, $tableName]);
 
             if ($foreignKey && isset($foreignKey->CONSTRAINT_NAME)) {
                 Schema::table($tableName, function (Blueprint $table) use ($foreignKey) {
