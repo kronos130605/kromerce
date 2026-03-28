@@ -1,0 +1,188 @@
+<template>
+    <div class="category-selector">
+        <!-- Label -->
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            {{ label }}
+            <span v-if="selectionCount > 0" class="text-xs text-gray-500 ml-1">
+                ({{ selectionCount }} seleccionadas)
+            </span>
+        </label>
+
+        <!-- Search Input -->
+        <div class="relative mb-3">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+            </div>
+            <input
+                :value="searchQuery"
+                @input="setSearch($event.target.value)"
+                type="text"
+                class="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                :placeholder="t('products.categories.search_placeholder', 'Buscar categorías...')"
+            >
+            <button
+                v-if="searchQuery"
+                @click="clearSearch"
+                class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+            >
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+
+        <!-- Selected Categories -->
+        <div v-if="selectedItems.length > 0" class="mb-3">
+            <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">{{ t('products.categories.selected', 'Seleccionadas') }}:</p>
+            <div class="flex flex-wrap gap-2">
+                <span
+                    v-for="category in selectedItems"
+                    :key="category.id"
+                    class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 border border-blue-200 dark:border-blue-700"
+                >
+                    {{ category.name }}
+                    <button
+                        @click.stop="toggle(category.id)"
+                        class="ml-2 text-blue-600 dark:text-blue-300 hover:text-blue-800 dark:hover:text-blue-100 focus:outline-none"
+                        :title="t('common.remove', 'Quitar')"
+                    >
+                        <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </span>
+            </div>
+        </div>
+
+        <!-- Available Categories Grid -->
+        <div class="category-grid">
+            <p v-if="filteredItems.length === 0" class="text-sm text-gray-500 dark:text-gray-400 italic">
+                {{ t('products.categories.no_results', 'No se encontraron categorías') }}
+            </p>
+            <div v-else class="flex flex-wrap gap-2">
+                <button
+                    v-for="category in filteredItems"
+                    :key="category.id"
+                    @click.stop="toggle(category.id)"
+                    class="category-badge"
+                    :class="{
+                        'selected': isSelected(category.id),
+                        'unselected': !isSelected(category.id)
+                    }"
+                >
+                    <span v-if="isSelected(category.id)" class="check-icon">
+                        <svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                        </svg>
+                    </span>
+                    {{ category.name }}
+                </button>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div v-if="selectedItems.length > 0" class="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700 flex gap-2">
+            <button
+                @click="clearAll"
+                class="text-xs text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 underline"
+            >
+                {{ t('products.categories.clear_all', 'Limpiar todas') }}
+            </button>
+        </div>
+    </div>
+</template>
+
+<script setup>
+import { computed, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { useSelectableItems } from '@/composables/useSelectableItems';
+
+const props = defineProps({
+    categories: {
+        type: Array,
+        required: true,
+        default: () => []
+    },
+    modelValue: {
+        type: Array,
+        required: true,
+        default: () => []
+    },
+    label: {
+        type: String,
+        default: 'Categorías'
+    }
+});
+
+const emit = defineEmits(['update:modelValue']);
+const { t } = useI18n();
+
+// Usar el composable para manejar la selección
+const categoriesRef = computed(() => props.categories);
+
+const {
+    selectedIds,
+    searchQuery,
+    selectedItems,
+    filteredItems,
+    selectionCount,
+    isSelected,
+    toggle,
+    clearAll,
+    setSearch,
+    clearSearch,
+    setSelection
+} = useSelectableItems({
+    items: categoriesRef,
+    key: 'id',
+    initialSelected: props.modelValue
+});
+
+// Sincronizar cambios externos (prop) hacia el composable
+watch(() => props.modelValue, (newValue) => {
+    if (newValue) {
+        const currentIds = [...selectedIds.value].sort();
+        const newIds = [...newValue.map(id => String(id))].sort();
+        if (JSON.stringify(currentIds) !== JSON.stringify(newIds)) {
+            setSelection(newValue);
+        }
+    }
+}, { deep: true });
+
+// Emitir cambios internos hacia afuera
+watch(selectedIds, (newValue) => {
+    emit('update:modelValue', [...newValue]);
+}, { deep: true });
+</script>
+
+<style scoped>
+.category-selector {
+    @apply w-full;
+}
+
+.category-badge {
+    @apply inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-150 ease-in-out;
+    @apply border focus:outline-none focus:ring-2 focus:ring-offset-1;
+}
+
+.category-badge.unselected {
+    @apply bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200 hover:border-gray-400;
+    @apply dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-600 dark:hover:border-gray-500;
+}
+
+.category-badge.selected {
+    @apply bg-green-100 text-green-800 border-green-300;
+    @apply dark:bg-green-900 dark:text-green-200 dark:border-green-700;
+}
+
+.category-badge .check-icon {
+    @apply mr-1.5 flex-shrink-0;
+}
+
+/* Animation for badges */
+.category-badge {
+    @apply transform hover:scale-105 active:scale-95;
+}
+</style>
