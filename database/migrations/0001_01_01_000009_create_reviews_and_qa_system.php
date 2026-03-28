@@ -18,7 +18,7 @@ return new class extends Migration
             $table->uuid('product_id');
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->unsignedBigInteger('store_id');
-            $table->uuid('order_id')->nullable(); // Verified purchase
+            $table->unsignedBigInteger('order_id')->nullable(); // Verified purchase
             
             // Review content
             $table->string('title');

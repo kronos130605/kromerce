@@ -180,7 +180,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->unsignedBigInteger('store_id');
-            $table->uuid('order_id')->nullable();
+            $table->unsignedBigInteger('order_id')->nullable();
             
             $table->string('type', 20); // earned, spent, expired, adjusted, refunded
             $table->integer('points');

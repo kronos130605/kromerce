@@ -58,7 +58,8 @@ return new class extends Migration
 
         // Product bundles (package deals)
         Schema::create('product_bundles', function (Blueprint $table) {
-            $table->uuid('id')->primary();
+            $table->id();
+            $table->uuid('uuid')->unique();
             $table->unsignedBigInteger('store_id');
             
             $table->string('name');
@@ -106,7 +107,7 @@ return new class extends Migration
         // Bundle items
         Schema::create('product_bundle_items', function (Blueprint $table) {
             $table->id();
-            $table->uuid('bundle_id');
+            $table->unsignedBigInteger('bundle_id');
             $table->uuid('product_id');
             $table->unsignedBigInteger('product_variant_id')->nullable();
             
@@ -129,8 +130,8 @@ return new class extends Migration
         // Bundle purchase history (for analytics)
         Schema::create('bundle_purchases', function (Blueprint $table) {
             $table->id();
-            $table->uuid('bundle_id');
-            $table->uuid('order_id');
+            $table->unsignedBigInteger('bundle_id');
+            $table->unsignedBigInteger('order_id');
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             
             $table->decimal('bundle_price', 10, 2);

@@ -68,7 +68,7 @@ return new class extends Migration
         // Order tax breakdown (detailed tax calculation per order)
         Schema::create('order_taxes', function (Blueprint $table) {
             $table->id();
-            $table->uuid('order_id');
+            $table->unsignedBigInteger('order_id');
             $table->unsignedBigInteger('tax_rate_id')->nullable();
             
             // Tax details

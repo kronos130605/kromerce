@@ -82,10 +82,11 @@ return new class extends Migration
                 ->on('stores')
                 ->onDelete('cascade');
 
-            $table->primary(['role_id', $columnNames['model_morph_key'], 'model_type', 'store_id'],
-                'model_has_roles_role_model_type_store_primary');
+            $table->primary(['role_id', $columnNames['model_morph_key'], 'model_type'],
+                'model_has_roles_role_model_type_primary');
                 
             $table->index(['store_id', 'role_id'], 'model_has_roles_store_role_index');
+            $table->index(['store_id', $columnNames['model_morph_key'], 'model_type'], 'model_has_roles_store_model_index');
         });
 
         // Role permissions

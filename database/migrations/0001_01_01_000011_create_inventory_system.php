@@ -26,7 +26,7 @@ return new class extends Migration
             $table->integer('quantity_after');
             
             // Reference
-            $table->uuid('order_id')->nullable();
+            $table->unsignedBigInteger('order_id')->nullable();
             $table->string('reference_type')->nullable(); // Order, Purchase, Transfer, Adjustment
             $table->string('reference_id')->nullable();
             $table->string('reference_number')->nullable();

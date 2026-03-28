@@ -14,8 +14,9 @@ return new class extends Migration
     {
         // Order invoices
         Schema::create('order_invoices', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->uuid('order_id');
+            $table->id();
+            $table->uuid('uuid')->unique();
+            $table->unsignedBigInteger('order_id');
             $table->unsignedBigInteger('store_id');
             
             // Invoice identification
@@ -78,8 +79,8 @@ return new class extends Migration
         // Invoice items
         Schema::create('invoice_items', function (Blueprint $table) {
             $table->id();
-            $table->uuid('invoice_id');
-            $table->uuid('order_item_id')->nullable();
+            $table->unsignedBigInteger('invoice_id');
+            $table->unsignedBigInteger('order_item_id')->nullable();
             
             $table->string('description');
             $table->string('sku')->nullable();
@@ -100,9 +101,10 @@ return new class extends Migration
 
         // Credit memos (refund documents)
         Schema::create('order_credit_memos', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->uuid('order_id');
-            $table->uuid('invoice_id')->nullable();
+            $table->id();
+            $table->uuid('uuid')->unique();
+            $table->unsignedBigInteger('order_id');
+            $table->unsignedBigInteger('invoice_id')->nullable();
             $table->unsignedBigInteger('store_id');
             
             // Credit memo identification
@@ -152,8 +154,8 @@ return new class extends Migration
         // Credit memo items
         Schema::create('credit_memo_items', function (Blueprint $table) {
             $table->id();
-            $table->uuid('credit_memo_id');
-            $table->uuid('order_item_id')->nullable();
+            $table->unsignedBigInteger('credit_memo_id');
+            $table->unsignedBigInteger('order_item_id')->nullable();
             
             $table->string('description');
             $table->string('sku')->nullable();
@@ -174,8 +176,8 @@ return new class extends Migration
         // Invoice payments tracking
         Schema::create('invoice_payments', function (Blueprint $table) {
             $table->id();
-            $table->uuid('invoice_id');
-            $table->uuid('order_payment_id')->nullable();
+            $table->unsignedBigInteger('invoice_id');
+            $table->unsignedBigInteger('order_payment_id')->nullable();
             
             $table->decimal('amount', 10, 2);
             $table->string('currency', 3);
@@ -195,7 +197,7 @@ return new class extends Migration
         // Invoice reminders/notifications
         Schema::create('invoice_reminders', function (Blueprint $table) {
             $table->id();
-            $table->uuid('invoice_id');
+            $table->unsignedBigInteger('invoice_id');
             
             $table->string('reminder_type', 20); // due_soon, overdue, final_notice
             $table->integer('days_overdue')->nullable();
