@@ -21,7 +21,7 @@ class OrderService
     {
         try {
             $paginator = $this->orderRepository->paginateForStore($store->id, $filters);
-            
+
             // Transform items to include calculated fields
             $transformedItems = $paginator->getCollection()->map(function ($order) {
                 return [
@@ -31,7 +31,7 @@ class OrderService
                     'status' => $order->status,
                     'payment_status' => $order->payment_status,
                     'currency' => $order->currency,
-                    'total_amount' => $order->total_amount,
+                    'total_amount' => $order->total,
                     'formatted_total' => $order->formatted_total,
                     'customer' => $order->customer ? [
                         'id' => $order->customer->id,
@@ -46,7 +46,7 @@ class OrderService
                     'is_cancelled' => $order->isCancelled(),
                 ];
             });
-            
+
             return new LengthAwarePaginator(
                 $transformedItems,
                 $paginator->total(),
@@ -77,7 +77,7 @@ class OrderService
                 'tax_amount' => $order->tax_amount,
                 'shipping_amount' => $order->shipping_amount,
                 'discount_amount' => $order->discount_amount,
-                'total_amount' => $order->total_amount,
+                'total_amount' => $order->total,
                 'formatted_total' => $order->formatted_total,
                 'payment_method' => $order->payment_method_title ?: $order->payment_method,
                 'shipping_method' => $order->shipping_method_title ?: $order->shipping_method,
@@ -140,9 +140,9 @@ class OrderService
     {
         try {
             $oldStatus = $order->status;
-            
+
             $order->status = $status;
-            
+
             // Update timestamps based on status
             switch ($status) {
                 case 'shipped':
@@ -154,12 +154,12 @@ class OrderService
                     $order->fulfillment_status = 'delivered';
                     break;
             }
-            
+
             $order->save();
-            
+
             // Add to status history
             $order->addStatusHistory($status, $notes, $userId);
-            
+
             return true;
         } catch (\Exception $e) {
             throw new \Exception('Failed to update order status: ' . $e->getMessage());
@@ -173,13 +173,13 @@ class OrderService
     {
         try {
             $order->payment_status = $paymentStatus;
-            
+
             if ($paymentStatus === 'paid') {
                 $order->paid_at = now();
             }
-            
+
             $order->save();
-            
+
             return true;
         } catch (\Exception $e) {
             throw new \Exception('Failed to update payment status: ' . $e->getMessage());
@@ -195,10 +195,10 @@ class OrderService
             $order->status = 'cancelled';
             $order->cancelled_at = now();
             $order->save();
-            
+
             // Add to status history
             $order->addStatusHistory('cancelled', $reason, $userId);
-            
+
             return true;
         } catch (\Exception $e) {
             throw new \Exception('Failed to cancel order: ' . $e->getMessage());

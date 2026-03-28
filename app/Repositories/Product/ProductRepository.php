@@ -57,7 +57,7 @@ class ProductRepository extends BaseRepository
     {
         return $this->model->newQuery()
             ->where('store_id', $storeId)
-            ->where('is_active', true)
+            ->where('status', 'active')
             ->get();
     }
 
@@ -127,7 +127,7 @@ class ProductRepository extends BaseRepository
         });
 
         $query->when(isset($filters['status']), function ($q) use ($filters) {
-            $q->where('is_active', $filters['status'] === 'active');
+            $q->where('status', $filters['status']);
         });
 
         $query->when(isset($filters['search']), function ($q) use ($filters) {
@@ -151,7 +151,7 @@ class ProductRepository extends BaseRepository
     {
         return $this->model->newQuery()
             ->where('store_id', $storeId)
-            ->where('is_active', true)
+            ->where('status', 'active')
             ->count();
     }
 

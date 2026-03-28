@@ -34,7 +34,7 @@ class ProductController extends Controller
             // Get products data using the service
             $filters = $request->all();
             $products = $this->productService->getProductsForStore($store, $filters);
-            $categories = $this->productService->getCategoriesForStore($store);
+            $categories = $this->productService->getCategories();
             $statistics = $this->productService->getStatisticsForStore($store);
 
             // Return products page with SPA structure
@@ -234,12 +234,19 @@ class ProductController extends Controller
             $baseUrl = config('app.url') . ':8080';
             $imageRecord = $product->images()->create([
                 'url' => $baseUrl . '/storage/' . $originalPath,
-                'thumbnail_url' => $baseUrl . '/storage/' . $directory . '/' . $thumbnailFilename,
-                'medium_url' => $baseUrl . '/storage/' . $directory . '/' . $mediumFilename,
                 'alt' => $request->input('alt', $product->name),
                 'title' => $request->input('title'),
                 'is_primary' => $isPrimary,
                 'order' => $order,
+                'metadata' => [
+                    'thumbnail' => $baseUrl . '/storage/' . $directory . '/' . $thumbnailFilename,
+                    'medium' => $baseUrl . '/storage/' . $directory . '/' . $mediumFilename,
+                    'sizes' => [
+                        'original' => $originalPath,
+                        'thumbnail' => $directory . '/' . $thumbnailFilename,
+                        'medium' => $directory . '/' . $mediumFilename,
+                    ],
+                ],
             ]);
 
             // If this is the first image or is_primary is true, set as primary
@@ -251,8 +258,8 @@ class ProductController extends Controller
             return $this->success([
                 'id' => $imageRecord->id,
                 'url' => $imageRecord->url,
-                'thumbnail_url' => $imageRecord->thumbnail_url,
-                'medium_url' => $imageRecord->medium_url,
+                'thumbnail_url' => $imageRecord->metadata['thumbnail'] ?? null,
+                'medium_url' => $imageRecord->metadata['medium'] ?? null,
                 'alt' => $imageRecord->alt,
                 'title' => $imageRecord->title,
                 'is_primary' => $imageRecord->is_primary,

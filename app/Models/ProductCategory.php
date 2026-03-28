@@ -14,7 +14,6 @@ class ProductCategory extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'store_id',
         'name',
         'slug',
         'description',
@@ -23,13 +22,19 @@ class ProductCategory extends Model
         'level',
         'order',
         'status',
+        'is_featured',
         'settings',
+        'translations',
+        'meta_title',
+        'meta_description',
     ];
 
     protected $casts = [
         'level' => 'integer',
         'order' => 'integer',
         'settings' => 'array',
+        'translations' => 'array',
+        'is_featured' => 'boolean',
     ];
 
     protected static function boot()
@@ -58,11 +63,12 @@ class ProductCategory extends Model
     }
 
     /**
-     * Get the store that owns the category.
+     * Get translations for a specific locale.
      */
-    public function store(): BelongsTo
+    public function getTranslation(string $locale, string $field = 'name'): ?string
     {
-        return $this->belongsTo(Store::class);
+        $translations = $this->translations ?? [];
+        return $translations[$locale][$field] ?? $this->$field;
     }
 
     /**

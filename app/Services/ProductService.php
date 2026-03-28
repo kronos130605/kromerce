@@ -42,12 +42,12 @@ class ProductService
     }
 
     /**
-     * Get categories for store.
+     * Get all categories (global).
      */
-    public function getCategoriesForStore(Store $store): Collection
+    public function getCategories(): Collection
     {
         try {
-            return $this->productCategoryRepository->getForStore($store->id);
+            return $this->productCategoryRepository->getAll();
         } catch (\Exception $e) {
             throw new \Exception('Failed to retrieve categories: ' . $e->getMessage());
         }
@@ -74,7 +74,18 @@ class ProductService
             $data['store_id'] = $store->id;
             $data['created_by'] = $user->id;
 
-            return $this->productRepository->create($data);
+            // Extract category_ids before creating product
+            $categoryIds = $data['category_ids'] ?? [];
+            unset($data['category_ids']);
+
+            $product = $this->productRepository->create($data);
+
+            // Sync categories if provided
+            if (!empty($categoryIds)) {
+                $product->categories()->sync($categoryIds);
+            }
+
+            return $product;
         } catch (\Exception $e) {
             throw new \Exception('Failed to create product: ' . $e->getMessage());
         }
@@ -99,8 +110,20 @@ class ProductService
     public function updateProductForStore(Store $store, int $productId, array $data): bool
     {
         try {
+            // Extract category_ids before updating product
+            $categoryIds = $data['category_ids'] ?? null;
+            unset($data['category_ids']);
+
             $updated = $this->productRepository
                 ->updateBy(['id' => $productId, 'store_id' => $store->id], $data);
+
+            // Sync categories if provided
+            if ($categoryIds !== null && $updated > 0) {
+                $product = $this->productRepository->getById($productId);
+                if ($product) {
+                    $product->categories()->sync($categoryIds);
+                }
+            }
 
             return $updated > 0;
         } catch (\Exception $e) {

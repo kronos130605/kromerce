@@ -17,7 +17,7 @@ class OrderRepository extends BaseRepository
         'payment_status',
         'fulfillment_status',
         'currency',
-        'total_amount',
+        'total',
         'created_at',
         'updated_at',
     ];
@@ -91,8 +91,8 @@ class OrderRepository extends BaseRepository
             'shipped_orders' => (int) $baseQuery->clone()->where('status', 'shipped')->count(),
             'delivered_orders' => (int) $baseQuery->clone()->where('status', 'delivered')->count(),
             'cancelled_orders' => (int) $baseQuery->clone()->where('status', 'cancelled')->count(),
-            'total_revenue' => (float) $baseQuery->clone()->where('payment_status', 'paid')->sum('total_amount'),
-            'pending_revenue' => (float) $baseQuery->clone()->where('payment_status', 'pending')->sum('total_amount'),
+            'total_revenue' => (float) $baseQuery->clone()->where('payment_status', 'paid')->sum('total'),
+            'pending_revenue' => (float) $baseQuery->clone()->where('payment_status', 'pending')->sum('total'),
         ];
     }
 

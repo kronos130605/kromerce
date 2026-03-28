@@ -163,6 +163,7 @@ const getStatusColor = (status) => ({
                 :actions="tableActions"
                 @action="handleTableAction"
                 :empty-title="t('products.empty.title')"
+                :empty-description="t('products.empty.description')"
                 empty-icon="📦"
             >
                 <template #empty-action>

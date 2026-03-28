@@ -58,7 +58,8 @@ class ProductRequest extends FormRequest
             
             // Pricing
             'base_price' => 'required|numeric|min:0|max:999999.99',
-            'sale_price' => 'nullable|numeric|min:0|max:999999.99|lt:base_price',
+            'base_sale_price' => 'nullable|numeric|min:0|max:999999.99|lt:base_price',
+            'cost_price' => 'nullable|numeric|min:0|max:999999.99',
             'base_currency' => [
                 'required',
                 'string',
@@ -86,13 +87,12 @@ class ProductRequest extends FormRequest
             
             // Status and visibility
             'status' => 'required|in:active,inactive,draft',
-            'is_featured' => 'sometimes|boolean',
+            'featured' => 'sometimes|boolean',
             'is_on_sale' => 'sometimes|boolean',
             
             // Organization
-            'category_id' => 'nullable|exists:product_categories,id',
-            'tags' => 'nullable|array',
-            'tags.*' => 'exists:product_tags,id',
+            'category_ids' => 'nullable|array',
+            'category_ids.*' => 'exists:product_categories,id',
             
             // Filters for listing
             'min_price' => 'sometimes|numeric|min:0',
@@ -127,7 +127,7 @@ class ProductRequest extends FormRequest
             // Pricing
             'base_price.required' => 'Base price is required',
             'base_price.numeric' => 'Base price must be a valid number',
-            'sale_price.lt' => 'Sale price must be less than base price',
+            'base_sale_price.lt' => 'Sale price must be less than base price',
             'base_currency.required' => 'Currency is required',
             'base_currency.exists' => 'Selected currency is not supported',
             
@@ -142,8 +142,7 @@ class ProductRequest extends FormRequest
             'status.in' => 'Invalid status selected',
             
             // Organization
-            'category_id.exists' => 'Selected category does not exist',
-            'tags.*.exists' => 'One or more selected tags are invalid',
+            'category_ids.*.exists' => 'One or more selected categories are invalid',
         ];
     }
 }

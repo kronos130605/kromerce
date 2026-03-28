@@ -20,8 +20,6 @@ class CurrencySeeder extends Seeder
                 'flag_emoji' => '🇺🇸',
                 'decimal_places' => 2,
                 'is_active' => true,
-                'is_default' => true,
-                'sort_order' => 1,
             ],
             [
                 'code' => 'EUR',
@@ -30,8 +28,6 @@ class CurrencySeeder extends Seeder
                 'flag_emoji' => '🇪🇺',
                 'decimal_places' => 2,
                 'is_active' => true,
-                'is_default' => false,
-                'sort_order' => 2,
             ],
             [
                 'code' => 'CUP',
@@ -40,8 +36,6 @@ class CurrencySeeder extends Seeder
                 'flag_emoji' => '🇨🇺',
                 'decimal_places' => 2,
                 'is_active' => true,
-                'is_default' => false,
-                'sort_order' => 3,
             ],
             [
                 'code' => 'GBP',
@@ -50,8 +44,6 @@ class CurrencySeeder extends Seeder
                 'flag_emoji' => '🇬🇧',
                 'decimal_places' => 2,
                 'is_active' => true,
-                'is_default' => false,
-                'sort_order' => 4,
             ],
             [
                 'code' => 'JPY',
@@ -60,8 +52,6 @@ class CurrencySeeder extends Seeder
                 'flag_emoji' => '🇯🇵',
                 'decimal_places' => 0,
                 'is_active' => true,
-                'is_default' => false,
-                'sort_order' => 5,
             ],
             [
                 'code' => 'MXN',
@@ -70,8 +60,6 @@ class CurrencySeeder extends Seeder
                 'flag_emoji' => '🇲🇽',
                 'decimal_places' => 2,
                 'is_active' => true,
-                'is_default' => false,
-                'sort_order' => 6,
             ],
             [
                 'code' => 'COP',
@@ -80,8 +68,6 @@ class CurrencySeeder extends Seeder
                 'flag_emoji' => '🇨🇴',
                 'decimal_places' => 0,
                 'is_active' => true,
-                'is_default' => false,
-                'sort_order' => 7,
             ],
             [
                 'code' => 'ARS',
@@ -90,8 +76,6 @@ class CurrencySeeder extends Seeder
                 'flag_emoji' => '🇦🇷',
                 'decimal_places' => 2,
                 'is_active' => true,
-                'is_default' => false,
-                'sort_order' => 8,
             ],
             [
                 'code' => 'BRL',
@@ -100,8 +84,6 @@ class CurrencySeeder extends Seeder
                 'flag_emoji' => '🇧🇷',
                 'decimal_places' => 2,
                 'is_active' => true,
-                'is_default' => false,
-                'sort_order' => 9,
             ],
             [
                 'code' => 'PEN',
@@ -110,8 +92,6 @@ class CurrencySeeder extends Seeder
                 'flag_emoji' => '🇵🇪',
                 'decimal_places' => 2,
                 'is_active' => true,
-                'is_default' => false,
-                'sort_order' => 10,
             ],
             [
                 'code' => 'CLP',
@@ -120,8 +100,6 @@ class CurrencySeeder extends Seeder
                 'flag_emoji' => '🇨🇱',
                 'decimal_places' => 0,
                 'is_active' => true,
-                'is_default' => false,
-                'sort_order' => 11,
             ],
             [
                 'code' => 'UYU',
@@ -130,8 +108,6 @@ class CurrencySeeder extends Seeder
                 'flag_emoji' => '🇺🇾',
                 'decimal_places' => 2,
                 'is_active' => true,
-                'is_default' => false,
-                'sort_order' => 12,
             ],
             [
                 'code' => 'VES',
@@ -140,8 +116,6 @@ class CurrencySeeder extends Seeder
                 'flag_emoji' => '🇻🇪',
                 'decimal_places' => 2,
                 'is_active' => true,
-                'is_default' => false,
-                'sort_order' => 13,
             ],
             [
                 'code' => 'CAD',
@@ -150,8 +124,6 @@ class CurrencySeeder extends Seeder
                 'flag_emoji' => '🇨🇦',
                 'decimal_places' => 2,
                 'is_active' => true,
-                'is_default' => false,
-                'sort_order' => 14,
             ],
             [
                 'code' => 'AUD',
@@ -160,8 +132,6 @@ class CurrencySeeder extends Seeder
                 'flag_emoji' => '🇦🇺',
                 'decimal_places' => 2,
                 'is_active' => true,
-                'is_default' => false,
-                'sort_order' => 15,
             ],
             [
                 'code' => 'CHF',
@@ -170,8 +140,6 @@ class CurrencySeeder extends Seeder
                 'flag_emoji' => '🇨🇭',
                 'decimal_places' => 2,
                 'is_active' => true,
-                'is_default' => false,
-                'sort_order' => 16,
             ],
             [
                 'code' => 'CNY',
@@ -179,16 +147,14 @@ class CurrencySeeder extends Seeder
                 'symbol' => '¥',
                 'flag_emoji' => '🇨🇳',
                 'decimal_places' => 2,
-                'is_active' => true,
-                'is_default' => false,
-                'sort_order' => 17,
+                'is_active' => true
             ],
         ];
 
         foreach ($currencies as $currency) {
             Currency::updateOrCreate(
                 ['code' => $currency['code']],
-                array_merge($currency, ['id' => \Illuminate\Support\Str::uuid()])
+                array_merge($currency)
             );
         }
     }

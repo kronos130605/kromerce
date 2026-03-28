@@ -60,12 +60,11 @@ return new class extends Migration
             $table->unique(['store_id', 'from_currency', 'to_currency', 'effective_date'], 'cr_business_unique');
         });
 
-        // Product categories - using store_id
+        // Product categories - global (no store_id)
         Schema::create('product_categories', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->unsignedBigInteger('store_id');
             $table->string('name');
-            $table->string('slug');
+            $table->string('slug')->unique();
             $table->text('description')->nullable();
             $table->string('image')->nullable();
             $table->uuid('parent_id')->nullable();
@@ -74,6 +73,7 @@ return new class extends Migration
             $table->string('status', 20)->default('active');
             $table->boolean('is_featured')->default(false);
             $table->json('settings')->nullable();
+            $table->json('translations')->nullable();
             
             // SEO
             $table->string('meta_title')->nullable();
@@ -81,10 +81,8 @@ return new class extends Migration
             $table->timestamps();
             $table->softDeletes();
             
-            $table->foreign('store_id')->references('id')->on('stores')->onDelete('cascade');
-            $table->unique(['store_id', 'slug'], 'pc_store_slug_unique');
-            $table->index(['store_id', 'status', 'parent_id'], 'pc_store_status_parent');
-            $table->index(['store_id', 'is_featured'], 'pc_store_featured');
+            $table->index(['status', 'parent_id'], 'pc_status_parent');
+            $table->index(['is_featured'], 'pc_featured');
         });
 
         // Products - using store_id

@@ -30,5 +30,8 @@ class DatabaseSeeder extends Seeder
         
         // Seed currencies
         $this->call(CurrencySeeder::class);
+        
+        // Seed default product categories
+        $this->call(ProductCategorySeeder::class);
     }
 }

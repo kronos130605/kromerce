@@ -19,15 +19,28 @@ class OrderItem extends Model
         'order_id',
         'product_id',
         'product_variant_id',
+        'uuid',
         'product_name',
         'product_sku',
+        'product_type',
+        'product_description',
         'product_image',
-        'quantity',
+        'variant_attributes',
+        'currency',
         'unit_price',
-        'total_price',
+        'unit_cost',
+        'quantity',
+        'subtotal',
         'tax_amount',
         'discount_amount',
-        'product_snapshot',
+        'total',
+        'unit_weight',
+        'total_weight',
+        'fulfillment_status',
+        'quantity_fulfilled',
+        'quantity_returned',
+        'fulfilled_at',
+        'metadata',
     ];
 
     /**
@@ -37,10 +50,16 @@ class OrderItem extends Model
      */
     protected $casts = [
         'unit_price' => 'decimal:2',
-        'total_price' => 'decimal:2',
+        'unit_cost' => 'decimal:2',
+        'subtotal' => 'decimal:2',
         'tax_amount' => 'decimal:2',
         'discount_amount' => 'decimal:2',
-        'product_snapshot' => 'array',
+        'total' => 'decimal:2',
+        'unit_weight' => 'decimal:2',
+        'total_weight' => 'decimal:2',
+        'variant_attributes' => 'array',
+        'metadata' => 'array',
+        'fulfilled_at' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
@@ -82,7 +101,7 @@ class OrderItem extends Model
      */
     public function getFormattedTotalPriceAttribute(): string
     {
-        return number_format($this->total_price, 2);
+        return number_format($this->total, 2);
     }
 
     /**

@@ -14,24 +14,22 @@ class ProductCategoryRepository extends BaseRepository
     }
 
     /**
-     * Get categories for store.
+     * Get all categories.
      */
-    public function getForStore(string $storeId): Collection
+    public function getAll(array $columns = ['*']): Collection
     {
         return $this->model
-            ->where('store_id', $storeId)
             ->orderBy('level')
             ->orderBy('name')
             ->get();
     }
 
     /**
-     * Get root categories for store.
+     * Get root categories.
      */
-    public function getRootForStore(string $storeId): Collection
+    public function getRoot(): Collection
     {
         return $this->model
-            ->where('store_id', $storeId)
             ->whereNull('parent_id')
             ->orderBy('name')
             ->get();
@@ -59,12 +57,11 @@ class ProductCategoryRepository extends BaseRepository
     }
 
     /**
-     * Get category tree for store.
+     * Get category tree.
      */
-    public function getTreeForStore(string $storeId): Collection
+    public function getTree(): Collection
     {
         return $this->model
-            ->where('store_id', $storeId)
             ->with(['children' => function ($query) {
                 $query->orderBy('name');
             }])
@@ -74,13 +71,12 @@ class ProductCategoryRepository extends BaseRepository
     }
 
     /**
-     * Get active categories for store.
+     * Get active categories.
      */
-    public function getActiveForStore(string $storeId): Collection
+    public function getActive(): Collection
     {
         return $this->model
-            ->where('store_id', $storeId)
-            ->where('is_active', true)
+            ->where('status', 'active')
             ->orderBy('level')
             ->orderBy('name')
             ->get();
@@ -128,24 +124,22 @@ class ProductCategoryRepository extends BaseRepository
     /**
      * Get category statistics.
      */
-    public function getStatistics(string $storeId): array
+    public function getStatistics(): array
     {
-        $categories = $this->model->where('store_id', $storeId);
-
         return [
-            'total_categories' => $categories->count(),
-            'active_categories' => $categories->where('is_active', true)->count(),
-            'root_categories' => $categories->whereNull('parent_id')->count(),
-            'max_level' => $categories->max('level'),
+            'total_categories' => $this->model->count(),
+            'active_categories' => $this->model->where('status', 'active')->count(),
+            'root_categories' => $this->model->whereNull('parent_id')->count(),
+            'max_level' => $this->model->max('level'),
         ];
     }
 
     /**
-     * Count categories for store.
+     * Count all categories.
      */
-    public function countForStore(string $storeId): int
+    public function countAll(): int
     {
-        return $this->model->where('store_id', $storeId)->count();
+        return $this->model->count();
     }
 
     /**
@@ -162,12 +156,21 @@ class ProductCategoryRepository extends BaseRepository
     /**
      * Get categories with product count.
      */
-    public function getWithProductCount(string $storeId): Collection
+    public function getWithProductCount(): Collection
     {
         return $this->model
-            ->where('store_id', $storeId)
             ->withCount('products')
             ->orderBy('name')
             ->get();
+    }
+
+    /**
+     * Find category by slug.
+     */
+    public function findBySlug(string $slug): ?ProductCategory
+    {
+        return $this->model
+            ->where('slug', $slug)
+            ->first();
     }
 }
