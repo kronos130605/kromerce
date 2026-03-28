@@ -8,13 +8,14 @@ return new class extends Migration
 {
     /**
      * Run the migrations.
+     * Creates products and currency system tables with store_id (not tenant_id).
      */
     public function up(): void
     {
-        // Configuración de monedas por business
+        // Business currency configs - using store_id instead of tenant_id
         Schema::create('business_currency_configs', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->unsignedBigInteger('tenant_id');  // ← CAMBIADO: BIGINT para referenciar tenants.id
+            $table->unsignedBigInteger('store_id');
             $table->string('default_currency', 3);
             $table->json('display_currencies');
             $table->boolean('use_custom_rates')->default(false);
@@ -23,13 +24,13 @@ return new class extends Migration
             $table->date('last_rate_update')->nullable();
             $table->integer('historical_retention_years')->default(2);
             $table->timestamps();
-            $table->softDeletes();  // ← AGREGADO: SoftDeletes column
+            $table->softDeletes();
             
-            $table->foreign('tenant_id')->references('id')->on('tenants')->onDelete('cascade');
-            $table->unique('tenant_id');
+            $table->foreign('store_id')->references('id')->on('stores')->onDelete('cascade');
+            $table->unique('store_id');
         });
 
-        // Tasas globales (default)
+        // Global currency rates (no store association)
         Schema::create('currency_rates_global', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('from_currency', 3);
@@ -39,15 +40,15 @@ return new class extends Migration
             $table->string('source', 50)->default('api');
             $table->timestamps();
             
-            $table->unique(['from_currency', 'to_currency', 'effective_date'], 'cr_global_unique');  // ← ACORTADO
-            $table->index(['from_currency', 'to_currency', 'effective_date'], 'cr_global_index');  // ← ACORTADO
-            $table->index('effective_date', 'cr_global_date');  // ← ACORTADO
+            $table->unique(['from_currency', 'to_currency', 'effective_date'], 'cr_global_unique');
+            $table->index(['from_currency', 'to_currency', 'effective_date'], 'cr_global_index');
+            $table->index('effective_date', 'cr_global_date');
         });
 
-        // Tasas personalizadas por business
+        // Store-specific currency rates
         Schema::create('currency_rates_business', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->unsignedBigInteger('tenant_id');  // ← CAMBIADO: BIGINT para referenciar tenants.id
+            $table->unsignedBigInteger('store_id');
             $table->string('from_currency', 3);
             $table->string('to_currency', 3);
             $table->decimal('rate', 10, 6);
@@ -55,14 +56,14 @@ return new class extends Migration
             $table->string('source', 50)->default('manual');
             $table->timestamps();
             
-            $table->foreign('tenant_id')->references('id')->on('tenants')->onDelete('cascade');
-            $table->unique(['tenant_id', 'from_currency', 'to_currency', 'effective_date'], 'cr_business_unique');  // ← ACORTADO
+            $table->foreign('store_id')->references('id')->on('stores')->onDelete('cascade');
+            $table->unique(['store_id', 'from_currency', 'to_currency', 'effective_date'], 'cr_business_unique');
         });
 
-        // Categorías de productos
+        // Product categories - using store_id
         Schema::create('product_categories', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->unsignedBigInteger('tenant_id');  // ← CAMBIADO: BIGINT para referenciar tenants.id
+            $table->unsignedBigInteger('store_id');
             $table->string('name');
             $table->string('slug');
             $table->text('description')->nullable();
@@ -71,68 +72,74 @@ return new class extends Migration
             $table->integer('level')->default(0);
             $table->integer('order')->default(0);
             $table->string('status', 20)->default('active');
+            $table->boolean('is_featured')->default(false);
             $table->json('settings')->nullable();
-            $table->timestamps();
-            $table->softDeletes();  // ← AGREGADO: SoftDeletes column
             
-            $table->foreign('tenant_id')->references('id')->on('tenants')->onDelete('cascade');
-            $table->unique(['tenant_id', 'slug'], 'pc_tenant_slug_unique');  // ← ACORTADO
-            $table->index(['tenant_id', 'status', 'parent_id'], 'pc_tenant_status_parent');  // ← ACORTADO
+            // SEO
+            $table->string('meta_title')->nullable();
+            $table->text('meta_description')->nullable();
+            $table->timestamps();
+            $table->softDeletes();
+            
+            $table->foreign('store_id')->references('id')->on('stores')->onDelete('cascade');
+            $table->unique(['store_id', 'slug'], 'pc_store_slug_unique');
+            $table->index(['store_id', 'status', 'parent_id'], 'pc_store_status_parent');
+            $table->index(['store_id', 'is_featured'], 'pc_store_featured');
         });
 
-        // Productos
+        // Products - using store_id
         Schema::create('products', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->unsignedBigInteger('tenant_id');  // ← CAMBIADO: BIGINT para referenciar tenants.id
+            $table->unsignedBigInteger('store_id');
             $table->string('name');
             $table->string('slug');
             $table->text('description')->nullable();
             $table->text('short_description')->nullable();
             
-            // Precios base
+            // Base prices
             $table->string('base_currency', 3);
             $table->decimal('base_price', 10, 2);
             $table->decimal('base_sale_price', 10, 2)->nullable();
             $table->decimal('cost_price', 10, 2)->nullable();
             
-            // Configuración de ofertas
+            // Sale configuration
             $table->boolean('is_on_sale')->default(false);
-            $table->string('sale_type', 20)->nullable(); // 'fixed' o 'percentage'
+            $table->string('sale_type', 20)->nullable();
             $table->decimal('sale_discount', 5, 2)->nullable();
             $table->date('sale_start_date')->nullable();
             $table->date('sale_end_date')->nullable();
             
-            // Histórico de costos
+            // Historical cost
             $table->string('historical_cost_currency', 3)->nullable();
             $table->decimal('historical_cost_amount', 10, 2)->nullable();
             $table->decimal('historical_cost_rate', 10, 6)->nullable();
             $table->date('historical_cost_date')->nullable();
             
-            // Configuración
+            // Configuration
             $table->boolean('track_cost')->default(false);
             $table->boolean('show_cost_to_customer')->default(false);
             
-            // SKU y barras
+            // SKU and barcode
             $table->string('sku')->unique();
             $table->string('barcode')->nullable();
             
-            // Estado y visibilidad
-            $table->string('status', 20)->default('active'); // active, inactive, draft
-            $table->string('visibility', 20)->default('public'); // public, private, hidden
+            // Status and visibility
+            $table->string('status', 20)->default('active');
+            $table->string('visibility', 20)->default('public');
             $table->boolean('featured')->default(false);
             $table->boolean('downloadable')->default(false);
             $table->boolean('virtual')->default(false);
             
-            // Tipo de producto
-            $table->string('product_type', 20)->default('simple'); // simple, variable, grouped
+            // Product type
+            $table->string('product_type', 20)->default('simple');
             $table->boolean('manage_stock')->default(true);
             $table->integer('stock_quantity')->default(0);
-            $table->string('stock_status', 20)->default('instock'); // instock, outofstock, onbackorder
+            $table->string('stock_status', 20)->default('instock');
             $table->integer('low_stock_threshold')->default(0);
             
             // Shipping
-            $table->decimal('weight', 8, 2)->nullable(); // kg
-            $table->decimal('length', 8, 2)->nullable(); // cm
+            $table->decimal('weight', 8, 2)->nullable();
+            $table->decimal('length', 8, 2)->nullable();
             $table->decimal('width', 8, 2)->nullable();
             $table->decimal('height', 8, 2)->nullable();
             $table->string('shipping_class')->nullable();
@@ -140,25 +147,37 @@ return new class extends Migration
             
             // Taxes
             $table->string('tax_class')->nullable();
-            $table->string('tax_status', 20)->default('taxable'); // taxable, exempt
+            $table->string('tax_status', 20)->default('taxable');
+            
+            // Stock management
+            $table->integer('min_order_quantity')->default(1);
+            $table->integer('max_order_quantity')->nullable();
+            $table->integer('stock_alert_threshold')->nullable();
+            $table->boolean('backorders_allowed')->default(false);
+            
+            // SEO
+            $table->string('meta_title')->nullable();
+            $table->text('meta_description')->nullable();
+            $table->text('meta_keywords')->nullable();
             
             // Metadata
-            $table->unsignedBigInteger('created_by')->nullable();  // ← CAMBIADO: BIGINT para referenciar users.id
-            $table->unsignedBigInteger('updated_by')->nullable();  // ← CAMBIADO: BIGINT para referenciar users.id
+            $table->unsignedBigInteger('created_by')->nullable();
+            $table->unsignedBigInteger('updated_by')->nullable();
             $table->timestamps();
-            $table->softDeletes();  // ← AGREGADO: SoftDeletes column
+            $table->softDeletes();
             
-            $table->foreign('tenant_id')->references('id')->on('tenants')->onDelete('cascade');
+            $table->foreign('store_id')->references('id')->on('stores')->onDelete('cascade');
             $table->foreign('created_by')->references('id')->on('users')->onDelete('set null');
             $table->foreign('updated_by')->references('id')->on('users')->onDelete('set null');
-            $table->unique(['tenant_id', 'slug'], 'p_tenant_slug_unique');  // ← ACORTADO
-            $table->unique(['tenant_id', 'sku'], 'p_tenant_sku_unique');  // ← ACORTADO
-            $table->index(['tenant_id', 'status'], 'p_tenant_status');  // ← ACORTADO
-            $table->index(['tenant_id', 'stock_status'], 'p_tenant_stock');  // ← ACORTADO
-            $table->index(['tenant_id', 'featured'], 'p_tenant_featured');  // ← ACORTADO
+            $table->unique(['store_id', 'slug'], 'p_store_slug_unique');
+            $table->unique(['store_id', 'sku'], 'p_store_sku_unique');
+            $table->index(['store_id', 'status'], 'p_store_status');
+            $table->index(['store_id', 'stock_status'], 'p_store_stock');
+            $table->index(['store_id', 'featured'], 'p_store_featured');
+            $table->index(['store_id', 'product_type'], 'p_store_type');
         });
 
-        // Relación productos-categorías
+        // Product-category relationship
         Schema::create('product_category_product', function (Blueprint $table) {
             $table->uuid('product_id');
             $table->uuid('category_id');
@@ -169,22 +188,22 @@ return new class extends Migration
             $table->primary(['product_id', 'category_id']);
         });
 
-        // Tags de productos
+        // Product tags - using store_id
         Schema::create('product_tags', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->unsignedBigInteger('tenant_id');  // ← CAMBIADO: BIGINT para referenciar tenants.id
+            $table->unsignedBigInteger('store_id');
             $table->string('name');
             $table->string('slug');
             $table->text('description')->nullable();
             $table->string('color', 7)->nullable();
             $table->timestamps();
-            $table->softDeletes();  // ← AGREGADO: SoftDeletes column
+            $table->softDeletes();
             
-            $table->foreign('tenant_id')->references('id')->on('tenants')->onDelete('cascade');
-            $table->unique(['tenant_id', 'slug'], 'pt_tenant_slug_unique');  // ← ACORTADO
+            $table->foreign('store_id')->references('id')->on('stores')->onDelete('cascade');
+            $table->unique(['store_id', 'slug'], 'pt_store_slug_unique');
         });
 
-        // Relación productos-tags
+        // Product-tag relationship
         Schema::create('product_product_tag', function (Blueprint $table) {
             $table->uuid('product_id');
             $table->uuid('tag_id');
@@ -194,9 +213,9 @@ return new class extends Migration
             $table->primary(['product_id', 'tag_id']);
         });
 
-        // Imágenes de productos
+        // Product images
         Schema::create('product_images', function (Blueprint $table) {
-            $table->id();  // ← CAMBIADO: Autoincremental para performance
+            $table->id();
             $table->uuid('product_id');
             $table->string('url');
             $table->string('alt')->nullable();
@@ -207,34 +226,34 @@ return new class extends Migration
             $table->timestamps();
             
             $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');
-            $table->index(['product_id', 'order'], 'pi_product_order');  // ← ACORTADO
+            $table->index(['product_id', 'order'], 'pi_product_order');
         });
 
-        // Atributos de productos (para variantes)
+        // Product attributes - using store_id
         Schema::create('product_attributes', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->unsignedBigInteger('tenant_id');  // ← CAMBIADO: BIGINT para referenciar tenants.id
+            $table->unsignedBigInteger('store_id');
             $table->string('name');
             $table->string('slug');
-            $table->string('type', 20)->default('text'); // text, color, number, visual
+            $table->string('type', 20)->default('text');
             $table->boolean('required')->default(false);
-            $table->json('config')->nullable(); // Configuración adicional
+            $table->json('config')->nullable();
             $table->integer('order')->default(0);
             $table->timestamps();
-            $table->softDeletes();  // ← AGREGADO: SoftDeletes column
+            $table->softDeletes();
             
-            $table->foreign('tenant_id')->references('id')->on('tenants')->onDelete('cascade');
-            $table->unique(['tenant_id', 'slug'], 'pa_tenant_slug_unique');  // ← ACORTADO
+            $table->foreign('store_id')->references('id')->on('stores')->onDelete('cascade');
+            $table->unique(['store_id', 'slug'], 'pa_store_slug_unique');
         });
 
-        // Valores de atributos
+        // Product attribute values
         Schema::create('product_attribute_values', function (Blueprint $table) {
-            $table->id();  // ← CAMBIADO: Autoincremental para performance
+            $table->id();
             $table->uuid('attribute_id');
             $table->string('value');
             $table->string('label');
-            $table->string('color', 7)->nullable(); // Para atributos de color
-            $table->string('image')->nullable(); // Para atributos visuales
+            $table->string('color', 7)->nullable();
+            $table->string('image')->nullable();
             $table->integer('order')->default(0);
             $table->timestamps();
             
@@ -242,19 +261,19 @@ return new class extends Migration
             $table->unique(['attribute_id', 'value']);
         });
 
-        // Variantes de productos
+        // Product variants
         Schema::create('product_variants', function (Blueprint $table) {
-            $table->id();  // ← CAMBIADO: Autoincremental para performance
+            $table->id();
             $table->uuid('product_id');
             $table->string('sku')->unique();
             $table->string('barcode')->nullable();
             
-            // Precios (pueden diferir del producto principal)
+            // Prices
             $table->decimal('base_price', 10, 2)->nullable();
             $table->decimal('base_sale_price', 10, 2)->nullable();
             $table->decimal('cost_price', 10, 2)->nullable();
             
-            // Inventario
+            // Inventory
             $table->boolean('manage_stock')->default(true);
             $table->integer('stock_quantity')->default(0);
             $table->string('stock_status', 20)->default('instock');
@@ -266,66 +285,66 @@ return new class extends Migration
             $table->decimal('width', 8, 2)->nullable();
             $table->decimal('height', 8, 2)->nullable();
             
-            // Estado
+            // Status
             $table->string('status', 20)->default('active');
             $table->boolean('enabled')->default(true);
             
             // Metadata
-            $table->json('attributes')->nullable(); // {color: 'red', size: 'M'}
+            $table->json('attributes')->nullable();
             $table->timestamps();
-            $table->softDeletes();  // ← AGREGADO: SoftDeletes column
+            $table->softDeletes();
             
             $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');
-            $table->unique(['product_id', 'sku'], 'pv_product_sku_unique');  // ← ACORTADO
-            $table->index(['product_id', 'status'], 'pv_product_status');  // ← ACORTADO
+            $table->unique(['product_id', 'sku'], 'pv_product_sku_unique');
+            $table->index(['product_id', 'status'], 'pv_product_status');
         });
 
-        // Imágenes de variantes
+        // Variant images
         Schema::create('product_variant_images', function (Blueprint $table) {
-            $table->id();  // ← CAMBIADO: Autoincremental para performance
-            $table->unsignedBigInteger('variant_id');  // ← CAMBIADO: BIGINT para referenciar product_variants.id
+            $table->id();
+            $table->unsignedBigInteger('variant_id');
             $table->string('url');
             $table->string('alt')->nullable();
             $table->integer('order')->default(0);
             $table->timestamps();
             
             $table->foreign('variant_id')->references('id')->on('product_variants')->onDelete('cascade');
-            $table->index(['variant_id', 'order'], 'pvi_variant_order');  // ← ACORTADO
+            $table->index(['variant_id', 'order'], 'pvi_variant_order');
         });
 
-        // Historial de precios de productos
+        // Product price history
         Schema::create('product_price_history', function (Blueprint $table) {
-            $table->id();  // ← CAMBIADO: Autoincremental para performance
+            $table->id();
             $table->uuid('product_id');
             $table->string('currency', 3);
             $table->decimal('old_price', 10, 2);
             $table->decimal('new_price', 10, 2);
-            $table->string('change_reason', 100); // 'manual', 'rate_update', 'sale_start', 'sale_end'
-            $table->unsignedBigInteger('changed_by')->nullable();  // ← CAMBIADO: BIGINT para referenciar users.id
+            $table->string('change_reason', 100);
+            $table->unsignedBigInteger('changed_by')->nullable();
             $table->text('notes')->nullable();
             $table->timestamps();
             
             $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');
             $table->foreign('changed_by')->references('id')->on('users')->onDelete('set null');
-            $table->index(['product_id', 'currency', 'created_at'], 'pph_product_currency_date');  // ← ACORTADO
+            $table->index(['product_id', 'currency', 'created_at'], 'pph_product_currency_date');
         });
 
-        // Auditoría de actualizaciones de tasas
+        // Currency rate updates audit
         Schema::create('currency_rate_updates', function (Blueprint $table) {
-            $table->id();  // ← CAMBIADO: Autoincremental para performance
+            $table->id();
             $table->date('update_date');
-            $table->json('currencies_updated'); // ['USD-EUR', 'USD-GBP', ...]
-            $table->string('source', 50); // 'api', 'manual', 'import'
+            $table->json('currencies_updated');
+            $table->string('source', 50);
             $table->boolean('success');
             $table->text('error_message')->nullable();
             $table->integer('total_rates_updated')->default(0);
             $table->timestamps();
             
-            $table->unique('update_date', 'cru_update_date_unique');  // ← ACORTADO
-            $table->index('success', 'cru_success');  // ← ACORTADO
+            $table->unique('update_date', 'cru_update_date_unique');
+            $table->index('success', 'cru_success');
         });
-        
-        // Agregar foreign key de self-referencia después de crear todas las tablas
+
+        // Add self-referencing foreign key after table creation
         Schema::table('product_categories', function (Blueprint $table) {
             $table->foreign('parent_id')->references('id')->on('product_categories')->onDelete('set null');
         });
@@ -336,7 +355,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        // Eliminar foreign key de self-referencia primero
         Schema::table('product_categories', function (Blueprint $table) {
             $table->dropForeign(['parent_id']);
         });

@@ -8,6 +8,7 @@ return new class extends Migration
 {
     /**
      * Run the migrations.
+     * Creates the main stores table and related store configuration tables.
      */
     public function up(): void
     {
@@ -21,6 +22,15 @@ return new class extends Migration
             $table->string('logo')->nullable();
             $table->string('banner')->nullable();
             
+            // Contact information
+            $table->string('email')->nullable();
+            $table->string('phone')->nullable();
+            $table->string('country', 2)->nullable(); // ISO 3166-1 alpha-2
+            
+            // Localization
+            $table->string('currency', 3)->default('USD'); // Default currency
+            $table->string('language', 5)->default('es'); // Default language
+            
             // Business information
             $table->string('business_type', 20)->default('retail'); // retail, wholesale, marketplace
             $table->string('status', 20)->default('active'); // active, inactive, maintenance, suspended
@@ -31,6 +41,9 @@ return new class extends Migration
             $table->string('website_url')->nullable();
             $table->string('timezone')->default('America/Havana');
             
+            // Additional data
+            $table->json('data')->nullable(); // Additional metadata
+            
             // Metadata
             $table->foreignId('owner_id')->constrained('users')->onDelete('cascade');
             $table->timestamps();
@@ -40,6 +53,8 @@ return new class extends Migration
             $table->index(['status', 'business_type']);
             $table->index('owner_id');
             $table->index('slug');
+            $table->index(['country', 'status']);
+            $table->index('email');
         });
 
         // Store Contacts - Normalized contact information
@@ -81,6 +96,9 @@ return new class extends Migration
             $table->unsignedBigInteger('store_id');
             $table->string('method'); // stripe, paypal, zelle, crypto, bank_transfer, cash_on_delivery
             $table->string('provider')->nullable(); // 'stripe', 'paypal', 'manual', 'tropipay'
+            $table->string('display_name'); // Nombre visible para el cliente
+            $table->text('description')->nullable(); // Descripción del método
+            $table->string('icon')->nullable(); // Ícono del método de pago
             $table->json('config'); // Only for method-specific configuration
             $table->boolean('is_enabled')->default(true);
             $table->decimal('min_amount', 10, 2)->nullable(); // Minimum amount for this method
@@ -100,6 +118,7 @@ return new class extends Migration
             $table->unsignedBigInteger('store_id');
             $table->string('name'); // 'La Habana', 'Provincia Occidente', 'Nacional'
             $table->json('locations'); // Array of provinces/municipalities
+            $table->string('currency', 3)->default('USD'); // Moneda del costo de envío
             $table->decimal('cost', 8, 2)->default(0);
             $table->decimal('free_shipping_threshold', 10, 2)->nullable(); // Free shipping over this amount
             $table->integer('delivery_days_min')->nullable();
@@ -182,7 +201,7 @@ return new class extends Migration
             $table->unique('store_id');
         });
 
-        // Store Users - Relationship between stores and users (extended from tenant_users)
+        // Store Users - Relationship between stores and users
         Schema::create('store_users', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('store_id');

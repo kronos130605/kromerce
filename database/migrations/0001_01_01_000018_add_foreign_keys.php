@@ -8,14 +8,13 @@ return new class extends Migration
 {
     /**
      * Run the migrations.
+     * Adds foreign keys that have circular dependencies.
      */
     public function up(): void
     {
+        // Add foreign key from users to stores (circular dependency resolved)
         Schema::table('users', function (Blueprint $table) {
-            $table->string('phone')->nullable();
-            $table->string('avatar_url')->nullable();
-            $table->boolean('is_active')->default(true);
-            $table->string('current_store_id')->nullable();
+            $table->foreign('store_id')->references('id')->on('stores')->onDelete('set null');
         });
     }
 
@@ -25,7 +24,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn(['phone', 'avatar_url', 'is_active', 'current_store_id']);
+            $table->dropForeign(['store_id']);
         });
     }
 };
