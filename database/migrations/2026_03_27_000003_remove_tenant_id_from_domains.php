@@ -8,19 +8,27 @@ use Illuminate\Support\Facades\DB;
 return new class extends Migration
 {
     /**
+     * Disable transactions for this migration to handle aborted transaction state.
+     */
+    public bool $withinTransaction = false;
+
+    /**
      * Run the migrations.
      */
     public function up(): void
     {
+        // Clear any aborted transaction state (PostgreSQL)
+        try {
+            DB::statement('ROLLBACK');
+        } catch (\Exception $e) {
+            // Ignore if no transaction active
+        }
+        
         // First, drop any foreign key constraints on tenant_id
         $this->dropTenantIdForeignKeyIfExists();
         
         // Then drop the tenant_id column
-        Schema::table('domains', function (Blueprint $table) {
-            if (Schema::hasColumn('domains', 'tenant_id')) {
-                $table->dropColumn('tenant_id');
-            }
-        });
+        DB::statement('ALTER TABLE domains DROP COLUMN IF EXISTS tenant_id');
     }
 
     /**
