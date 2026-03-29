@@ -26,27 +26,30 @@ export function useSelectableItems(options = {}) {
 
     // Getters computados
     const selectedItems = computed(() => {
-        return items.value.filter(item => isSelected(item[key]));
+        const result = items.value.filter(item => isSelected(item[key]));
+        console.log('[useSelectableItems] selectedItems:', result.map(i => ({ id: i[key], name: i.name })));
+        return result;
     });
 
     const unselectedItems = computed(() => {
-        return items.value.filter(item => !isSelected(item[key]));
+        const result = items.value.filter(item => !isSelected(item[key]));
+        return result;
     });
 
     const filteredItems = computed(() => {
         const query = searchQuery.value.trim().toLowerCase();
-        // Siempre mostrar solo las no seleccionadas
-        let items = unselectedItems.value;
+        let result = unselectedItems.value;
         
         if (query) {
-            items = items.filter(item => {
+            result = result.filter(item => {
                 const name = (item.name || '').toLowerCase();
                 const description = (item.description || '').toLowerCase();
                 return name.includes(query) || description.includes(query);
             });
         }
         
-        return items;
+        console.log('[useSelectableItems] filteredItems (unselected):', result.map(i => ({ id: i[key], name: i.name })));
+        return result;
     });
 
     const hasSelection = computed(() => selectedIds.value.length > 0);
@@ -55,31 +58,39 @@ export function useSelectableItems(options = {}) {
 
     // Métodos
     function isSelected(id) {
-        // Asegurar comparación consistente convirtiendo a string
         const strId = String(id);
-        return selectedIds.value.some(selectedId => String(selectedId) === strId);
+        const result = selectedIds.value.some(selectedId => String(selectedId) === strId);
+        return result;
     }
 
     function select(id) {
         const strId = String(id);
+        console.log('[useSelectableItems] select called:', strId, 'current selected:', selectedIds.value);
         if (!isSelected(strId)) {
             selectedIds.value.push(strId);
+            console.log('[useSelectableItems] added:', strId, 'new selected:', selectedIds.value);
+        } else {
+            console.log('[useSelectableItems] already selected:', strId);
         }
     }
 
     function deselect(id) {
         const strId = String(id);
+        console.log('[useSelectableItems] deselect called:', strId, 'current selected:', selectedIds.value);
         const index = selectedIds.value.findIndex(selectedId => String(selectedId) === strId);
         if (index > -1) {
             selectedIds.value.splice(index, 1);
+            console.log('[useSelectableItems] removed:', strId, 'new selected:', selectedIds.value);
         }
     }
 
     function toggle(id) {
-        if (isSelected(id)) {
-            deselect(id);
+        const strId = String(id);
+        console.log('[useSelectableItems] toggle called:', strId, 'isSelected:', isSelected(strId));
+        if (isSelected(strId)) {
+            deselect(strId);
         } else {
-            select(id);
+            select(strId);
         }
     }
 

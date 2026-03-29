@@ -10,25 +10,24 @@ class StoreShippingZone extends Model
     protected $fillable = [
         'store_id',
         'name',
-        'countries',
-        'states',
-        'postal_codes',
-        'shipping_cost',
+        'locations',
+        'currency',
+        'cost',
         'free_shipping_threshold',
-        'estimated_days',
+        'delivery_days_min',
+        'delivery_days_max',
         'is_active',
-        'conditions',
+        'sort_order',
     ];
 
     protected $casts = [
-        'countries' => 'array',
-        'states' => 'array',
-        'postal_codes' => 'array',
-        'shipping_cost' => 'decimal:2',
+        'locations' => 'array',
+        'cost' => 'decimal:2',
         'free_shipping_threshold' => 'decimal:2',
-        'estimated_days' => 'integer',
+        'delivery_days_min' => 'integer',
+        'delivery_days_max' => 'integer',
         'is_active' => 'boolean',
-        'conditions' => 'json',
+        'sort_order' => 'integer',
     ];
 
     /**

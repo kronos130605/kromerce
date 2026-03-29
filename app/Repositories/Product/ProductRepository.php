@@ -12,18 +12,49 @@ class ProductRepository extends BaseRepository
 {
     protected array $allowedFields = [
         'id',
-        'name', 'slug', 'description', 'short_description', 'base_currency', 
-        'base_price', 'base_sale_price', 'cost_price', 'is_on_sale', 
+        'name', 'slug', 'description', 'short_description', 'base_currency',
+        'base_price', 'base_sale_price', 'cost_price', 'is_on_sale',
         'sale_type', 'sale_discount', 'sale_start_date', 'sale_end_date',
-        'sku', 'barcode', 'status', 'visibility', 'featured', 
-        'downloadable', 'virtual', 'product_type', 'manage_stock', 
-        'stock_quantity', 'stock_status', 'low_stock_threshold', 
+        'sku', 'barcode', 'status', 'visibility', 'featured',
+        'downloadable', 'virtual', 'product_type', 'manage_stock',
+        'stock_quantity', 'stock_status', 'low_stock_threshold',
         'store_id', 'category_id', 'created_at', 'updated_at'
     ];
 
     public function __construct(Product $model)
     {
         parent::__construct($model);
+    }
+
+    /**
+     * Get product by ID for specific store.
+     */
+    public function getByIdForStore(string $productId, int $storeId): ?Product
+    {
+        return $this->model->newQuery()
+            ->where('id', $productId)
+            ->where('store_id', $storeId)
+            ->first();
+    }
+
+    /**
+     * Update product by ID.
+     */
+    public function updateById(string $productId, array $data): bool
+    {
+        return $this->model->newQuery()
+            ->where('id', $productId)
+            ->update($data) > 0;
+    }
+
+    /**
+     * Delete product by ID.
+     */
+    public function deleteById(string $productId): bool
+    {
+        return $this->model->newQuery()
+            ->where('id', $productId)
+            ->delete() > 0;
     }
 
     /**
@@ -43,7 +74,15 @@ class ProductRepository extends BaseRepository
      */
     public function paginateForStore(int $storeId, array $filters = [], int $perPage = 15): LengthAwarePaginator
     {
-        $query = $this->model->newQuery()->where('store_id', $storeId);
+        $query = $this->model->newQuery()
+            ->where('store_id', $storeId)
+            ->with([
+                'categories',
+                'tags',
+                'images' => function ($query) {
+                    $query->orderBy('order');
+                },
+            ]);
 
         $this->applyProductFilters($query, $filters);
 
@@ -98,7 +137,9 @@ class ProductRepository extends BaseRepository
                   ->orWhere('sku', 'like', "%{$query}%");
             })
             ->when(isset($filters['category_id']), function ($q) use ($filters) {
-                $q->where('category_id', $filters['category_id']);
+                $q->whereHas('categories', function ($categoryQuery) use ($filters) {
+                    $categoryQuery->where('product_categories.id', $filters['category_id']);
+                });
             })
             ->when(isset($filters['min_price']), function ($q) use ($filters) {
                 $q->where('base_price', '>=', $filters['min_price']);
@@ -106,6 +147,7 @@ class ProductRepository extends BaseRepository
             ->when(isset($filters['max_price']), function ($q) use ($filters) {
                 $q->where('base_price', '<=', $filters['max_price']);
             })
+            ->with(['categories', 'tags', 'images'])
             ->get();
     }
 
@@ -114,8 +156,11 @@ class ProductRepository extends BaseRepository
      */
     private function applyProductFilters($query, array $filters): void
     {
+        // Filter by category using relationship
         $query->when(isset($filters['category_id']), function ($q) use ($filters) {
-            $q->where('category_id', $filters['category_id']);
+            $q->whereHas('categories', function ($categoryQuery) use ($filters) {
+                $categoryQuery->where('product_categories.id', $filters['category_id']);
+            });
         });
 
         $query->when(isset($filters['min_price']), function ($q) use ($filters) {
@@ -130,9 +175,13 @@ class ProductRepository extends BaseRepository
             $q->where('status', $filters['status']);
         });
 
+        // Fix search to not break other filters
         $query->when(isset($filters['search']), function ($q) use ($filters) {
-            $q->where('name', 'like', "%{$filters['search']}%")
-              ->orWhere('description', 'like', "%{$filters['search']}%");
+            $q->where(function ($searchQuery) use ($filters) {
+                $searchQuery->where('name', 'like', "%{$filters['search']}%")
+                    ->orWhere('description', 'like', "%{$filters['search']}%")
+                    ->orWhere('sku', 'like', "%{$filters['search']}%");
+            });
         });
     }
 
@@ -280,25 +329,34 @@ class ProductRepository extends BaseRepository
     public function getStatistics(int $storeId): array
     {
         try {
+            // Single optimized query for main stats
+            $mainStats = \DB::table('products')
+                ->where('store_id', $storeId)
+                ->selectRaw('
+                    COUNT(*) as total_products,
+                    SUM(CASE WHEN status = "active" THEN 1 ELSE 0 END) as active_products,
+                    SUM(CASE WHEN status != "active" THEN 1 ELSE 0 END) as inactive_products,
+                    SUM(base_price) as total_value,
+                    AVG(base_price) as average_price
+                ')
+                ->first();
+
             $stats = [
-                'total_products' => $this->model->newQuery()->where('store_id', $storeId)->count(),
-                'active_products' => $this->model->newQuery()->where('store_id', $storeId)->where('status', 'active')->count(),
-                'inactive_products' => $this->model->newQuery()->where('store_id', $storeId)->where('status', '!=', 'active')->count(),
-                'total_value' => $this->model->newQuery()->where('store_id', $storeId)->sum('base_price'),
-                'average_price' => $this->model->newQuery()->where('store_id', $storeId)->avg('base_price'),
-                'recent_products' => $this->model->newQuery()->where('store_id', $storeId)
-                    ->orderBy('created_at', 'desc')
-                    ->limit(5)
-                    ->count(),
+                'total_products' => (int) $mainStats->total_products,
+                'active_products' => (int) $mainStats->active_products,
+                'inactive_products' => (int) $mainStats->inactive_products,
+                'total_value' => (float) $mainStats->total_value,
+                'average_price' => (float) $mainStats->average_price,
             ];
 
-            // Get products by category if categories exist
+            // Get products by category using many-to-many relationship
             try {
-                $categoryStats = \DB::table('products')
-                    ->join('product_categories', 'products.category_id', '=', 'product_categories.id')
+                $categoryStats = \DB::table('product_category_product')
+                    ->join('product_categories', 'product_category_product.category_id', '=', 'product_categories.id')
+                    ->join('products', 'product_category_product.product_id', '=', 'products.id')
                     ->where('products.store_id', $storeId)
-                    ->groupBy('product_categories.name')
-                    ->selectRaw('product_categories.name as category, COUNT(*) as count')
+                    ->groupBy('product_categories.id', 'product_categories.name')
+                    ->selectRaw('product_categories.name as category, COUNT(DISTINCT products.id) as count')
                     ->get()
                     ->pluck('count', 'category')
                     ->toArray();
@@ -314,14 +372,13 @@ class ProductRepository extends BaseRepository
                 'store_id' => $storeId,
                 'error' => $e->getMessage(),
             ]);
-            
+
             return [
                 'total_products' => 0,
                 'active_products' => 0,
                 'inactive_products' => 0,
                 'total_value' => 0,
                 'average_price' => 0,
-                'recent_products' => 0,
                 'products_by_category' => [],
             ];
         }

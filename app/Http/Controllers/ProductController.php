@@ -160,33 +160,37 @@ class ProductController extends Controller
     /**
      * Remove the specified product.
      */
-    public function destroy(ProductRequest $request, Product $product): JsonResponse|RedirectResponse
+    public function destroy(Request $request, Product $product): JsonResponse
     {
         try {
             $store = $this->validateStore();
 
+            // Verify product belongs to the store
+            if ($product->store_id !== $store->id) {
+                return $this->notFound('Product not found');
+            }
+
+            // Delete all physical image files first
+            $directory = 'products/' . $product->id;
+            \Storage::disk('public')->deleteDirectory($directory);
+
+            // Delete product (this will cascade delete image records via FK)
             $deleted = $this->productService->deleteProductForStore($store, $product->id);
 
             if (!$deleted) {
-                if ($request->wantsJson()) {
-                    return $this->notFound('Product not found');
-                }
-
-                abort(404);
+                return $this->notFound('Product not found');
             }
 
-            if ($request->wantsJson()) {
-                return $this->noContent('Product deleted successfully');
-            }
-
-            return redirect()->route('products.index');
+            return $this->noContent('Product deleted successfully');
 
         } catch (\Exception $e) {
-            if ($request->wantsJson()) {
-                return $this->error('Failed to delete product', 500);
-            }
+            Log::error('ProductController::destroy - ERROR', [
+                'error' => $e->getMessage(),
+                'product_id' => $product->id ?? null,
+                'user_id' => auth()->id(),
+            ]);
 
-            throw $e;
+            return $this->error('Failed to delete product: ' . $e->getMessage(), 500);
         }
     }
 
@@ -230,17 +234,16 @@ class ProductController extends Controller
             $isPrimary = $request->booleanIsPrimary();
             $order = $request->integerOrder($product->images()->count());
 
-            // Create image record with all sizes
-            $baseUrl = config('app.url') . ':8080';
+            // Create image record with relative paths (not full URLs)
             $imageRecord = $product->images()->create([
-                'url' => $baseUrl . '/storage/' . $originalPath,
+                'url' => 'storage/' . $originalPath,
                 'alt' => $request->input('alt', $product->name),
                 'title' => $request->input('title'),
                 'is_primary' => $isPrimary,
                 'order' => $order,
                 'metadata' => [
-                    'thumbnail' => $baseUrl . '/storage/' . $directory . '/' . $thumbnailFilename,
-                    'medium' => $baseUrl . '/storage/' . $directory . '/' . $mediumFilename,
+                    'thumbnail' => 'storage/' . $directory . '/' . $thumbnailFilename,
+                    'medium' => 'storage/' . $directory . '/' . $mediumFilename,
                     'sizes' => [
                         'original' => $originalPath,
                         'thumbnail' => $directory . '/' . $thumbnailFilename,
@@ -257,9 +260,10 @@ class ProductController extends Controller
 
             return $this->success([
                 'id' => $imageRecord->id,
-                'url' => $imageRecord->url,
-                'thumbnail_url' => $imageRecord->metadata['thumbnail'] ?? null,
-                'medium_url' => $imageRecord->metadata['medium'] ?? null,
+                'url' => asset($imageRecord->url),
+                'full_url' => asset($imageRecord->url),
+                'thumbnail_url' => asset($imageRecord->metadata['thumbnail'] ?? $imageRecord->url),
+                'medium_url' => asset($imageRecord->metadata['medium'] ?? $imageRecord->url),
                 'alt' => $imageRecord->alt,
                 'title' => $imageRecord->title,
                 'is_primary' => $imageRecord->is_primary,

@@ -9,15 +9,17 @@ class StoreBusinessHour extends Model
 {
     protected $fillable = [
         'store_id',
-        'day_of_week',
+        'day',
         'open_time',
         'close_time',
         'is_closed',
+        'breaks',
         'is_active',
     ];
 
     protected $casts = [
         'is_closed' => 'boolean',
+        'breaks' => 'array',
         'is_active' => 'boolean',
         'open_time' => 'datetime:H:i',
         'close_time' => 'datetime:H:i',

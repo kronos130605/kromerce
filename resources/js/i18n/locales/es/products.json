@@ -64,7 +64,8 @@
     "images": {
       "drag_drop": "Arrastra y suelta imágenes aquí",
       "supported_formats": "PNG, JPG, GIF hasta 10MB",
-      "browse": "Seleccionar archivos"
+      "browse": "Seleccionar archivos",
+      "create_first": "Primero debes crear el producto para poder subir imágenes"
     },
     "seo": {
       "title_hint": "Dejar en blanco para usar el nombre del producto",

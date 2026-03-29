@@ -202,6 +202,8 @@ const getStatusColor = (status) => ({
             :title="confirmModalConfig.title"
             :message="confirmModalConfig.message"
             :danger="confirmModalConfig.danger"
+            :confirm-text="confirmModalConfig.confirmText"
+            :cancel-text="confirmModalConfig.cancelText"
             :loading="loading"
             @confirm="confirmModalConfig.onConfirm"
             @cancel="closeConfirmModal"

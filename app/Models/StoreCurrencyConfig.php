@@ -10,12 +10,16 @@ class StoreCurrencyConfig extends Model
 {
     use HasFactory, SoftDeletes;
 
+    protected $keyType = 'string';
+    public $incrementing = false;
+
     /**
      * The attributes that are mass assignable.
      *
      * @var array<int, string>
      */
     protected $fillable = [
+        'id',
         'store_id',
         'default_currency',
         'display_currencies',

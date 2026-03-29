@@ -13,13 +13,17 @@ class LoginAttempt extends Model
         'email',
         'ip_address',
         'attempted_at',
-        'successful',
+        'was_successful',
         'user_agent',
+        'failure_reason',
+        'device_fingerprint',
+        'country',
+        'city',
     ];
 
     protected $casts = [
         'attempted_at' => 'datetime',
-        'successful' => 'boolean',
+        'was_successful' => 'boolean',
     ];
 
     /**
@@ -28,7 +32,7 @@ class LoginAttempt extends Model
     public static function getFailedAttemptsCount(string $email, int $minutes = 15): int
     {
         return self::where('email', $email)
-            ->where('successful', false)
+            ->where('was_successful', false)
             ->where('attempted_at', '>=', now()->subMinutes($minutes))
             ->count();
     }
@@ -47,7 +51,7 @@ class LoginAttempt extends Model
 
         // Check if there's a recent lockout
         $lastFailedAttempt = self::where('email', $email)
-            ->where('successful', false)
+            ->where('was_successful', false)
             ->orderBy('attempted_at', 'desc')
             ->first();
 
@@ -65,7 +69,7 @@ class LoginAttempt extends Model
     public static function getRemainingLockoutTime(string $email): int
     {
         $lastFailedAttempt = self::where('email', $email)
-            ->where('successful', false)
+            ->where('was_successful', false)
             ->orderBy('attempted_at', 'desc')
             ->first();
 
@@ -97,7 +101,7 @@ class LoginAttempt extends Model
             'email' => $email,
             'ip_address' => $ipAddress,
             'attempted_at' => now(),
-            'successful' => $successful,
+            'was_successful' => $successful,
             'user_agent' => $userAgent,
         ]);
 

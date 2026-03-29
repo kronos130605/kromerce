@@ -38,7 +38,7 @@ class ProductResource extends JsonResource
             'tags' => $this->tags?->pluck('name')->toArray() ?? [],
             'images' => $this->images?->map(fn($img) => [
                 'id' => (string) $img->id,
-                'url' => $img->url,
+                'url' => $img->full_url,
                 'alt' => $img->alt,
                 'title' => $img->title,
                 'is_primary' => $img->is_primary,

@@ -161,18 +161,28 @@ return new class extends Migration
             // Metadata
             $table->unsignedBigInteger('created_by')->nullable();
             $table->unsignedBigInteger('updated_by')->nullable();
+            
+            // Moderation (for marketplace)
+            $table->string('moderation_status', 20)->default('pending'); // pending, approved, rejected, flagged
+            $table->unsignedBigInteger('moderated_by')->nullable();
+            $table->timestamp('moderated_at')->nullable();
+            $table->text('moderation_notes')->nullable();
+            $table->integer('rejection_count')->default(0);
+            
             $table->timestamps();
             $table->softDeletes();
             
             $table->foreign('store_id')->references('id')->on('stores')->onDelete('cascade');
             $table->foreign('created_by')->references('id')->on('users')->onDelete('set null');
             $table->foreign('updated_by')->references('id')->on('users')->onDelete('set null');
+            $table->foreign('moderated_by')->references('id')->on('users')->onDelete('set null');
             $table->unique(['store_id', 'slug'], 'p_store_slug_unique');
             $table->unique(['store_id', 'sku'], 'p_store_sku_unique');
             $table->index(['store_id', 'status'], 'p_store_status');
             $table->index(['store_id', 'stock_status'], 'p_store_stock');
             $table->index(['store_id', 'featured'], 'p_store_featured');
             $table->index(['store_id', 'product_type'], 'p_store_type');
+            $table->index(['store_id', 'moderation_status'], 'p_store_moderation');
         });
 
         // Product-category relationship

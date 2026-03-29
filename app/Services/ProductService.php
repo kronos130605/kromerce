@@ -71,21 +71,23 @@ class ProductService
     public function createProductForStore(Store $store, User $user, array $data): Model
     {
         try {
-            $data['store_id'] = $store->id;
-            $data['created_by'] = $user->id;
+            return \DB::transaction(function () use ($store, $user, $data) {
+                $data['store_id'] = $store->id;
+                $data['created_by'] = $user->id;
 
-            // Extract category_ids before creating product
-            $categoryIds = $data['category_ids'] ?? [];
-            unset($data['category_ids']);
+                // Extract category_ids before creating product
+                $categoryIds = $data['category_ids'] ?? [];
+                unset($data['category_ids']);
 
-            $product = $this->productRepository->create($data);
+                $product = $this->productRepository->create($data);
 
-            // Sync categories if provided
-            if (!empty($categoryIds)) {
-                $product->categories()->sync($categoryIds);
-            }
+                // Sync categories if provided
+                if (!empty($categoryIds)) {
+                    $product->categories()->sync($categoryIds);
+                }
 
-            return $product;
+                return $product;
+            });
         } catch (\Exception $e) {
             throw new \Exception('Failed to create product: ' . $e->getMessage());
         }
@@ -94,7 +96,7 @@ class ProductService
     /**
      * Get product by ID for store.
      */
-    public function getProductForStore(Store $store, int $productId): ?Model
+    public function getProductForStore(Store $store, string $productId): ?Model
     {
         try {
             return $this->productRepository
@@ -107,25 +109,30 @@ class ProductService
     /**
      * Update product for store.
      */
-    public function updateProductForStore(Store $store, int $productId, array $data): bool
+    public function updateProductForStore(Store $store, string $productId, array $data): bool
     {
         try {
-            // Extract category_ids before updating product
-            $categoryIds = $data['category_ids'] ?? null;
-            unset($data['category_ids']);
+            return \DB::transaction(function () use ($store, $productId, $data) {
+                // Extract category_ids before updating product
+                $categoryIds = $data['category_ids'] ?? null;
+                unset($data['category_ids']);
+                
+                // Add updated_by
+                $data['updated_by'] = auth()->id();
 
-            $updated = $this->productRepository
-                ->updateBy(['id' => $productId, 'store_id' => $store->id], $data);
+                $updated = $this->productRepository
+                    ->updateBy(['id' => $productId, 'store_id' => $store->id], $data);
 
-            // Sync categories if provided
-            if ($categoryIds !== null && $updated > 0) {
-                $product = $this->productRepository->getById($productId);
-                if ($product) {
-                    $product->categories()->sync($categoryIds);
+                // Sync categories if provided
+                if ($categoryIds !== null && $updated > 0) {
+                    $product = $this->productRepository->getById($productId);
+                    if ($product) {
+                        $product->categories()->sync($categoryIds);
+                    }
                 }
-            }
 
-            return $updated > 0;
+                return $updated > 0;
+            });
         } catch (\Exception $e) {
             throw new \Exception('Failed to update product: ' . $e->getMessage());
         }
@@ -158,7 +165,7 @@ class ProductService
     /**
      * Delete product for store.
      */
-    public function deleteProductForStore(Store $store, int $productId): bool
+    public function deleteProductForStore(Store $store, string $productId): bool
     {
         try {
             $deleted = $this->productRepository

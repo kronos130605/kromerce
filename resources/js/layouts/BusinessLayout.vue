@@ -1,5 +1,8 @@
 <template>
   <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <!-- Toast Notifications -->
+    <Toast />
+
     <!-- Business Dashboard Navbar -->
     <BusinessDashboardNavbar ref="navbarRef" />
 
@@ -37,6 +40,7 @@ import BusinessSidebar from '@/components/navigation/sidebars/BusinessSidebar.vu
 import BusinessDashboardNavbar from '@/components/navigation/navbars/BusinessDashboardNavbar.vue';
 import { useSidebar } from '@/composables/useSidebar.js';
 import { useRoleGuard } from '@/composables/useRoleGuard.js';
+import Toast from '@/components/shared/Toast.vue';
 
 // Import content components
 import BusinessDashboardContent from '@/modules/business/components/BusinessDashboardContent.vue';

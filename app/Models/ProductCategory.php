@@ -13,6 +13,9 @@ class ProductCategory extends Model
 {
     use HasFactory, SoftDeletes;
 
+    protected $keyType = 'string';
+    public $incrementing = false;
+
     protected $fillable = [
         'name',
         'slug',
@@ -42,6 +45,11 @@ class ProductCategory extends Model
         parent::boot();
 
         static::creating(function ($category) {
+            // Generate UUID if not set
+            if (empty($category->id)) {
+                $category->id = Str::uuid()->toString();
+            }
+
             if (empty($category->slug)) {
                 $category->slug = Str::slug($category->name);
             }

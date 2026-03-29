@@ -95,9 +95,8 @@
 </template>
 
 <script setup>
-import { computed, watch } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useSelectableItems } from '@/composables/useSelectableItems';
 
 const props = defineProps({
     categories: {
@@ -119,42 +118,77 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue']);
 const { t } = useI18n();
 
-// Usar el composable para manejar la selección
-const categoriesRef = computed(() => props.categories);
+// Estado local - simple y directo
+const selectedIds = ref([...props.modelValue.map(id => String(id))]);
+const searchQuery = ref('');
 
-const {
-    selectedIds,
-    searchQuery,
-    selectedItems,
-    filteredItems,
-    selectionCount,
-    isSelected,
-    toggle,
-    clearAll,
-    setSearch,
-    clearSearch,
-    setSelection
-} = useSelectableItems({
-    items: categoriesRef,
-    key: 'id',
-    initialSelected: props.modelValue
-});
-
-// Sincronizar cambios externos (prop) hacia el composable
+// Sincronizar prop externo -> estado local
 watch(() => props.modelValue, (newValue) => {
-    if (newValue) {
-        const currentIds = [...selectedIds.value].sort();
-        const newIds = [...newValue.map(id => String(id))].sort();
-        if (JSON.stringify(currentIds) !== JSON.stringify(newIds)) {
-            setSelection(newValue);
-        }
+    const newIds = (newValue || []).map(id => String(id)).sort();
+    const currentIds = [...selectedIds.value].sort();
+    if (JSON.stringify(newIds) !== JSON.stringify(currentIds)) {
+        selectedIds.value = newIds;
     }
 }, { deep: true });
 
-// Emitir cambios internos hacia afuera
+// Emitir cambios cuando cambia la selección
 watch(selectedIds, (newValue) => {
     emit('update:modelValue', [...newValue]);
 }, { deep: true });
+
+// Computadas - filtrar items no seleccionados
+const selectedItems = computed(() => {
+    return props.categories.filter(cat => selectedIds.value.includes(String(cat.id)));
+});
+
+const unselectedItems = computed(() => {
+    return props.categories.filter(cat => !selectedIds.value.includes(String(cat.id)));
+});
+
+const filteredItems = computed(() => {
+    const query = searchQuery.value.trim().toLowerCase();
+    let items = unselectedItems.value;
+    
+    if (query) {
+        items = items.filter(cat => {
+            const name = (cat.name || '').toLowerCase();
+            const desc = (cat.description || '').toLowerCase();
+            return name.includes(query) || desc.includes(query);
+        });
+    }
+    
+    return items;
+});
+
+const selectionCount = computed(() => selectedIds.value.length);
+
+// Métodos simples
+function isSelected(categoryId) {
+    return selectedIds.value.includes(String(categoryId));
+}
+
+function toggle(categoryId) {
+    const strId = String(categoryId);
+    const index = selectedIds.value.indexOf(strId);
+    
+    if (index > -1) {
+        selectedIds.value.splice(index, 1);
+    } else {
+        selectedIds.value.push(strId);
+    }
+}
+
+function clearAll() {
+    selectedIds.value = [];
+}
+
+function setSearch(value) {
+    searchQuery.value = value;
+}
+
+function clearSearch() {
+    searchQuery.value = '';
+}
 </script>
 
 <style scoped>

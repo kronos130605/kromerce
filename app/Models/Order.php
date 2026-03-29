@@ -20,7 +20,7 @@ class Order extends Model
     protected $fillable = [
         'uuid',
         'store_id',
-        'customer_id',
+        'user_id',
         'order_number',
         'status',
         'payment_status',
@@ -86,7 +86,6 @@ class Order extends Model
         'cancelled_at',
         'cancellation_reason',
         'refunded_at',
-        'created_by',
     ];
 
     /**
@@ -115,6 +114,7 @@ class Order extends Model
         'metadata' => 'array',
         'shipped_at' => 'datetime',
         'delivered_at' => 'datetime',
+        'estimated_delivery_at' => 'datetime',
         'paid_at' => 'datetime',
         'processed_at' => 'datetime',
         'cancelled_at' => 'datetime',
@@ -152,11 +152,11 @@ class Order extends Model
     }
 
     /**
-     * Get the customer that owns the order.
+     * Get the user that owns the order.
      */
-    public function customer(): BelongsTo
+    public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'customer_id');
+        return $this->belongsTo(User::class);
     }
 
     /**
