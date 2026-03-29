@@ -319,4 +319,157 @@ class ProductController extends Controller
             return $this->error('Failed to delete image', 500);
         }
     }
+
+    /**
+     * Bulk update product status.
+     */
+    public function bulkUpdateStatus(Request $request): JsonResponse
+    {
+        try {
+            $validated = $request->validate([
+                'ids' => 'required|array',
+                'ids.*' => 'required|string',
+                'status' => 'required|in:active,inactive,draft,archived'
+            ]);
+
+            $store = $this->validateStore();
+            
+            $updated = $this->productService->bulkUpdateStatus(
+                $store,
+                $validated['ids'],
+                $validated['status']
+            );
+
+            return $this->success(null, "{$updated} products updated successfully");
+
+        } catch (\Exception $e) {
+            Log::error('ProductController::bulkUpdateStatus - ERROR', [
+                'error' => $e->getMessage(),
+                'user_id' => auth()->id(),
+            ]);
+
+            return $this->error('Failed to update products', 500);
+        }
+    }
+
+    /**
+     * Bulk delete products.
+     */
+    public function bulkDelete(Request $request): JsonResponse
+    {
+        try {
+            $validated = $request->validate([
+                'ids' => 'required|array',
+                'ids.*' => 'required|string'
+            ]);
+
+            $store = $this->validateStore();
+            
+            $deleted = $this->productService->bulkDelete($store, $validated['ids']);
+
+            return $this->success(null, "{$deleted} products deleted successfully");
+
+        } catch (\Exception $e) {
+            Log::error('ProductController::bulkDelete - ERROR', [
+                'error' => $e->getMessage(),
+                'user_id' => auth()->id(),
+            ]);
+
+            return $this->error('Failed to delete products', 500);
+        }
+    }
+
+    /**
+     * Bulk update product categories.
+     */
+    public function bulkUpdateCategories(Request $request): JsonResponse
+    {
+        try {
+            $validated = $request->validate([
+                'ids' => 'required|array',
+                'ids.*' => 'required|string',
+                'category_ids' => 'required|array',
+                'category_ids.*' => 'required|string'
+            ]);
+
+            $store = $this->validateStore();
+            
+            $updated = $this->productService->bulkUpdateCategories(
+                $store,
+                $validated['ids'],
+                $validated['category_ids']
+            );
+
+            return $this->success(null, "{$updated} products updated successfully");
+
+        } catch (\Exception $e) {
+            Log::error('ProductController::bulkUpdateCategories - ERROR', [
+                'error' => $e->getMessage(),
+                'user_id' => auth()->id(),
+            ]);
+
+            return $this->error('Failed to update categories', 500);
+        }
+    }
+
+    /**
+     * Bulk update product prices.
+     */
+    public function bulkUpdatePrice(Request $request): JsonResponse
+    {
+        try {
+            $validated = $request->validate([
+                'ids' => 'required|array',
+                'ids.*' => 'required|string',
+                'type' => 'required|in:fixed,percentage',
+                'value' => 'required|numeric',
+                'apply_to' => 'required|in:base_price,sale_price,both'
+            ]);
+
+            $store = $this->validateStore();
+            
+            $updated = $this->productService->bulkUpdatePrice(
+                $store,
+                $validated['ids'],
+                $validated
+            );
+
+            return $this->success(null, "{$updated} products updated successfully");
+
+        } catch (\Exception $e) {
+            Log::error('ProductController::bulkUpdatePrice - ERROR', [
+                'error' => $e->getMessage(),
+                'user_id' => auth()->id(),
+            ]);
+
+            return $this->error('Failed to update prices', 500);
+        }
+    }
+
+    /**
+     * Export products.
+     */
+    public function export(Request $request): mixed
+    {
+        try {
+            $validated = $request->validate([
+                'ids' => 'nullable|string',
+                'format' => 'required|in:csv,xlsx'
+            ]);
+
+            $store = $this->validateStore();
+            
+            $ids = $validated['ids'] ? explode(',', $validated['ids']) : null;
+            
+            return $this->productService->exportProducts($store, $ids, $validated['format']);
+
+        } catch (\Exception $e) {
+            Log::error('ProductController::export - ERROR', [
+                'error' => $e->getMessage(),
+                'user_id' => auth()->id(),
+            ]);
+
+            return $this->error('Failed to export products', 500);
+        }
+    }
 }

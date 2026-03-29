@@ -4,10 +4,16 @@ import { Link, usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import BusinessLayout from '@/layouts/BusinessLayout.vue';
 import { useProductManager } from '../composables/useProductManager.js';
+import { useProductFilters } from '../composables/useProductFilters.js';
+import { useBulkActions } from '../composables/useBulkActions.js';
 import ProductModal from '../components/ProductModal.vue';
+import ProductFilters from '../components/ProductFilters.vue';
+import BulkActionsBar from '../components/BulkActionsBar.vue';
 import DataTable from '@/components/shared/DataTable.vue';
 import ConfirmationModal from '@/components/shared/ConfirmationModal.vue';
 import ProductView from '../components/ProductView.vue';
+import StatusBadge from '@/components/ui/data-display/StatusBadge.vue';
+import StockIndicator from '@/components/ui/data-display/StockIndicator.vue';
 
 const { t } = useI18n();
 const page = usePage();
@@ -19,6 +25,7 @@ const props = defineProps({
     statistics: Object,
 });
 
+// Product Manager (Modal CRUD)
 const {
     selectedProduct,
     isModalOpen,
@@ -47,6 +54,31 @@ const {
     initialFilters: props.filters,
 });
 
+// Filters
+const {
+    filters: activeFilters,
+    showFilters,
+    hasActiveFilters,
+    activeFilterCount,
+    updateFilter,
+    clearFilters,
+    toggleFilters,
+    searchProducts,
+} = useProductFilters(props.filters);
+
+// Bulk Actions
+const {
+    selectedItems,
+    isProcessing,
+    hasSelection,
+    selectionCount,
+    toggleItem,
+    toggleAll,
+    clearSelection,
+    isSelected,
+    quickActions,
+} = useBulkActions();
+
 // Table columns configuration
 const tableColumns = [
     {
@@ -59,6 +91,11 @@ const tableColumns = [
         fallbackIcon: '📦',
     },
     {
+        key: 'categories',
+        label: t('products.fields.categories'),
+        type: 'custom',
+    },
+    {
         key: 'base_price',
         label: t('products.fields.price'),
         type: 'currency',
@@ -66,14 +103,14 @@ const tableColumns = [
         align: 'left',
     },
     {
+        key: 'stock_quantity',
+        label: t('products.fields.stock'),
+        type: 'custom',
+    },
+    {
         key: 'status',
         label: t('products.fields.status'),
-        type: 'badge',
-        badgeColors: {
-            active: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
-            inactive: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
-            draft: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
-        },
+        type: 'custom',
     },
 ];
 
@@ -156,20 +193,148 @@ const getStatusColor = (status) => ({
                 </div>
             </div>
 
+            <!-- Search and Filters Bar -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <!-- Search -->
+                    <div class="flex-1">
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                            </div>
+                            <input
+                                :value="activeFilters.search"
+                                @input="searchProducts($event.target.value)"
+                                type="text"
+                                :placeholder="t('products.search_placeholder', 'Search products...')"
+                                class="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            />
+                        </div>
+                    </div>
+
+                    <!-- Filter Toggle Button -->
+                    <button
+                        @click="toggleFilters"
+                        :class="[
+                            'inline-flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors',
+                            hasActiveFilters 
+                                ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400' 
+                                : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'
+                        ]"
+                    >
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                        </svg>
+                        <span>{{ t('products.filters', 'Filters') }}</span>
+                        <span v-if="activeFilterCount > 0" class="inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-blue-600 rounded-full">
+                            {{ activeFilterCount }}
+                        </span>
+                    </button>
+
+                    <!-- Quick Filters -->
+                    <div class="flex gap-2">
+                        <button
+                            @click="activeFilters.status = 'active'; updateFilter('status', 'active')"
+                            :class="[
+                                'px-3 py-2 text-sm rounded-lg transition-colors',
+                                activeFilters.status === 'active'
+                                    ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
+                                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                            ]"
+                        >
+                            {{ t('products.active', 'Active') }}
+                        </button>
+                        <button
+                            @click="activeFilters.status = 'draft'; updateFilter('status', 'draft')"
+                            :class="[
+                                'px-3 py-2 text-sm rounded-lg transition-colors',
+                                activeFilters.status === 'draft'
+                                    ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400'
+                                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                            ]"
+                        >
+                            {{ t('products.draft', 'Draft') }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filters Panel -->
+            <ProductFilters
+                :filters="activeFilters"
+                :categories="categories"
+                :show="showFilters"
+                @update:filter="updateFilter"
+                @clear="clearFilters"
+            />
+
             <!-- Products Table -->
             <DataTable
                 :data="products.data"
                 :columns="tableColumns"
                 :actions="tableActions"
+                :selectable="true"
+                :selected-items="selectedItems"
                 @action="handleTableAction"
+                @selection-change="selectedItems = $event"
                 :empty-title="t('products.empty.title')"
                 :empty-description="t('products.empty.description')"
                 empty-icon="📦"
             >
+                <!-- Custom Slots -->
+                <template #cell-categories="{ item }">
+                    <div class="flex flex-wrap gap-1">
+                        <span
+                            v-for="category in item.categories?.slice(0, 2)"
+                            :key="category.id"
+                            class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
+                        >
+                            {{ category.name }}
+                        </span>
+                        <span
+                            v-if="item.categories?.length > 2"
+                            class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400"
+                        >
+                            +{{ item.categories.length - 2 }}
+                        </span>
+                    </div>
+                </template>
+
+                <template #cell-stock_quantity="{ item }">
+                    <StockIndicator
+                        :stock="item.stock_quantity"
+                        :low-stock-threshold="item.low_stock_threshold || 10"
+                        size="sm"
+                        variant="badge"
+                    />
+                </template>
+
+                <template #cell-status="{ item }">
+                    <StatusBadge
+                        :status="item.status"
+                        type="product"
+                        size="sm"
+                    />
+                </template>
+
                 <template #empty-action>
                     <button @click="openCreate" class="mt-4 btn btn-primary">{{ t('products.add_first') }}</button>
                 </template>
             </DataTable>
+
+            <!-- Bulk Actions Bar -->
+            <BulkActionsBar
+                :selection-count="selectionCount"
+                :is-processing="isProcessing"
+                @clear-selection="clearSelection"
+                @bulk-activate="quickActions.activate"
+                @bulk-deactivate="quickActions.deactivate"
+                @bulk-draft="quickActions.draft"
+                @bulk-delete="quickActions.delete"
+                @bulk-export="quickActions.exportCSV"
+            />
         </div>
 
         <!-- Modals -->
