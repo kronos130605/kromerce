@@ -1,7 +1,7 @@
 <script setup>
-import { useI18n } from 'vue-i18n';
+import { useTranslations } from '@/composables/useTranslations';
 
-const { t } = useI18n();
+const { t } = useTranslations();
 const currentYear = new Date().getFullYear();
 
 const footerLinks = {

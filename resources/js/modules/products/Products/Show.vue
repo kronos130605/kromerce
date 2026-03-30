@@ -1,6 +1,9 @@
 <script setup>
 import { Link } from '@inertiajs/vue3';
 import { computed } from 'vue';
+import { useTranslations } from '@/composables/useTranslations';
+
+const { t } = useTranslations();
 
 const props = defineProps({
     product: Object,
@@ -107,7 +110,7 @@ const getStockStatusText = () => {
                     <!-- Product Details -->
                     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
                         <h2 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Product Details</h2>
-                        
+
                         <div class="space-y-4">
                             <div>
                                 <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Description</h3>
@@ -115,7 +118,7 @@ const getStockStatusText = () => {
                                     {{ product.description || 'No description provided' }}
                                 </p>
                             </div>
-                            
+
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
                                     <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Category</h3>
@@ -132,7 +135,7 @@ const getStockStatusText = () => {
                                     </div>
                                 </div>
                             </div>
-                            
+
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
                                     <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Created</h3>
@@ -170,7 +173,7 @@ const getStockStatusText = () => {
                     <!-- Pricing -->
                     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
                         <h2 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Pricing</h2>
-                        
+
                         <div class="space-y-3">
                             <div>
                                 <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Base Price</h3>
@@ -178,7 +181,7 @@ const getStockStatusText = () => {
                                     {{ formatCurrency(product.base_price, product.base_currency) }}
                                 </p>
                             </div>
-                            
+
                             <div v-if="product.sale_price">
                                 <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Sale Price</h3>
                                 <p class="mt-1 text-xl font-bold text-green-600 dark:text-green-400">
@@ -188,7 +191,7 @@ const getStockStatusText = () => {
                                     Save {{ formatCurrency(product.base_price - product.sale_price, product.base_currency) }}
                                 </p>
                             </div>
-                            
+
                             <div>
                                 <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Currency</h3>
                                 <p class="mt-1 text-gray-900 dark:text-white">{{ product.base_currency }}</p>
@@ -199,7 +202,7 @@ const getStockStatusText = () => {
                     <!-- Stock Information -->
                     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
                         <h2 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Stock Information</h2>
-                        
+
                         <div class="space-y-3">
                             <div>
                                 <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Stock Status</h3>
@@ -207,7 +210,7 @@ const getStockStatusText = () => {
                                     {{ getStockStatusText() }}
                                 </p>
                             </div>
-                            
+
                             <div v-if="product.manage_stock">
                                 <div>
                                     <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Current Stock</h3>
@@ -215,7 +218,7 @@ const getStockStatusText = () => {
                                         {{ product.stock_quantity }} units
                                     </p>
                                 </div>
-                                
+
                                 <div>
                                     <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Low Stock Threshold</h3>
                                     <p class="mt-1 text-gray-900 dark:text-white">
@@ -223,7 +226,7 @@ const getStockStatusText = () => {
                                     </p>
                                 </div>
                             </div>
-                            
+
                             <div v-else>
                                 <p class="text-sm text-gray-500 dark:text-gray-400">
                                     Stock management is disabled for this product
@@ -235,7 +238,7 @@ const getStockStatusText = () => {
                     <!-- Product Flags -->
                     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
                         <h2 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Product Flags</h2>
-                        
+
                         <div class="space-y-3">
                             <div class="flex items-center justify-between">
                                 <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Featured</span>
@@ -249,7 +252,7 @@ const getStockStatusText = () => {
                                     {{ product.is_featured ? 'Yes' : 'No' }}
                                 </span>
                             </div>
-                            
+
                             <div class="flex items-center justify-between">
                                 <span class="text-sm font-medium text-gray-700 dark:text-gray-300">On Sale</span>
                                 <span
@@ -268,7 +271,7 @@ const getStockStatusText = () => {
                     <!-- Actions -->
                     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
                         <h2 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Actions</h2>
-                        
+
                         <div class="space-y-3">
                             <Link
                                 :href="`/products/${product.id}/edit`"
@@ -279,7 +282,7 @@ const getStockStatusText = () => {
                                 </svg>
                                 Edit Product
                             </Link>
-                            
+
                             <button
                                 @click="duplicateProduct(product.id)"
                                 class="w-full inline-flex items-center justify-center px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
@@ -289,7 +292,7 @@ const getStockStatusText = () => {
                                 </svg>
                                 Duplicate Product
                             </button>
-                            
+
                             <button
                                 @click="deleteProduct(product.id)"
                                 class="w-full inline-flex items-center justify-center px-4 py-2 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 rounded-lg hover:bg-red-200 dark:hover:bg-red-800 transition-colors"

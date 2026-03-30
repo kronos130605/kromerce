@@ -2,13 +2,9 @@
 import { Link, router } from '@inertiajs/vue3';
 import { ref, computed } from 'vue';
 import { usePage } from '@inertiajs/vue3';
-import { useI18n } from 'vue-i18n';
 import { useTranslations } from '@/composables/useTranslations';
 
-const { t } = useI18n();
-
-// Load products translations
-useTranslations('products');
+const { t } = useTranslations();
 
 const page = usePage();
 const props = defineProps({

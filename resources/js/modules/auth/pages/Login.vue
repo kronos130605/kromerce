@@ -1,7 +1,7 @@
 <script setup>
 import { Head, Link, useForm, usePage, router } from '@inertiajs/vue3';
 import { ref, watch, onUnmounted, computed } from 'vue';
-import { useI18n } from 'vue-i18n';
+import { useTranslations } from '@/composables/useTranslations';
 import { useTranslations } from '@/composables/useTranslations';
 import { useDarkMode } from '@/composables/useDarkMode';
 import LoginAttempts from '@/modules/auth/components/LoginAttempts.vue';
@@ -32,7 +32,7 @@ const props = defineProps({
     }
 });
 
-const { t } = useI18n();
+const { t } = useTranslations();
 const { locale } = useI18n();
 const page = usePage();
 

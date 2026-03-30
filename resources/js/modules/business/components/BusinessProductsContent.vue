@@ -2,7 +2,7 @@
 import { Link } from '@inertiajs/vue3';
 import { computed } from 'vue';
 import { usePage } from '@inertiajs/vue3';
-import { useI18n } from 'vue-i18n';
+import { useTranslations } from '@/composables/useTranslations';
 
 // Import products component
 import ProductsMainContent from '@/modules/products/Products/Content.vue';
@@ -10,7 +10,7 @@ import ProductsCreate from '@/modules/products/Products/Create.vue';
 import ProductsEdit from '@/modules/products/Products/Edit.vue';
 import ProductsShow from '@/modules/products/Products/Show.vue';
 
-const { t } = useI18n();
+const { t } = useTranslations();
 const page = usePage();
 const props = defineProps({
     products: Object,

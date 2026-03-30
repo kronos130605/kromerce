@@ -1,11 +1,11 @@
 <script setup>
 import { computed } from 'vue';
-import { useI18n } from 'vue-i18n';
+import { useTranslations } from '@/composables/useTranslations';
 import Button from '@/components/ui/buttons/Button.vue';
 import Badge from '@/components/ui/data-display/Badge.vue';
 import { Sun, Moon, Star } from 'lucide-vue-next';
 
-const { t } = useI18n();
+const { t } = useTranslations();
 
 const floatingCards = computed(() => [
   {

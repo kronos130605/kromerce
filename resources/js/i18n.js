@@ -1,130 +1,30 @@
-import { createI18n } from 'vue-i18n';
-
-// Get saved locale from localStorage
-const savedLocale = localStorage.getItem('kromerce_locale') || 'es';
-
-// Create i18n instance with lazy loading support
-const i18n = createI18n({
-    legacy: false,
-    locale: savedLocale,
-    fallbackLocale: 'es',
-    messages: {
-        es: {},
-        en: {}
-    },
-    globalInjection: true,
-    // Enable missing handler for debugging
-    missingWarn: false,
-    fallbackWarn: false
-});
-
-// Lazy load translation modules
-const loadedModules = {
-    es: new Set(),
-    en: new Set()
-};
-
 /**
- * Load a translation module dynamically
- * @param {string} locale - 'es' or 'en'
- * @param {string} module - Module name (e.g., 'common', 'auth', 'storefront')
+ * i18n Utilities
+ * 
+ * Nota: Con la nueva arquitectura backend-driven, las traducciones
+ * vienen vía Inertia props y se consumen con useTranslations().
+ * 
+ * Este archivo mantiene compatibilidad legacy y exporta utilidades.
  */
-export async function loadTranslationModule(locale, module) {
-    // Check if already loaded
-    if (loadedModules[locale].has(module)) {
-        return;
-    }
 
-    try {
-        let messages;
-
-        // Dynamic import based on locale and module
-        if (locale === 'es') {
-            messages = await import(`./i18n/locales/es/${module}.json`);
-        } else if (locale === 'en') {
-            // Try to load English, fallback to Spanish if not available or empty
-            try {
-                messages = await import(`./i18n/locales/en/${module}.json`);
-                // Check if English file is empty (missing root index key)
-                if (!messages.default[module] || Object.keys(messages.default).length === 0) {
-                    console.warn(`English translation for ${module} is empty, using Spanish fallback`);
-                    messages = await import(`./i18n/locales/es/${module}.json`);
-                }
-            } catch (error) {
-                console.warn(`English translation for ${module} not found, using Spanish fallback`);
-                messages = await import(`./i18n/locales/es/${module}.json`);
-            }
-        }
-
-        // Merge the loaded module into existing messages
-        const currentMessages = i18n.global.messages.value[locale] || {};
-
-        // All translation files now have their filename as root key
-        // Extract the namespace from the JSON (e.g., {"dashboard": {...}} -> dashboard: {...})
-        const moduleData = messages.default[module] || messages.default;
-
-        i18n.global.setLocaleMessage(locale, {
-            ...currentMessages,
-            [module]: moduleData
-        });
-
-        loadedModules[locale].add(module);
-        console.log(`✅ Loaded ${locale}/${module} translations`);
-    } catch (error) {
-        console.error(`Failed to load translation module ${locale}/${module}:`, error);
-    }
+// Detectar locale del navegador/localStorage
+export function detectLocale() {
+    return localStorage.getItem('kromerce_locale') || 'es';
 }
 
-/**
- * Load multiple translation modules at once
- * @param {string} locale - 'es' or 'en'
- * @param {string[]} modules - Array of module names
- */
-export async function loadTranslationModules(locale, modules) {
-    await Promise.all(modules.map(module => loadTranslationModule(locale, module)));
+// Setear locale en cookie para backend
+export function setLocaleCookie(locale) {
+    document.cookie = `kromerce_locale=${locale};path=/;max-age=${30 * 24 * 60 * 60};SameSite=Lax`;
+    localStorage.setItem('kromerce_locale', locale);
 }
 
-/**
- * Preload common translations (always needed)
- */
-export async function preloadCommonTranslations() {
-    const locale = i18n.global.locale.value;
-    await loadTranslationModules(locale, ['common', 'errors']);
+// Exportar función t simple para uso global (opcional)
+export function t(key, replacements = {}) {
+    if (!key) return '';
+    
+    // En la nueva arquitectura, esto se maneja via useTranslations()
+    // Esta función es para compatibilidad legacy
+    console.warn('t() global llamado - usar useTranslations() composable en su lugar');
+    return key;
 }
 
-/**
- * Load translations for authentication pages
- */
-export async function loadAuthTranslations() {
-    const locale = i18n.global.locale.value;
-    await loadTranslationModules(locale, ['common', 'auth', 'errors']);
-}
-
-/**
- * Load translations for business dashboard
- */
-export async function loadBusinessTranslations() {
-    const locale = i18n.global.locale.value;
-    await loadTranslationModules(locale, ['common', 'business', 'dashboard', 'products', 'orders', 'errors']);
-}
-
-/**
- * Load translations for storefront
- */
-export async function loadStorefrontTranslations() {
-    const locale = i18n.global.locale.value;
-    await loadTranslationModules(locale, ['common', 'storefront', 'errors']);
-}
-
-/**
- * Load translations for product management
- */
-export async function loadProductTranslations() {
-    const locale = i18n.global.locale.value;
-    await loadTranslationModules(locale, ['common', 'products', 'errors', 'dashboard_nav']);
-}
-
-// Preload common translations on init
-preloadCommonTranslations();
-
-export { i18n };

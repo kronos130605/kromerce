@@ -96,7 +96,7 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue';
-import { useI18n } from 'vue-i18n';
+import { useTranslations } from '@/composables/useTranslations';
 
 const props = defineProps({
     categories: {
@@ -116,7 +116,7 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['update:modelValue']);
-const { t } = useI18n();
+const { t } = useTranslations();
 
 // Estado local - simple y directo
 const selectedIds = ref([...props.modelValue.map(id => String(id))]);

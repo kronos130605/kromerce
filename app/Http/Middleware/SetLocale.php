@@ -5,9 +5,6 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\File;
-use Inertia\Inertia;
 
 class SetLocale
 {
@@ -20,11 +17,14 @@ class SetLocale
      */
     public function handle(Request $request, Closure $next)
     {
-        // Get locale from request header, session, or cookie
-        $locale = $request->header('Accept-Language')
+        // Get locale from cookie (set by frontend), session, or default
+        // TODO: Remove hardcoded 'es' once English translations are ready
+        $locale = $request->cookie('kromerce_locale')
             ?? session('locale')
-            ?? $request->cookie('locale')
             ?? config('app.locale', 'es');
+        
+        // Temporary: Force Spanish until we have English translations
+        $locale = 'es';
 
         // Validate locale is supported
         $supportedLocales = config('i18n.supported_locales', ['es' => 'Español']);
@@ -38,18 +38,8 @@ class SetLocale
         // Set locale in session
         session(['locale' => $locale]);
 
-        // Load translations for frontend - ONLY current locale to avoid memory issues
-        $translations = [];
-        $translationPath = config('i18n.translation_files.path', resource_path('js/i18n/locales')) . "/{$locale}.json";
-
-        if (File::exists($translationPath)) {
-            $translations = json_decode(File::get($translationPath), true);
-        }
-
-        // Share translations with Inertia - only current locale
-        Inertia::share('translations', $translations);
-        Inertia::share('currentLocale', $locale);
-        Inertia::share('supportedLocales', $supportedLocales);
+        // Note: Specific translations are now loaded by controllers using TranslationHelper
+        // This middleware only sets the locale, actual translations come via Inertia props per view
 
         return $next($request);
     }

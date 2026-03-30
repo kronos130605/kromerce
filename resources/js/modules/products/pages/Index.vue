@@ -1,7 +1,7 @@
 <script setup>
 import { computed, onMounted } from 'vue';
 import { Link, usePage } from '@inertiajs/vue3';
-import { useI18n } from 'vue-i18n';
+import { useTranslations } from '@/composables/useTranslations';
 import BusinessLayout from '@/layouts/BusinessLayout.vue';
 import { useProductManager } from '../composables/useProductManager.js';
 import { useProductFilters } from '../composables/useProductFilters.js';
@@ -15,7 +15,7 @@ import ProductView from '../components/ProductView.vue';
 import StatusBadge from '@/components/ui/data-display/StatusBadge.vue';
 import StockIndicator from '@/components/ui/data-display/StockIndicator.vue';
 
-const { t } = useI18n();
+const { t } = useTranslations();
 const page = usePage();
 
 const props = defineProps({

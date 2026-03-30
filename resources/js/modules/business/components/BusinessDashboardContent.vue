@@ -1,7 +1,6 @@
 <script setup>
 import { computed } from 'vue';
 import { usePage } from '@inertiajs/vue3';
-import { useI18n } from 'vue-i18n';
 import { useTranslations } from '@/composables/useTranslations';
 
 // Import business dashboard components
@@ -16,11 +15,7 @@ import BusinessActivityFeed from '@/modules/business/components/dashboard/Busine
 import BusinessAnalytics from '@/modules/business/components/dashboard/BusinessAnalytics.vue';
 
 const page = usePage();
-const { t } = useI18n();
-
-// Load ALL dashboard translations in parent component
-// Child components will inherit these translations
-useTranslations(['currency','common', 'dashboard', 'business', 'products', 'orders', 'errors']);
+const { t } = useTranslations();
 
 // Dashboard data from backend
 const dashboardData = computed(() => page.props.dashboard_data || {});

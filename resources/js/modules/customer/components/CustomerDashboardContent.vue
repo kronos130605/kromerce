@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted } from 'vue';
-import { useI18n } from 'vue-i18n';
+import { useTranslations } from '@/composables/useTranslations';
 
 // Import dashboard components
 import CustomerWelcome from '@/modules/customer/components/dashboard/CustomerWelcome.vue';
@@ -11,7 +11,7 @@ import CustomerQuickActions from '@/modules/customer/components/dashboard/Custom
 import { useAuth } from '@/composables/useAuth';
 
 const { user } = useAuth();
-const { t } = useI18n();
+const { t } = useTranslations();
 
 // State management
 const notifications = ref([]);

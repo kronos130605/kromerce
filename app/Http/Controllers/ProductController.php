@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\TranslationHelper;
 use App\Models\Product;
 use App\Services\ProductService;
 use App\Http\Requests\ProductRequest;
@@ -43,6 +44,7 @@ class ProductController extends Controller
                 'categories' => $categories,
                 'filters' => $filters,
                 'statistics' => $statistics,
+                'translations' => TranslationHelper::forPreset('products'),
             ]);
 
         } catch (\Exception $e) {

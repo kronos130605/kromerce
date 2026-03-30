@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\TranslationHelper;
 use App\Services\DashboardRoutingService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -32,11 +33,14 @@ class DashboardController extends Controller
             // For business users, use the new SPA structure
             if ($dashboardView === 'modules/dashboard/pages/DashboardBusiness') {
                 return Inertia::render('Business/Index', array_merge($dashboardData, [
-                    'activeTab' => 'overview'
+                    'activeTab' => 'overview',
+                    'translations' => TranslationHelper::forPreset('dashboard'),
                 ]));
             }
 
-            return Inertia::render($dashboardView, $dashboardData);
+            return Inertia::render($dashboardView, array_merge($dashboardData, [
+                'translations' => TranslationHelper::forPreset('dashboard'),
+            ]));
 
         } catch (\Exception $e) {
             Log::error('Dashboard error', [

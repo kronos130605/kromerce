@@ -1,8 +1,8 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue';
-import { useI18n } from 'vue-i18n';
+import { useTranslations } from '@/composables/useTranslations';
 
-const { t } = useI18n();
+const { t } = useTranslations();
 
 const currentTime = ref(new Date());
 const flashSaleEnds = ref(new Date(Date.now() + 2 * 60 * 60 * 1000 + 34 * 60 * 1000 + 12 * 1000)); // 2h 34m 12s

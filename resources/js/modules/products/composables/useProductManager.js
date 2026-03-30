@@ -1,6 +1,6 @@
 import { ref, computed } from 'vue';
 import { router } from '@inertiajs/vue3';
-import { useI18n } from 'vue-i18n';
+import { useTranslations } from '@/composables/useTranslations';
 import { useToast } from '@/composables/useToast.js';
 
 /**
@@ -48,7 +48,7 @@ const uploadTemporaryImages = async (productId, images) => {
  * @returns {Object} Estado y métodos para gestión de productos
  */
 export function useProductManager(options = {}) {
-    const { t } = useI18n();
+    const { t } = useTranslations();
     const { success: toastSuccess, error: toastError } = useToast();
     // Estado de la lista
     const products = ref(options.initialProducts || []);

@@ -1,6 +1,6 @@
 import { ref } from 'vue';
 import { router } from '@inertiajs/vue3';
-import { useI18n } from 'vue-i18n';
+import { useTranslations } from '@/composables/useTranslations';
 
 /**
  * Composable para gestión de órdenes con DataTable
@@ -11,7 +11,7 @@ import { useI18n } from 'vue-i18n';
  * @returns {Object} Estado y métodos para gestión de órdenes
  */
 export function useOrderManager(options = {}) {
-    const { t } = useI18n();
+    const { t } = useTranslations();
     
     // Estado de la lista
     const orders = ref(options.initialOrders || []);

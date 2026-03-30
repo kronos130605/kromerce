@@ -1,12 +1,12 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { Link, usePage } from '@inertiajs/vue3';
-import { useI18n } from 'vue-i18n';
+import { useTranslations } from '@/composables/useTranslations';
 import { useDarkMode } from '@/composables/useDarkMode';
 import { useTranslations } from '@/composables/useTranslations';
 import LanguageSelector from '@/components/shared/LanguageSelector.vue';
 
-const { t } = useI18n();
+const { t } = useTranslations();
 const page = usePage();
 const { isDark, toggleDarkMode } = useDarkMode();
 const showMobileMenu = ref(false);

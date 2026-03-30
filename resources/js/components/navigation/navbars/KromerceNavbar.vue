@@ -1,14 +1,14 @@
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import { usePage } from '@inertiajs/vue3';
-import { useI18n } from 'vue-i18n';
+import { useTranslations } from '@/composables/useTranslations';
 import { useAuth } from '@/composables/useAuth.js';
 import { useDarkMode } from '@/composables/useDarkMode.js';
 import Button from '@/components/ui/buttons/Button.vue';
 import Badge from '@/components/ui/data-display/Badge.vue';
 import LanguageSelector from '@/components/shared/LanguageSelector.vue';
 
-const { t } = useI18n();
+const { t } = useTranslations();
 const page = usePage();
 const { user } = useAuth();
 const { isDark, toggleDarkMode } = useDarkMode();

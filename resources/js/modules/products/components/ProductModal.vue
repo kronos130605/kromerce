@@ -1,10 +1,10 @@
 <script setup>
 import { watch } from 'vue';
-import { useI18n } from 'vue-i18n';
+import { useTranslations } from '@/composables/useTranslations';
 import ImageUploader from './ImageUploader.vue';
 import CategorySelector from './CategorySelector.vue';
 
-const { t } = useI18n();
+const { t } = useTranslations();
 
 const props = defineProps({
     isOpen: { type: Boolean, required: true },

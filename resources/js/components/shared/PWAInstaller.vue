@@ -1,8 +1,8 @@
 <script setup>
 import { ref, onMounted, onBeforeUnmount, computed } from 'vue';
-import { useI18n } from 'vue-i18n';
+import { useTranslations } from '@/composables/useTranslations';
 
-const { t } = useI18n();
+const { t } = useTranslations();
 
 // State
 const deferredPrompt = ref(null); // beforeinstallprompt event (Chrome/Brave)

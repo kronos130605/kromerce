@@ -1,10 +1,10 @@
 <script setup>
 import { computed } from 'vue';
-import { useI18n } from 'vue-i18n';
+import { useTranslations } from '@/composables/useTranslations';
 import { Link } from '@inertiajs/vue3';
 import DashboardList from '@/components/ui/data-display/DashboardList.vue';
 
-const { t } = useI18n();
+const { t } = useTranslations();
 
 const props = defineProps({
     products: {

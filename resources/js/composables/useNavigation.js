@@ -1,5 +1,4 @@
 import { computed } from 'vue';
-import { useI18n } from 'vue-i18n';
 import { useAuth } from './useAuth.js';
 import { usePage } from '@inertiajs/vue3';
 import { BusinessIcons, CustomerIcons } from '@/icons';
@@ -7,7 +6,7 @@ import {useTranslations} from "@/composables/useTranslations.js";
 
 export function useNavigation() {
     const page = usePage();
-    const { t } = useI18n();
+    const { t } = useTranslations();
     useTranslations('dashboard_nav');
 
     // Customer navigation items (for navbars with SVG icons)

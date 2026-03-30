@@ -1,0 +1,228 @@
+{
+    "products": {
+        "title": "Productos",
+        "subtitle": "Gestiona tu catálogo de productos",
+        "add": "Agregar Producto",
+        "add_first": "Agregar tu primer producto",
+        "overview": "Resumen de Productos",
+        "management": "Gestión de Productos",
+        "add_new": "Agregar Nuevo Producto",
+        "manage_products": "Gestionar Productos",
+        "import_products": "Importar Productos",
+        "export_products": "Exportar Productos",
+        "no_description": "Sin descripción",
+        "empty": {
+            "title": "No hay productos",
+            "description": "Comienza creando tu primer producto"
+        },
+        "validation": {
+            "name_required": "El nombre es obligatorio.",
+            "price_required": "El precio es obligatorio."
+        },
+        "fields": {
+            "product": "Producto",
+            "name": "Nombre",
+            "description": "Descripción",
+            "base_price": "Precio Base",
+            "sale_price": "Precio de Oferta",
+            "price": "Precio",
+            "compare_price": "Precio comparación",
+            "cost": "Costo",
+            "currency": "Moneda",
+            "sku": "SKU",
+            "barcode": "Código de barras",
+            "status": "Estado",
+            "stock": "Stock",
+            "stock_quantity": "Cantidad en stock",
+            "low_stock_threshold": "Umbral stock bajo",
+            "manage_stock": "Gestionar stock",
+            "allow_backorders": "Permitir backorders",
+            "categories": "Categorías",
+            "tags": "Etiquetas",
+            "seo_title": "Título SEO",
+            "seo_description": "Descripción SEO",
+            "seo_keywords": "Palabras clave SEO",
+            "created": "Creado"
+        },
+        "statistics": {
+            "total": "Total de Productos",
+            "active": "Productos Activos",
+            "low_stock": "Stock Bajo",
+            "out_of_stock": "Sin Stock"
+        },
+        "view": {
+            "title": "Detalles del Producto"
+        },
+        "edit": {
+            "title": "Editar Producto",
+            "subtitle": "Modifica los detalles del producto"
+        },
+        "create": {
+            "title": "Crear Producto",
+            "subtitle": "Agrega un nuevo producto a tu catálogo"
+        },
+        "images": {
+            "drag_drop": "Arrastra y suelta imágenes aquí",
+            "supported_formats": "PNG, JPG, GIF hasta 10MB",
+            "browse": "Seleccionar archivos",
+            "create_first": "Primero debes crear el producto para poder subir imágenes"
+        },
+        "seo": {
+            "title_hint": "Dejar en blanco para usar el nombre del producto",
+            "description_hint": "Descripción corta para SEO",
+            "keywords_placeholder": "producto, categoría, etiqueta",
+            "keywords_hint": "Separar palabras clave con comas"
+        },
+        "list": {
+            "title": "Lista de Productos",
+            "empty": "No se encontraron productos",
+            "search_placeholder": "Buscar productos...",
+            "filter": "Filtrar",
+            "clear_filters": "Limpiar",
+            "apply_filters": "Aplicar Filtros",
+            "showing_results": "Mostrando {from} a {to} de {total} resultados",
+            "previous": "Anterior",
+            "next": "Siguiente",
+            "filters": {
+                "title": "Filtros",
+                "search": "Buscar",
+                "category": "Categoría",
+                "status": "Estado",
+                "price_range": "Rango de Precio",
+                "stock": "Stock",
+                "all_categories": "Todas las Categorías",
+                "all_status": "Todos los Estados",
+                "active": "Activo",
+                "inactive": "Inactivo",
+                "draft": "Borrador",
+                "min_price": "Precio Mínimo",
+                "max_price": "Precio Máximo",
+                "in_stock_only": "Solo en Stock"
+            },
+            "table": {
+                "product": "Producto",
+                "category": "Categoría",
+                "price": "Precio",
+                "stock": "Stock",
+                "status": "Estado",
+                "actions": "Acciones",
+                "no_products": "No se encontraron productos",
+                "no_products_description": "No hay productos que coincidan con los criterios de búsqueda.",
+                "create_first": "Crear tu primer producto",
+                "view": "Ver",
+                "edit": "Editar",
+                "delete": "Eliminar",
+                "duplicate": "Duplicar"
+            }
+        },
+        "form": {
+            "name": "Nombre del Producto",
+            "description": "Descripción",
+            "sku": "SKU",
+            "slug": "Slug",
+            "base_price": "Precio Base",
+            "sale_price": "Precio de Oferta",
+            "currency": "Moneda",
+            "category": "Categoría",
+            "status": "Estado",
+            "stock_quantity": "Cantidad de Stock",
+            "low_stock_threshold": "Umbral de Stock Bajo",
+            "manage_stock": "Habilitar gestión de stock",
+            "featured": "Producto destacado",
+            "on_sale": "En oferta",
+            "tags": "Etiquetas",
+            "save": "Guardar Producto",
+            "update": "Actualizar Producto",
+            "cancel": "Cancelar",
+            "create": "Crear Producto",
+            "generating": "Generando...",
+            "generate_sku": "Generar",
+            "generate_slug": "Generar"
+        },
+        "status": {
+            "active": "Activo",
+            "inactive": "Inactivo",
+            "draft": "Borrador"
+        },
+        "stock": {
+            "in_stock": "En Stock",
+            "out_of_stock": "Sin Stock",
+            "low_stock": "Stock Bajo",
+            "not_managed": "No gestionado",
+            "current_stock": "Stock Actual",
+            "threshold": "Umbral",
+            "units": "unidades",
+            "managing_stock": "Estado del inventario",
+            "stock_disabled": "La gestión de stock está deshabilitada para este producto"
+        },
+        "pricing": {
+            "base_price": "Precio Base",
+            "sale_price": "Precio de Oferta",
+            "save_amount": "Ahorra {amount}",
+            "currency": "Moneda"
+        },
+        "actions": {
+            "view": "Ver",
+            "edit": "Editar",
+            "delete": "Eliminar",
+            "duplicate": "Duplicar Producto",
+            "back_to_products": "Volver a Productos",
+            "go_back": "Regresar"
+        },
+        "messages": {
+            "created": "Producto creado exitosamente",
+            "updated": "Producto actualizado exitosamente",
+            "deleted": "Producto eliminado exitosamente",
+            "duplicated": "Producto duplicado exitosamente",
+            "loading": "Cargando...",
+            "no_data": "No hay productos disponibles",
+            "delete_title": "Eliminar producto",
+            "confirm_delete": "¿Estás seguro de que quieres eliminar este producto?",
+            "all_sufficient_stock": "Todos los productos tienen stock suficiente"
+        },
+        "sections": {
+            "basic_info": "Información Básica",
+            "pricing": "Precios",
+            "stock_management": "Gestión de Stock",
+            "images": "Imágenes",
+            "seo": "SEO"
+        },
+        "steps": {
+            "basic": "Info Básica",
+            "pricing": "Precios y Stock",
+            "media": "Imágenes",
+            "seo": "SEO"
+        },
+        "placeholders": {
+            "name": "Nombre del producto",
+            "description": "Descripción del producto",
+            "sku": "Ej: PROD-001",
+            "barcode": "Ej: 123456789",
+            "seo_title": "Título para SEO",
+            "seo_description": "Descripción corta para SEO",
+            "seo_keywords": "producto, categoría, etiqueta",
+            "base_price": "0.00",
+            "sale_price": "0.00"
+        },
+        "imageUploader": {
+            "drop_hint": "Arrastra imágenes aquí o haz clic para subir",
+            "formats": "PNG, JPG, GIF hasta 10MB cada uno",
+            "uploaded_count": "{count}/{max} imágenes subidas",
+            "product_images": "Imágenes del Producto",
+            "primary": "Principal",
+            "set_primary": "Establecer como imagen principal",
+            "edit_details": "Editar detalles de imagen",
+            "remove": "Eliminar imagen",
+            "move_left": "Mover izquierda",
+            "move_right": "Mover derecha",
+            "edit_modal_title": "Editar Detalles de Imagen",
+            "alt_text": "Texto Alternativo",
+            "alt_placeholder": "Describe la imagen para accesibilidad",
+            "title": "Título",
+            "title_placeholder": "Título de la imagen",
+            "cancel": "Cancelar",
+            "save_changes": "Guardar Cambios",
+            "file_too_large": "El archivo {name} es muy grande. El tamaño máximo es {size}MB."
+        }
+    }
+}

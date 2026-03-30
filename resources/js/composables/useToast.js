@@ -1,5 +1,5 @@
 import { ref, computed } from 'vue';
-import { useI18n } from 'vue-i18n';
+import { useTranslations } from '@/composables/useTranslations';
 
 /**
  * Composable para sistema de notificaciones toast
@@ -8,7 +8,7 @@ const toasts = ref([]);
 let toastId = 0;
 
 export function useToast() {
-    const { t } = useI18n();
+    const { t } = useTranslations();
 
     /**
      * Show a toast notification

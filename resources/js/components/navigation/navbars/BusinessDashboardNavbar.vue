@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
-import { useI18n } from 'vue-i18n';
+import { useTranslations } from '@/composables/useTranslations';
 import { useAuth } from '@/composables/useAuth.js';
 import { useDarkMode } from '@/composables/useDarkMode.js';
 import { useNavigation } from '@/composables/useNavigation.js';
@@ -9,7 +9,7 @@ import Badge from '@/components/ui/data-display/Badge.vue';
 import LanguageSelector from '@/components/shared/LanguageSelector.vue';
 import Icon from '@/components/ui/data-display/Icon.vue';
 
-const { t } = useI18n();
+const { t } = useTranslations();
 
 // Use auth composable
 const {

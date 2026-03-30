@@ -42,11 +42,11 @@
 
 <script setup>
 import { computed } from 'vue';
-import { useI18n } from 'vue-i18n';
+import { useTranslations } from '@/composables/useTranslations';
 import { useAuth } from '@/composables/useAuth.js';
 
 const { user } = useAuth();
-const { t } = useI18n();
+const { t } = useTranslations();
 
 // Enhanced user data
 const userProfile = computed(() => ({
