@@ -7,54 +7,54 @@ const billingCycle = ref('monthly');
 
 const plans = computed(() => [
   {
-    name: t('pricing.plans.starter.name'),
-    description: t('pricing.plans.starter.description'),
+    name: t('welcome.pricing.plans.starter.name'),
+    description: t('welcome.pricing.plans.starter.description'),
     price: { monthly: 0, yearly: 0 },
     features: [
-      t('pricing.plans.starter.features.0'),
-      t('pricing.plans.starter.features.1'),
-      t('pricing.plans.starter.features.2'),
-      t('pricing.plans.starter.features.3'),
-      t('pricing.plans.starter.features.4'),
-      t('pricing.plans.starter.features.5')
+      t('welcome.pricing.plans.starter.features.0'),
+      t('welcome.pricing.plans.starter.features.1'),
+      t('welcome.pricing.plans.starter.features.2'),
+      t('welcome.pricing.plans.starter.features.3'),
+      t('welcome.pricing.plans.starter.features.4'),
+      t('welcome.pricing.plans.starter.features.5')
     ],
-    cta: t('pricing.plans.starter.cta'),
+    cta: t('welcome.pricing.plans.starter.cta'),
     popular: false,
     color: 'gray'
   },
   {
-    name: t('pricing.plans.professional.name'),
-    description: t('pricing.plans.professional.description'),
+    name: t('welcome.pricing.plans.professional.name'),
+    description: t('welcome.pricing.plans.professional.description'),
     price: { monthly: 49, yearly: 39 },
     features: [
-      t('pricing.plans.professional.features.0'),
-      t('pricing.plans.professional.features.1'),
-      t('pricing.plans.professional.features.2'),
-      t('pricing.plans.professional.features.3'),
-      t('pricing.plans.professional.features.4'),
-      t('pricing.plans.professional.features.5'),
-      t('pricing.plans.professional.features.6'),
-      t('pricing.plans.professional.features.7')
+      t('welcome.pricing.plans.professional.features.0'),
+      t('welcome.pricing.plans.professional.features.1'),
+      t('welcome.pricing.plans.professional.features.2'),
+      t('welcome.pricing.plans.professional.features.3'),
+      t('welcome.pricing.plans.professional.features.4'),
+      t('welcome.pricing.plans.professional.features.5'),
+      t('welcome.pricing.plans.professional.features.6'),
+      t('welcome.pricing.plans.professional.features.7')
     ],
-    cta: t('pricing.plans.professional.cta'),
+    cta: t('welcome.pricing.plans.professional.cta'),
     popular: true,
     color: 'blue'
   },
   {
-    name: t('pricing.plans.enterprise.name'),
-    description: t('pricing.plans.enterprise.description'),
+    name: t('welcome.pricing.plans.enterprise.name'),
+    description: t('welcome.pricing.plans.enterprise.description'),
     price: { monthly: 199, yearly: 159 },
     features: [
-      t('pricing.plans.enterprise.features.0'),
-      t('pricing.plans.enterprise.features.1'),
-      t('pricing.plans.enterprise.features.2'),
-      t('pricing.plans.enterprise.features.3'),
-      t('pricing.plans.enterprise.features.4'),
-      t('pricing.plans.enterprise.features.5'),
-      t('pricing.plans.enterprise.features.6'),
-      t('pricing.plans.enterprise.features.7')
+      t('welcome.pricing.plans.enterprise.features.0'),
+      t('welcome.pricing.plans.enterprise.features.1'),
+      t('welcome.pricing.plans.enterprise.features.2'),
+      t('welcome.pricing.plans.enterprise.features.3'),
+      t('welcome.pricing.plans.enterprise.features.4'),
+      t('welcome.pricing.plans.enterprise.features.5'),
+      t('welcome.pricing.plans.enterprise.features.6'),
+      t('welcome.pricing.plans.enterprise.features.7')
     ],
-    cta: t('pricing.plans.enterprise.cta'),
+    cta: t('welcome.pricing.plans.enterprise.cta'),
     popular: false,
     color: 'purple'
   }
@@ -66,11 +66,11 @@ const toggleBilling = () => {
 
 const getDisplayPrice = (plan) => {
   const price = plan.price[billingCycle.value];
-  return price === 0 ? t('pricing.free') : `$${price}`;
+  return price === 0 ? t('welcome.pricing.free') : `$${price}`;
 };
 
 const getBillingText = () => {
-  return billingCycle.value === 'monthly' ? t('pricing.per_month') : t('pricing.per_year');
+  return billingCycle.value === 'monthly' ? t('welcome.pricing.per_month') : t('welcome.pricing.per_year');
 };
 
 const getYearlySavings = (plan) => {
@@ -88,19 +88,19 @@ const getYearlySavings = (plan) => {
       <!-- Header -->
       <div class="text-center mb-16">
         <h2 class="text-3xl md:text-4xl font-bold mb-4 text-foreground">
-          {{ t('pricing.title') }}
+          {{ t('welcome.pricing.title') }}
           <span class="text-transparent bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text">
-            {{ t('pricing.title_highlight') }}
+            {{ t('welcome.pricing.title_highlight') }}
           </span>
         </h2>
         <p class="text-xl max-w-3xl mx-auto mb-8 text-muted-foreground">
-          {{ t('pricing.subtitle') }}
+          {{ t('welcome.pricing.subtitle') }}
         </p>
 
         <!-- Billing Toggle -->
         <div class="flex items-center justify-center gap-4">
           <span :class="['font-medium transition-colors', billingCycle === 'monthly' ? 'text-foreground' : 'text-muted-foreground']">
-            {{ t('pricing.monthly') }}
+            {{ t('welcome.pricing.monthly') }}
           </span>
           <button
             @click="toggleBilling"
@@ -111,8 +111,8 @@ const getYearlySavings = (plan) => {
             />
           </button>
           <span :class="['font-medium transition-colors', billingCycle === 'yearly' ? 'text-foreground' : 'text-muted-foreground']">
-            {{ t('pricing.yearly') }}
-            <span class="text-green-600 ml-1">{{ t('pricing.yearly_discount') }}</span>
+            {{ t('welcome.pricing.yearly') }}
+            <span class="text-green-600 ml-1">{{ t('welcome.pricing.yearly_discount') }}</span>
           </span>
         </div>
       </div>
@@ -134,7 +134,7 @@ const getYearlySavings = (plan) => {
             v-if="plan.popular"
             class="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-blue-600 to-cyan-500 text-white px-4 py-1 rounded-full text-sm font-medium"
           >
-            {{ t('pricing.most_popular') }}
+            {{ t('welcome.pricing.most_popular') }}
           </div>
 
           <!-- Plan Header -->
@@ -156,7 +156,7 @@ const getYearlySavings = (plan) => {
                 v-if="getYearlySavings(plan) && billingCycle === 'yearly'"
                 class="text-sm mt-1 font-medium text-green-600 dark:text-green-400"
               >
-                {{ t('pricing.save') }} {{ getYearlySavings(plan) }}%
+                {{ t('welcome.pricing.save') }} {{ getYearlySavings(plan) }}%
               </div>
             </div>
           </div>
@@ -199,16 +199,16 @@ const getYearlySavings = (plan) => {
       <!-- Additional Info -->
       <div class="mt-16 text-center">
         <div class="rounded-2xl p-8 shadow-lg max-w-4xl mx-auto bg-card text-card-foreground">
-          <h3 class="text-xl font-bold mb-4 text-foreground">{{ t('pricing.questions.title') }}</h3>
+          <h3 class="text-xl font-bold mb-4 text-foreground">{{ t('welcome.pricing.questions.title') }}</h3>
           <p class="mb-6 leading-relaxed text-muted-foreground">
-            {{ t('pricing.questions.subtitle') }}
+            {{ t('welcome.pricing.questions.subtitle') }}
           </p>
           <div class="flex flex-col sm:flex-row gap-4 justify-center">
             <button class="px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium cursor-pointer">
-              {{ t('pricing.questions.talk_sales') }}
+              {{ t('welcome.pricing.questions.talk_sales') }}
             </button>
             <button class="px-6 py-3 border border-border rounded-lg hover:bg-accent transition-colors font-medium cursor-pointer text-foreground">
-              {{ t('pricing.questions.documentation') }}
+              {{ t('welcome.pricing.questions.documentation') }}
             </button>
           </div>
         </div>

@@ -97,7 +97,7 @@ onBeforeUnmount(() => {
           </button>
 
           <!-- Logo -->
-          <Link href="/public" class="flex items-center ml-4 lg:ml-0 group cursor-pointer">
+          <Link href="/" class="flex items-center ml-4 lg:ml-0 group cursor-pointer">
             <div class="transition-transform duration-300 group-hover:scale-110">
               <img
                 src="/images/kromerce-business-text.png"

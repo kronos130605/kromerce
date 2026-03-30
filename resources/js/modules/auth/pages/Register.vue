@@ -2,7 +2,6 @@
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import { computed, ref, onUnmounted } from 'vue';
 import { useTranslations } from '@/composables/useTranslations';
-import { useTranslations } from '@/composables/useTranslations';
 import { useDarkMode } from '@/composables/useDarkMode';
 import LanguageSelector from '@/components/shared/LanguageSelector.vue';
 import PasswordStrength from '@/modules/auth/components/PasswordStrength.vue';

@@ -1,7 +1,6 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { Link, usePage } from '@inertiajs/vue3';
-import { useTranslations } from '@/composables/useTranslations';
 import { useDarkMode } from '@/composables/useDarkMode';
 import { useTranslations } from '@/composables/useTranslations';
 import LanguageSelector from '@/components/shared/LanguageSelector.vue';

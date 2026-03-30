@@ -2,7 +2,6 @@
 import { Head, Link, useForm, usePage, router } from '@inertiajs/vue3';
 import { ref, watch, onUnmounted, computed } from 'vue';
 import { useTranslations } from '@/composables/useTranslations';
-import { useTranslations } from '@/composables/useTranslations';
 import { useDarkMode } from '@/composables/useDarkMode';
 import LoginAttempts from '@/modules/auth/components/LoginAttempts.vue';
 import LanguageSelector from '@/components/shared/LanguageSelector.vue';
@@ -33,7 +32,6 @@ const props = defineProps({
 });
 
 const { t } = useTranslations();
-const { locale } = useI18n();
 const page = usePage();
 
 // Load auth translations

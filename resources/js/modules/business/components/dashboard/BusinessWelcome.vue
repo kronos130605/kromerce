@@ -7,12 +7,8 @@ import { useAuth } from '@/composables/useAuth.js';
 const page = usePage();
 import { Link } from '@inertiajs/vue3';
 
-const { t, translations } = useTranslations();
+const { t } = useTranslations();
 const { user, currentStore } = useAuth();
-
-// Log translations para debug
-console.log('🔍 Translations loaded:', translations);
-console.log('🔍 Page props translations:', page.props.translations);
 
 // Props for real data from backend
 const props = defineProps({

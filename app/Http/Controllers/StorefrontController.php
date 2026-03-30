@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\TranslationHelper;
 use App\Services\StorefrontService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -19,9 +20,12 @@ class StorefrontController extends Controller
     public function home(): Response
     {
         $data = $this->storefrontService->getHomePageData();
-        logger($data);
 
-        return Inertia::render('storefront/Home', $data);
+        return Inertia::render('storefront/Home', array_merge($data,
+            [
+                'translations' => TranslationHelper::forPreset('storefront'),
+            ]
+        ));
     }
 
     /**

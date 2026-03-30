@@ -4,13 +4,9 @@ import ProductCard from '@/components/storefront/ProductCard.vue';
 import StoreCard from '@/components/storefront/StoreCard.vue';
 import CategoryCard from '@/components/storefront/CategoryCard.vue';
 import { Link } from '@inertiajs/vue3';
-import { useTranslations } from '@/composables/useTranslations';
-import { useTranslations } from '@/composables/useTranslations';
+import {useTranslations} from "@/composables/useTranslations.js";
 
 const { t } = useTranslations();
-
-// Load storefront translations
-useTranslations('storefront');
 
 defineProps({
     featured_categories: Array,

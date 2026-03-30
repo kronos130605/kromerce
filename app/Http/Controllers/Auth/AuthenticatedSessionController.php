@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Helpers\TranslationHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Models\LoginAttempt;
@@ -41,6 +42,7 @@ class AuthenticatedSessionController extends Controller
             'lockoutTime' => $lockoutTime,
             'isLocked' => $isLocked,
             'email' => $email,
+            'translations' => TranslationHelper::forPreset('auth'),
         ]);
     }
 

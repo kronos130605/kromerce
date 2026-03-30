@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Helpers\TranslationHelper;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Store;
@@ -23,7 +24,9 @@ class RegisteredUserController extends Controller
      */
     public function create(): Response
     {
-        return Inertia::render('modules/auth/pages/Register');
+        return Inertia::render('modules/auth/pages/Register', [
+            'translations' => TranslationHelper::forPreset('auth'),
+        ]);
     }
 
     /**

@@ -17,27 +17,11 @@ class TranslationHelper
         $translations = [];
 
         foreach ($modules as $module) {
-            // Load JSON file directly since Laravel's Lang::get() expects PHP files
             $path = base_path("lang/{$locale}/{$module}.json");
-            
-            \Log::info("Loading translation", [
-                'module' => $module,
-                'path' => $path,
-                'exists' => file_exists($path)
-            ]);
-            
+
             if (file_exists($path)) {
                 $content = file_get_contents($path);
                 $decoded = json_decode($content, true);
-                
-                \Log::info("Decoded JSON", [
-                    'module' => $module,
-                    'has_content' => !empty($decoded),
-                    'keys' => array_keys($decoded ?? [])
-                ]);
-                
-                // Extract nested content if the JSON has the module name as root key
-                // e.g., {"dashboard": {...}} -> extract the inner object
                 $translations[$module] = $decoded[$module] ?? $decoded;
             } else {
                 $translations[$module] = [];

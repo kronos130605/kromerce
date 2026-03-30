@@ -67,7 +67,7 @@ onBeforeUnmount(() => {
     <div class="container mx-auto px-4">
       <div class="flex justify-between items-center h-16">
         <!-- Logo -->
-        <a href="/public" class="flex items-center group cursor-pointer">
+        <a href="/" class="flex items-center group cursor-pointer">
           <div class="mr-3 transition-transform duration-300 group-hover:scale-110">
             <img
               src="/images/kromerce-business-text.png"
