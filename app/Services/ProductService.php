@@ -176,4 +176,176 @@ class ProductService
             throw new \Exception('Failed to delete product: ' . $e->getMessage());
         }
     }
+
+    /**
+     * Bulk update product status.
+     */
+    public function bulkUpdateStatus(Store $store, array $ids, string $status): int
+    {
+        try {
+            return \DB::transaction(function () use ($store, $ids, $status) {
+                return $this->productRepository->updateBy(
+                    ['store_id' => $store->id, 'id' => $ids],
+                    ['status' => $status, 'updated_by' => auth()->id()]
+                );
+            });
+        } catch (\Exception $e) {
+            throw new \Exception('Failed to bulk update status: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Bulk delete products.
+     */
+    public function bulkDelete(Store $store, array $ids): int
+    {
+        try {
+            return \DB::transaction(function () use ($store, $ids) {
+                // Delete images first for each product
+                $products = $this->productRepository->getBy([
+                    'store_id' => $store->id,
+                    'id' => $ids
+                ]);
+
+                foreach ($products as $product) {
+                    $directory = 'products/' . $product->id;
+                    \Storage::disk('public')->deleteDirectory($directory);
+                }
+
+                return $this->productRepository->deleteBy([
+                    'store_id' => $store->id,
+                    'id' => $ids
+                ]);
+            });
+        } catch (\Exception $e) {
+            throw new \Exception('Failed to bulk delete products: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Bulk update product categories.
+     */
+    public function bulkUpdateCategories(Store $store, array $ids, array $categoryIds): int
+    {
+        try {
+            return \DB::transaction(function () use ($store, $ids, $categoryIds) {
+                $products = $this->productRepository->getBy([
+                    'store_id' => $store->id,
+                    'id' => $ids
+                ]);
+
+                $updated = 0;
+                foreach ($products as $product) {
+                    $product->categories()->sync($categoryIds);
+                    $product->update(['updated_by' => auth()->id()]);
+                    $updated++;
+                }
+
+                return $updated;
+            });
+        } catch (\Exception $e) {
+            throw new \Exception('Failed to bulk update categories: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Bulk update product prices.
+     */
+    public function bulkUpdatePrice(Store $store, array $ids, array $data): int
+    {
+        try {
+            return \DB::transaction(function () use ($store, $ids, $data) {
+                $products = $this->productRepository->getBy([
+                    'store_id' => $store->id,
+                    'id' => $ids
+                ]);
+
+                $updated = 0;
+                foreach ($products as $product) {
+                    $updateData = ['updated_by' => auth()->id()];
+
+                    if ($data['type'] === 'fixed') {
+                        if (in_array($data['apply_to'], ['base_price', 'both'])) {
+                            $updateData['base_price'] = $data['value'];
+                        }
+                        if (in_array($data['apply_to'], ['sale_price', 'both'])) {
+                            $updateData['base_sale_price'] = $data['value'];
+                            $updateData['is_on_sale'] = true;
+                        }
+                    } else { // percentage
+                        $factor = 1 + ($data['value'] / 100);
+                        if (in_array($data['apply_to'], ['base_price', 'both'])) {
+                            $updateData['base_price'] = round($product->base_price * $factor, 2);
+                        }
+                        if (in_array($data['apply_to'], ['sale_price', 'both']) && $product->base_sale_price) {
+                            $updateData['base_sale_price'] = round($product->base_sale_price * $factor, 2);
+                        }
+                    }
+
+                    $this->productRepository->update($product->id, $updateData);
+                    $updated++;
+                }
+
+                return $updated;
+            });
+        } catch (\Exception $e) {
+            throw new \Exception('Failed to bulk update prices: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Export products.
+     */
+    public function exportProducts(Store $store, ?array $ids, string $format): mixed
+    {
+        try {
+            $products = $ids
+                ? $this->productRepository->getBy(['store_id' => $store->id, 'id' => $ids])
+                : $this->productRepository->getBy(['store_id' => $store->id]);
+
+            $filename = 'products_' . now()->format('Y-m-d_His') . '.' . $format;
+
+            if ($format === 'csv') {
+                return $this->exportToCsv($products, $filename);
+            }
+
+            // Default to CSV for now, can add Excel later
+            return $this->exportToCsv($products, $filename);
+        } catch (\Exception $e) {
+            throw new \Exception('Failed to export products: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Export products to CSV.
+     */
+    private function exportToCsv(Collection $products, string $filename): \Symfony\Component\HttpFoundation\StreamedResponse
+    {
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ];
+
+        return response()->stream(function () use ($products) {
+            $handle = fopen('php://output', 'w');
+
+            // Headers
+            fputcsv($handle, ['ID', 'Name', 'SKU', 'Base Price', 'Sale Price', 'Status', 'Stock', 'Categories']);
+
+            foreach ($products as $product) {
+                fputcsv($handle, [
+                    $product->id,
+                    $product->name,
+                    $product->sku,
+                    $product->base_price,
+                    $product->base_sale_price,
+                    $product->status,
+                    $product->stock_quantity,
+                    $product->categories->pluck('name')->implode(', ')
+                ]);
+            }
+
+            fclose($handle);
+        }, 200, $headers);
+    }
 }

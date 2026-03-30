@@ -61,7 +61,7 @@ class ProductController extends Controller
 
     /**
      * Show the form for creating a new product.
-     * 
+     *
      * @deprecated Use modal in products/Index instead
      */
     public function create(ProductRequest $request): RedirectResponse
@@ -102,7 +102,7 @@ class ProductController extends Controller
 
     /**
      * Display the specified product.
-     * 
+     *
      * @deprecated Use modal in products/Index instead
      */
     public function show(ProductRequest $request, Product $product): RedirectResponse
@@ -113,7 +113,7 @@ class ProductController extends Controller
 
     /**
      * Show the form for editing the specified product.
-     * 
+     *
      * @deprecated Use modal in products/Index instead
      */
     public function edit(ProductRequest $request, Product $product): RedirectResponse
@@ -137,18 +137,11 @@ class ProductController extends Controller
             );
 
             if (!$updated) {
-                if ($request->wantsJson()) {
-                    return $this->notFound('Product not found');
-                }
-
                 abort(404);
             }
 
-            if ($request->wantsJson()) {
-                return $this->success(null, 'Product updated successfully');
-            }
-
-            return redirect()->route('products.show', $product);
+            // Inertia expects a redirect response, not JSON
+            return redirect()->route('products.index')->with('success', 'Product updated successfully');
 
         } catch (\Exception $e) {
             if ($request->wantsJson()) {
@@ -335,7 +328,7 @@ class ProductController extends Controller
             ]);
 
             $store = $this->validateStore();
-            
+
             $updated = $this->productService->bulkUpdateStatus(
                 $store,
                 $validated['ids'],
@@ -366,7 +359,7 @@ class ProductController extends Controller
             ]);
 
             $store = $this->validateStore();
-            
+
             $deleted = $this->productService->bulkDelete($store, $validated['ids']);
 
             return $this->success(null, "{$deleted} products deleted successfully");
@@ -395,7 +388,7 @@ class ProductController extends Controller
             ]);
 
             $store = $this->validateStore();
-            
+
             $updated = $this->productService->bulkUpdateCategories(
                 $store,
                 $validated['ids'],
@@ -429,7 +422,7 @@ class ProductController extends Controller
             ]);
 
             $store = $this->validateStore();
-            
+
             $updated = $this->productService->bulkUpdatePrice(
                 $store,
                 $validated['ids'],
@@ -460,9 +453,9 @@ class ProductController extends Controller
             ]);
 
             $store = $this->validateStore();
-            
+
             $ids = $validated['ids'] ? explode(',', $validated['ids']) : null;
-            
+
             return $this->productService->exportProducts($store, $ids, $validated['format']);
 
         } catch (\Exception $e) {

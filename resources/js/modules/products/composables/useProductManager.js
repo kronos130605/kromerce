@@ -206,7 +206,11 @@ export function useProductManager(options = {}) {
                 await uploadTemporaryImages(selectedProduct.value.id, newImages);
             }
 
-            router.put(`/products/${selectedProduct.value.id}`, payload, {
+            // Use form method spoofing for PUT request
+            router.post(`/products/${selectedProduct.value.id}`, {
+                _method: 'PUT',
+                ...payload
+            }, {
                 preserveScroll: true,
                 onSuccess: () => {
                     closeModal();
@@ -214,6 +218,7 @@ export function useProductManager(options = {}) {
                     toastSuccess(t('products.messages.updated'));
                 },
                 onError: (err) => {
+                    console.error('Update error response:', err);
                     errors.value = err;
                     toastError(t('products.messages.update_failed'));
                 },
@@ -226,15 +231,12 @@ export function useProductManager(options = {}) {
                 preserveScroll: true,
                 onSuccess: async (page) => {
                     console.log('Product created, page props:', page.props);
-                    
+
                     // Find the newly created product by matching name and sku
                     const newProduct = page.props?.products?.data?.find(p =>
                         p.name === payload.name && p.sku === payload.sku
                     );
                     const newProductId = newProduct?.id;
-                    
-                    console.log('New product ID:', newProductId);
-                    console.log('Temporary images:', temporaryImages);
 
                     if (newProductId && temporaryImages.length > 0) {
                         console.log('Uploading temporary images...');
@@ -273,7 +275,7 @@ export function useProductManager(options = {}) {
     const executeDelete = async (product) => {
         loading.value = true;
         closeConfirmModal();
-        
+
         try {
             const response = await fetch(`/products/${product.id}`, {
                 method: 'DELETE',
@@ -343,8 +345,8 @@ export function useProductManager(options = {}) {
             name: product.name || '',
             description: product.description || '',
             base_price: product.base_price || '',
-            sale_price: product.sale_price || '',
-            cost: product.cost || '',
+            sale_price: product.base_sale_price || '',
+            cost: product.cost_price || '',
             sku: product.sku || '',
             barcode: product.barcode || '',
             base_currency: product.base_currency || 'USD',
@@ -363,7 +365,26 @@ export function useProductManager(options = {}) {
     };
 
     const buildPayload = () => {
-        return { ...form.value };
+        return {
+            name: form.value.name,
+            description: form.value.description,
+            base_price: form.value.base_price,
+            base_sale_price: form.value.sale_price,
+            cost_price: form.value.cost,
+            sku: form.value.sku,
+            barcode: form.value.barcode,
+            base_currency: form.value.base_currency,
+            stock_quantity: form.value.stock_quantity,
+            low_stock_threshold: form.value.low_stock_threshold,
+            manage_stock: form.value.manage_stock,
+            allow_backorders: form.value.allow_backorders,
+            status: form.value.status,
+            category_ids: form.value.category_ids,
+            tags: form.value.tags,
+            seo_title: form.value.seo_title,
+            seo_description: form.value.seo_description,
+            seo_keywords: form.value.seo_keywords,
+        };
     };
 
     const validateAllSteps = () => {
