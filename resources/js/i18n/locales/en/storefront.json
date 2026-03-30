@@ -1,0 +1,100 @@
+{
+  "hero": {
+    "title": "Discover Amazing Products",
+    "subtitle": "Shop from thousands of verified sellers worldwide",
+    "cta_browse": "Browse Products",
+    "cta_sellers": "View Sellers"
+  },
+  "sections": {
+    "featured_categories": "Featured Categories",
+    "trending_products": "Trending Products",
+    "new_arrivals": "New Arrivals",
+    "deals_of_the_day": "Deals of the Day",
+    "top_stores": "Top Stores",
+    "view_all": "View All"
+  },
+  "navigation": {
+    "home": "Home",
+    "products": "Products",
+    "categories": "Categories",
+    "stores": "Stores",
+    "deals": "Deals",
+    "search_placeholder": "Search products...",
+    "cart": "Cart",
+    "account": "Account",
+    "login": "Login",
+    "register": "Register",
+    "logout": "Logout"
+  },
+  "product": {
+    "add_to_cart": "Add to Cart",
+    "buy_now": "Buy Now",
+    "out_of_stock": "Out of Stock",
+    "in_stock": "In Stock",
+    "sale": "Sale",
+    "new": "New",
+    "featured": "Featured",
+    "free_shipping": "Free Shipping",
+    "from": "From"
+  },
+  "store": {
+    "verified": "Verified",
+    "top_seller": "Top Seller",
+    "products_count": "{count} products",
+    "visit_store": "Visit Store"
+  },
+  "category": {
+    "products_count": "{count} products"
+  },
+  "features": {
+    "secure_payment": {
+      "title": "Secure Payment",
+      "description": "Your transactions are protected"
+    },
+    "fast_shipping": {
+      "title": "Fast Shipping",
+      "description": "Delivery in record time"
+    },
+    "quality_guarantee": {
+      "title": "Quality Guarantee",
+      "description": "Verified and quality products"
+    },
+    "support": {
+      "title": "24/7 Support",
+      "description": "We're here to help you"
+    }
+  },
+  "footer": {
+    "about": {
+      "title": "About Kromerce",
+      "description": "Your trusted marketplace for buying and selling quality products."
+    },
+    "quick_links": {
+      "title": "Quick Links",
+      "about_us": "About Us",
+      "contact": "Contact",
+      "faq": "FAQ",
+      "terms": "Terms & Conditions",
+      "privacy": "Privacy Policy"
+    },
+    "customer_service": {
+      "title": "Customer Service",
+      "help_center": "Help Center",
+      "returns": "Returns",
+      "shipping": "Shipping",
+      "track_order": "Track Order"
+    },
+    "for_sellers": {
+      "title": "For Sellers",
+      "start_selling": "Start Selling",
+      "seller_dashboard": "Seller Dashboard",
+      "seller_support": "Seller Support"
+    },
+    "copyright": "© {year} Kromerce. All rights reserved."
+  },
+  "empty": {
+    "no_products": "No products available",
+    "no_categories": "No categories available",
+    "no_stores": "No stores available"
+  }
+}

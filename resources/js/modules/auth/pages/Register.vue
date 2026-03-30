@@ -94,7 +94,7 @@ onUnmounted(() => {
         <!-- Home Button -->
         <div class="absolute top-4 left-4">
             <Link
-                :href="route('kromerce.app')"
+                :href="route('home')"
                 :class="[
                     'inline-flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200',
                     isDarkMode
