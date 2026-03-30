@@ -91,10 +91,10 @@ const formatDate = (dateString) => {
             viewAllLink="/orders"
             :viewAllText="t('dashboard.view_all')"
             emptyIcon="📭"
-            :emptyTitle="t('dashboard.no_orders_yet')"
-            :emptyDescription="t('dashboard.orders_appear_here')"
+            :emptyTitle="t('dashboard.quick_actions.no_orders_yet')"
+            :emptyDescription="t('dashboard.quick_actions.orders_appear_here')"
             emptyActionLink="/orders"
-            :emptyActionText="t('dashboard.view_orders')"
+            :emptyActionText="t('dashboard.quick_actions.view_orders')"
             emptyActionIcon="🛒"
             :skeletonRows="3"
             @itemClick="openOrderDrawer">

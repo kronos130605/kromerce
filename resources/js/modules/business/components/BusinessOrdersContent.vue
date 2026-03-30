@@ -7,7 +7,7 @@ const { t } = useI18n();
 <template>
     <div class="space-y-8">
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-8">
-            <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">{{ t('dashboard.nav_orders') }}</h3>
+            <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">{{ t('dashboard_nav.nav_orders') }}</h3>
             <div class="text-center py-12">
                 <div class="text-6xl mb-4">🛒</div>
                 <p class="text-gray-600 dark:text-gray-400">{{ t('dashboard.orders_coming_soon') }}</p>

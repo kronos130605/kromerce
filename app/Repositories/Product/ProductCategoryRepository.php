@@ -8,6 +8,21 @@ use Illuminate\Database\Eloquent\Collection;
 
 class ProductCategoryRepository extends BaseRepository
 {
+    protected array $allowedFields = [
+        'id',
+        'name',
+        'slug',
+        'description',
+        'image',
+        'parent_id',
+        'level',
+        'order',
+        'status',
+        'is_featured',
+        'created_at',
+        'updated_at'
+    ];
+
     public function __construct(ProductCategory $model)
     {
         parent::__construct($model);
@@ -172,5 +187,18 @@ class ProductCategoryRepository extends BaseRepository
         return $this->model
             ->where('slug', $slug)
             ->first();
+    }
+
+    /**
+     * Get featured categories with product count.
+     */
+    public function getFeaturedCategories(int $limit = 8): Collection
+    {
+        return $this->model
+            ->where('status', 'active')
+            ->withCount('products')
+            ->orderBy('products_count', 'desc')
+            ->limit($limit)
+            ->get(['id', 'name', 'slug', 'description', 'image']);
     }
 }

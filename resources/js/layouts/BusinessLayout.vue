@@ -36,6 +36,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
+import { useTranslations } from '@/composables/useTranslations';
 import BusinessSidebar from '@/components/navigation/sidebars/BusinessSidebar.vue';
 import BusinessDashboardNavbar from '@/components/navigation/navbars/BusinessDashboardNavbar.vue';
 import { useSidebar } from '@/composables/useSidebar.js';
@@ -50,6 +51,10 @@ import BusinessAnalyticsContent from '@/modules/business/components/BusinessAnal
 
 const page = usePage();
 const { t } = useI18n();
+
+// Load business translations
+useTranslations(['dashboard_nav']);
+
 const sidebarRef = ref(null);
 const navbarRef = ref(null);
 

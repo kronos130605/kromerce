@@ -69,10 +69,10 @@ const topProducts = computed(() => {
         viewAllLink="/products"
         :viewAllText="t('dashboard.view_all')"
         emptyIcon="📦"
-        :emptyTitle="t('quick_actions.no_products_yet')"
-        :emptyDescription="t('quick_actions.start_adding_products')"
+        :emptyTitle="t('dashboard.quick_actions.no_products_yet')"
+        :emptyDescription="t('dashboard.quick_actions.start_adding_products')"
         emptyActionLink="/products?modal=create"
-        :emptyActionText="t('quick_actions.add_first_product')"
+        :emptyActionText="t('dashboard.quick_actions.add_first_product')"
         emptyActionIcon="➕"
         :skeletonRows="3">
 

@@ -33,7 +33,7 @@ const product = computed(() => page.props.product || null);
             <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-6">
                 <div class="flex justify-between items-center mb-6">
                     <div>
-                        <h3 class="text-2xl font-bold text-gray-900 dark:text-white">{{ t('dashboard.nav_products') }}</h3>
+                        <h3 class="text-2xl font-bold text-gray-900 dark:text-white">{{ t('dashboard_nav.nav_products') }}</h3>
                         <p class="text-gray-600 dark:text-gray-400 mt-1">{{ t('products.overview') }}</p>
                     </div>
                     <Link

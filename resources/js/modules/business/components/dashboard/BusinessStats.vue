@@ -36,7 +36,7 @@ const stats = ref([
         previous: 2894
     },
     {
-        title: 'common.products',
+        title: 'dashboard.products',
         value: 156,
         change: 12.1,
         changeType: 'positive',

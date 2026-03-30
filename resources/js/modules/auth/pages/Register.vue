@@ -2,11 +2,15 @@
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import { computed, ref, onUnmounted } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useTranslations } from '@/composables/useTranslations';
 import { useDarkMode } from '@/composables/useDarkMode';
 import LanguageSelector from '@/components/shared/LanguageSelector.vue';
 import PasswordStrength from '@/modules/auth/components/PasswordStrength.vue';
 
 const { t } = useI18n();
+
+// Load auth translations
+useTranslations('auth');
 const { isDark, toggleDarkMode } = useDarkMode();
 const showPassword = ref(false);
 const showPasswordConfirm = ref(false);

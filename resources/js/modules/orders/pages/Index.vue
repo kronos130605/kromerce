@@ -2,6 +2,7 @@
 import { computed } from 'vue';
 import { usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
+import { useTranslations } from '@/composables/useTranslations';
 import BusinessLayout from '@/layouts/BusinessLayout.vue';
 import DataTable from '@/components/shared/DataTable.vue';
 import ConfirmationModal from '@/components/shared/ConfirmationModal.vue';
@@ -9,6 +10,9 @@ import { useOrderManager } from '../composables/useOrderManager.js';
 
 const { t } = useI18n();
 const page = usePage();
+
+// Load business translations (includes orders)
+useTranslations(['orders', 'dashboard_nav']);
 
 const props = defineProps({
     orders: Object,

@@ -147,6 +147,198 @@ class ProductRepository extends BaseRepository
             ->when(isset($filters['max_price']), function ($q) use ($filters) {
                 $q->where('base_price', '<=', $filters['max_price']);
             })
+            ->get();
+    }
+
+    /**
+     * Get trending products (for storefront).
+     */
+    public function getTrendingProducts(int $limit = 12): Collection
+    {
+        return $this->model->newQuery()
+            ->where('status', 'active')
+            ->with([
+                'images:id,product_id,url,thumbnail_url,is_primary,order',
+                'store:id,name,slug',
+                'categories:id,name,slug'
+            ])
+            ->select(['id', 'name', 'slug', 'base_price', 'base_sale_price', 'base_currency', 'stock_quantity', 'featured', 'store_id'])
+            ->inRandomOrder() // TODO: Replace with actual trending logic based on views/sales
+            ->limit($limit)
+            ->get();
+    }
+
+    /**
+     * Get new arrivals (for storefront).
+     */
+    public function getNewArrivals(int $limit = 12, int $days = 30): Collection
+    {
+        return $this->model->newQuery()
+            ->where('status', 'active')
+            ->where('created_at', '>=', now()->subDays($days))
+            ->with([
+                'images:id,product_id,url,thumbnail_url,is_primary,order',
+                'store:id,name,slug',
+                'categories:id,name,slug'
+            ])
+            ->select(['id', 'name', 'slug', 'base_price', 'base_sale_price', 'base_currency', 'stock_quantity', 'featured', 'store_id', 'created_at'])
+            ->latest()
+            ->limit($limit)
+            ->get();
+    }
+
+    /**
+     * Get deals of the day (products with sale price).
+     */
+    public function getDealsOfTheDay(int $limit = 12): Collection
+    {
+        return $this->model->newQuery()
+            ->where('status', 'active')
+            ->whereNotNull('base_sale_price')
+            ->whereColumn('base_sale_price', '<', 'base_price')
+            ->with([
+                'images:id,product_id,url,thumbnail_url,is_primary,order',
+                'store:id,name,slug',
+                'categories:id,name,slug'
+            ])
+            ->select(['id', 'name', 'slug', 'base_price', 'base_sale_price', 'base_currency', 'stock_quantity', 'featured', 'store_id'])
+            ->inRandomOrder()
+            ->limit($limit)
+            ->get();
+    }
+
+    /**
+     * Get products with filters for storefront.
+     */
+    public function getProductsWithFilters(array $filters, int $perPage = 24): LengthAwarePaginator
+    {
+        $query = $this->model->newQuery()
+            ->where('status', 'active')
+            ->with(['images', 'store', 'categories']);
+
+        // Apply filters
+        if (!empty($filters['search'])) {
+            $query->where('name', 'like', '%' . $filters['search'] . '%');
+        }
+
+        if (!empty($filters['category'])) {
+            $query->whereHas('categories', function ($q) use ($filters) {
+                $q->where('product_categories.id', $filters['category']);
+            });
+        }
+
+        if (!empty($filters['store'])) {
+            $query->where('store_id', $filters['store']);
+        }
+
+        if (!empty($filters['min_price'])) {
+            $query->where('base_price', '>=', $filters['min_price']);
+        }
+
+        if (!empty($filters['max_price'])) {
+            $query->where('base_price', '<=', $filters['max_price']);
+        }
+
+        // Apply sorting
+        $sortBy = $filters['sort_by'] ?? 'created_at';
+        $sortOrder = $filters['sort_order'] ?? 'desc';
+        $query->orderBy($sortBy, $sortOrder);
+
+        return $query->paginate($perPage);
+    }
+
+    /**
+     * Get products by category.
+     */
+    public function getProductsByCategory(string $categoryId, array $filters, int $perPage = 24): LengthAwarePaginator
+    {
+        $query = $this->model->newQuery()
+            ->where('status', 'active')
+            ->whereHas('categories', function ($q) use ($categoryId) {
+                $q->where('product_categories.id', $categoryId);
+            })
+            ->with(['images', 'store', 'categories']);
+
+        // Apply additional filters
+        if (!empty($filters['search'])) {
+            $query->where('name', 'like', '%' . $filters['search'] . '%');
+        }
+
+        if (!empty($filters['store'])) {
+            $query->where('store_id', $filters['store']);
+        }
+
+        if (!empty($filters['min_price'])) {
+            $query->where('base_price', '>=', $filters['min_price']);
+        }
+
+        if (!empty($filters['max_price'])) {
+            $query->where('base_price', '<=', $filters['max_price']);
+        }
+
+        // Apply sorting
+        $sortBy = $filters['sort_by'] ?? 'created_at';
+        $sortOrder = $filters['sort_order'] ?? 'desc';
+        $query->orderBy($sortBy, $sortOrder);
+
+        return $query->paginate($perPage);
+    }
+
+    /**
+     * Search products globally.
+     */
+    public function searchProducts(string $query, int $perPage = 24): LengthAwarePaginator
+    {
+        return $this->model->newQuery()
+            ->where('status', 'active')
+            ->where(function ($q) use ($query) {
+                $q->where('name', 'like', '%' . $query . '%')
+                  ->orWhere('description', 'like', '%' . $query . '%')
+                  ->orWhere('sku', 'like', '%' . $query . '%');
+            })
+            ->with(['images', 'store', 'categories'])
+            ->paginate($perPage);
+    }
+
+    /**
+     * Get related products (same categories).
+     */
+    public function getRelatedProducts(string $productId, int $limit = 8): Collection
+    {
+        $product = $this->getById($productId);
+        
+        if (!$product) {
+            return new Collection();
+        }
+
+        $categoryIds = $product->categories->pluck('id')->toArray();
+
+        return $this->model->newQuery()
+            ->where('status', 'active')
+            ->where('id', '!=', $productId)
+            ->whereHas('categories', function ($q) use ($categoryIds) {
+                $q->whereIn('product_categories.id', $categoryIds);
+            })
+            ->with(['images', 'store'])
+            ->limit($limit)
+            ->get();
+    }
+
+    /**
+     * Get more products from same store.
+     */
+    public function getStoreProducts(string $storeId, ?string $excludeProductId = null, int $limit = 8): Collection
+    {
+        $query = $this->model->newQuery()
+            ->where('status', 'active')
+            ->where('store_id', $storeId)
+            ->with(['images']);
+
+        if ($excludeProductId) {
+            $query->where('id', '!=', $excludeProductId);
+        }
+
+        return $query->limit($limit)
             ->with(['categories', 'tags', 'images'])
             ->get();
     }

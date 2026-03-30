@@ -37,14 +37,19 @@ export async function loadTranslationModule(locale, module) {
 
     try {
         let messages;
-        
+
         // Dynamic import based on locale and module
         if (locale === 'es') {
             messages = await import(`./i18n/locales/es/${module}.json`);
         } else if (locale === 'en') {
-            // Try to load English, fallback to Spanish if not available
+            // Try to load English, fallback to Spanish if not available or empty
             try {
                 messages = await import(`./i18n/locales/en/${module}.json`);
+                // Check if English file is empty (missing root index key)
+                if (!messages.default[module] || Object.keys(messages.default).length === 0) {
+                    console.warn(`English translation for ${module} is empty, using Spanish fallback`);
+                    messages = await import(`./i18n/locales/es/${module}.json`);
+                }
             } catch (error) {
                 console.warn(`English translation for ${module} not found, using Spanish fallback`);
                 messages = await import(`./i18n/locales/es/${module}.json`);
@@ -53,20 +58,15 @@ export async function loadTranslationModule(locale, module) {
 
         // Merge the loaded module into existing messages
         const currentMessages = i18n.global.messages.value[locale] || {};
-        
-        // If module has nested structure (like storefront), preserve it
-        // Otherwise merge at root level
-        if (module === 'storefront' || module === 'orders') {
-            i18n.global.setLocaleMessage(locale, {
-                ...currentMessages,
-                [module]: messages.default
-            });
-        } else {
-            i18n.global.setLocaleMessage(locale, {
-                ...currentMessages,
-                ...messages.default
-            });
-        }
+
+        // All translation files now have their filename as root key
+        // Extract the namespace from the JSON (e.g., {"dashboard": {...}} -> dashboard: {...})
+        const moduleData = messages.default[module] || messages.default;
+
+        i18n.global.setLocaleMessage(locale, {
+            ...currentMessages,
+            [module]: moduleData
+        });
 
         loadedModules[locale].add(module);
         console.log(`✅ Loaded ${locale}/${module} translations`);
@@ -121,7 +121,7 @@ export async function loadStorefrontTranslations() {
  */
 export async function loadProductTranslations() {
     const locale = i18n.global.locale.value;
-    await loadTranslationModules(locale, ['common', 'products', 'errors']);
+    await loadTranslationModules(locale, ['common', 'products', 'errors', 'dashboard_nav']);
 }
 
 // Preload common translations on init
