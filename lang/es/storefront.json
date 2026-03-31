@@ -1,10 +1,16 @@
 {
     "storefront": {
         "hero": {
+            "badge": "Nuevos productos cada día",
             "title": "Descubre Productos Increíbles",
             "subtitle": "Compra de miles de vendedores verificados en todo el mundo",
             "cta_browse": "Explorar Productos",
             "cta_sellers": "Ver Vendedores"
+        },
+        "topbar": {
+            "free_shipping": "Envío gratis en pedidos mayores a $50",
+            "secure_payment": "Pago Seguro",
+            "support": "Soporte 24/7"
         },
         "sections": {
             "featured_categories": "Categorías Destacadas",
@@ -12,16 +18,20 @@
             "new_arrivals": "Nuevos Productos",
             "deals_of_the_day": "Ofertas del Día",
             "top_stores": "Tiendas Destacadas",
-            "view_all": "Ver Todo"
+            "view_all": "Ver Todo",
+            "ends_in": "Termina en"
         },
         "navigation": {
             "home": "Inicio",
             "products": "Productos",
+            "all_products": "Todos los Productos",
             "categories": "Categorías",
             "stores": "Tiendas",
             "deals": "Ofertas",
-            "search_placeholder": "Buscar productos...",
+            "search_placeholder": "Buscar productos, tiendas...",
+            "search": "Buscar",
             "cart": "Carrito",
+            "wishlist": "Favoritos",
             "account": "Cuenta",
             "login": "Iniciar Sesión",
             "register": "Registrarse",
@@ -29,14 +39,20 @@
         },
         "product": {
             "add_to_cart": "Agregar al Carrito",
+            "added": "¡Agregado!",
             "buy_now": "Comprar Ahora",
             "out_of_stock": "Agotado",
             "in_stock": "En Stock",
+            "left": "disponibles",
+            "sold": "vendidos",
             "sale": "Oferta",
             "new": "Nuevo",
             "featured": "Destacado",
             "free_shipping": "Envío Gratis",
-            "from": "Desde"
+            "from": "Desde",
+            "quick_view": "Vista Rápida",
+            "add_to_wishlist": "Agregar a Favoritos",
+            "view_full_details": "Ver Detalles Completos"
         },
         "store": {
             "verified": "Verificado",
@@ -92,6 +108,12 @@
                 "seller_support": "Soporte para Vendedores"
             },
             "copyright": "© {year} Kromerce. Todos los derechos reservados."
+        },
+        "cart": {
+            "items": "artículos",
+            "empty": "Tu carrito está vacío",
+            "total": "Total",
+            "checkout": "Proceder al Pago"
         },
         "empty": {
             "no_products": "No hay productos disponibles",

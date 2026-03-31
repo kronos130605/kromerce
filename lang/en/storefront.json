@@ -1,102 +1,124 @@
 {
     "storefront": {
         "hero": {
-            "title": "Descubre Productos Increíbles",
-            "subtitle": "Compra de miles de vendedores verificados en todo el mundo",
-            "cta_browse": "Explorar Productos",
-            "cta_sellers": "Ver Vendedores"
+            "badge": "New arrivals every day",
+            "title": "Discover Amazing Products",
+            "subtitle": "Shop from thousands of verified sellers worldwide",
+            "cta_browse": "Browse Products",
+            "cta_sellers": "View Sellers"
+        },
+        "topbar": {
+            "free_shipping": "Free shipping on orders over $50",
+            "secure_payment": "Secure Payment",
+            "support": "24/7 Support"
         },
         "sections": {
-            "featured_categories": "Categorías Destacadas",
-            "trending_products": "Productos en Tendencia",
-            "new_arrivals": "Nuevos Productos",
-            "deals_of_the_day": "Ofertas del Día",
-            "top_stores": "Tiendas Destacadas",
-            "view_all": "Ver Todo"
+            "featured_categories": "Featured Categories",
+            "trending_products": "Trending Products",
+            "new_arrivals": "New Arrivals",
+            "deals_of_the_day": "Deals of the Day",
+            "top_stores": "Top Stores",
+            "view_all": "View All",
+            "ends_in": "Ends in"
         },
         "navigation": {
-            "home": "Inicio",
-            "products": "Productos",
-            "categories": "Categorías",
-            "stores": "Tiendas",
-            "deals": "Ofertas",
-            "search_placeholder": "Buscar productos...",
-            "cart": "Carrito",
-            "account": "Cuenta",
-            "login": "Iniciar Sesión",
-            "register": "Registrarse",
-            "logout": "Cerrar Sesión"
+            "home": "Home",
+            "products": "Products",
+            "all_products": "All Products",
+            "categories": "Categories",
+            "stores": "Stores",
+            "deals": "Deals",
+            "search_placeholder": "Search products, stores...",
+            "search": "Search",
+            "cart": "Cart",
+            "wishlist": "Wishlist",
+            "account": "Account",
+            "login": "Sign In",
+            "register": "Register",
+            "logout": "Sign Out"
         },
         "product": {
-            "add_to_cart": "Agregar al Carrito",
-            "buy_now": "Comprar Ahora",
-            "out_of_stock": "Agotado",
-            "in_stock": "En Stock",
-            "sale": "Oferta",
-            "new": "Nuevo",
-            "featured": "Destacado",
-            "free_shipping": "Envío Gratis",
-            "from": "Desde"
+            "add_to_cart": "Add to Cart",
+            "added": "Added!",
+            "buy_now": "Buy Now",
+            "out_of_stock": "Out of Stock",
+            "in_stock": "In Stock",
+            "left": "left",
+            "sold": "sold",
+            "sale": "Sale",
+            "new": "New",
+            "featured": "Featured",
+            "free_shipping": "Free Shipping",
+            "from": "From",
+            "quick_view": "Quick View",
+            "add_to_wishlist": "Add to Wishlist",
+            "view_full_details": "View Full Details"
         },
         "store": {
-            "verified": "Verificado",
-            "top_seller": "Vendedor Top",
-            "products_count": "{count} productos",
-            "visit_store": "Visitar Tienda"
+            "verified": "Verified",
+            "top_seller": "Top Seller",
+            "products_count": "{count} products",
+            "visit_store": "Visit Store"
         },
         "category": {
-            "products_count": "{count} productos"
+            "products_count": "{count} products"
         },
         "features": {
             "secure_payment": {
-                "title": "Pago Seguro",
-                "description": "Tus transacciones están protegidas"
+                "title": "Secure Payment",
+                "description": "Your transactions are fully protected"
             },
             "fast_shipping": {
-                "title": "Envío Rápido",
-                "description": "Entrega en tiempo récord"
+                "title": "Fast Shipping",
+                "description": "Delivered in record time"
             },
             "quality_guarantee": {
-                "title": "Garantía de Calidad",
-                "description": "Productos verificados y de calidad"
+                "title": "Quality Guarantee",
+                "description": "Verified and quality products"
             },
             "support": {
-                "title": "Soporte 24/7",
-                "description": "Estamos aquí para ayudarte"
+                "title": "24/7 Support",
+                "description": "We are here to help you"
             }
         },
         "footer": {
             "about": {
-                "title": "Acerca de Kromerce",
-                "description": "Tu marketplace de confianza para comprar y vender productos de calidad."
+                "title": "About Kromerce",
+                "description": "Your trusted marketplace to buy and sell quality products."
             },
             "quick_links": {
-                "title": "Enlaces Rápidos",
-                "about_us": "Sobre Nosotros",
-                "contact": "Contacto",
-                "faq": "Preguntas Frecuentes",
-                "terms": "Términos y Condiciones",
-                "privacy": "Política de Privacidad"
+                "title": "Quick Links",
+                "about_us": "About Us",
+                "contact": "Contact",
+                "faq": "FAQ",
+                "terms": "Terms & Conditions",
+                "privacy": "Privacy Policy"
             },
             "customer_service": {
-                "title": "Servicio al Cliente",
-                "help_center": "Centro de Ayuda",
-                "returns": "Devoluciones",
-                "shipping": "Envíos",
-                "track_order": "Rastrear Pedido"
+                "title": "Customer Service",
+                "help_center": "Help Center",
+                "returns": "Returns",
+                "shipping": "Shipping",
+                "track_order": "Track Order"
             },
             "for_sellers": {
-                "title": "Para Vendedores",
-                "start_selling": "Comenzar a Vender",
-                "seller_dashboard": "Panel de Vendedor",
-                "seller_support": "Soporte para Vendedores"
+                "title": "For Sellers",
+                "start_selling": "Start Selling",
+                "seller_dashboard": "Seller Dashboard",
+                "seller_support": "Seller Support"
             },
-            "copyright": "© {year} Kromerce. Todos los derechos reservados."
+            "copyright": "© {year} Kromerce. All rights reserved."
+        },
+        "cart": {
+            "items": "items",
+            "empty": "Your cart is empty",
+            "total": "Total",
+            "checkout": "Proceed to Checkout"
         },
         "empty": {
-            "no_products": "No hay productos disponibles",
-            "no_categories": "No hay categorías disponibles",
-            "no_stores": "No hay tiendas disponibles"
+            "no_products": "No products available",
+            "no_categories": "No categories available",
+            "no_stores": "No stores available"
         }
     }
 }
