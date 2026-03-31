@@ -19,10 +19,12 @@ class DatabaseSeeder extends Seeder
 
         // Skip test user creation in production
         if (app()->environment('local', 'testing')) {
-            User::factory()->create([
-                'name' => 'Test User',
-                'email' => 'test@example.com',
-            ]);
+            User::firstOrCreate(
+                ['email' => 'test@example.com'],
+                [
+                    'name' => 'Test User',
+                ]
+            );
         }
 
         // Run role and permission seeder

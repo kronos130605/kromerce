@@ -57,7 +57,10 @@ class CommissionTierSeeder extends Seeder
         ];
 
         foreach ($tiers as $tier) {
-            CommissionTier::create($tier);
+            CommissionTier::firstOrCreate(
+                ['name' => $tier['name']],
+                $tier
+            );
         }
     }
 }

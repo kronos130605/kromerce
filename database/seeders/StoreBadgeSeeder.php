@@ -97,7 +97,10 @@ class StoreBadgeSeeder extends Seeder
         ];
 
         foreach ($badges as $badge) {
-            StoreBadge::create($badge);
+            StoreBadge::firstOrCreate(
+                ['slug' => $badge['slug']],
+                $badge
+            );
         }
     }
 }
