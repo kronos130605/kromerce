@@ -1,7 +1,7 @@
 <script setup>
-import { useI18n } from 'vue-i18n';
+import { useTranslations } from '@/composables/useTranslations';
 
-const { t } = useI18n();
+const { t } = useTranslations();
 const testimonials = [
   {
     name: 'María González',
@@ -60,10 +60,10 @@ const testimonials = [
 ];
 
 const industries = [
-  { name: t('testimonials.industries.retail'), icon: 'M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z' },
-  { name: t('testimonials.industries.services'), icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2' },
-  { name: t('testimonials.industries.technology'), icon: 'M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z' },
-  { name: t('testimonials.industries.creative'), icon: 'M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4' }
+  { name: t('welcome.testimonials.industries.retail'), icon: 'M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z' },
+  { name: t('welcome.testimonials.industries.services'), icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2' },
+  { name: t('welcome.testimonials.industries.technology'), icon: 'M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z' },
+  { name: t('welcome.testimonials.industries.creative'), icon: 'M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4' }
 ];
 </script>
 
@@ -73,13 +73,13 @@ const industries = [
       <!-- Header -->
       <div class="text-center mb-16">
         <h2 class="text-3xl md:text-4xl font-bold mb-4">
-          {{ t('testimonials.title') }}
+          {{ t('welcome.testimonials.title') }}
           <span class="text-transparent bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text">
-            {{ t('testimonials.title_highlight') }}
+            {{ t('welcome.testimonials.title_highlight') }}
           </span>
         </h2>
         <p class="text-xl text-muted-foreground max-w-3xl mx-auto">
-          {{ t('testimonials.subtitle') }}
+          {{ t('welcome.testimonials.subtitle') }}
         </p>
       </div>
 
@@ -148,17 +148,17 @@ const industries = [
       <div class="text-center mt-16">
         <div class="bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-gray-950 dark:to-slate-950 rounded-2xl p-8 max-w-4xl mx-auto border border-border">
           <h3 class="text-2xl font-bold mb-4 text-foreground dark:text-gray-100">
-            {{ t('testimonials.cta.title') }}
+            {{ t('welcome.testimonials.cta.title') }}
           </h3>
           <p class="text-muted-foreground mb-6 dark:text-gray-300">
-            {{ t('testimonials.cta.subtitle') }}
+            {{ t('welcome.testimonials.cta.subtitle') }}
           </p>
           <div class="flex flex-col sm:flex-row gap-4 justify-center">
             <button class="px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium">
-              {{ t('testimonials.cta.start_free') }}
+              {{ t('welcome.testimonials.cta.start_free') }}
             </button>
             <button class="px-6 py-3 border border-border rounded-lg hover:bg-accent transition-colors font-medium text-foreground dark:text-gray-100">
-              {{ t('testimonials.cta.case_studies') }}
+              {{ t('welcome.testimonials.cta.case_studies') }}
             </button>
           </div>
         </div>

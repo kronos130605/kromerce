@@ -2,7 +2,7 @@
 import { Link } from '@inertiajs/vue3';
 import { computed } from 'vue';
 import { usePage } from '@inertiajs/vue3';
-import { useI18n } from 'vue-i18n';
+import { useTranslations } from '@/composables/useTranslations';
 
 // Import products component
 import ProductsMainContent from '@/modules/products/Products/Content.vue';
@@ -10,7 +10,7 @@ import ProductsCreate from '@/modules/products/Products/Create.vue';
 import ProductsEdit from '@/modules/products/Products/Edit.vue';
 import ProductsShow from '@/modules/products/Products/Show.vue';
 
-const { t } = useI18n();
+const { t } = useTranslations();
 const page = usePage();
 const props = defineProps({
     products: Object,
@@ -33,7 +33,7 @@ const product = computed(() => page.props.product || null);
             <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-6">
                 <div class="flex justify-between items-center mb-6">
                     <div>
-                        <h3 class="text-2xl font-bold text-gray-900 dark:text-white">{{ t('dashboard.nav_products') }}</h3>
+                        <h3 class="text-2xl font-bold text-gray-900 dark:text-white">{{ t('dashboard_nav.nav_products') }}</h3>
                         <p class="text-gray-600 dark:text-gray-400 mt-1">{{ t('products.overview') }}</p>
                     </div>
                     <Link

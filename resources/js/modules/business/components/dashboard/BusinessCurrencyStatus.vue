@@ -1,6 +1,6 @@
 <script setup>
 import { computed } from 'vue';
-import { useI18n } from 'vue-i18n';
+import { useTranslations } from '@/composables/useTranslations';
 
 const props = defineProps({
     currencyStatus: {
@@ -9,7 +9,7 @@ const props = defineProps({
     }
 });
 
-const { t } = useI18n();
+const { t } = useTranslations();
 
 // Mock data for now
 const mockCurrencyStatus = computed(() => ({

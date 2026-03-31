@@ -6,9 +6,6 @@ import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createApp, h } from 'vue';
 import { ZiggyVue } from 'ziggy-js';
 
-// Import i18n configuration
-import { i18n } from './i18n.js';
-
 // PWA Service Worker Registration - manejado por VitePWA
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
@@ -121,27 +118,9 @@ createInertiaApp({
         );
     },
     setup({ el, App, props, plugin }) {
-        // Set locale from backend
-        const currentLocale = props.initialPage?.props?.currentLocale || 'en';
-        const translations = props.initialPage?.props?.translations || {};
-
-        // Configure i18n with backend data
-        i18n.global.locale.value = currentLocale;
-
-        // Set messages for current locale
-        if (translations[currentLocale]) {
-            i18n.global.setLocaleMessage(currentLocale, translations[currentLocale]);
-        }
-
-        // Set fallback messages
-        if (translations.en) {
-            i18n.global.setLocaleMessage('en', translations.en);
-        }
-
         return createApp({ render: () => h(App, props) })
             .use(plugin)
             .use(ZiggyVue)
-            .use(i18n)
             .mount(el);
     },
     progress: {

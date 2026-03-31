@@ -20,6 +20,7 @@ class StoreUser extends Model
     protected $fillable = [
         'store_id',
         'user_id',
+        'role',
         'permissions',
         'is_active',
         'joined_at',
@@ -31,8 +32,8 @@ class StoreUser extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'is_active' => 'boolean',
         'permissions' => 'array',
+        'is_active' => 'boolean',
         'joined_at' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',

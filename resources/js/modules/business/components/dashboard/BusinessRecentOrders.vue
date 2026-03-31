@@ -1,10 +1,10 @@
 <script setup>
 import { ref, computed } from 'vue';
-import { useI18n } from 'vue-i18n';
+import { useTranslations } from '@/composables/useTranslations';
 import { Link, router } from '@inertiajs/vue3';
 import DashboardList from '@/components/ui/data-display/DashboardList.vue';
 
-const { t } = useI18n();
+const { t } = useTranslations();
 
 const props = defineProps({
     orders: {
@@ -91,10 +91,10 @@ const formatDate = (dateString) => {
             viewAllLink="/orders"
             :viewAllText="t('dashboard.view_all')"
             emptyIcon="📭"
-            :emptyTitle="t('dashboard.no_orders_yet')"
-            :emptyDescription="t('dashboard.orders_appear_here')"
+            :emptyTitle="t('dashboard.quick_actions.no_orders_yet')"
+            :emptyDescription="t('dashboard.quick_actions.orders_appear_here')"
             emptyActionLink="/orders"
-            :emptyActionText="t('dashboard.view_orders')"
+            :emptyActionText="t('dashboard.quick_actions.view_orders')"
             emptyActionIcon="🛒"
             :skeletonRows="3"
             @itemClick="openOrderDrawer">

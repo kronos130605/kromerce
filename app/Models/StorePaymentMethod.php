@@ -19,6 +19,9 @@ class StorePaymentMethod extends Model
         'store_id',
         'method',
         'provider',
+        'display_name',
+        'description',
+        'icon',
         'config',
         'is_enabled',
         'min_amount',
@@ -34,13 +37,13 @@ class StorePaymentMethod extends Model
      * @var array<string, string>
      */
     protected $casts = [
+        'config' => 'array',
         'is_enabled' => 'boolean',
         'min_amount' => 'decimal:2',
         'max_amount' => 'decimal:2',
         'fee_percentage' => 'decimal:2',
         'fixed_fee' => 'decimal:2',
         'sort_order' => 'integer',
-        'config' => 'array',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
         'deleted_at' => 'datetime',

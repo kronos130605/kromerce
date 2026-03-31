@@ -1,9 +1,10 @@
 <script setup>
 import { watch } from 'vue';
-import { useI18n } from 'vue-i18n';
+import { useTranslations } from '@/composables/useTranslations';
 import ImageUploader from './ImageUploader.vue';
+import CategorySelector from './CategorySelector.vue';
 
-const { t } = useI18n();
+const { t } = useTranslations();
 
 const props = defineProps({
     isOpen: { type: Boolean, required: true },
@@ -185,20 +186,11 @@ const currentStepData = props.steps[props.currentStep];
                             </div>
 
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                    {{ t('products.fields.categories') }}
-                                </label>
-                                <select
-                                    :value="form.category_ids"
-                                    @change="updateForm('category_ids', Array.from($event.target.selectedOptions).map(o => o.value))"
-                                    multiple
-                                    class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                >
-                                    <option v-for="cat in categories" :key="cat.id" :value="cat.id">
-                                        {{ cat.name }}
-                                    </option>
-                                </select>
-                                <p class="mt-1 text-xs text-gray-500">{{ t('common.multiselect_hint') }}</p>
+                                <CategorySelector
+                                    :categories="props.categories"
+                                    v-model="form.category_ids"
+                                    :label="t('products.fields.categories')"
+                                />
                             </div>
                         </div>
 

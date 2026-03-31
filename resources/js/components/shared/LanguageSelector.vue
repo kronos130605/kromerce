@@ -1,8 +1,8 @@
 <script setup>
-import { computed } from 'vue';
-import { useI18n } from 'vue-i18n';
+import { computed, ref } from 'vue';
+import { setLocaleCookie, detectLocale } from '@/i18n.js';
 
-const { locale } = useI18n();
+const locale = ref(detectLocale());
 
 const languages = [
   { code: 'es', name: 'Español', flag: '🇪🇸' },
@@ -13,9 +13,15 @@ const currentLanguage = computed(() =>
   languages.find(lang => lang.code === locale.value) || languages[0]
 );
 
-const changeLanguage = (langCode) => {
+const changeLanguage = async (langCode) => {
   locale.value = langCode;
-  localStorage.setItem('kromerce_locale', langCode);
+  setLocaleCookie(langCode);
+
+  // Dispatch event to notify components to reload their translations
+  window.dispatchEvent(new CustomEvent('locale-changed', { detail: langCode }));
+
+  // Reload page to ensure all components get new translations
+  window.location.reload();
 };
 </script>
 

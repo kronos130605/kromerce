@@ -79,8 +79,8 @@ class StoreStatisticsRepository extends BaseRepository
         try {
             return $this->model->newQuery()
                 ->where('id', $storeId)
-                ->withSum('orders', 'total_amount')
-                ->value('orders_sum_total_amount') ?? 0;
+                ->withSum('orders', 'total')
+                ->value('orders_sum_total') ?? 0;
         } catch (\Exception $e) {
             return 0;
         }
@@ -100,7 +100,7 @@ class StoreStatisticsRepository extends BaseRepository
             return $store->orders()
                 ->latest()
                 ->take($limit)
-                ->get(['id', 'order_number', 'total_amount', 'status', 'created_at']);
+                ->get(['id', 'order_number', 'total', 'status', 'created_at']);
         } catch (\Exception $e) {
             return collect();
         }

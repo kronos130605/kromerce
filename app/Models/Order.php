@@ -20,7 +20,7 @@ class Order extends Model
     protected $fillable = [
         'uuid',
         'store_id',
-        'customer_id',
+        'user_id',
         'order_number',
         'status',
         'payment_status',
@@ -30,22 +30,62 @@ class Order extends Model
         'tax_amount',
         'shipping_amount',
         'discount_amount',
-        'total_amount',
-        'payment_method',
-        'payment_method_title',
-        'transaction_id',
+        'total',
+        'total_paid',
+        'total_refunded',
+        'total_weight',
+        'total_items',
+        'total_unique_items',
+        'customer_email',
+        'customer_phone',
+        'customer_first_name',
+        'customer_last_name',
+        'customer_company',
+        'billing_address_1',
+        'billing_address_2',
+        'billing_city',
+        'billing_state',
+        'billing_postal_code',
+        'billing_country',
+        'billing_phone',
+        'shipping_address_1',
+        'shipping_address_2',
+        'shipping_city',
+        'shipping_state',
+        'shipping_postal_code',
+        'shipping_country',
+        'shipping_phone',
+        'shipping_instructions',
         'shipping_method',
-        'shipping_method_title',
-        'shipping_address',
-        'billing_address',
-        'notes',
-        'customer_notes',
-        'metadata',
+        'shipping_carrier',
+        'tracking_number',
         'shipped_at',
         'delivered_at',
+        'estimated_delivery_at',
+        'payment_method',
+        'payment_provider',
+        'payment_transaction_id',
         'paid_at',
+        'coupon_code',
+        'coupon_discount',
+        'applied_discounts',
+        'is_gift',
+        'gift_message',
+        'gift_wrap_fee',
+        'loyalty_points_earned',
+        'loyalty_points_used',
+        'loyalty_points_discount',
+        'customer_notes',
+        'internal_notes',
+        'source',
+        'ip_address',
+        'user_agent',
+        'referrer',
+        'metadata',
+        'processed_at',
         'cancelled_at',
-        'created_by',
+        'cancellation_reason',
+        'refunded_at',
     ];
 
     /**
@@ -58,14 +98,27 @@ class Order extends Model
         'tax_amount' => 'decimal:2',
         'shipping_amount' => 'decimal:2',
         'discount_amount' => 'decimal:2',
-        'total_amount' => 'decimal:2',
-        'shipping_address' => 'array',
-        'billing_address' => 'array',
+        'total' => 'decimal:2',
+        'total_paid' => 'decimal:2',
+        'total_refunded' => 'decimal:2',
+        'total_weight' => 'decimal:2',
+        'total_items' => 'integer',
+        'total_unique_items' => 'integer',
+        'coupon_discount' => 'decimal:2',
+        'applied_discounts' => 'array',
+        'is_gift' => 'boolean',
+        'gift_wrap_fee' => 'decimal:2',
+        'loyalty_points_earned' => 'integer',
+        'loyalty_points_used' => 'integer',
+        'loyalty_points_discount' => 'decimal:2',
         'metadata' => 'array',
         'shipped_at' => 'datetime',
         'delivered_at' => 'datetime',
+        'estimated_delivery_at' => 'datetime',
         'paid_at' => 'datetime',
+        'processed_at' => 'datetime',
         'cancelled_at' => 'datetime',
+        'refunded_at' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
         'deleted_at' => 'datetime',
@@ -99,11 +152,11 @@ class Order extends Model
     }
 
     /**
-     * Get the customer that owns the order.
+     * Get the user that owns the order.
      */
-    public function customer(): BelongsTo
+    public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'customer_id');
+        return $this->belongsTo(User::class);
     }
 
     /**
@@ -207,7 +260,7 @@ class Order extends Model
      */
     public function getFormattedTotalAttribute(): string
     {
-        return number_format($this->total_amount, 2);
+        return number_format($this->total, 2);
     }
 
     /**

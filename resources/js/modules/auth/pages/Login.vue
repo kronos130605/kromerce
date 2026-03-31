@@ -1,7 +1,7 @@
 <script setup>
 import { Head, Link, useForm, usePage, router } from '@inertiajs/vue3';
 import { ref, watch, onUnmounted, computed } from 'vue';
-import { useI18n } from 'vue-i18n';
+import { useTranslations } from '@/composables/useTranslations';
 import { useDarkMode } from '@/composables/useDarkMode';
 import LoginAttempts from '@/modules/auth/components/LoginAttempts.vue';
 import LanguageSelector from '@/components/shared/LanguageSelector.vue';
@@ -31,9 +31,12 @@ const props = defineProps({
     }
 });
 
-const { t } = useI18n();
-const { locale } = useI18n();
+const { t } = useTranslations();
 const page = usePage();
+
+// Load auth translations
+useTranslations('auth');
+
 const { isDark, toggleDarkMode } = useDarkMode();
 const showPassword = ref(false);
 const isFormLocked = ref(page.props.isLocked || false);
@@ -132,7 +135,7 @@ onUnmounted(() => {
         <!-- Home Button -->
         <div class="absolute top-4 left-4">
             <Link
-                :href="route('kromerce.app')"
+                :href="route('home')"
                 :class="[
                     'inline-flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200',
                     isDarkMode

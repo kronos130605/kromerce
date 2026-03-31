@@ -17,12 +17,13 @@ class OrderStatusHistory extends Model
      */
     protected $fillable = [
         'order_id',
-        'status',
-        'payment_status',
-        'fulfillment_status',
-        'notes',
-        'notified_by',
-        'customer_notified',
+        'from_status',
+        'to_status',
+        'reason',
+        'changed_by',
+        'changed_by_type',
+        'metadata',
+        'changed_at',
     ];
 
     /**
@@ -31,7 +32,8 @@ class OrderStatusHistory extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'customer_notified' => 'boolean',
+        'metadata' => 'array',
+        'changed_at' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];

@@ -1,33 +1,33 @@
 <script setup>
 import { ref, onMounted } from 'vue';
-import { useI18n } from 'vue-i18n';
+import { useTranslations } from '@/composables/useTranslations';
 
-const { t } = useI18n();
+const { t } = useTranslations();
 
 const stats = [
   {
     number: 10000,
     suffix: '+',
-    label: t('stats.businesses.label'),
-    description: t('stats.businesses.description')
+    label: t('welcome.stats.businesses.label'),
+    description: t('welcome.stats.businesses.description')
   },
   {
     number: 50,
     suffix: '+',
-    label: t('stats.countries.label'),
-    description: t('stats.countries.description')
+    label: t('welcome.stats.countries.label'),
+    description: t('welcome.stats.countries.description')
   },
   {
     number: 99.9,
     suffix: '%',
-    label: t('stats.uptime.label'),
-    description: t('stats.uptime.description')
+    label: t('welcome.stats.uptime.label'),
+    description: t('welcome.stats.uptime.description')
   },
   {
     number: 24,
     suffix: '/7',
-    label: t('stats.support.label'),
-    description: t('stats.support.description')
+    label: t('welcome.stats.support.label'),
+    description: t('welcome.stats.support.description')
   }
 ];
 
@@ -62,13 +62,13 @@ onMounted(() => {
       <!-- Header -->
       <div class="text-center mb-16">
         <h2 class="text-3xl md:text-4xl font-bold mb-4 text-foreground">
-          {{ t('stats.title') }}
+          {{ t('welcome.stats.title') }}
           <span class="text-transparent bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text">
-            {{ t('stats.title_highlight') }}
+            {{ t('welcome.stats.title_highlight') }}
           </span>
         </h2>
         <p class="text-xl max-w-3xl mx-auto text-muted-foreground">
-          {{ t('stats.subtitle') }}
+          {{ t('welcome.stats.subtitle') }}
         </p>
       </div>
 
@@ -104,15 +104,15 @@ onMounted(() => {
           <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div>
               <div class="text-3xl font-bold mb-2 text-green-600 dark:text-green-400">$2M+</div>
-              <p class="leading-relaxed text-muted-foreground">{{ t('stats.additional.processed') }}</p>
+              <p class="leading-relaxed text-muted-foreground">{{ t('welcome.stats.additional.processed') }}</p>
             </div>
             <div>
               <div class="text-3xl font-bold mb-2 text-blue-600 dark:text-blue-400">4.9★</div>
-              <p class="leading-relaxed text-muted-foreground">{{ t('stats.additional.rating') }}</p>
+              <p class="leading-relaxed text-muted-foreground">{{ t('welcome.stats.additional.rating') }}</p>
             </div>
             <div>
               <div class="text-3xl font-bold mb-2 text-purple-600 dark:text-purple-400">150ms</div>
-              <p class="leading-relaxed text-muted-foreground">{{ t('stats.additional.response_time') }}</p>
+              <p class="leading-relaxed text-muted-foreground">{{ t('welcome.stats.additional.response_time') }}</p>
             </div>
           </div>
         </div>

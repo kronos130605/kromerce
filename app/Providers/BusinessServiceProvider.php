@@ -41,6 +41,8 @@ use App\Services\RoleService;
 use App\Services\StoreService;
 use App\Services\StoreConfigService;
 use App\Services\StoreUserService;
+use App\Services\StorefrontService;
+use App\Services\StorePageService;
 use Illuminate\Support\ServiceProvider;
 use Spatie\Permission\Models\Role;
 
@@ -219,6 +221,23 @@ class BusinessServiceProvider extends ServiceProvider
             return new ProductService(
                 $app->make(ProductRepository::class),
                 $app->make(ProductCategoryRepository::class)
+            );
+        });
+
+        // Register Storefront Service
+        $this->app->singleton(StorefrontService::class, function ($app) {
+            return new StorefrontService(
+                $app->make(ProductRepository::class),
+                $app->make(ProductCategoryRepository::class),
+                $app->make(StoreRepository::class)
+            );
+        });
+
+        // Register Store Page Service
+        $this->app->singleton(StorePageService::class, function ($app) {
+            return new StorePageService(
+                $app->make(StoreRepository::class),
+                $app->make(ProductRepository::class)
             );
         });
     }

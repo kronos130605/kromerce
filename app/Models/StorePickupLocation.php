@@ -12,19 +12,24 @@ class StorePickupLocation extends Model
         'name',
         'address',
         'city',
-        'state',
+        'province',
         'postal_code',
-        'country',
+        'latitude',
+        'longitude',
         'phone',
         'email',
-        'is_active',
-        'coordinates',
         'instructions',
+        'schedule',
+        'is_active',
+        'is_primary',
     ];
 
     protected $casts = [
+        'latitude' => 'decimal:8',
+        'longitude' => 'decimal:8',
+        'schedule' => 'array',
         'is_active' => 'boolean',
-        'coordinates' => 'array',
+        'is_primary' => 'boolean',
     ];
 
     /**

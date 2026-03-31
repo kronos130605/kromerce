@@ -1,13 +1,13 @@
 <script setup>
 import { computed } from 'vue';
 import { usePage } from '@inertiajs/vue3';
-import { useI18n } from 'vue-i18n';
+import { useTranslations } from '@/composables/useTranslations';
 import { useAuth } from '@/composables/useAuth.js';
 
 const page = usePage();
 import { Link } from '@inertiajs/vue3';
 
-const { t } = useI18n();
+const { t } = useTranslations();
 const { user, currentStore } = useAuth();
 
 // Props for real data from backend

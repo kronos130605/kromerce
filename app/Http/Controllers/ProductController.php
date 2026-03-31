@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\TranslationHelper;
 use App\Models\Product;
 use App\Services\ProductService;
 use App\Http\Requests\ProductRequest;
@@ -34,7 +35,7 @@ class ProductController extends Controller
             // Get products data using the service
             $filters = $request->all();
             $products = $this->productService->getProductsForStore($store, $filters);
-            $categories = $this->productService->getCategoriesForStore($store);
+            $categories = $this->productService->getCategories();
             $statistics = $this->productService->getStatisticsForStore($store);
 
             // Return products page with SPA structure
@@ -43,6 +44,7 @@ class ProductController extends Controller
                 'categories' => $categories,
                 'filters' => $filters,
                 'statistics' => $statistics,
+                'translations' => TranslationHelper::forPreset('products'),
             ]);
 
         } catch (\Exception $e) {
@@ -59,7 +61,7 @@ class ProductController extends Controller
 
     /**
      * Show the form for creating a new product.
-     * 
+     *
      * @deprecated Use modal in products/Index instead
      */
     public function create(ProductRequest $request): RedirectResponse
@@ -100,7 +102,7 @@ class ProductController extends Controller
 
     /**
      * Display the specified product.
-     * 
+     *
      * @deprecated Use modal in products/Index instead
      */
     public function show(ProductRequest $request, Product $product): RedirectResponse
@@ -111,7 +113,7 @@ class ProductController extends Controller
 
     /**
      * Show the form for editing the specified product.
-     * 
+     *
      * @deprecated Use modal in products/Index instead
      */
     public function edit(ProductRequest $request, Product $product): RedirectResponse
@@ -135,18 +137,11 @@ class ProductController extends Controller
             );
 
             if (!$updated) {
-                if ($request->wantsJson()) {
-                    return $this->notFound('Product not found');
-                }
-
                 abort(404);
             }
 
-            if ($request->wantsJson()) {
-                return $this->success(null, 'Product updated successfully');
-            }
-
-            return redirect()->route('products.show', $product);
+            // Inertia expects a redirect response, not JSON
+            return redirect()->route('products.index')->with('success', 'Product updated successfully');
 
         } catch (\Exception $e) {
             if ($request->wantsJson()) {
@@ -160,33 +155,37 @@ class ProductController extends Controller
     /**
      * Remove the specified product.
      */
-    public function destroy(ProductRequest $request, Product $product): JsonResponse|RedirectResponse
+    public function destroy(Request $request, Product $product): JsonResponse
     {
         try {
             $store = $this->validateStore();
 
+            // Verify product belongs to the store
+            if ($product->store_id !== $store->id) {
+                return $this->notFound('Product not found');
+            }
+
+            // Delete all physical image files first
+            $directory = 'products/' . $product->id;
+            \Storage::disk('public')->deleteDirectory($directory);
+
+            // Delete product (this will cascade delete image records via FK)
             $deleted = $this->productService->deleteProductForStore($store, $product->id);
 
             if (!$deleted) {
-                if ($request->wantsJson()) {
-                    return $this->notFound('Product not found');
-                }
-
-                abort(404);
+                return $this->notFound('Product not found');
             }
 
-            if ($request->wantsJson()) {
-                return $this->noContent('Product deleted successfully');
-            }
-
-            return redirect()->route('products.index');
+            return $this->noContent('Product deleted successfully');
 
         } catch (\Exception $e) {
-            if ($request->wantsJson()) {
-                return $this->error('Failed to delete product', 500);
-            }
+            Log::error('ProductController::destroy - ERROR', [
+                'error' => $e->getMessage(),
+                'product_id' => $product->id ?? null,
+                'user_id' => auth()->id(),
+            ]);
 
-            throw $e;
+            return $this->error('Failed to delete product: ' . $e->getMessage(), 500);
         }
     }
 
@@ -230,16 +229,22 @@ class ProductController extends Controller
             $isPrimary = $request->booleanIsPrimary();
             $order = $request->integerOrder($product->images()->count());
 
-            // Create image record with all sizes
-            $baseUrl = config('app.url') . ':8080';
+            // Create image record with relative paths (not full URLs)
             $imageRecord = $product->images()->create([
-                'url' => $baseUrl . '/storage/' . $originalPath,
-                'thumbnail_url' => $baseUrl . '/storage/' . $directory . '/' . $thumbnailFilename,
-                'medium_url' => $baseUrl . '/storage/' . $directory . '/' . $mediumFilename,
+                'url' => 'storage/' . $originalPath,
                 'alt' => $request->input('alt', $product->name),
                 'title' => $request->input('title'),
                 'is_primary' => $isPrimary,
                 'order' => $order,
+                'metadata' => [
+                    'thumbnail' => 'storage/' . $directory . '/' . $thumbnailFilename,
+                    'medium' => 'storage/' . $directory . '/' . $mediumFilename,
+                    'sizes' => [
+                        'original' => $originalPath,
+                        'thumbnail' => $directory . '/' . $thumbnailFilename,
+                        'medium' => $directory . '/' . $mediumFilename,
+                    ],
+                ],
             ]);
 
             // If this is the first image or is_primary is true, set as primary
@@ -250,9 +255,10 @@ class ProductController extends Controller
 
             return $this->success([
                 'id' => $imageRecord->id,
-                'url' => $imageRecord->url,
-                'thumbnail_url' => $imageRecord->thumbnail_url,
-                'medium_url' => $imageRecord->medium_url,
+                'url' => asset($imageRecord->url),
+                'full_url' => asset($imageRecord->url),
+                'thumbnail_url' => asset($imageRecord->metadata['thumbnail'] ?? $imageRecord->url),
+                'medium_url' => asset($imageRecord->metadata['medium'] ?? $imageRecord->url),
                 'alt' => $imageRecord->alt,
                 'title' => $imageRecord->title,
                 'is_primary' => $imageRecord->is_primary,
@@ -306,6 +312,159 @@ class ProductController extends Controller
             ]);
 
             return $this->error('Failed to delete image', 500);
+        }
+    }
+
+    /**
+     * Bulk update product status.
+     */
+    public function bulkUpdateStatus(Request $request): JsonResponse
+    {
+        try {
+            $validated = $request->validate([
+                'ids' => 'required|array',
+                'ids.*' => 'required|string',
+                'status' => 'required|in:active,inactive,draft,archived'
+            ]);
+
+            $store = $this->validateStore();
+
+            $updated = $this->productService->bulkUpdateStatus(
+                $store,
+                $validated['ids'],
+                $validated['status']
+            );
+
+            return $this->success(null, "{$updated} products updated successfully");
+
+        } catch (\Exception $e) {
+            Log::error('ProductController::bulkUpdateStatus - ERROR', [
+                'error' => $e->getMessage(),
+                'user_id' => auth()->id(),
+            ]);
+
+            return $this->error('Failed to update products', 500);
+        }
+    }
+
+    /**
+     * Bulk delete products.
+     */
+    public function bulkDelete(Request $request): JsonResponse
+    {
+        try {
+            $validated = $request->validate([
+                'ids' => 'required|array',
+                'ids.*' => 'required|string'
+            ]);
+
+            $store = $this->validateStore();
+
+            $deleted = $this->productService->bulkDelete($store, $validated['ids']);
+
+            return $this->success(null, "{$deleted} products deleted successfully");
+
+        } catch (\Exception $e) {
+            Log::error('ProductController::bulkDelete - ERROR', [
+                'error' => $e->getMessage(),
+                'user_id' => auth()->id(),
+            ]);
+
+            return $this->error('Failed to delete products', 500);
+        }
+    }
+
+    /**
+     * Bulk update product categories.
+     */
+    public function bulkUpdateCategories(Request $request): JsonResponse
+    {
+        try {
+            $validated = $request->validate([
+                'ids' => 'required|array',
+                'ids.*' => 'required|string',
+                'category_ids' => 'required|array',
+                'category_ids.*' => 'required|string'
+            ]);
+
+            $store = $this->validateStore();
+
+            $updated = $this->productService->bulkUpdateCategories(
+                $store,
+                $validated['ids'],
+                $validated['category_ids']
+            );
+
+            return $this->success(null, "{$updated} products updated successfully");
+
+        } catch (\Exception $e) {
+            Log::error('ProductController::bulkUpdateCategories - ERROR', [
+                'error' => $e->getMessage(),
+                'user_id' => auth()->id(),
+            ]);
+
+            return $this->error('Failed to update categories', 500);
+        }
+    }
+
+    /**
+     * Bulk update product prices.
+     */
+    public function bulkUpdatePrice(Request $request): JsonResponse
+    {
+        try {
+            $validated = $request->validate([
+                'ids' => 'required|array',
+                'ids.*' => 'required|string',
+                'type' => 'required|in:fixed,percentage',
+                'value' => 'required|numeric',
+                'apply_to' => 'required|in:base_price,sale_price,both'
+            ]);
+
+            $store = $this->validateStore();
+
+            $updated = $this->productService->bulkUpdatePrice(
+                $store,
+                $validated['ids'],
+                $validated
+            );
+
+            return $this->success(null, "{$updated} products updated successfully");
+
+        } catch (\Exception $e) {
+            Log::error('ProductController::bulkUpdatePrice - ERROR', [
+                'error' => $e->getMessage(),
+                'user_id' => auth()->id(),
+            ]);
+
+            return $this->error('Failed to update prices', 500);
+        }
+    }
+
+    /**
+     * Export products.
+     */
+    public function export(Request $request): mixed
+    {
+        try {
+            $validated = $request->validate([
+                'ids' => 'nullable|string',
+                'format' => 'required|in:csv,xlsx'
+            ]);
+
+            $store = $this->validateStore();
+
+            $ids = $validated['ids'] ? explode(',', $validated['ids']) : null;
+
+            return $this->productService->exportProducts($store, $ids, $validated['format']);
+
+        } catch (\Exception $e) {
+            Log::error('ProductController::export - ERROR', [
+                'error' => $e->getMessage(),
+                'user_id' => auth()->id(),
+            ]);
+
+            return $this->error('Failed to export products', 500);
         }
     }
 }

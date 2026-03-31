@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\TranslationHelper;
 use App\Models\Order;
 use App\Services\OrderService;
 use Illuminate\Http\Request;
@@ -38,6 +39,7 @@ class OrderController extends Controller
                 'orders' => $orders,
                 'filters' => $filters,
                 'statistics' => $statistics,
+                'translations' => TranslationHelper::forPreset('orders'),
             ]);
 
         } catch (\Exception $e) {

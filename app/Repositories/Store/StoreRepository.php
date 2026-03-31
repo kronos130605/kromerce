@@ -47,6 +47,20 @@ class StoreRepository extends BaseRepository
     }
 
     /**
+     * Get top stores for storefront.
+     */
+    public function getTopStores(int $limit = 8): Collection
+    {
+        return $this->model->newQuery()
+            ->where('status', 'active')
+            ->withCount('products')
+            ->select(['id', 'name', 'slug', 'description', 'logo', 'verified_business'])
+            ->inRandomOrder() // TODO: Replace with actual rating/performance logic
+            ->limit($limit)
+            ->get();
+    }
+
+    /**
      * Search stores.
      */
     public function search(string $query): Collection

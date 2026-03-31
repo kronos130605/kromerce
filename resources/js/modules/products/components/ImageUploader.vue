@@ -61,7 +61,7 @@
                     <!-- Image Preview -->
                     <div class="aspect-square bg-gray-100 rounded-lg overflow-hidden">
                         <img
-                            :src="image.url || image.preview"
+                            :src="image.full_url || image.preview || image.url"
                             :alt="image.alt || `Image ${index + 1}`"
                             class="w-full h-full object-cover"
                         >
@@ -200,9 +200,9 @@
 
 <script setup>
 import { ref, watch } from 'vue'
-import { useI18n } from 'vue-i18n'
+import { useTranslations } from '@/composables/useTranslations'
 
-const { t } = useI18n()
+const { t } = useTranslations()
 
 const props = defineProps({
     modelValue: {
@@ -348,8 +348,8 @@ const uploadImage = async (file, isPrimary = false) => {
         if (data.success) {
             images.value.push({
                 id: data.data.id,
-                url: data.data.thumbnail_url || data.data.url, // Use thumbnail for preview
-                full_url: data.data.url, // Keep full size for viewing
+                url: data.data.thumbnail_url || data.data.url,
+                full_url: data.data.full_url || data.data.url,
                 preview: data.data.thumbnail_url || data.data.url,
                 alt: data.data.alt || '',
                 title: data.data.title || '',

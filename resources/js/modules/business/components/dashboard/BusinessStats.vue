@@ -1,9 +1,9 @@
 <script setup>
 import { ref } from 'vue';
-import { useI18n } from 'vue-i18n';
+import { useTranslations } from '@/composables/useTranslations';
 import { useDarkMode } from '@/composables/useDarkMode.js';
 
-const { t } = useI18n();
+const { t } = useTranslations();
 const { isDark } = useDarkMode();
 
 // Get dynamic background color based on mode
@@ -36,7 +36,7 @@ const stats = ref([
         previous: 2894
     },
     {
-        title: 'common.products',
+        title: 'dashboard.products',
         value: 156,
         change: 12.1,
         changeType: 'positive',

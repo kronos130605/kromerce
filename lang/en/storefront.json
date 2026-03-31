@@ -1,0 +1,124 @@
+{
+    "storefront": {
+        "hero": {
+            "badge": "New arrivals every day",
+            "title": "Discover Amazing Products",
+            "subtitle": "Shop from thousands of verified sellers worldwide",
+            "cta_browse": "Browse Products",
+            "cta_sellers": "View Sellers"
+        },
+        "topbar": {
+            "free_shipping": "Free shipping on orders over $50",
+            "secure_payment": "Secure Payment",
+            "support": "24/7 Support"
+        },
+        "sections": {
+            "featured_categories": "Featured Categories",
+            "trending_products": "Trending Products",
+            "new_arrivals": "New Arrivals",
+            "deals_of_the_day": "Deals of the Day",
+            "top_stores": "Top Stores",
+            "view_all": "View All",
+            "ends_in": "Ends in"
+        },
+        "navigation": {
+            "home": "Home",
+            "products": "Products",
+            "all_products": "All Products",
+            "categories": "Categories",
+            "stores": "Stores",
+            "deals": "Deals",
+            "search_placeholder": "Search products, stores...",
+            "search": "Search",
+            "cart": "Cart",
+            "wishlist": "Wishlist",
+            "account": "Account",
+            "login": "Sign In",
+            "register": "Register",
+            "logout": "Sign Out"
+        },
+        "product": {
+            "add_to_cart": "Add to Cart",
+            "added": "Added!",
+            "buy_now": "Buy Now",
+            "out_of_stock": "Out of Stock",
+            "in_stock": "In Stock",
+            "left": "left",
+            "sold": "sold",
+            "sale": "Sale",
+            "new": "New",
+            "featured": "Featured",
+            "free_shipping": "Free Shipping",
+            "from": "From",
+            "quick_view": "Quick View",
+            "add_to_wishlist": "Add to Wishlist",
+            "view_full_details": "View Full Details"
+        },
+        "store": {
+            "verified": "Verified",
+            "top_seller": "Top Seller",
+            "products_count": "{count} products",
+            "visit_store": "Visit Store"
+        },
+        "category": {
+            "products_count": "{count} products"
+        },
+        "features": {
+            "secure_payment": {
+                "title": "Secure Payment",
+                "description": "Your transactions are fully protected"
+            },
+            "fast_shipping": {
+                "title": "Fast Shipping",
+                "description": "Delivered in record time"
+            },
+            "quality_guarantee": {
+                "title": "Quality Guarantee",
+                "description": "Verified and quality products"
+            },
+            "support": {
+                "title": "24/7 Support",
+                "description": "We are here to help you"
+            }
+        },
+        "footer": {
+            "about": {
+                "title": "About Kromerce",
+                "description": "Your trusted marketplace to buy and sell quality products."
+            },
+            "quick_links": {
+                "title": "Quick Links",
+                "about_us": "About Us",
+                "contact": "Contact",
+                "faq": "FAQ",
+                "terms": "Terms & Conditions",
+                "privacy": "Privacy Policy"
+            },
+            "customer_service": {
+                "title": "Customer Service",
+                "help_center": "Help Center",
+                "returns": "Returns",
+                "shipping": "Shipping",
+                "track_order": "Track Order"
+            },
+            "for_sellers": {
+                "title": "For Sellers",
+                "start_selling": "Start Selling",
+                "seller_dashboard": "Seller Dashboard",
+                "seller_support": "Seller Support"
+            },
+            "copyright": "© {year} Kromerce. All rights reserved."
+        },
+        "cart": {
+            "items": "items",
+            "empty": "Your cart is empty",
+            "total": "Total",
+            "checkout": "Proceed to Checkout"
+        },
+        "empty": {
+            "no_products": "No products available",
+            "no_categories": "No categories available",
+            "no_stores": "No stores available"
+        }
+    }
+}

@@ -1,13 +1,13 @@
 <script setup>
 import { useForm, router } from '@inertiajs/vue3';
 import { ref } from 'vue';
-import { useI18n } from 'vue-i18n';
+import { useTranslations } from '@/composables/useTranslations';
 
 const props = defineProps({
     categories: Array,
 });
 
-const { t } = useI18n();
+const { t } = useTranslations();
 
 const form = useForm({
     name: '',

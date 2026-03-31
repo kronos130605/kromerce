@@ -27,8 +27,14 @@ class DatabaseSeeder extends Seeder
 
         // Run role and permission seeder
         $this->call(RolePermissionSeeder::class);
-        
+
         // Seed currencies
         $this->call(CurrencySeeder::class);
+
+        // Seed default product categories
+        $this->call(ProductCategorySeeder::class);
+
+        // Seed marketplace
+        $this->call(MarketplaceSeeder::class);
     }
 }

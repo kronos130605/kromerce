@@ -1,7 +1,7 @@
 <script setup>
-import { useI18n } from 'vue-i18n';
+import { useTranslations } from '@/composables/useTranslations';
 
-const { t } = useI18n();
+const { t } = useTranslations();
 const currentYear = new Date().getFullYear();
 
 const footerLinks = {
@@ -42,9 +42,9 @@ const socialLinks = [
             <img src="/images/kromerce-business-text.png" alt="Kromerce" class="h-8 w-auto" />
           </div>
           <p class="text-muted-foreground mb-6 max-w-md">
-            {{ t('footer.description') }}
+            {{ t('welcome.footer.description') }}
           </p>
-          
+
           <!-- Newsletter -->
           <div class="space-y-4">
             <h3 class="font-semibold text-foreground">Newsletter</h3>
@@ -63,7 +63,7 @@ const socialLinks = [
 
         <!-- Product Links -->
         <div>
-          <h3 class="font-semibold text-foreground mb-4">{{ t('footer.links.product') }}</h3>
+          <h3 class="font-semibold text-foreground mb-4">{{ t('welcome.footer.links.product') }}</h3>
           <ul class="space-y-2">
             <li v-for="link in footerLinks.product" :key="link.key">
               <a :href="link.href" class="text-muted-foreground hover:text-foreground transition-colors">
@@ -75,7 +75,7 @@ const socialLinks = [
 
         <!-- Company Links -->
         <div>
-          <h3 class="font-semibold text-foreground mb-4">{{ t('footer.links.company') }}</h3>
+          <h3 class="font-semibold text-foreground mb-4">{{ t('welcome.footer.links.company') }}</h3>
           <ul class="space-y-2">
             <li v-for="link in footerLinks.company" :key="link.key">
               <a :href="link.href" class="text-muted-foreground hover:text-foreground transition-colors">
@@ -87,7 +87,7 @@ const socialLinks = [
 
         <!-- Legal Links -->
         <div>
-          <h3 class="font-semibold text-foreground mb-4">{{ t('footer.links.legal') }}</h3>
+          <h3 class="font-semibold text-foreground mb-4">{{ t('welcome.footer.links.legal') }}</h3>
           <ul class="space-y-2">
             <li v-for="link in footerLinks.legal" :key="link.key">
               <a :href="link.href" class="text-muted-foreground hover:text-foreground transition-colors">
@@ -113,9 +113,9 @@ const socialLinks = [
             </svg>
           </a>
         </div>
-        
+
         <div class="text-muted-foreground text-sm">
-          {{ t('footer.copyright').replace('2024', String(currentYear)) }}
+          {{ t('welcome.footer.copyright').replace('2024', String(currentYear)) }}
         </div>
       </div>
     </div>

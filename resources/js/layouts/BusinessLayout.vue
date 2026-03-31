@@ -1,5 +1,8 @@
 <template>
   <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <!-- Toast Notifications -->
+    <Toast />
+
     <!-- Business Dashboard Navbar -->
     <BusinessDashboardNavbar ref="navbarRef" />
 
@@ -32,11 +35,12 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { usePage } from '@inertiajs/vue3';
-import { useI18n } from 'vue-i18n';
+import { useTranslations } from '@/composables/useTranslations';
 import BusinessSidebar from '@/components/navigation/sidebars/BusinessSidebar.vue';
 import BusinessDashboardNavbar from '@/components/navigation/navbars/BusinessDashboardNavbar.vue';
 import { useSidebar } from '@/composables/useSidebar.js';
 import { useRoleGuard } from '@/composables/useRoleGuard.js';
+import Toast from '@/components/shared/Toast.vue';
 
 // Import content components
 import BusinessDashboardContent from '@/modules/business/components/BusinessDashboardContent.vue';
@@ -45,7 +49,11 @@ import BusinessOrdersContent from '@/modules/business/components/BusinessOrdersC
 import BusinessAnalyticsContent from '@/modules/business/components/BusinessAnalyticsContent.vue';
 
 const page = usePage();
-const { t } = useI18n();
+const { t } = useTranslations();
+
+// Load business translations
+useTranslations(['dashboard_nav']);
+
 const sidebarRef = ref(null);
 const navbarRef = ref(null);
 

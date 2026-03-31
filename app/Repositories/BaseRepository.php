@@ -27,8 +27,9 @@ abstract class BaseRepository
 
     /**
      * Get record by ID.
+     * Supports both int and string (UUID) IDs.
      */
-    public function getById(int $id, array $columns = ['*']): ?Model
+    public function getById(int|string $id, array $columns = ['*']): ?Model
     {
         return $this->model->find($id, $columns);
     }
@@ -101,8 +102,9 @@ abstract class BaseRepository
 
     /**
      * Update record by ID.
+     * Supports both int and string (UUID) IDs.
      */
-    public function update(int $id, array $data): bool
+    public function update(int|string $id, array $data): bool
     {
         $model = $this->getById($id);
 
@@ -137,8 +139,9 @@ abstract class BaseRepository
 
     /**
      * Delete record by ID.
+     * Supports both int and string (UUID) IDs.
      */
-    public function delete(int $id): bool
+    public function delete(int|string $id): bool
     {
         $model = $this->getById($id);
 

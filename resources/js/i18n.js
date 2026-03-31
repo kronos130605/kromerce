@@ -1,43 +1,9 @@
-import { createI18n } from 'vue-i18n';
+export function detectLocale() {
+    return localStorage.getItem('kromerce_locale') || 'es';
+}
 
-// Import translation files from the modular structure
-import commonEs from './i18n/locales/es/common.json';
-import authEs from './i18n/locales/es/auth.json';
-import dashboardEs from './i18n/locales/es/dashboard.json';
-import productsEs from './i18n/locales/es/products.json';
-import ordersEs from './i18n/locales/es/orders.json';
-import businessEs from './i18n/locales/es/business.json';
-import errorsEs from './i18n/locales/es/errors.json';
+export function setLocaleCookie(locale) {
+    document.cookie = `kromerce_locale=${locale};path=/;max-age=${30 * 24 * 60 * 60};SameSite=Lax`;
+    localStorage.setItem('kromerce_locale', locale);
+}
 
-import commonEn from './i18n/locales/en/common.json';
-import authEn from './i18n/locales/en/auth.json';
-import dashboardEn from './i18n/locales/en/dashboard.json';
-import productsEn from './i18n/locales/en/products.json';
-import ordersEn from './i18n/locales/es/orders.json'; // Fallback to Spanish for now
-import businessEn from './i18n/locales/en/business.json';
-import errorsEn from './i18n/locales/en/errors.json';
-
-// Merge translations for each locale
-const mergeTranslations = (common, auth, dashboard, products, orders, business, errors) => ({
-  ...common,
-  ...auth,
-  ...dashboard,
-  ...products,
-    orders: orders,
-  ...business,
-  ...errors
-});
-
-// Create i18n instance
-const i18n = createI18n({
-    legacy: false,
-    locale: 'es', // default locale (matching the existing setup)
-    fallbackLocale: 'es',
-    messages: {
-        es: mergeTranslations(commonEs, authEs, dashboardEs, productsEs, ordersEs, businessEs, errorsEs),
-        en: mergeTranslations(commonEn, authEn, dashboardEn, productsEn, ordersEn, businessEn, errorsEn)
-    },
-    globalInjection: true
-});
-
-export { i18n };

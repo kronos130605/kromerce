@@ -10,10 +10,15 @@ use Inertia\Inertia;
 |--------------------------------------------------------------------------
 */
 
-// Landing page principal
-Route::get('/', function () {
-    return Inertia::render('Kromerce.vue');
-})->name('kromerce.app');
+use App\Http\Controllers\StorefrontController;
+
+// Welcome/Landing page
+Route::get('/welcome', function () {
+    return Inertia::render('Kromerce');
+})->name('welcome');
+
+// Marketplace - Storefront para clientes
+Route::get('/', [StorefrontController::class, 'home'])->name('home');
 
 // Rutas de perfil de usuario
 Route::middleware('auth')->group(function () {
@@ -24,6 +29,7 @@ Route::middleware('auth')->group(function () {
 
 // Include de archivos de rutas específicos
 require __DIR__.'/auth.php';
+require __DIR__.'/storefront.php';
 require __DIR__.'/business.php';
 require __DIR__.'/products.php';
 require __DIR__.'/orders.php';

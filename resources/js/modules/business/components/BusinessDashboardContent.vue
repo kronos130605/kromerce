@@ -1,7 +1,7 @@
 <script setup>
 import { computed } from 'vue';
 import { usePage } from '@inertiajs/vue3';
-import { useI18n } from 'vue-i18n';
+import { useTranslations } from '@/composables/useTranslations';
 
 // Import business dashboard components
 import BusinessWelcome from '@/modules/business/components/dashboard/BusinessWelcome.vue';
@@ -15,19 +15,19 @@ import BusinessActivityFeed from '@/modules/business/components/dashboard/Busine
 import BusinessAnalytics from '@/modules/business/components/dashboard/BusinessAnalytics.vue';
 
 const page = usePage();
-const { t } = useI18n();
+const { t } = useTranslations();
 
 // Dashboard data from backend
 const dashboardData = computed(() => page.props.dashboard_data || {});
 
 // Tab options
 const tabOptions = computed(() => [
-    { key: 'overview', label: t('dashboard.tab_overview'), href: '/dashboard' },
-    { key: 'products', label: t('dashboard.tab_products'), href: '/products' },
-    { key: 'orders', label: t('dashboard.tab_orders'), href: '/orders' },
-    { key: 'analytics', label: t('dashboard.nav_analytics'), href: '/analytics' },
+    { key: 'overview', label: t('dashboard.overview'), href: '/dashboard' },
+    { key: 'products', label: t('dashboard.products'), href: '/products' },
+    { key: 'orders', label: t('dashboard.orders'), href: '/orders' },
+    { key: 'analytics', label: t('dashboard.analytics'), href: '/analytics' },
     { key: 'marketing', label: t('dashboard.marketing_tools'), href: '/marketing' },
-    { key: 'settings', label: t('dashboard.nav_settings'), href: '/settings' }
+    { key: 'settings', label: t('dashboard.settings'), href: '/settings' }
 ]);
 
 // Helper functions

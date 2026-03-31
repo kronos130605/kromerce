@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
@@ -13,8 +14,10 @@ class ProductCategory extends Model
 {
     use HasFactory, SoftDeletes;
 
+    protected $keyType = 'string';
+    public $incrementing = false;
+
     protected $fillable = [
-        'store_id',
         'name',
         'slug',
         'description',
@@ -23,13 +26,19 @@ class ProductCategory extends Model
         'level',
         'order',
         'status',
+        'is_featured',
         'settings',
+        'translations',
+        'meta_title',
+        'meta_description',
     ];
 
     protected $casts = [
         'level' => 'integer',
         'order' => 'integer',
         'settings' => 'array',
+        'translations' => 'array',
+        'is_featured' => 'boolean',
     ];
 
     protected static function boot()
@@ -37,6 +46,11 @@ class ProductCategory extends Model
         parent::boot();
 
         static::creating(function ($category) {
+            // Generate UUID if not set
+            if (empty($category->id)) {
+                $category->id = Str::uuid()->toString();
+            }
+
             if (empty($category->slug)) {
                 $category->slug = Str::slug($category->name);
             }
@@ -58,11 +72,12 @@ class ProductCategory extends Model
     }
 
     /**
-     * Get the store that owns the category.
+     * Get translations for a specific locale.
      */
-    public function store(): BelongsTo
+    public function getTranslation(string $locale, string $field = 'name'): ?string
     {
-        return $this->belongsTo(Store::class);
+        $translations = $this->translations ?? [];
+        return $translations[$locale][$field] ?? $this->$field;
     }
 
     /**
