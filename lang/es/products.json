@@ -223,6 +223,16 @@
             "cancel": "Cancelar",
             "save_changes": "Guardar Cambios",
             "file_too_large": "El archivo {name} es muy grande. El tamaño máximo es {size}MB."
+        },
+        "bulk_actions": {
+            "selected": "{count} producto seleccionado|{count} productos seleccionados",
+            "clear_selection": "Limpiar selección",
+            "activate": "Activar seleccionados",
+            "deactivate": "Desactivar seleccionados",
+            "move_to_draft": "Mover a borrador",
+            "export": "Exportar seleccionados",
+            "delete": "Eliminar seleccionados",
+            "processing": "Procesando..."
         }
     }
 }

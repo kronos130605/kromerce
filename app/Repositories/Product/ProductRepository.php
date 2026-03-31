@@ -158,7 +158,7 @@ class ProductRepository extends BaseRepository
         return $this->model->newQuery()
             ->where('status', 'active')
             ->with([
-                'images:id,product_id,url,thumbnail_url,is_primary,order',
+                'images:id,product_id,url,is_primary,order',
                 'store:id,name,slug',
                 'categories:id,name,slug'
             ])
@@ -177,7 +177,7 @@ class ProductRepository extends BaseRepository
             ->where('status', 'active')
             ->where('created_at', '>=', now()->subDays($days))
             ->with([
-                'images:id,product_id,url,thumbnail_url,is_primary,order',
+                'images:id,product_id,url,is_primary,order',
                 'store:id,name,slug',
                 'categories:id,name,slug'
             ])
@@ -197,7 +197,7 @@ class ProductRepository extends BaseRepository
             ->whereNotNull('base_sale_price')
             ->whereColumn('base_sale_price', '<', 'base_price')
             ->with([
-                'images:id,product_id,url,thumbnail_url,is_primary,order',
+                'images:id,product_id,url,is_primary,order',
                 'store:id,name,slug',
                 'categories:id,name,slug'
             ])

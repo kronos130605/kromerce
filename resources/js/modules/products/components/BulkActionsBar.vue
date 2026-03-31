@@ -1,5 +1,8 @@
 <script setup>
 import { ref } from 'vue';
+import { useTranslations } from '@/composables/useTranslations';
+
+const { t } = useTranslations();
 
 const props = defineProps({
     selectionCount: {
@@ -48,13 +51,13 @@ const showMenu = ref(false);
                         </div>
                         <div>
                             <p class="text-sm font-medium text-gray-900 dark:text-white">
-                                {{ selectionCount }} {{ selectionCount === 1 ? 'product' : 'products' }} selected
+                                {{ t('products.bulk_actions.selected', { count: selectionCount }) }}
                             </p>
                             <button
                                 @click="emit('clear-selection')"
                                 class="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
                             >
-                                Clear selection
+                                {{ t('products.bulk_actions.clear_selection') }}
                             </button>
                         </div>
                     </div>
@@ -68,7 +71,7 @@ const showMenu = ref(false);
                         <button
                             @click="emit('bulk-activate')"
                             :disabled="isProcessing"
-                            title="Activate selected"
+                            :title="t('products.bulk_actions.activate')"
                             class="p-2 rounded-lg text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/30 transition-colors disabled:opacity-50"
                         >
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -80,7 +83,7 @@ const showMenu = ref(false);
                         <button
                             @click="emit('bulk-deactivate')"
                             :disabled="isProcessing"
-                            title="Deactivate selected"
+                            :title="t('products.bulk_actions.deactivate')"
                             class="p-2 rounded-lg text-gray-600 dark:text-gray-400 hover:text-yellow-600 dark:hover:text-yellow-400 hover:bg-yellow-50 dark:hover:bg-yellow-900/30 transition-colors disabled:opacity-50"
                         >
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -92,7 +95,7 @@ const showMenu = ref(false);
                         <button
                             @click="emit('bulk-draft')"
                             :disabled="isProcessing"
-                            title="Move to draft"
+                            :title="t('products.bulk_actions.move_to_draft')"
                             class="p-2 rounded-lg text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors disabled:opacity-50"
                         >
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -107,7 +110,7 @@ const showMenu = ref(false);
                         <button
                             @click="emit('bulk-export')"
                             :disabled="isProcessing"
-                            title="Export selected"
+                            :title="t('products.bulk_actions.export')"
                             class="p-2 rounded-lg text-gray-600 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/30 transition-colors disabled:opacity-50"
                         >
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -119,7 +122,7 @@ const showMenu = ref(false);
                         <button
                             @click="emit('bulk-delete')"
                             :disabled="isProcessing"
-                            title="Delete selected"
+                            :title="t('products.bulk_actions.delete')"
                             class="p-2 rounded-lg text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors disabled:opacity-50"
                         >
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -131,7 +134,7 @@ const showMenu = ref(false);
                     <!-- Processing Indicator -->
                     <div v-if="isProcessing" class="flex items-center gap-2 ml-2">
                         <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
-                        <span class="text-sm text-gray-600 dark:text-gray-400">Processing...</span>
+                        <span class="text-sm text-gray-600 dark:text-gray-400">{{ t('products.bulk_actions.processing') }}</span>
                     </div>
                 </div>
             </div>

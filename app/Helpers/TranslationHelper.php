@@ -44,6 +44,8 @@ class TranslationHelper
 
     public static function getLocale(): string
     {
-        return session('locale', config('app.locale', 'es'));
+        // Forzar español como idioma por defecto
+        // Solo cambiará si el usuario lo selecciona explícitamente (guardado en session)
+        return session('locale', 'es');
     }
 }
