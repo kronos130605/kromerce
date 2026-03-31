@@ -263,9 +263,16 @@ class ProductCategorySeeder extends Seeder
             ],
         ];
 
-        // Crear categorías usando el modelo para que se procesen correctamente
+        // Crear categorías usando updateOrCreate para evitar duplicados en redeploys
         foreach ($categories as $categoryData) {
-            ProductCategory::create($categoryData);
+            $slug = $categoryData['slug'];
+            // Remove 'id' to prevent trying to update primary key of existing records
+            $data = array_diff_key($categoryData, ['id' => true]);
+
+            ProductCategory::updateOrCreate(
+                ['slug' => $slug],
+                $data
+            );
         }
 
         $this->command->info('Creadas ' . count($categories) . ' categorías globales con traducciones.');

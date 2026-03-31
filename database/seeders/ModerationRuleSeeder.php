@@ -72,7 +72,10 @@ class ModerationRuleSeeder extends Seeder
         ];
 
         foreach ($rules as $rule) {
-            ModerationRule::create($rule);
+            ModerationRule::firstOrCreate(
+                ['name' => $rule['name']],
+                $rule
+            );
         }
     }
 }
