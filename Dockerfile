@@ -34,9 +34,9 @@ RUN chown -R www-data:www-data public/build
 
 # Install Node.js dependencies and build assets
 RUN npm install \
+    && rm -f public/hot \
     && rm -rf public/build \
     && npm run build \
-    && rm -f public/build/manifest.webmanifest \
     && ls -R public/build
 
 

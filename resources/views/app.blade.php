@@ -17,7 +17,7 @@
         <link rel="apple-touch-icon" href="{{ asset('images/icons/kromerce-business-icon-app-100.png') }}">
         
         <!-- PWA Manifest -->
-        <link rel="manifest" href="{{ asset('manifest.json') }}">
+        <link rel="manifest" href="{{ asset('build/manifest.webmanifest') }}">
 
         <title>{{ config('app.name', 'Laravel') }}</title>
 
