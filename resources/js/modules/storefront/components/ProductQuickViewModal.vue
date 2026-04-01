@@ -1,9 +1,9 @@
 <script setup>
 import { ref, computed, watch } from 'vue';
 import { Link } from '@inertiajs/vue3';
-import { useCart } from '@/composables/useCart';
-import { useProductPresentation } from '@/composables/useProductPresentation';
-import { useTranslations } from '@/composables/useTranslations';
+import { useCart } from '@/composables/useCart.js';
+import { useProductPresentation } from '@/composables/useProductPresentation.js';
+import { useTranslations } from '@/composables/useTranslations.js';
 
 const { t } = useTranslations();
 const { addToCart, isInCart } = useCart();
@@ -269,7 +269,7 @@ const close = () => emit('close');
                                     </svg>
                                 </button>
                                 <Link
-                                    :href="`/products/${product.slug}`"
+                                    :href="`/products/${product.id}`"
                                     @click="close"
                                     class="text-sm text-blue-600 hover:underline dark:text-blue-400"
                                 >

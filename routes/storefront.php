@@ -16,7 +16,7 @@ use App\Http\Controllers\StorePageController;
 
 // Marketplace routes
 Route::get('/products', [StorefrontController::class, 'products'])->name('products.index');
-Route::get('/products/{product:slug}', [StorefrontController::class, 'productDetail'])->name('products.show');
+Route::get('/products/{product}', [StorefrontController::class, 'productDetail'])->name('products.show');
 Route::get('/category/{category:slug}', [StorefrontController::class, 'category'])->name('category.show');
 Route::get('/search', [StorefrontController::class, 'search'])->name('search');
 

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Store;
 use App\Services\StorePageService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -16,14 +17,8 @@ class StorePageController extends Controller
     /**
      * Display store home page.
      */
-    public function home(string $slug): Response
+    public function home(Store $store): Response
     {
-        $store = $this->storePageService->getStoreBySlug($slug);
-
-        if (!$store) {
-            abort(404, 'Store not found');
-        }
-
         $store->load(['owner']);
         $data = $this->storePageService->getStoreHomeData($store->id);
 
@@ -35,14 +30,8 @@ class StorePageController extends Controller
     /**
      * Display store products page.
      */
-    public function products(string $slug, Request $request): Response
+    public function products(Store $store, Request $request): Response
     {
-        $store = $this->storePageService->getStoreBySlug($slug);
-
-        if (!$store) {
-            abort(404, 'Store not found');
-        }
-
         $filters = $request->only(['search', 'category', 'min_price', 'max_price', 'sort_by', 'sort_order']);
         $products = $this->storePageService->getStoreProducts($store->id, $filters);
         $categories = $this->storePageService->getStoreCategories($store->id);
@@ -58,14 +47,8 @@ class StorePageController extends Controller
     /**
      * Display store about page.
      */
-    public function about(string $slug): Response
+    public function about(Store $store): Response
     {
-        $store = $this->storePageService->getStoreBySlug($slug);
-
-        if (!$store) {
-            abort(404, 'Store not found');
-        }
-
         $store->load(['owner']);
 
         return Inertia::render('storefront/StoreAbout', [

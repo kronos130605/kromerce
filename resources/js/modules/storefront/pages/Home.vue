@@ -1,8 +1,8 @@
 <script setup>
 import { ref } from 'vue';
 import StorefrontLayout from '@/layouts/StorefrontLayout.vue';
-import ProductDetailsModal from '@/components/storefront/ProductDetailsModal.vue';
-import ProductQuickViewModal from '@/components/storefront/ProductQuickViewModal.vue';
+import ProductDetailsModal from '@/modules/storefront/components/ProductDetailsModal.vue';
+import ProductQuickViewModal from '@/modules/storefront/components/ProductQuickViewModal.vue';
 import HeroBanner from '@/modules/storefront/components/HeroBanner.vue';
 import TrustBar from '@/modules/storefront/components/TrustBar.vue';
 import FeaturedCategoriesSection from '@/modules/storefront/components/FeaturedCategoriesSection.vue';

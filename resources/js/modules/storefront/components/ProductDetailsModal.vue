@@ -1,9 +1,9 @@
 <script setup>
 import { computed, ref, watch } from 'vue';
 import { Link } from '@inertiajs/vue3';
-import { useCart } from '@/composables/useCart';
-import { useProductPresentation } from '@/composables/useProductPresentation';
-import { useTranslations } from '@/composables/useTranslations';
+import { useCart } from '@/composables/useCart.js';
+import { useProductPresentation } from '@/composables/useProductPresentation.js';
+import { useTranslations } from '@/composables/useTranslations.js';
 
 const { t } = useTranslations();
 const { addToCart } = useCart();
@@ -294,7 +294,7 @@ const close = () => emit('close');
 
                             <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                                 <Link
-                                    :href="`/products/${product.slug}`"
+                                    :href="`/products/${product.id}`"
                                     @click="close"
                                     class="inline-flex items-center gap-2 text-sm font-semibold text-blue-600 transition-colors hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
                                 >

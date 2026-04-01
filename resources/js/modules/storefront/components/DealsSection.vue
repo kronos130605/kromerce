@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue';
 import { Link } from '@inertiajs/vue3';
-import StorefrontProductCarousel from '@/components/storefront/StorefrontProductCarousel.vue';
+import StorefrontProductCarousel from '@/modules/storefront/components/StorefrontProductCarousel.vue';
 import { useTranslations } from '@/composables/useTranslations';
 
 const { t } = useTranslations();

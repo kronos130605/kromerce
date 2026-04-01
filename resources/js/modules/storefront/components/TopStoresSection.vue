@@ -1,6 +1,6 @@
 <script setup>
 import { Link } from '@inertiajs/vue3';
-import StoreCard from '@/components/storefront/StoreCard.vue';
+import StoreCard from '@/modules/storefront/components/StoreCard.vue';
 import { useTranslations } from '@/composables/useTranslations';
 
 const { t } = useTranslations();

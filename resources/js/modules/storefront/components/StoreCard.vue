@@ -1,6 +1,6 @@
 <script setup>
 import { Link } from '@inertiajs/vue3';
-import { useTranslations } from '@/composables/useTranslations';
+import { useTranslations } from '@/composables/useTranslations.js';
 
 const { t } = useTranslations();
 

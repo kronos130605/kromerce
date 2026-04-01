@@ -1,6 +1,6 @@
 <script setup>
 import { Link } from '@inertiajs/vue3';
-import CategoryCard from '@/components/storefront/CategoryCard.vue';
+import CategoryCard from '@/modules/storefront/components/CategoryCard.vue';
 import { useTranslations } from '@/composables/useTranslations';
 
 const { t } = useTranslations();

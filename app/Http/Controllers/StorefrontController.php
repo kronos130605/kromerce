@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\TranslationHelper;
+use App\Models\Product;
 use App\Services\StorefrontService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -50,14 +51,8 @@ class StorefrontController extends Controller
     /**
      * Display product detail page.
      */
-    public function productDetail(string $slug): Response
+    public function productDetail(Product $product): Response
     {
-        $product = $this->storefrontService->getProductBySlug($slug);
-
-        if (!$product) {
-            abort(404, 'Product not found');
-        }
-
         $product->load(['images', 'variants', 'categories', 'store']);
 
         $relatedProducts = $this->storefrontService->getRelatedProducts($product->id);
