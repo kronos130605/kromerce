@@ -5,6 +5,7 @@ import { useDarkMode } from '@/composables/useDarkMode';
 import { useTranslations } from '@/composables/useTranslations';
 import { useCart } from '@/composables/useCart';
 import LanguageSelector from '@/components/shared/LanguageSelector.vue';
+import DropdownMenu from '@/components/shared/DropdownMenu.vue';
 
 const { t } = useTranslations();
 useTranslations('storefront');
@@ -12,17 +13,18 @@ const { isDark, toggleDarkMode } = useDarkMode();
 const { cartCount } = useCart();
 const showMobileMenu = ref(false);
 const showCartPreview = ref(false);
+const categoriesDropdownRef = ref(null);
 const { cartItems, cartTotal, removeFromCart, updateQuantity } = useCart();
 
 const categories = [
-    { name: 'Electronics', slug: 'electronics', icon: '💻' },
-    { name: 'Fashion', slug: 'fashion', icon: '👕' },
-    { name: 'Home & Garden', slug: 'home-garden', icon: '🏡' },
-    { name: 'Sports', slug: 'sports', icon: '⚽' },
-    { name: 'Books', slug: 'books', icon: '📚' },
-    { name: 'Toys', slug: 'toys', icon: '🧸' },
-    { name: 'Beauty', slug: 'beauty', icon: '💄' },
-    { name: 'Automotive', slug: 'automotive', icon: '🚗' },
+    { name: 'Electronics', slug: 'electronics', icon: '💻', count: 1240 },
+    { name: 'Fashion', slug: 'fashion', icon: '👕', count: 856 },
+    { name: 'Home & Garden', slug: 'home-garden', icon: '🏡', count: 643 },
+    { name: 'Sports', slug: 'sports', icon: '⚽', count: 432 },
+    { name: 'Books', slug: 'books', icon: '📚', count: 389 },
+    { name: 'Toys', slug: 'toys', icon: '🧸', count: 267 },
+    { name: 'Beauty', slug: 'beauty', icon: '💄', count: 198 },
+    { name: 'Automotive', slug: 'automotive', icon: '🚗', count: 156 },
 ];
 
 const currentYear = computed(() => new Date().getFullYear());
@@ -50,58 +52,43 @@ const cartStoresCount = computed(() => {
     <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
 
         <!-- Top Bar -->
-        <div class="bg-gray-900 dark:bg-gray-950 text-gray-300 text-xs border-b border-gray-700">
-            <div class="max-w-7xl mx-auto px-4 py-2 flex items-center justify-between gap-4">
-                <!-- Left: Promo Info -->
-                <div class="hidden md:flex items-center gap-5">
-                    <span class="flex items-center gap-1.5 text-emerald-400 font-medium">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/>
-                        </svg>
-                        {{ t('storefront.topbar.free_shipping') }}
-                    </span>
-                    <span class="text-gray-600">|</span>
-                    <span class="flex items-center gap-1.5">
-                        <svg class="w-3.5 h-3.5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
-                        </svg>
-                        {{ t('storefront.topbar.secure_payment') }}
-                    </span>
-                    <span class="text-gray-600">|</span>
-                    <span class="flex items-center gap-1.5">
-                        <svg class="w-3.5 h-3.5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"/>
-                        </svg>
-                        {{ t('storefront.topbar.support') }}
-                    </span>
-                </div>
+        <div class="bg-gray-900 dark:bg-gray-950 text-gray-300 text-xs border-b border-gray-800">
+            <div class="max-w-7xl mx-auto px-4 py-2 flex items-center justify-between">
+                <!-- Left: Promo -->
+                <span class="hidden sm:flex items-center gap-2 text-emerald-400 font-medium">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
+                    {{ t('storefront.topbar.free_shipping') }}
+                </span>
 
                 <!-- Right: Actions -->
-                <div class="flex items-center gap-4 ml-auto">
+                <div class="flex items-center gap-3 ml-auto">
                     <LanguageSelector />
                     <button
                         @click="toggleDarkMode"
-                        class="hover:text-white transition-colors"
+                        class="p-1 hover:text-white transition-colors"
                         :title="isDark ? 'Light Mode' : 'Dark Mode'"
                     >
-                        <span>{{ isDark ? '☀️' : '🌙' }}</span>
+                        <svg v-if="isDark" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+                        </svg>
+                        <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+                        </svg>
                     </button>
-                    <span class="text-gray-600 hidden sm:block">|</span>
-                    <Link href="/stores" class="hidden sm:block hover:text-white transition-colors">
-                        {{ t('storefront.footer.for_sellers.start_selling') }}
-                    </Link>
-                    <span class="text-gray-600 hidden sm:block">|</span>
+                    <span class="text-gray-700">|</span>
                     <template v-if="$page.props.auth?.user">
                         <Link href="/business" class="hover:text-white transition-colors flex items-center gap-1">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                             </svg>
-                            {{ t('storefront.navigation.account') }}
+                            <span class="hidden sm:inline">{{ t('storefront.navigation.account') }}</span>
                         </Link>
                     </template>
                     <template v-else>
                         <Link href="/login" class="hover:text-white transition-colors">{{ t('storefront.navigation.login') }}</Link>
-                        <Link href="/register" class="px-2.5 py-0.5 bg-blue-600 hover:bg-blue-500 text-white rounded-full transition-colors font-medium">
+                        <Link href="/register" class="px-2 py-0.5 bg-blue-600 hover:bg-blue-500 text-white rounded text-[10px] font-medium transition-colors">
                             {{ t('storefront.navigation.register') }}
                         </Link>
                     </template>
@@ -126,29 +113,98 @@ const cartStoresCount = computed(() => {
                         />
                     </Link>
 
-                    <!-- Search Bar -->
-                    <form action="/search" method="GET" class="flex-1 flex items-center">
-                        <div class="flex w-full rounded-xl border border-gray-200 dark:border-gray-600 overflow-hidden focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500 transition-all">
-                            <input
-                                type="text"
-                                name="q"
-                                :placeholder="t('storefront.navigation.search_placeholder')"
-                                class="flex-1 px-4 py-2.5 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 outline-none"
-                            />
-                            <button
-                                type="submit"
-                                class="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white transition-colors flex-shrink-0 flex items-center gap-1.5"
-                            >
+                    <!-- Search Bar with Categories Dropdown -->
+                    <div class="flex-1 flex items-center gap-2">
+                        <!-- Categories Dropdown -->
+                        <DropdownMenu
+                            ref="categoriesDropdownRef"
+                            triggerType="both"
+                            position="left"
+                            width="280px"
+                            triggerClass="hidden md:flex items-center gap-2 px-3 py-2.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-xl font-medium text-sm whitespace-nowrap"
+                        >
+                            <template #trigger="{ isOpen }">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
                                 </svg>
-                                <span class="hidden sm:block text-sm font-medium">{{ t('storefront.navigation.search') }}</span>
-                            </button>
-                        </div>
-                    </form>
+                                <span class="hidden lg:block">{{ t('storefront.navigation.categories') }}</span>
+                                <svg class="w-3.5 h-3.5 transition-transform duration-200" :class="{ 'rotate-180': isOpen }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                </svg>
+                            </template>
+
+                            <template #content="{ close }">
+                                <div class="p-2">
+                                    <Link
+                                        href="/products"
+                                        @click="close"
+                                        class="flex items-center gap-3 px-3 py-2.5 text-sm font-semibold text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
+                                    >
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
+                                        </svg>
+                                        {{ t('storefront.navigation.all_products') }}
+                                    </Link>
+                                    <div class="my-2 border-t border-gray-100 dark:border-gray-700"></div>
+                                    <Link
+                                        v-for="category in categories"
+                                        :key="category.slug"
+                                        :href="`/category/${category.slug}`"
+                                        @click="close"
+                                        class="flex items-center justify-between px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors group"
+                                    >
+                                        <div class="flex items-center gap-3">
+                                            <span class="w-6 h-6 flex items-center justify-center bg-gray-100 dark:bg-gray-700 rounded-full text-sm group-hover:bg-white dark:group-hover:bg-gray-600 transition-colors">{{ category.icon }}</span>
+                                            <span>{{ category.name }}</span>
+                                        </div>
+                                        <span class="text-xs text-gray-400 dark:text-gray-500">{{ category.count }}</span>
+                                    </Link>
+                                </div>
+                                <div class="bg-gray-50 dark:bg-gray-900/50 p-3 border-t border-gray-100 dark:border-gray-700">
+                                    <Link href="/stores" @click="close" class="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                                        </svg>
+                                        {{ t('storefront.footer.for_sellers.start_selling') }}
+                                    </Link>
+                                </div>
+                            </template>
+                        </DropdownMenu>
+
+                        <!-- Search Input -->
+                        <form action="/search" method="GET" class="flex-1">
+                            <div class="flex w-full rounded-xl border border-gray-200 dark:border-gray-600 overflow-hidden focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500 transition-all">
+                                <input
+                                    type="text"
+                                    name="q"
+                                    :placeholder="t('storefront.navigation.search_placeholder')"
+                                    class="flex-1 px-4 py-2.5 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 outline-none"
+                                />
+                                <button
+                                    type="submit"
+                                    class="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white transition-colors flex-shrink-0 flex items-center gap-1.5"
+                                >
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                    </svg>
+                                    <span class="hidden sm:block text-sm font-medium">{{ t('storefront.navigation.search') }}</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
 
                     <!-- Right Actions -->
                     <div class="flex items-center gap-1 flex-shrink-0">
+                        <!-- Mobile Menu Button -->
+                        <button
+                            @click="showMobileMenu = !showMobileMenu"
+                            class="md:hidden p-2.5 text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                        >
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                            </svg>
+                        </button>
+
                         <!-- Wishlist -->
                         <button class="p-2.5 text-gray-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" :title="t('storefront.navigation.wishlist')">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -165,7 +221,7 @@ const cartStoresCount = computed(() => {
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                                 </svg>
-                                <span class="hidden sm:block text-sm font-medium text-gray-700 dark:text-gray-300">{{ t('storefront.navigation.cart') }}</span>
+                                <span class="hidden lg:block text-sm font-medium text-gray-700 dark:text-gray-300">{{ t('storefront.navigation.cart') }}</span>
                                 <Transition
                                     enter-active-class="transition-all duration-200"
                                     enter-from-class="scale-0 opacity-0"
@@ -313,25 +369,6 @@ const cartStoresCount = computed(() => {
                             </Transition>
                         </div>
                     </div>
-
-                    <!-- Categories Navigation -->
-                    <nav class="hidden lg:flex items-center gap-1 py-2 border-t border-gray-100 dark:border-gray-700 overflow-x-auto scrollbar-none">
-                        <Link
-                            href="/products"
-                            class="flex-shrink-0 px-3 py-1.5 text-xs font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 rounded-full transition-colors hover:bg-blue-100 dark:hover:bg-blue-900/50"
-                        >
-                            {{ t('storefront.navigation.all_products') }}
-                        </Link>
-                        <Link
-                            v-for="category in categories"
-                            :key="category.slug"
-                            :href="`/category/${category.slug}`"
-                            class="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 text-xs text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
-                        >
-                            <span>{{ category.icon }}</span>
-                            <span>{{ category.name }}</span>
-                        </Link>
-                    </nav>
                 </div>
             </div>
         </header>
@@ -345,25 +382,75 @@ const cartStoresCount = computed(() => {
             leave-from-class="opacity-100 translate-y-0"
             leave-to-class="opacity-0 -translate-y-2"
         >
-            <div v-if="showMobileMenu" class="lg:hidden bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700 shadow-sm">
-                <div class="max-w-7xl mx-auto px-4 py-3">
-                    <div class="grid grid-cols-3 gap-2">
+            <div v-if="showMobileMenu" class="md:hidden bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700 shadow-lg">
+                <div class="max-w-7xl mx-auto px-4 py-4">
+                    <!-- Search Mobile -->
+                    <form action="/search" method="GET" class="mb-4">
+                        <div class="flex w-full rounded-xl border border-gray-200 dark:border-gray-600 overflow-hidden">
+                            <input
+                                type="text"
+                                name="q"
+                                :placeholder="t('storefront.navigation.search_placeholder')"
+                                class="flex-1 px-4 py-2.5 text-sm bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 outline-none"
+                            />
+                            <button type="submit" class="px-4 bg-blue-600 text-white">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Categories Grid -->
+                    <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">{{ t('storefront.navigation.categories') }}</p>
+                    <div class="grid grid-cols-2 gap-2 mb-4">
                         <Link
                             v-for="category in categories"
                             :key="category.slug"
                             :href="`/category/${category.slug}`"
-                            class="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                            class="flex items-center gap-3 px-3 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                         >
-                            <span>{{ category.icon }}</span>
-                            <span class="text-xs">{{ category.name }}</span>
+                            <span class="w-8 h-8 flex items-center justify-center bg-gray-100 dark:bg-gray-700 rounded-full text-base">{{ category.icon }}</span>
+                            <div>
+                                <span class="block font-medium">{{ category.name }}</span>
+                                <span class="text-xs text-gray-400">{{ category.count }} items</span>
+                            </div>
                         </Link>
+                    </div>
+
+                    <!-- All Products Link -->
+                    <Link
+                        href="/products"
+                        class="flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 rounded-xl hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors mb-4"
+                    >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
+                        </svg>
+                        {{ t('storefront.navigation.all_products') }}
+                    </Link>
+
+                    <!-- Quick Links -->
+                    <div class="border-t border-gray-100 dark:border-gray-700 pt-4">
+                        <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">{{ t('storefront.footer.quick_links.title') }}</p>
+                        <div class="space-y-1">
+                            <Link href="/stores" class="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                                </svg>
+                                {{ t('storefront.footer.for_sellers.start_selling') }}
+                            </Link>
+                        </div>
                     </div>
                 </div>
             </div>
         </Transition>
 
-        <!-- Click outside overlay for cart -->
-        <div v-if="showCartPreview" class="fixed inset-0 z-30" @click="showCartPreview = false" />
+        <!-- Click outside overlay -->
+        <div
+            v-if="showCartPreview || categoriesDropdownRef?.isOpen"
+            class="fixed inset-0 z-30"
+            @click="showCartPreview = false; categoriesDropdownRef?.close()"
+        />
 
         <!-- Main Content -->
         <main>

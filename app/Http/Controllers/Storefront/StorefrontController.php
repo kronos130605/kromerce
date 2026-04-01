@@ -1,10 +1,9 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Storefront;
 
 use App\Helpers\TranslationHelper;
-use App\Http\Resources\Storefront\ProductResource;
-use App\Http\Resources\Storefront\SimpleProductResource;
+use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Services\StorefrontService;
 use Illuminate\Http\Request;
@@ -222,8 +221,8 @@ class StorefrontController extends Controller
         return $images->map(fn ($img) => [
             'id' => $img->id,
             'url' => $img->url && !str_starts_with($img->url, 'http') ? asset($img->url) : $img->url,
-            'thumbnail_url' => $img->thumbnail_url && !str_starts_with($img->thumbnail_url, 'http') 
-                ? asset($img->thumbnail_url) 
+            'thumbnail_url' => $img->thumbnail_url && !str_starts_with($img->thumbnail_url, 'http')
+                ? asset($img->thumbnail_url)
                 : $img->thumbnail_url,
             'alt_text' => $img->alt_text,
             'is_primary' => $img->is_primary,

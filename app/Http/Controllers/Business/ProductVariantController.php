@@ -1,11 +1,12 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Business;
 
+use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Services\ProductVariantService;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class ProductVariantController extends Controller
 {
@@ -19,9 +20,9 @@ class ProductVariantController extends Controller
     {
         try {
             $this->authorize('view', $product);
-            
+
             $variants = $this->variantService->getVariantsForProduct($product->id);
-            
+
             return $this->success($variants);
         } catch (\Exception $e) {
             return $this->error('Failed to retrieve variants', 500);
@@ -32,7 +33,7 @@ class ProductVariantController extends Controller
     {
         try {
             $this->authorize('update', $product);
-            
+
             $validated = $request->validate([
                 'sku' => 'required|string|max:100|unique:product_variants,sku',
                 'name' => 'nullable|string|max:255',
@@ -47,7 +48,7 @@ class ProductVariantController extends Controller
             ]);
 
             $variant = $this->variantService->createVariant($product->id, $validated);
-            
+
             return $this->success($variant, 'Variant created successfully', 201);
         } catch (\Exception $e) {
             return $this->error('Failed to create variant: ' . $e->getMessage(), 500);
@@ -58,7 +59,7 @@ class ProductVariantController extends Controller
     {
         try {
             $this->authorize('update', $product);
-            
+
             $validated = $request->validate([
                 'sku' => 'sometimes|string|max:100|unique:product_variants,sku,' . $variant,
                 'name' => 'nullable|string|max:255',
@@ -73,7 +74,7 @@ class ProductVariantController extends Controller
             ]);
 
             $updated = $this->variantService->updateVariant($variant, $validated);
-            
+
             return $this->success($updated, 'Variant updated successfully');
         } catch (\Exception $e) {
             return $this->error('Failed to update variant: ' . $e->getMessage(), 500);
@@ -84,9 +85,9 @@ class ProductVariantController extends Controller
     {
         try {
             $this->authorize('update', $product);
-            
+
             $this->variantService->deleteVariant($variant);
-            
+
             return $this->success(null, 'Variant deleted successfully');
         } catch (\Exception $e) {
             return $this->error('Failed to delete variant: ' . $e->getMessage(), 500);
@@ -97,7 +98,7 @@ class ProductVariantController extends Controller
     {
         try {
             $this->authorize('update', $product);
-            
+
             $validated = $request->validate([
                 'variants' => 'required|array',
                 'variants.*.id' => 'sometimes|exists:product_variants,id',
@@ -110,7 +111,7 @@ class ProductVariantController extends Controller
                 $product->id,
                 $validated['variants']
             );
-            
+
             return $this->success($variants, 'Variants updated successfully');
         } catch (\Exception $e) {
             return $this->error('Failed to update variants: ' . $e->getMessage(), 500);

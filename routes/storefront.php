@@ -1,8 +1,8 @@
 <?php
 
+use App\Http\Controllers\Storefront\StorefrontController;
+use App\Http\Controllers\Storefront\StorePageController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\StorefrontController;
-use App\Http\Controllers\StorePageController;
 
 /*
 |--------------------------------------------------------------------------

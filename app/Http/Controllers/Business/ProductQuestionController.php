@@ -1,11 +1,12 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Business;
 
+use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Services\ProductQuestionService;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class ProductQuestionController extends Controller
 {
@@ -18,7 +19,7 @@ class ProductQuestionController extends Controller
         try {
             $filters = $request->only(['status', 'has_answer', 'sort_by', 'sort_order', 'per_page']);
             $questions = $this->questionService->getQuestionsForProduct($product->id, $filters);
-            
+
             return $this->success($questions);
         } catch (\Exception $e) {
             return $this->error('Failed to retrieve questions', 500);
@@ -38,7 +39,7 @@ class ProductQuestionController extends Controller
             $validated['status'] = 'pending';
 
             $question = $this->questionService->createQuestion($validated);
-            
+
             return $this->success($question, 'Question submitted successfully', 201);
         } catch (\Exception $e) {
             return $this->error('Failed to create question: ' . $e->getMessage(), 500);
@@ -56,7 +57,7 @@ class ProductQuestionController extends Controller
             $validated['status'] = 'pending';
 
             $answer = $this->questionService->createAnswer($question, $validated);
-            
+
             return $this->success($answer, 'Answer submitted successfully', 201);
         } catch (\Exception $e) {
             return $this->error('Failed to create answer: ' . $e->getMessage(), 500);
@@ -71,7 +72,7 @@ class ProductQuestionController extends Controller
             ]);
 
             $updated = $this->questionService->updateQuestion($question, $validated);
-            
+
             return $this->success(null, 'Question updated successfully');
         } catch (\Exception $e) {
             return $this->error('Failed to update question: ' . $e->getMessage(), 500);
@@ -82,7 +83,7 @@ class ProductQuestionController extends Controller
     {
         try {
             $this->questionService->deleteQuestion($question);
-            
+
             return $this->success(null, 'Question deleted successfully');
         } catch (\Exception $e) {
             return $this->error('Failed to delete question: ' . $e->getMessage(), 500);
@@ -101,7 +102,7 @@ class ProductQuestionController extends Controller
                 auth()->id(),
                 $validated['is_helpful']
             );
-            
+
             return $this->success(null, 'Vote recorded successfully');
         } catch (\Exception $e) {
             return $this->error('Failed to record vote: ' . $e->getMessage(), 500);
