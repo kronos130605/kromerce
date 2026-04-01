@@ -52,7 +52,25 @@
             "from": "Desde",
             "quick_view": "Vista Rápida",
             "add_to_wishlist": "Agregar a Favoritos",
-            "view_full_details": "Ver Detalles Completos"
+            "view_full_details": "Ver Detalles Completos",
+            "view_details": "Ver Detalles",
+            "reviews": "reseñas",
+            "low_stock": "Pocas unidades",
+            "ready_to_ship": "Listo para envío",
+            "save_short": "Ahorra",
+            "you_save": "Ahorras",
+            "in_cart": "Ya está en el carrito",
+            "description_label": "Descripción",
+            "shipping_label": "Envío",
+            "shipping_value": "Envío rápido disponible con seguimiento.",
+            "purchase_protection_label": "Protección de Compra",
+            "purchase_protection_value": "Pago seguro y soporte si necesitas ayuda.",
+            "condition_label": "Condición",
+            "condition_new": "Nuevo",
+            "availability_label": "Disponibilidad",
+            "units_available": "unidades disponibles",
+            "store_label": "Tienda",
+            "taxes_notice": "Impuestos y envío calculados al finalizar la compra."
         },
         "store": {
             "verified": "Verificado",
@@ -110,6 +128,11 @@
             "copyright": "© {year} Kromerce. Todos los derechos reservados."
         },
         "cart": {
+            "subtotal": "Subtotal",
+            "savings": "Ahorro",
+            "shipping": "Envío",
+            "continue_shopping": "Continuar comprando",
+            "stores": "tiendas",
             "items": "artículos",
             "empty": "Tu carrito está vacío",
             "total": "Total",

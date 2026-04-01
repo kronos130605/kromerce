@@ -1,5 +1,6 @@
 <script setup>
 import { computed, ref } from 'vue';
+import { router } from '@inertiajs/vue3';
 import { setLocaleCookie, detectLocale } from '@/i18n.js';
 
 const locale = ref(detectLocale());
@@ -14,14 +15,21 @@ const currentLanguage = computed(() =>
 );
 
 const changeLanguage = async (langCode) => {
+  if (locale.value === langCode) {
+    return;
+  }
+
   locale.value = langCode;
   setLocaleCookie(langCode);
 
   // Dispatch event to notify components to reload their translations
   window.dispatchEvent(new CustomEvent('locale-changed', { detail: langCode }));
 
-  // Reload page to ensure all components get new translations
-  window.location.reload();
+  // Reload current Inertia page props without a full browser refresh
+  router.reload({
+    preserveState: true,
+    preserveScroll: true,
+  });
 };
 </script>
 

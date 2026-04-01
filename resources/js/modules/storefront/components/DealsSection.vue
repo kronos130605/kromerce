@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue';
 import { Link } from '@inertiajs/vue3';
-import ProductCard from '@/components/storefront/ProductCard.vue';
+import StorefrontProductCarousel from '@/components/storefront/StorefrontProductCarousel.vue';
 import { useTranslations } from '@/composables/useTranslations';
 
 const { t } = useTranslations();
@@ -17,7 +17,7 @@ defineProps({
     },
 });
 
-const emit = defineEmits(['quick-view']);
+const emit = defineEmits(['quick-view', 'details-view']);
 
 const hours = ref(23);
 const minutes = ref(59);
@@ -82,15 +82,14 @@ onUnmounted(() => { clearInterval(timer); });
                 </div>
             </div>
 
-            <!-- Products Grid -->
-            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-                <ProductCard
-                    v-for="product in products"
-                    :key="product.id"
-                    :product="product"
-                    @quick-view="(p) => emit('quick-view', p)"
-                />
-            </div>
+            <StorefrontProductCarousel
+                :products="products"
+                :show-arrows="true"
+                arrow-variant="light"
+                arrows-class="absolute right-0 -top-16 z-10 hidden lg:flex"
+                @quick-view="(p) => emit('quick-view', p)"
+                @details-view="(p) => emit('details-view', p)"
+            />
 
         </div>
     </section>

@@ -295,9 +295,25 @@ class ProductController extends Controller
                 return $this->notFound('Image not found');
             }
 
-            // Delete the file from storage
-            $path = str_replace(asset('storage/'), '', $image->url);
-            \Storage::disk('public')->delete($path);
+            // Delete the main image file from storage
+            // URL is stored as 'storage/products/{id}/{filename}'
+            $url = $image->url;
+
+            if (str_starts_with($url, 'storage/')) {
+                $path = substr($url, 8); // Remove 'storage/' prefix to get the actual path
+                \Storage::disk('public')->delete($path);
+            }
+
+            // Delete thumbnail and medium variants if they exist
+            $metadata = $image->metadata ?? [];
+            if (!empty($metadata['thumbnail']) && str_starts_with($metadata['thumbnail'], 'storage/')) {
+                $thumbnailPath = substr($metadata['thumbnail'], 8);
+                \Storage::disk('public')->delete($thumbnailPath);
+            }
+            if (!empty($metadata['medium']) && str_starts_with($metadata['medium'], 'storage/')) {
+                $mediumPath = substr($metadata['medium'], 8);
+                \Storage::disk('public')->delete($mediumPath);
+            }
 
             // Delete the record
             $image->delete();

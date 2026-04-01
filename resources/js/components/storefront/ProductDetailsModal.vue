@@ -1,12 +1,12 @@
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { Link } from '@inertiajs/vue3';
 import { useCart } from '@/composables/useCart';
 import { useProductPresentation } from '@/composables/useProductPresentation';
 import { useTranslations } from '@/composables/useTranslations';
 
 const { t } = useTranslations();
-const { addToCart, isInCart } = useCart();
+const { addToCart } = useCart();
 
 const props = defineProps({
     product: {
@@ -19,7 +19,7 @@ const props = defineProps({
     },
 });
 
-const emit = defineEmits(['close', 'open-details']);
+const emit = defineEmits(['close']);
 
 const quantity = ref(1);
 const added = ref(false);
@@ -38,12 +38,12 @@ const {
     discountPercentage,
     displayPrice,
     savingsAmount,
+    isOutOfStock,
     ratingValue,
     reviewCount,
-    isOutOfStock,
     stockLabel,
     formatPrice,
-} = useProductPresentation(productRef, { galleryLimit: 6 });
+} = useProductPresentation(productRef);
 
 const imageUrl = computed(() =>
     gallery.value[activeImageIndex.value]?.url
@@ -51,15 +51,32 @@ const imageUrl = computed(() =>
     || '/images/placeholder-product.png'
 );
 
+const productHighlights = computed(() => {
+    if (!props.product) return [];
+
+    return [
+        {
+            label: t('storefront.product.condition_label'),
+            value: props.product.condition || t('storefront.product.condition_new'),
+        },
+        {
+            label: t('storefront.product.availability_label'),
+            value: isOutOfStock.value
+                ? t('storefront.product.out_of_stock')
+                : `${props.product.stock_quantity || 0} ${t('storefront.product.units_available')}`,
+        },
+        {
+            label: t('storefront.product.store_label'),
+            value: props.product.store?.name || 'Kromerce',
+        },
+    ];
+});
+
 const handleAddToCart = () => {
     if (!props.product || isOutOfStock.value) return;
     addToCart(props.product, quantity.value);
     added.value = true;
     setTimeout(() => { added.value = false; }, 2000);
-};
-
-const openDetails = () => {
-    emit('open-details', props.product);
 };
 
 const close = () => emit('close');
@@ -77,24 +94,24 @@ const close = () => emit('close');
         >
             <div
                 v-if="show && product"
-                class="fixed inset-0 z-50 flex items-center justify-center p-4"
+                class="fixed inset-0 z-[60] flex items-center justify-center p-4"
                 @click.self="close"
             >
                 <div class="absolute inset-0 bg-slate-950/70 backdrop-blur-sm" @click="close" />
 
-                <div class="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-[2rem] bg-white shadow-2xl dark:bg-gray-900">
+                <div class="relative w-full max-w-6xl max-h-[92vh] overflow-y-auto rounded-[2rem] bg-white shadow-2xl dark:bg-gray-900">
                     <button
                         @click="close"
-                        class="absolute right-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-gray-700 shadow-lg transition-colors hover:bg-white dark:bg-gray-800/90 dark:text-gray-200 dark:hover:bg-gray-800"
+                        class="absolute right-5 top-5 z-10 flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-white/90 text-gray-700 shadow-lg backdrop-blur transition-colors hover:bg-white dark:border-gray-700 dark:bg-gray-800/90 dark:text-gray-200 dark:hover:bg-gray-800"
                     >
                         <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                         </svg>
                     </button>
 
-                    <div class="grid grid-cols-1 lg:grid-cols-[1.05fr_0.95fr]">
+                    <div class="grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr]">
                         <div class="bg-gradient-to-br from-slate-50 via-white to-blue-50/70 p-6 dark:from-gray-800 dark:via-gray-900 dark:to-blue-950/30">
-                            <div class="overflow-hidden rounded-[1.5rem] bg-white shadow-sm dark:bg-gray-800">
+                            <div class="overflow-hidden rounded-[1.5rem] border border-white/70 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
                                 <div class="aspect-[4/3] overflow-hidden bg-gray-100 dark:bg-gray-700">
                                     <img
                                         :src="imageUrl"
@@ -106,11 +123,11 @@ const close = () => emit('close');
 
                             <div class="mt-4 flex gap-3 overflow-x-auto pb-1">
                                 <button
-                                    v-for="(img, idx) in gallery.slice(0, 6)"
+                                    v-for="(img, idx) in gallery"
                                     :key="idx"
                                     @click="activeImageIndex = idx"
                                     :class="[
-                                        'h-16 w-16 flex-shrink-0 overflow-hidden rounded-2xl border-2 bg-white transition-all dark:bg-gray-800',
+                                        'h-20 w-20 flex-shrink-0 overflow-hidden rounded-2xl border-2 bg-white transition-all dark:bg-gray-800',
                                         activeImageIndex === idx
                                             ? 'border-blue-500 shadow-md shadow-blue-500/20'
                                             : 'border-transparent hover:border-gray-300 dark:hover:border-gray-600'
@@ -123,10 +140,25 @@ const close = () => emit('close');
                                     />
                                 </button>
                             </div>
+
+                            <div class="mt-6 grid gap-3 sm:grid-cols-3">
+                                <div
+                                    v-for="item in productHighlights"
+                                    :key="item.label"
+                                    class="rounded-2xl border border-gray-100 bg-white/90 p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800/80"
+                                >
+                                    <p class="text-xs font-semibold uppercase tracking-[0.18em] text-gray-400 dark:text-gray-500">
+                                        {{ item.label }}
+                                    </p>
+                                    <p class="mt-2 text-sm font-semibold text-gray-900 dark:text-white">
+                                        {{ item.value }}
+                                    </p>
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="flex flex-col p-6 lg:p-7">
-                            <div class="flex flex-wrap gap-2">
+                        <div class="flex flex-col p-6 lg:p-8">
+                            <div class="flex flex-wrap items-center gap-2">
                                 <span v-if="product.featured" class="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">
                                     {{ t('storefront.product.featured') }}
                                 </span>
@@ -134,23 +166,25 @@ const close = () => emit('close');
                                     {{ t('storefront.product.new') }}
                                 </span>
                                 <span v-if="hasDiscount" class="rounded-full bg-rose-100 px-3 py-1 text-xs font-semibold text-rose-700 dark:bg-rose-900/40 dark:text-rose-300">
-                                    -{{ discountPercentage }}%
+                                    -{{ discountPercentage }}% {{ t('storefront.product.sale') }}
                                 </span>
-                                <span v-if="isInCart(product.id)" class="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
-                                    {{ t('storefront.product.in_cart') }}
+                                <span class="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
+                                    {{ stockLabel }}
                                 </span>
                             </div>
 
-                            <div class="mt-4">
-                                <p v-if="product.store?.name" class="text-sm font-medium text-blue-600 dark:text-blue-400">
-                                    {{ product.store.name }}
-                                </p>
-                                <h2 class="mt-1 text-2xl font-bold leading-tight text-gray-900 dark:text-white">
-                                    {{ product.name }}
-                                </h2>
+                            <div class="mt-5 flex items-start justify-between gap-4">
+                                <div>
+                                    <p v-if="product.store?.name" class="text-sm font-medium text-blue-600 dark:text-blue-400">
+                                        {{ product.store.name }}
+                                    </p>
+                                    <h2 class="mt-1 text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
+                                        {{ product.name }}
+                                    </h2>
+                                </div>
                             </div>
 
-                            <div class="mt-4 flex flex-wrap items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
+                            <div class="mt-4 flex flex-wrap items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
                                 <div class="flex items-center gap-2">
                                     <div class="flex items-center">
                                         <template v-for="i in 5" :key="i">
@@ -168,12 +202,12 @@ const close = () => emit('close');
                                 <span>•</span>
                                 <span>{{ reviewCount }} {{ t('storefront.product.reviews') }}</span>
                                 <span>•</span>
-                                <span>{{ stockLabel }}</span>
+                                <span>{{ product.sales_count || 0 }} {{ t('storefront.product.sold') }}</span>
                             </div>
 
                             <div class="mt-6 rounded-3xl border border-gray-100 bg-gray-50 p-5 dark:border-gray-800 dark:bg-gray-800/80">
-                                <div class="flex items-end gap-3">
-                                    <span class="text-3xl font-bold text-gray-900 dark:text-white">
+                                <div class="flex flex-wrap items-end gap-3">
+                                    <span class="text-4xl font-bold tracking-tight text-gray-900 dark:text-white">
                                         {{ formatPrice(displayPrice) }}
                                     </span>
                                     <span v-if="hasDiscount" class="text-lg text-gray-400 line-through">
@@ -186,10 +220,10 @@ const close = () => emit('close');
                             </div>
 
                             <div v-if="product.description" class="mt-6 rounded-3xl border border-gray-100 p-5 dark:border-gray-800">
-                                <h3 class="text-xs font-semibold uppercase tracking-[0.16em] text-gray-400 dark:text-gray-500">
+                                <h3 class="text-sm font-semibold uppercase tracking-[0.16em] text-gray-400 dark:text-gray-500">
                                     {{ t('storefront.product.description_label') }}
                                 </h3>
-                                <p class="mt-3 line-clamp-4 text-sm leading-7 text-gray-600 dark:text-gray-300">
+                                <p class="mt-3 text-sm leading-7 text-gray-600 dark:text-gray-300">
                                     {{ product.description }}
                                 </p>
                             </div>
@@ -213,12 +247,12 @@ const close = () => emit('close');
                                 </div>
                             </div>
 
-                            <div class="mt-8 flex items-center gap-3">
-                                <div class="flex items-center overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-700">
+                            <div class="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center">
+                                <div class="flex items-center rounded-2xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
                                     <button
                                         @click="quantity = Math.max(1, quantity - 1)"
                                         :disabled="quantity <= 1"
-                                        class="px-4 py-3 text-gray-600 transition-colors hover:bg-gray-50 disabled:opacity-40 dark:text-gray-300 dark:hover:bg-gray-800"
+                                        class="px-4 py-3 text-gray-600 transition-colors hover:bg-gray-50 disabled:opacity-40 dark:text-gray-300 dark:hover:bg-gray-700"
                                     >
                                         <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
@@ -228,7 +262,7 @@ const close = () => emit('close');
                                     <button
                                         @click="quantity = Math.min(product.stock_quantity || 99, quantity + 1)"
                                         :disabled="product.stock_quantity > 0 && quantity >= product.stock_quantity"
-                                        class="px-4 py-3 text-gray-600 transition-colors hover:bg-gray-50 disabled:opacity-40 dark:text-gray-300 dark:hover:bg-gray-800"
+                                        class="px-4 py-3 text-gray-600 transition-colors hover:bg-gray-50 disabled:opacity-40 dark:text-gray-300 dark:hover:bg-gray-700"
                                     >
                                         <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -240,7 +274,7 @@ const close = () => emit('close');
                                     @click="handleAddToCart"
                                     :disabled="isOutOfStock"
                                     :class="[
-                                        'inline-flex flex-1 items-center justify-center gap-2 rounded-2xl px-5 py-3 text-sm font-semibold transition-all duration-300',
+                                        'inline-flex flex-1 items-center justify-center gap-2 rounded-2xl px-6 py-3.5 text-sm font-semibold transition-all duration-300',
                                         added
                                             ? 'bg-emerald-500 text-white'
                                             : isOutOfStock
@@ -259,22 +293,19 @@ const close = () => emit('close');
                             </div>
 
                             <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                                <button
-                                    @click="openDetails"
-                                    class="inline-flex items-center gap-2 text-sm font-semibold text-indigo-600 transition-colors hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
-                                >
-                                    {{ t('storefront.product.view_details') }}
-                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                                    </svg>
-                                </button>
                                 <Link
                                     :href="`/products/${product.slug}`"
                                     @click="close"
-                                    class="text-sm text-blue-600 hover:underline dark:text-blue-400"
+                                    class="inline-flex items-center gap-2 text-sm font-semibold text-blue-600 transition-colors hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
                                 >
                                     {{ t('storefront.product.view_full_details') }}
+                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                    </svg>
                                 </Link>
+                                <p class="text-xs text-gray-400 dark:text-gray-500">
+                                    {{ t('storefront.product.taxes_notice') }}
+                                </p>
                             </div>
                         </div>
                     </div>

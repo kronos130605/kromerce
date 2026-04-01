@@ -12,7 +12,7 @@ const { isDark, toggleDarkMode } = useDarkMode();
 const { cartCount } = useCart();
 const showMobileMenu = ref(false);
 const showCartPreview = ref(false);
-const { cartItems, cartTotal, removeFromCart } = useCart();
+const { cartItems, cartTotal, removeFromCart, updateQuantity } = useCart();
 
 const categories = [
     { name: 'Electronics', slug: 'electronics', icon: '💻' },
@@ -29,6 +29,21 @@ const currentYear = computed(() => new Date().getFullYear());
 
 const formatPrice = (price, currency = 'USD') =>
     new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(price);
+
+const cartSubtotal = computed(() => cartTotal.value);
+
+const cartSavings = computed(() =>
+    cartItems.value.reduce((sum, item) => {
+        const base = Number(item.base_price || item.price || 0);
+        const finalPrice = Number(item.price || 0);
+        return sum + Math.max(base - finalPrice, 0) * item.quantity;
+    }, 0)
+);
+
+const cartStoresCount = computed(() => {
+    const stores = new Set(cartItems.value.map((item) => item.store?.id).filter(Boolean));
+    return stores.size;
+});
 </script>
 
 <template>
@@ -176,13 +191,21 @@ const formatPrice = (price, currency = 'USD') =>
                             >
                                 <div
                                     v-if="showCartPreview"
-                                    class="absolute right-0 top-full mt-2 w-80 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 z-50"
+                                    class="absolute right-0 top-full z-50 mt-2 w-[24rem] overflow-hidden rounded-[1.5rem] border border-gray-100 bg-white shadow-2xl dark:border-gray-700 dark:bg-gray-800"
                                 >
-                                    <div class="p-4 border-b border-gray-100 dark:border-gray-700">
-                                        <h3 class="font-semibold text-gray-900 dark:text-white text-sm">
-                                            {{ t('storefront.navigation.cart') }}
-                                            <span class="text-gray-400 font-normal">({{ cartCount }} {{ t('storefront.cart.items') }})</span>
-                                        </h3>
+                                    <div class="border-b border-gray-100 bg-gradient-to-r from-blue-600 to-indigo-600 p-4 text-white dark:border-gray-700">
+                                        <div class="flex items-start justify-between gap-3">
+                                            <div>
+                                                <h3 class="text-sm font-semibold">{{ t('storefront.navigation.cart') }}</h3>
+                                                <p class="mt-1 text-xs text-blue-100">
+                                                    {{ cartCount }} {{ t('storefront.cart.items') }}
+                                                    <span v-if="cartStoresCount">• {{ cartStoresCount }} {{ t('storefront.cart.stores') }}</span>
+                                                </p>
+                                            </div>
+                                            <span class="rounded-full bg-white/15 px-2.5 py-1 text-[11px] font-semibold text-white/95 backdrop-blur">
+                                                {{ formatPrice(cartSubtotal) }}
+                                            </span>
+                                        </div>
                                     </div>
 
                                     <div v-if="cartItems.length === 0" class="p-8 text-center">
@@ -193,73 +216,123 @@ const formatPrice = (price, currency = 'USD') =>
                                     </div>
 
                                     <div v-else>
-                                        <ul class="max-h-56 overflow-y-auto divide-y divide-gray-50 dark:divide-gray-700">
-                                            <li v-for="item in cartItems" :key="item.id" class="flex items-center gap-3 p-3">
-                                                <div class="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-700 flex-shrink-0">
-                                                    <img v-if="item.image" :src="item.image" :alt="item.name" class="w-full h-full object-cover" />
-                                                    <div v-else class="w-full h-full flex items-center justify-center text-gray-400">
-                                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                                                        </svg>
+                                        <ul class="max-h-80 space-y-3 overflow-y-auto p-3">
+                                            <li v-for="item in cartItems" :key="item.id" class="rounded-2xl border border-gray-100 bg-gray-50/70 p-3 dark:border-gray-700 dark:bg-gray-900/40">
+                                                <div class="flex items-start gap-3">
+                                                    <div class="h-14 w-14 flex-shrink-0 overflow-hidden rounded-xl bg-gray-100 dark:bg-gray-700">
+                                                        <img v-if="item.image" :src="item.image" :alt="item.name" class="w-full h-full object-cover" />
+                                                        <div v-else class="w-full h-full flex items-center justify-center text-gray-400">
+                                                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                                            </svg>
+                                                        </div>
+                                                    </div>
+                                                    <div class="min-w-0 flex-1">
+                                                        <div class="flex items-start justify-between gap-2">
+                                                            <div class="min-w-0">
+                                                                <p class="truncate text-xs font-semibold text-gray-900 dark:text-white">{{ item.name }}</p>
+                                                                <p v-if="item.store?.name" class="mt-1 text-[11px] text-blue-600 dark:text-blue-400">{{ item.store.name }}</p>
+                                                                <p class="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
+                                                                    {{ formatPrice(item.price, item.currency) }}
+                                                                    <span v-if="item.base_price && item.base_price > item.price" class="ml-1 text-gray-400 line-through dark:text-gray-500">
+                                                                        {{ formatPrice(item.base_price, item.currency) }}
+                                                                    </span>
+                                                                </p>
+                                                            </div>
+                                                            <button
+                                                                @click="removeFromCart(item.id)"
+                                                                class="flex-shrink-0 text-gray-300 transition-colors hover:text-red-500 dark:text-gray-600"
+                                                            >
+                                                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                                                </svg>
+                                                            </button>
+                                                        </div>
+
+                                                        <div class="mt-3 flex items-center justify-between gap-3">
+                                                            <div class="flex items-center overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
+                                                                <button
+                                                                    @click="updateQuantity(item.id, item.quantity - 1)"
+                                                                    class="px-2.5 py-1.5 text-gray-600 transition-colors hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700"
+                                                                >
+                                                                    <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
+                                                                    </svg>
+                                                                </button>
+                                                                <span class="min-w-[2rem] px-2 text-center text-xs font-semibold text-gray-900 dark:text-white">{{ item.quantity }}</span>
+                                                                <button
+                                                                    @click="updateQuantity(item.id, item.quantity + 1)"
+                                                                    :disabled="item.stock_quantity > 0 && item.quantity >= item.stock_quantity"
+                                                                    class="px-2.5 py-1.5 text-gray-600 transition-colors hover:bg-gray-50 disabled:opacity-40 dark:text-gray-300 dark:hover:bg-gray-700"
+                                                                >
+                                                                    <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                                                    </svg>
+                                                                </button>
+                                                            </div>
+
+                                                            <div class="text-right">
+                                                                <p class="text-xs font-semibold text-gray-900 dark:text-white">
+                                                                    {{ formatPrice(item.price * item.quantity, item.currency) }}
+                                                                </p>
+                                                                <p v-if="item.stock_quantity && item.stock_quantity <= 5" class="mt-1 text-[10px] font-medium text-amber-600 dark:text-amber-400">
+                                                                    {{ t('storefront.product.low_stock') }}
+                                                                </p>
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                                <div class="flex-1 min-w-0">
-                                                    <p class="text-xs font-medium text-gray-800 dark:text-gray-200 truncate">{{ item.name }}</p>
-                                                    <p class="text-xs text-gray-500 dark:text-gray-400">
-                                                        {{ item.quantity }} × {{ formatPrice(item.price, item.currency) }}
-                                                    </p>
-                                                </div>
-                                                <button
-                                                    @click="removeFromCart(item.id)"
-                                                    class="text-gray-300 dark:text-gray-600 hover:text-red-500 transition-colors flex-shrink-0"
-                                                >
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                                                    </svg>
-                                                </button>
                                             </li>
                                         </ul>
-                                        <div class="p-3 border-t border-gray-100 dark:border-gray-700">
-                                            <div class="flex justify-between text-sm font-semibold text-gray-900 dark:text-white mb-3">
-                                                <span>{{ t('storefront.cart.total') }}</span>
-                                                <span>{{ formatPrice(cartTotal) }}</span>
+                                        <div class="border-t border-gray-100 p-4 dark:border-gray-700">
+                                            <div class="rounded-2xl bg-gray-50 p-3 dark:bg-gray-900/50">
+                                                <div class="flex justify-between text-xs text-gray-500 dark:text-gray-400">
+                                                    <span>{{ t('storefront.cart.subtotal') }}</span>
+                                                    <span>{{ formatPrice(cartSubtotal) }}</span>
+                                                </div>
+                                                <div class="mt-2 flex justify-between text-xs text-emerald-600 dark:text-emerald-400">
+                                                    <span>{{ t('storefront.cart.savings') }}</span>
+                                                    <span>{{ formatPrice(cartSavings) }}</span>
+                                                </div>
+                                                <div class="mt-3 flex justify-between text-sm font-semibold text-gray-900 dark:text-white">
+                                                    <span>{{ t('storefront.cart.total') }}</span>
+                                                    <span>{{ formatPrice(cartSubtotal) }}</span>
+                                                </div>
                                             </div>
-                                            <button class="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">
-                                                {{ t('storefront.cart.checkout') }}
-                                            </button>
+                                            <div class="mt-3 grid grid-cols-2 gap-2">
+                                                <Link href="/products" class="inline-flex items-center justify-center rounded-xl border border-gray-200 px-3 py-2 text-xs font-semibold text-gray-700 transition-colors hover:border-blue-300 hover:text-blue-600 dark:border-gray-600 dark:text-gray-200 dark:hover:border-blue-500 dark:hover:text-blue-400">
+                                                    {{ t('storefront.cart.continue_shopping') }}
+                                                </Link>
+                                                <button class="rounded-xl bg-blue-600 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700">
+                                                    {{ t('storefront.cart.checkout') }}
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </Transition>
                         </div>
-
-                        <!-- Mobile Menu Toggle -->
-                        <button @click="showMobileMenu = !showMobileMenu" class="lg:hidden p-2.5 text-gray-500 dark:text-gray-400 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                            </svg>
-                        </button>
                     </div>
-                </div>
 
-                <!-- Categories Navigation -->
-                <nav class="hidden lg:flex items-center gap-1 py-2 border-t border-gray-100 dark:border-gray-700 overflow-x-auto scrollbar-none">
-                    <Link
-                        href="/products"
-                        class="flex-shrink-0 px-3 py-1.5 text-xs font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 rounded-full transition-colors hover:bg-blue-100 dark:hover:bg-blue-900/50"
-                    >
-                        {{ t('storefront.navigation.all_products') }}
-                    </Link>
-                    <Link
-                        v-for="category in categories"
-                        :key="category.slug"
-                        :href="`/category/${category.slug}`"
-                        class="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 text-xs text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
-                    >
-                        <span>{{ category.icon }}</span>
-                        <span>{{ category.name }}</span>
-                    </Link>
-                </nav>
+                    <!-- Categories Navigation -->
+                    <nav class="hidden lg:flex items-center gap-1 py-2 border-t border-gray-100 dark:border-gray-700 overflow-x-auto scrollbar-none">
+                        <Link
+                            href="/products"
+                            class="flex-shrink-0 px-3 py-1.5 text-xs font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 rounded-full transition-colors hover:bg-blue-100 dark:hover:bg-blue-900/50"
+                        >
+                            {{ t('storefront.navigation.all_products') }}
+                        </Link>
+                        <Link
+                            v-for="category in categories"
+                            :key="category.slug"
+                            :href="`/category/${category.slug}`"
+                            class="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 text-xs text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
+                        >
+                            <span>{{ category.icon }}</span>
+                            <span>{{ category.name }}</span>
+                        </Link>
+                    </nav>
+                </div>
             </div>
         </header>
 
