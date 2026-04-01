@@ -5,9 +5,6 @@ set -e
 
 echo "🚀 Starting Kromerce..."
 
-# Ensure Laravel Vite does not enter dev-server mode in production
-rm -f public/hot
-
 # Wait for database to be ready (if using PostgreSQL)
 if [ ! -z "$DATABASE_URL" ]; then
     echo "⏳ Waiting for database..."

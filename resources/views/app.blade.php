@@ -3,21 +3,21 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        
+
         <!-- PWA Meta Tags -->
         <meta name="theme-color" content="#3b82f6">
         <meta name="description" content="E-commerce platform for modern businesses">
         <meta name="mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-status-bar-style" content="default">
         <meta name="apple-mobile-web-app-title" content="Kromerce">
-        
+
         <!-- Favicon -->
         <link rel="icon" type="image/png" href="{{ asset('images/icons/kromerce-business-icon-logo-32.png') }}" sizes="32x32">
         <link rel="icon" type="image/png" href="{{ asset('images/icons/kromerce-business-icon-app-100.png') }}" sizes="100x100">
         <link rel="apple-touch-icon" href="{{ asset('images/icons/kromerce-business-icon-app-100.png') }}">
         
         <!-- PWA Manifest -->
-        <link rel="manifest" href="{{ asset('build/manifest.webmanifest') }}">
+        <link rel="manifest" href="{{ asset('manifest.json') }}">
 
         <title>{{ config('app.name', 'Laravel') }}</title>
 
@@ -30,7 +30,7 @@
         @routes
         @vite(['resources/js/app.js'])
         @inertiaHead
-        
+
         <!-- CSRF Token -->
         <meta name="csrf-token" content="{{ csrf_token() }}">
     </head>
