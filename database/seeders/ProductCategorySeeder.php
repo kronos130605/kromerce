@@ -263,16 +263,22 @@ class ProductCategorySeeder extends Seeder
             ],
         ];
 
-        // Crear categorías usando updateOrCreate para evitar duplicados en redeploys
+        // Crear categorías usando firstOrNew para manejar correctamente el UUID
         foreach ($categories as $categoryData) {
             $slug = $categoryData['slug'];
-            // Remove 'id' to prevent trying to update primary key of existing records
-            $data = array_diff_key($categoryData, ['id' => true]);
 
-            ProductCategory::updateOrCreate(
-                ['slug' => $slug],
-                $data
-            );
+            // Buscar o crear nueva instancia
+            $category = ProductCategory::firstOrNew(['slug' => $slug]);
+
+            // Si es nuevo, asignar el UUID del seeder
+            if (!$category->exists) {
+                $category->id = $categoryData['id'];
+            }
+
+            // Quitar id y slug de los datos a asignar (slug ya está en la búsqueda)
+            $data = array_diff_key($categoryData, ['id' => true, 'slug' => true]);
+            $category->fill($data);
+            $category->save();
         }
 
         $this->command->info('Creadas ' . count($categories) . ' categorías globales con traducciones.');
