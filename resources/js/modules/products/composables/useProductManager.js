@@ -342,6 +342,7 @@ export function useProductManager(options = {}) {
 
     const populateForm = (product) => {
         form.value = {
+            id: product.id || null,
             name: product.name || '',
             description: product.description || '',
             base_price: product.base_price || '',

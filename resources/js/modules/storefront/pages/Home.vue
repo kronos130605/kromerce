@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue';
 import StorefrontLayout from '@/layouts/StorefrontLayout.vue';
+import ProductDetailsModal from '@/components/storefront/ProductDetailsModal.vue';
 import ProductQuickViewModal from '@/components/storefront/ProductQuickViewModal.vue';
 import HeroBanner from '@/modules/storefront/components/HeroBanner.vue';
 import TrustBar from '@/modules/storefront/components/TrustBar.vue';
@@ -22,6 +23,8 @@ defineProps({
 
 const quickViewProduct = ref(null);
 const showQuickView = ref(false);
+const detailsProduct = ref(null);
+const showDetailsView = ref(false);
 
 const openQuickView = (product) => {
     quickViewProduct.value = product;
@@ -32,15 +35,32 @@ const closeQuickView = () => {
     showQuickView.value = false;
     setTimeout(() => { quickViewProduct.value = null; }, 200);
 };
+
+const openDetailsView = (product) => {
+    detailsProduct.value = product;
+    showDetailsView.value = true;
+};
+
+const closeDetailsView = () => {
+    showDetailsView.value = false;
+    setTimeout(() => { detailsProduct.value = null; }, 200);
+};
 </script>
 
 <template>
     <StorefrontLayout>
 
+        <ProductDetailsModal
+            :product="detailsProduct"
+            :show="showDetailsView"
+            @close="closeDetailsView"
+        />
+
         <ProductQuickViewModal
             :product="quickViewProduct"
             :show="showQuickView"
             @close="closeQuickView"
+            @open-details="openDetailsView"
         />
 
         <HeroBanner />
@@ -56,11 +76,13 @@ const closeQuickView = () => {
             view-all-link="/products?sort_by=trending"
             bg-class="bg-white dark:bg-gray-800"
             @quick-view="openQuickView"
+            @details-view="openDetailsView"
         />
 
         <DealsSection
             :products="deals_of_the_day"
             @quick-view="openQuickView"
+            @details-view="openDetailsView"
         />
 
         <ProductsGridSection
@@ -70,6 +92,7 @@ const closeQuickView = () => {
             view-all-link="/products?sort_by=created_at&sort_order=desc"
             bg-class="bg-gray-50 dark:bg-gray-900"
             @quick-view="openQuickView"
+            @details-view="openDetailsView"
         />
 
         <TopStoresSection :stores="top_stores" />
