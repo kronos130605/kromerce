@@ -219,8 +219,8 @@ const getStatusColor = (status) => ({
                         @click="toggleFilters"
                         :class="[
                             'inline-flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors',
-                            hasActiveFilters 
-                                ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400' 
+                            hasActiveFilters
+                                ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'
                                 : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'
                         ]"
                     >
