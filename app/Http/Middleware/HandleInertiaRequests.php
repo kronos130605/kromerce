@@ -29,35 +29,26 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
-        return [
-            ...parent::share($request),
-            'auth' => [
-                'user' => function () use ($request) {
-                    $user = $request->user();
-                    if ($user) {
-                        // Load roles with the user
-                        $user->load('roles');
-                        return $user;
-                    }
-                    return null;
-                },
-            ],
-            'current_store' => function () use ($request) {
-                $storeService = app(\App\Services\StoreService::class);
-                $store = $storeService->resolveCurrentStoreForRequest($request);
-                if (!$store) {
-                    return null;
-                }
+        $shared = parent::share($request);
 
-                return $storeService->getBasicStoreDataForFrontend($store->id);
-            },
-            'ziggy' => function () use ($request) {
-                $ziggy = new \Tighten\Ziggy\Ziggy;
-                return array_merge($ziggy->toArray(), [
-                    'location' => $request->url(),
-                    'query' => $request->query(),
-                ]);
-            },
+        $shared['auth'] = [
+            'user' => $request->user()?->load('roles'),
         ];
+
+        try {
+            $storeService = app(\App\Services\StoreService::class);
+            $store = $storeService->resolveCurrentStoreForRequest($request);
+            $shared['current_store'] = $store ? $storeService->getBasicStoreDataForFrontend($store->id) : null;
+            logger('[HandleInertiaRequests] current_store resolved successfully.');
+        } catch (\Throwable $e) {
+            logger('[HandleInertiaRequests] ERROR resolving current_store: ' . $e->getMessage());
+            $shared['current_store'] = null;
+        }
+
+        $shared['ziggy'] = fn () => array_merge((new \Tighten\Ziggy\Ziggy)->toArray(), [
+            'location' => $request->url(),
+        ]);
+
+        return $shared;
     }
 }

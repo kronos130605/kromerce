@@ -16,14 +16,14 @@ defineProps({
         <!-- Store Mini Header -->
         <div class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
             <div class="max-w-7xl mx-auto px-4 py-4 flex items-center gap-4">
-                <Link :href="`/stores/${store.slug}`" class="h-12 w-12 flex-shrink-0 overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm">
+                <Link :href="`/marketplace/stores/${store.slug}`" class="h-12 w-12 flex-shrink-0 overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm">
                     <img v-if="store.logo" :src="store.logo" :alt="store.name" class="h-full w-full object-cover" />
                     <div v-else class="flex h-full w-full items-center justify-center bg-gradient-to-br from-blue-600 to-purple-600">
                         <span class="text-lg font-bold text-white">{{ store.name?.charAt(0) }}</span>
                     </div>
                 </Link>
                 <div class="flex-1 min-w-0">
-                    <Link :href="`/stores/${store.slug}`" class="font-bold text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                    <Link :href="`/marketplace/stores/${store.slug}`" class="font-bold text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                         {{ store.name }}
                     </Link>
                 </div>
@@ -32,13 +32,13 @@ defineProps({
             <!-- Navigation Tabs -->
             <div class="max-w-7xl mx-auto px-4">
                 <nav class="flex gap-0">
-                    <Link :href="`/stores/${store.slug}`" class="border-b-2 border-transparent px-6 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:border-gray-300 transition-colors dark:text-gray-400 dark:hover:text-white">
+                    <Link :href="`/marketplace/stores/${store.slug}`" class="border-b-2 border-transparent px-6 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:border-gray-300 transition-colors dark:text-gray-400 dark:hover:text-white">
                         Home
                     </Link>
-                    <Link :href="`/stores/${store.slug}/products`" class="border-b-2 border-transparent px-6 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:border-gray-300 transition-colors dark:text-gray-400 dark:hover:text-white">
+                    <Link :href="`/marketplace/stores/${store.slug}/products`" class="border-b-2 border-transparent px-6 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:border-gray-300 transition-colors dark:text-gray-400 dark:hover:text-white">
                         Products
                     </Link>
-                    <Link :href="`/stores/${store.slug}/about`" class="border-b-2 border-blue-600 px-6 py-3 text-sm font-semibold text-blue-600 dark:text-blue-400">
+                    <Link :href="`/marketplace/stores/${store.slug}/about`" class="border-b-2 border-blue-600 px-6 py-3 text-sm font-semibold text-blue-600 dark:text-blue-400">
                         About
                     </Link>
                 </nav>
@@ -122,7 +122,7 @@ defineProps({
                 <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Browse products from {{ store.name }}</h3>
                 <p class="text-sm text-gray-600 dark:text-gray-400 mb-5">Discover our full catalog of products</p>
                 <Link
-                    :href="`/stores/${store.slug}/products`"
+                    :href="`/marketplace/stores/${store.slug}/products`"
                     class="inline-flex items-center gap-2 rounded-2xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white hover:bg-blue-700 transition-colors"
                 >
                     {{ t('storefront.store.visit_store') }}

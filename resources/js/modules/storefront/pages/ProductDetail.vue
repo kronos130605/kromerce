@@ -83,7 +83,7 @@ const closeDetailsView = () => {
             <nav class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-6">
                 <Link href="/" class="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">{{ t('storefront.navigation.home') }}</Link>
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                <Link href="/products" class="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">{{ t('storefront.navigation.products') }}</Link>
+                <Link href="/marketplace/products" class="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">{{ t('storefront.navigation.products') }}</Link>
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                 <span class="text-gray-900 dark:text-white font-medium truncate max-w-[200px]">{{ product.name }}</span>
             </nav>
@@ -134,7 +134,7 @@ const closeDetailsView = () => {
 
                     <!-- Store & Name -->
                     <div>
-                        <Link v-if="product.store" :href="`/stores/${product.store.slug}`" class="text-sm font-semibold text-blue-600 dark:text-blue-400 hover:underline">
+                        <Link v-if="product.store" :href="`/marketplace/stores/${product.store.slug}`" class="text-sm font-semibold text-blue-600 dark:text-blue-400 hover:underline">
                             {{ product.store.name }}
                         </Link>
                         <h1 class="mt-1 text-3xl font-bold tracking-tight text-gray-900 dark:text-white leading-tight">
@@ -176,7 +176,7 @@ const closeDetailsView = () => {
                         <Link
                             v-for="cat in product.categories"
                             :key="cat.id"
-                            :href="`/category/${cat.slug}`"
+                            :href="`/marketplace/category/${cat.slug}`"
                             class="rounded-full border border-gray-200 px-3 py-1 text-xs font-medium text-gray-600 hover:border-blue-300 hover:text-blue-600 transition-colors dark:border-gray-700 dark:text-gray-400 dark:hover:border-blue-500 dark:hover:text-blue-400"
                         >
                             {{ cat.name }}
@@ -236,7 +236,7 @@ const closeDetailsView = () => {
                     <h2 class="text-xl font-bold text-gray-900 dark:text-white">
                         {{ product.store?.name ? `More from ${product.store.name}` : 'More Products' }}
                     </h2>
-                    <Link v-if="product.store" :href="`/stores/${product.store.slug}/products`" class="text-sm text-blue-600 dark:text-blue-400 hover:underline font-medium flex items-center gap-1">
+                    <Link v-if="product.store" :href="`/marketplace/stores/${product.store.slug}/products`" class="text-sm text-blue-600 dark:text-blue-400 hover:underline font-medium flex items-center gap-1">
                         {{ t('storefront.sections.view_all') }}
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                     </Link>
@@ -253,7 +253,7 @@ const closeDetailsView = () => {
             <section v-if="related_products?.length > 0">
                 <div class="mb-5 flex items-center justify-between">
                     <h2 class="text-xl font-bold text-gray-900 dark:text-white">Related Products</h2>
-                    <Link href="/products" class="text-sm text-blue-600 dark:text-blue-400 hover:underline font-medium flex items-center gap-1">
+                    <Link href="/marketplace/products" class="text-sm text-blue-600 dark:text-blue-400 hover:underline font-medium flex items-center gap-1">
                         {{ t('storefront.sections.view_all') }}
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                     </Link>

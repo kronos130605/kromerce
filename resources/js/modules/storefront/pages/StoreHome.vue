@@ -94,19 +94,19 @@ const closeDetailsView = () => { showDetailsView.value = false; setTimeout(() =>
             <div class="max-w-7xl mx-auto px-4">
                 <nav class="flex gap-0">
                     <Link
-                        :href="`/stores/${store.slug}`"
+                        :href="`/marketplace/stores/${store.slug}`"
                         class="border-b-2 border-blue-600 px-6 py-4 text-sm font-semibold text-blue-600 dark:text-blue-400"
                     >
                         Home
                     </Link>
                     <Link
-                        :href="`/stores/${store.slug}/products`"
+                        :href="`/marketplace/stores/${store.slug}/products`"
                         class="border-b-2 border-transparent px-6 py-4 text-sm font-medium text-gray-600 hover:text-gray-900 hover:border-gray-300 transition-colors dark:text-gray-400 dark:hover:text-white"
                     >
                         Products
                     </Link>
                     <Link
-                        :href="`/stores/${store.slug}/about`"
+                        :href="`/marketplace/stores/${store.slug}/about`"
                         class="border-b-2 border-transparent px-6 py-4 text-sm font-medium text-gray-600 hover:text-gray-900 hover:border-gray-300 transition-colors dark:text-gray-400 dark:hover:text-white"
                     >
                         About
@@ -122,7 +122,7 @@ const closeDetailsView = () => { showDetailsView.value = false; setTimeout(() =>
             icon="⭐"
             :products="featured_products"
             :show-store="false"
-            :view-all-link="`/stores/${store.slug}/products`"
+            :view-all-link="`/marketplace/stores/${store.slug}/products`"
             bg-class="bg-white dark:bg-gray-800"
             @quick-view="openQuickView"
             @details-view="openDetailsView"
@@ -135,7 +135,7 @@ const closeDetailsView = () => { showDetailsView.value = false; setTimeout(() =>
             icon="🛍️"
             :products="all_products?.data || []"
             :show-store="false"
-            :view-all-link="`/stores/${store.slug}/products`"
+            :view-all-link="`/marketplace/stores/${store.slug}/products`"
             bg-class="bg-gray-50 dark:bg-gray-900"
             @quick-view="openQuickView"
             @details-view="openDetailsView"

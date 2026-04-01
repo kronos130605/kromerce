@@ -104,7 +104,7 @@ class ProductCategory extends Model
     {
         return $this->belongsToMany(Product::class, 'product_category_product', 'category_id', 'product_id')
             ->withPivot('order')
-            ->orderBy('pivot_order');
+            ->orderByPivot('order');
     }
 
     /**

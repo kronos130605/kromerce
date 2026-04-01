@@ -269,7 +269,7 @@ const close = () => emit('close');
                                     </svg>
                                 </button>
                                 <Link
-                                    :href="`/products/${product.id}`"
+                                    :href="`/marketplace/products/${product.id}`"
                                     @click="close"
                                     class="text-sm text-blue-600 hover:underline dark:text-blue-400"
                                 >

@@ -93,10 +93,10 @@ const closeDetailsView = () => { showDetailsView.value = false; setTimeout(() =>
                     {{ query ? `No results for "${query}"` : 'Type something to search' }}
                 </p>
                 <div class="mt-6 flex items-center justify-center gap-3">
-                    <Link href="/products" class="rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 transition-colors">
+                    <Link href="/marketplace/products" class="rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 transition-colors">
                         Browse all products
                     </Link>
-                    <Link href="/stores" class="rounded-xl border border-gray-200 px-5 py-2.5 text-sm font-medium text-gray-700 hover:border-blue-300 hover:text-blue-600 transition-colors dark:border-gray-600 dark:text-gray-300">
+                    <Link href="/marketplace/stores" class="rounded-xl border border-gray-200 px-5 py-2.5 text-sm font-medium text-gray-700 hover:border-blue-300 hover:text-blue-600 transition-colors dark:border-gray-600 dark:text-gray-300">
                         Browse stores
                     </Link>
                 </div>

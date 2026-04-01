@@ -58,7 +58,7 @@ const handleDetailsView = (e) => {
 
 <template>
     <div class="group flex h-full w-[280px] flex-shrink-0 snap-start flex-col overflow-hidden rounded-[1.35rem] border border-gray-100 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-blue-500/10 sm:w-[300px] lg:w-[320px] dark:border-gray-700 dark:bg-gray-800">
-        <Link :href="`/products/${product.id}`" class="flex flex-1 flex-col">
+        <Link :href="`/marketplace/products/${product.id}`" class="flex flex-1 flex-col">
             <div class="relative aspect-[4/3] overflow-hidden bg-gray-100 dark:bg-gray-700">
                 <img
                     :src="primaryImageUrl"

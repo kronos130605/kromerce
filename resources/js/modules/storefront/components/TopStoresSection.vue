@@ -21,7 +21,7 @@ defineProps({
                 {{ t('storefront.sections.top_stores') }}
             </h2>
             <Link
-                href="/stores"
+                href="/marketplace/stores"
                 class="text-sm text-blue-600 dark:text-blue-400 hover:underline font-medium flex items-center gap-1"
             >
                 {{ t('storefront.sections.view_all') }}

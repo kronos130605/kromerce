@@ -40,7 +40,7 @@ const sortOptions = [
 ];
 
 const applyFilters = () => {
-    router.get(`/category/${props.category.slug}`, {
+    router.get(`/marketplace/category/${props.category.slug}`, {
         search: localSearch.value || undefined,
         store: localStore.value || undefined,
         min_price: localMinPrice.value || undefined,
@@ -55,7 +55,7 @@ const clearFilters = () => {
     localMinPrice.value = '';
     localMaxPrice.value = '';
     localSortBy.value = '';
-    router.get(`/category/${props.category.slug}`);
+    router.get(`/marketplace/category/${props.category.slug}`);
 };
 
 const hasActiveFilters = computed(() =>
@@ -79,7 +79,7 @@ const closeDetailsView = () => { showDetailsView.value = false; setTimeout(() =>
                 <nav class="flex items-center gap-2 text-sm text-blue-200 mb-4">
                     <Link href="/" class="hover:text-white transition-colors">{{ t('storefront.navigation.home') }}</Link>
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                    <Link href="/products" class="hover:text-white transition-colors">{{ t('storefront.navigation.products') }}</Link>
+                    <Link href="/marketplace/products" class="hover:text-white transition-colors">{{ t('storefront.navigation.products') }}</Link>
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                     <span class="text-white font-medium">{{ category.name }}</span>
                 </nav>
@@ -142,7 +142,7 @@ const closeDetailsView = () => { showDetailsView.value = false; setTimeout(() =>
                 <Link
                     v-for="page in pagination.last_page"
                     :key="page"
-                    :href="`/category/${category.slug}?page=${page}`"
+                    :href="`/marketplace/category/${category.slug}?page=${page}`"
                     :class="[
                         'flex h-10 w-10 items-center justify-center rounded-xl text-sm font-medium transition-colors',
                         page === pagination.current_page
