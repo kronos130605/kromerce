@@ -63,6 +63,27 @@ export function useCart() {
         }
     };
 
+    /**
+     * Create a reactive handler for adding products to cart with visual feedback.
+     * Returns the handler function and the 'added' reactive state for UI feedback.
+     */
+    const createAddToCartHandler = () => {
+        const added = ref(false);
+
+        const handleAddToCart = (product, quantity, options = {}) => {
+            const { isOutOfStock = false, validateProduct = true } = options;
+
+            if (validateProduct && !product) return;
+            if (isOutOfStock) return;
+
+            addToCart(product, quantity);
+            added.value = true;
+            setTimeout(() => { added.value = false; }, 2000);
+        };
+
+        return { handleAddToCart, added };
+    };
+
     const updateQuantity = (productId, quantity) => {
         const item = cartItems.value.find((i) => i.id === productId);
         if (item) {
@@ -89,6 +110,7 @@ export function useCart() {
         isInCart,
         getItemQuantity,
         addToCart,
+        createAddToCartHandler,
         updateQuantity,
         removeFromCart,
         clearCart,

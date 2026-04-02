@@ -9,9 +9,12 @@ import { useCart } from '@/composables/useCart';
 import { useProductPresentation } from '@/composables/useProductPresentation';
 import { useTranslations } from '@/composables/useTranslations';
 
+import { useProductGallery } from '@/composables/useProductGallery.js';
+import ProductImageGallery from '@/components/shared/ProductImageGallery.vue';
+
 const { t } = useTranslations();
 useTranslations('storefront');
-const { addToCart } = useCart();
+const { addToCart, createAddToCartHandler } = useCart();
 
 const props = defineProps({
     product: { type: Object, required: true },
@@ -22,13 +25,6 @@ const props = defineProps({
 });
 
 const quantity = ref(1);
-const added = ref(false);
-const activeImageIndex = ref(0);
-
-const quickViewProduct = ref(null);
-const showQuickView = ref(false);
-const detailsProduct = ref(null);
-const showDetailsView = ref(false);
 
 const productRef = computed(() => props.product);
 const {
@@ -44,17 +40,20 @@ const {
     formatPrice,
 } = useProductPresentation(productRef);
 
-const activeImageUrl = computed(() =>
-    gallery.value[activeImageIndex.value]?.url
-    || gallery.value[activeImageIndex.value]?.thumbnail_url
-    || '/images/placeholder-product.png'
-);
+// Use the gallery composable for image navigation
+const {
+    activeImageIndex,
+    activeImageUrl,
+    isActiveImage,
+    setActiveImage,
+} = useProductGallery(productRef, { galleryRef: gallery });
 
-const handleAddToCart = () => {
-    if (isOutOfStock.value) return;
-    addToCart(props.product, quantity.value);
-    added.value = true;
-    setTimeout(() => { added.value = false; }, 2000);
+// Create the add to cart handler with visual feedback
+const { handleAddToCart, added } = createAddToCartHandler();
+
+// Wrapper to call with proper arguments
+const onAddToCart = () => {
+    handleAddToCart(props.product, quantity.value, { isOutOfStock: isOutOfStock.value, validateProduct: false });
 };
 
 const openQuickView = (product) => {
@@ -109,26 +108,17 @@ const closeDetailsView = () => {
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 mb-14">
                 <!-- Gallery -->
                 <div class="space-y-4">
-                    <div class="overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
-                        <div class="aspect-[4/3] overflow-hidden bg-gray-100 dark:bg-gray-700">
-                            <img :src="activeImageUrl" :alt="product.name" class="h-full w-full object-cover transition-transform duration-500 hover:scale-105" />
-                        </div>
-                    </div>
-                    <div v-if="gallery.length > 1" class="flex gap-3 overflow-x-auto pb-1">
-                        <button
-                            v-for="(img, idx) in gallery"
-                            :key="idx"
-                            @click="activeImageIndex = idx"
-                            :class="[
-                                'h-20 w-20 flex-shrink-0 overflow-hidden rounded-2xl border-2 transition-all bg-white dark:bg-gray-800',
-                                activeImageIndex === idx
-                                    ? 'border-blue-500 shadow-md shadow-blue-500/20'
-                                    : 'border-transparent hover:border-gray-300 dark:hover:border-gray-600'
-                            ]"
-                        >
-                            <img :src="img.url || img.thumbnail_url" :alt="`${product.name} ${idx + 1}`" class="h-full w-full object-cover" />
-                        </button>
-                    </div>
+                    <ProductImageGallery
+                        :product="product"
+                        :gallery="gallery"
+                        :active-image-url="activeImageUrl"
+                        :active-image-index="activeImageIndex"
+                        :thumbnail-limit="null"
+                        thumbnail-size="md"
+                        variant="shadow"
+                        container-class=""
+                        @set-active="setActiveImage"
+                    />
                 </div>
 
                 <!-- Product Info -->
@@ -212,7 +202,7 @@ const closeDetailsView = () => {
                             </button>
                         </div>
                         <button
-                            @click="handleAddToCart"
+                            @click="onAddToCart"
                             :disabled="isOutOfStock"
                             :class="[
                                 'inline-flex flex-1 items-center justify-center gap-2 rounded-2xl px-6 py-3.5 text-sm font-semibold transition-all duration-300',

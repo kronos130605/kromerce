@@ -5,8 +5,11 @@ import { useCart } from '@/composables/useCart.js';
 import { useProductPresentation } from '@/composables/useProductPresentation.js';
 import { useTranslations } from '@/composables/useTranslations.js';
 
+import { useProductGallery } from '@/composables/useProductGallery.js';
+import ProductImageGallery from '@/components/shared/ProductImageGallery.vue';
+
 const { t } = useTranslations();
-const { addToCart } = useCart();
+const { addToCart, createAddToCartHandler } = useCart();
 
 const props = defineProps({
     product: {
@@ -22,14 +25,9 @@ const props = defineProps({
 const emit = defineEmits(['close']);
 
 const quantity = ref(1);
-const added = ref(false);
-const activeImageIndex = ref(0);
 
-watch(() => props.product, () => {
-    quantity.value = 1;
-    added.value = false;
-    activeImageIndex.value = 0;
-});
+// Create the add to cart handler with visual feedback
+const { handleAddToCart, added } = createAddToCartHandler();
 
 const productRef = computed(() => props.product);
 const {
@@ -45,11 +43,13 @@ const {
     formatPrice,
 } = useProductPresentation(productRef);
 
-const imageUrl = computed(() =>
-    gallery.value[activeImageIndex.value]?.url
-    || gallery.value[activeImageIndex.value]?.thumbnail_url
-    || '/images/placeholder-product.png'
-);
+// Use the gallery composable for image navigation
+const {
+    activeImageIndex,
+    activeImageUrl,
+    isActiveImage,
+    setActiveImage,
+} = useProductGallery(productRef, { galleryRef: gallery });
 
 const productHighlights = computed(() => {
     if (!props.product) return [];
@@ -71,13 +71,6 @@ const productHighlights = computed(() => {
         },
     ];
 });
-
-const handleAddToCart = () => {
-    if (!props.product || isOutOfStock.value) return;
-    addToCart(props.product, quantity.value);
-    added.value = true;
-    setTimeout(() => { added.value = false; }, 2000);
-};
 
 const close = () => emit('close');
 </script>
@@ -111,35 +104,17 @@ const close = () => emit('close');
 
                     <div class="grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr]">
                         <div class="bg-gradient-to-br from-slate-50 via-white to-blue-50/70 p-6 dark:from-gray-800 dark:via-gray-900 dark:to-blue-950/30">
-                            <div class="overflow-hidden rounded-[1.5rem] border border-white/70 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
-                                <div class="aspect-[4/3] overflow-hidden bg-gray-100 dark:bg-gray-700">
-                                    <img
-                                        :src="imageUrl"
-                                        :alt="product.name"
-                                        class="h-full w-full object-cover"
-                                    />
-                                </div>
-                            </div>
-
-                            <div class="mt-4 flex gap-3 overflow-x-auto pb-1">
-                                <button
-                                    v-for="(img, idx) in gallery"
-                                    :key="idx"
-                                    @click="activeImageIndex = idx"
-                                    :class="[
-                                        'h-20 w-20 flex-shrink-0 overflow-hidden rounded-2xl border-2 bg-white transition-all dark:bg-gray-800',
-                                        activeImageIndex === idx
-                                            ? 'border-blue-500 shadow-md shadow-blue-500/20'
-                                            : 'border-transparent hover:border-gray-300 dark:hover:border-gray-600'
-                                    ]"
-                                >
-                                    <img
-                                        :src="img.url || img.thumbnail_url"
-                                        :alt="`${product.name} ${idx + 1}`"
-                                        class="h-full w-full object-cover"
-                                    />
-                                </button>
-                            </div>
+                            <ProductImageGallery
+                                :product="product"
+                                :gallery="gallery"
+                                :active-image-url="activeImageUrl"
+                                :active-image-index="activeImageIndex"
+                                :thumbnail-limit="null"
+                                thumbnail-size="md"
+                                variant="bordered"
+                                container-class=""
+                                @set-active="setActiveImage"
+                            />
 
                             <div class="mt-6 grid gap-3 sm:grid-cols-3">
                                 <div
