@@ -12,7 +12,7 @@ import BulkActionsBar from '../components/BulkActionsBar.vue';
 import DataTable from '@/components/shared/DataTable.vue';
 import ConfirmationModal from '@/components/shared/ConfirmationModal.vue';
 import ProductView from '../components/ProductView.vue';
-import StatusBadge from '@/components/ui/data-display/StatusBadge.vue';
+import SearchFilterBar from '@/components/shared/SearchFilterBar.vue';
 import StockIndicator from '@/components/ui/data-display/StockIndicator.vue';
 
 const { t } = useTranslations();
@@ -193,73 +193,22 @@ const getStatusColor = (status) => ({
                 </div>
             </div>
 
-            <!-- Search and Filters Bar -->
-            <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
-                <div class="flex flex-col sm:flex-row gap-4">
-                    <!-- Search -->
-                    <div class="flex-1">
-                        <div class="relative">
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                </svg>
-                            </div>
-                            <input
-                                :value="activeFilters.search"
-                                @input="searchProducts($event.target.value)"
-                                type="text"
-                                :placeholder="t('products.list.search_placeholder')"
-                                class="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                            />
-                        </div>
-                    </div>
-
-                    <!-- Filter Toggle Button -->
-                    <button
-                        @click="toggleFilters"
-                        :class="[
-                            'inline-flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors',
-                            hasActiveFilters
-                                ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'
-                                : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'
-                        ]"
-                    >
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                        </svg>
-                        <span>{{ t('products.list.filters.title') }}</span>
-                        <span v-if="activeFilterCount > 0" class="inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-blue-600 rounded-full">
-                            {{ activeFilterCount }}
-                        </span>
-                    </button>
-
-                    <!-- Quick Filters -->
-                    <div class="flex gap-2">
-                        <button
-                            @click="activeFilters.status = 'active'; updateFilter('status', 'active')"
-                            :class="[
-                                'px-3 py-2 text-sm rounded-lg transition-colors',
-                                activeFilters.status === 'active'
-                                    ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
-                                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-                            ]"
-                        >
-                            {{ t('products.list.filters.active') }}
-                        </button>
-                        <button
-                            @click="activeFilters.status = 'draft'; updateFilter('status', 'draft')"
-                            :class="[
-                                'px-3 py-2 text-sm rounded-lg transition-colors',
-                                activeFilters.status === 'draft'
-                                    ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400'
-                                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-                            ]"
-                        >
-                            {{ t('products.list.filters.draft') }}
-                        </button>
-                    </div>
-                </div>
-            </div>
+        <!-- Search and Filters Bar -->
+        <SearchFilterBar
+            :search-value="activeFilters.search"
+            :search-placeholder="t('products.list.search_placeholder')"
+            :has-active-filters="hasActiveFilters"
+            :active-filter-count="activeFilterCount"
+            :filters-button-label="t('products.list.filters.title')"
+            :quick-filters="[
+                { key: 'active', label: t('products.list.filters.active'), activeClass: 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' },
+                { key: 'draft', label: t('products.list.filters.draft'), activeClass: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400' }
+            ]"
+            :active-quick-filter="activeFilters.status"
+            @search="searchProducts"
+            @toggle-filters="toggleFilters"
+            @quick-filter="(filter) => { activeFilters.status = filter.key; updateFilter('status', filter.key); }"
+        />
 
             <!-- Filters Panel -->
             <ProductFilters
