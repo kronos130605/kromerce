@@ -3,7 +3,6 @@ import { ref, computed } from 'vue';
 import { Link } from '@inertiajs/vue3';
 import StorefrontLayout from '@/layouts/StorefrontLayout.vue';
 import StorefrontProductCarousel from '@/modules/storefront/components/StorefrontProductCarousel.vue';
-import ProductDetailsModal from '@/modules/storefront/components/ProductDetailsModal.vue';
 import ProductQuickViewModal from '@/modules/storefront/components/ProductQuickViewModal.vue';
 import { useCart } from '@/composables/useCart';
 import { useProductPresentation } from '@/composables/useProductPresentation';
@@ -64,20 +63,11 @@ const closeQuickView = () => {
     showQuickView.value = false;
     setTimeout(() => { quickViewProduct.value = null; }, 200);
 };
-const openDetailsView = (product) => {
-    detailsProduct.value = product;
-    showDetailsView.value = true;
-};
-const closeDetailsView = () => {
-    showDetailsView.value = false;
-    setTimeout(() => { detailsProduct.value = null; }, 200);
-};
 </script>
 
 <template>
     <StorefrontLayout>
-        <ProductDetailsModal :product="detailsProduct" :show="showDetailsView" @close="closeDetailsView" />
-        <ProductQuickViewModal :product="quickViewProduct" :show="showQuickView" @close="closeQuickView" @open-details="openDetailsView" />
+        <ProductQuickViewModal :product="quickViewProduct" :show="showQuickView" @close="closeQuickView" />
 
         <div class="max-w-7xl mx-auto px-4 py-8">
             <!-- Breadcrumb -->
@@ -252,7 +242,6 @@ const closeDetailsView = () => {
                     :products="store_products"
                     :show-store="false"
                     @quick-view="openQuickView"
-                    @details-view="openDetailsView"
                 />
             </section>
 
@@ -268,7 +257,6 @@ const closeDetailsView = () => {
                 <StorefrontProductCarousel
                     :products="related_products"
                     @quick-view="openQuickView"
-                    @details-view="openDetailsView"
                 />
             </section>
         </div>

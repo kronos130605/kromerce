@@ -2,7 +2,6 @@
 import { ref } from 'vue';
 import { Link } from '@inertiajs/vue3';
 import StorefrontLayout from '@/layouts/StorefrontLayout.vue';
-import ProductDetailsModal from '@/modules/storefront/components/ProductDetailsModal.vue';
 import ProductQuickViewModal from '@/modules/storefront/components/ProductQuickViewModal.vue';
 import ProductsGridSection from '@/modules/storefront/components/ProductsGridSection.vue';
 import { useTranslations } from '@/composables/useTranslations';
@@ -19,20 +18,15 @@ const props = defineProps({
 
 const quickViewProduct = ref(null);
 const showQuickView = ref(false);
-const detailsProduct = ref(null);
-const showDetailsView = ref(false);
 
 const openQuickView = (product) => { quickViewProduct.value = product; showQuickView.value = true; };
 const closeQuickView = () => { showQuickView.value = false; setTimeout(() => { quickViewProduct.value = null; }, 200); };
-const openDetailsView = (product) => { detailsProduct.value = product; showDetailsView.value = true; };
-const closeDetailsView = () => { showDetailsView.value = false; setTimeout(() => { detailsProduct.value = null; }, 200); };
 
 </script>
 
 <template>
     <StorefrontLayout>
-        <ProductDetailsModal :product="detailsProduct" :show="showDetailsView" @close="closeDetailsView" />
-        <ProductQuickViewModal :product="quickViewProduct" :show="showQuickView" @close="closeQuickView" @open-details="openDetailsView" />
+        <ProductQuickViewModal :product="quickViewProduct" :show="showQuickView" @close="closeQuickView" />
 
         <!-- Store Banner -->
         <div class="relative overflow-hidden">
@@ -125,7 +119,6 @@ const closeDetailsView = () => { showDetailsView.value = false; setTimeout(() =>
             :view-all-link="`/marketplace/stores/${store.slug}/products`"
             bg-class="bg-white dark:bg-gray-800"
             @quick-view="openQuickView"
-            @details-view="openDetailsView"
         />
 
         <!-- All Products Preview -->
@@ -138,7 +131,6 @@ const closeDetailsView = () => { showDetailsView.value = false; setTimeout(() =>
             :view-all-link="`/marketplace/stores/${store.slug}/products`"
             bg-class="bg-gray-50 dark:bg-gray-900"
             @quick-view="openQuickView"
-            @details-view="openDetailsView"
         />
 
         <!-- Empty state -->

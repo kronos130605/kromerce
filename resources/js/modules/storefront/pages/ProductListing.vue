@@ -3,7 +3,6 @@ import { ref, computed } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import StorefrontLayout from '@/layouts/StorefrontLayout.vue';
 import ProductCard from '@/modules/storefront/components/ProductCard.vue';
-import ProductDetailsModal from '@/modules/storefront/components/ProductDetailsModal.vue';
 import ProductQuickViewModal from '@/modules/storefront/components/ProductQuickViewModal.vue';
 import { useTranslations } from '@/composables/useTranslations';
 
@@ -19,8 +18,6 @@ const props = defineProps({
 
 const quickViewProduct = ref(null);
 const showQuickView = ref(false);
-const detailsProduct = ref(null);
-const showDetailsView = ref(false);
 const showFilters = ref(false);
 
 const localSearch = ref(props.filters.search || '');
@@ -70,14 +67,11 @@ const hasActiveFilters = computed(() =>
 
 const openQuickView = (product) => { quickViewProduct.value = product; showQuickView.value = true; };
 const closeQuickView = () => { showQuickView.value = false; setTimeout(() => { quickViewProduct.value = null; }, 200); };
-const openDetailsView = (product) => { detailsProduct.value = product; showDetailsView.value = true; };
-const closeDetailsView = () => { showDetailsView.value = false; setTimeout(() => { detailsProduct.value = null; }, 200); };
 </script>
 
 <template>
     <StorefrontLayout>
-        <ProductDetailsModal :product="detailsProduct" :show="showDetailsView" @close="closeDetailsView" />
-        <ProductQuickViewModal :product="quickViewProduct" :show="showQuickView" @close="closeQuickView" @open-details="openDetailsView" />
+        <ProductQuickViewModal :product="quickViewProduct" :show="showQuickView" @close="closeQuickView" />
 
         <div class="max-w-7xl mx-auto px-4 py-8">
             <!-- Header -->
@@ -164,7 +158,6 @@ const closeDetailsView = () => { showDetailsView.value = false; setTimeout(() =>
                     :product="product"
                     class="!w-full"
                     @quick-view="openQuickView"
-                    @details-view="openDetailsView"
                 />
             </div>
 

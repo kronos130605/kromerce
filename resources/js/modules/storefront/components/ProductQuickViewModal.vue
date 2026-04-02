@@ -21,7 +21,7 @@ const props = defineProps({
     },
 });
 
-const emit = defineEmits(['close', 'open-details']);
+const emit = defineEmits(['close']);
 
 const quantity = ref(1);
 
@@ -54,10 +54,6 @@ const {
     isActiveImage,
     setActiveImage,
 } = useProductGallery(productRef, { galleryRef: gallery });
-
-const openDetails = () => {
-    emit('open-details', props.product);
-};
 
 const close = () => emit('close');
 </script>
@@ -235,15 +231,16 @@ const close = () => emit('close');
                             </div>
 
                             <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                                <button
-                                    @click="openDetails"
+                                <Link
+                                    :href="`/marketplace/products/${product.id}`"
+                                    @click="close"
                                     class="inline-flex items-center gap-2 text-sm font-semibold text-indigo-600 transition-colors hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
                                 >
                                     {{ t('storefront.product.view_details') }}
                                     <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                                     </svg>
-                                </button>
+                                </Link>
                                 <Link
                                     :href="`/marketplace/products/${product.id}`"
                                     @click="close"
