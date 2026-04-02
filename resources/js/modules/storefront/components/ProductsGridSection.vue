@@ -1,6 +1,6 @@
 <script setup>
 import { Link } from '@inertiajs/vue3';
-import StorefrontProductCarousel from '@/components/storefront/StorefrontProductCarousel.vue';
+import StorefrontProductCarousel from '@/modules/storefront/components/StorefrontProductCarousel.vue';
 import { useTranslations } from '@/composables/useTranslations';
 
 const { t } = useTranslations();
@@ -25,6 +25,10 @@ defineProps({
     bgClass: {
         type: String,
         default: '',
+    },
+    showStore: {
+        type: Boolean,
+        default: true,
     },
 });
 
@@ -56,6 +60,7 @@ const emit = defineEmits(['quick-view', 'details-view']);
                 v-if="products?.length > 0"
                 :products="products"
                 :show-arrows="true"
+                :show-store="showStore"
                 arrows-class="absolute right-0 -top-14"
                 @quick-view="(p) => emit('quick-view', p)"
                 @details-view="(p) => emit('details-view', p)"

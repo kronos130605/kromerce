@@ -33,13 +33,13 @@ const { t } = useTranslations();
 
                     <div class="flex flex-col sm:flex-row gap-3">
                         <Link
-                            href="/products"
+                            href="/marketplace/products"
                             class="px-7 py-3 bg-white text-blue-700 font-semibold rounded-xl hover:bg-blue-50 transition-colors text-center shadow-lg"
                         >
                             {{ t('storefront.hero.cta_browse') }}
                         </Link>
                         <Link
-                            href="/stores"
+                            href="/marketplace/stores"
                             class="px-7 py-3 border-2 border-white/60 text-white font-semibold rounded-xl hover:bg-white/10 transition-colors text-center backdrop-blur-sm"
                         >
                             {{ t('storefront.hero.cta_sellers') }}

@@ -1,9 +1,9 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { Link } from '@inertiajs/vue3';
-import { useCart } from '@/composables/useCart';
-import { useProductPresentation } from '@/composables/useProductPresentation';
-import { useTranslations } from '@/composables/useTranslations';
+import { useCart } from '@/composables/useCart.js';
+import { useProductPresentation } from '@/composables/useProductPresentation.js';
+import { useTranslations } from '@/composables/useTranslations.js';
 
 const { t } = useTranslations();
 const { addToCart } = useCart();
@@ -58,7 +58,7 @@ const handleDetailsView = (e) => {
 
 <template>
     <div class="group flex h-full w-[280px] flex-shrink-0 snap-start flex-col overflow-hidden rounded-[1.35rem] border border-gray-100 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-blue-500/10 sm:w-[300px] lg:w-[320px] dark:border-gray-700 dark:bg-gray-800">
-        <Link :href="`/products/${product.slug}`" class="flex flex-1 flex-col">
+        <Link :href="`/marketplace/products/${product.id}`" class="flex flex-1 flex-col">
             <div class="relative aspect-[4/3] overflow-hidden bg-gray-100 dark:bg-gray-700">
                 <img
                     :src="primaryImageUrl"
@@ -90,15 +90,15 @@ const handleDetailsView = (e) => {
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                         </svg>
                     </button>
-                    <button
-                        @click="handleDetailsView"
+                    <Link
+                        :href="`/marketplace/products/${product.id}`"
                         :title="t('storefront.product.view_details')"
                         class="flex h-9 w-9 items-center justify-center rounded-full bg-white/95 shadow-lg transition-colors hover:bg-indigo-50 dark:bg-gray-800/95 dark:hover:bg-indigo-900/30"
                     >
                         <svg class="h-4 w-4 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                    </button>
+                    </Link>
                 </div>
 
                 <div v-if="isOutOfStock" class="absolute inset-0 flex items-center justify-center bg-black/40">

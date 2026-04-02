@@ -1,11 +1,12 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Business;
 
+use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Services\ProductReviewService;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class ProductReviewController extends Controller
 {
@@ -18,7 +19,7 @@ class ProductReviewController extends Controller
         try {
             $filters = $request->only(['status', 'rating', 'verified_purchase', 'sort_by', 'sort_order', 'per_page']);
             $reviews = $this->reviewService->getReviewsForProduct($product->id, $filters);
-            
+
             return $this->success($reviews);
         } catch (\Exception $e) {
             return $this->error('Failed to retrieve reviews', 500);
@@ -41,7 +42,7 @@ class ProductReviewController extends Controller
             $validated['status'] = 'pending';
 
             $review = $this->reviewService->createReview($validated);
-            
+
             return $this->success($review, 'Review submitted successfully', 201);
         } catch (\Exception $e) {
             return $this->error('Failed to create review: ' . $e->getMessage(), 500);
@@ -58,7 +59,7 @@ class ProductReviewController extends Controller
             ]);
 
             $updated = $this->reviewService->updateReview($review, $validated);
-            
+
             return $this->success($updated, 'Review updated successfully');
         } catch (\Exception $e) {
             return $this->error('Failed to update review: ' . $e->getMessage(), 500);
@@ -69,7 +70,7 @@ class ProductReviewController extends Controller
     {
         try {
             $this->reviewService->deleteReview($review);
-            
+
             return $this->success(null, 'Review deleted successfully');
         } catch (\Exception $e) {
             return $this->error('Failed to delete review: ' . $e->getMessage(), 500);
@@ -90,7 +91,7 @@ class ProductReviewController extends Controller
                 auth()->id(),
                 $validated['moderation_notes'] ?? null
             );
-            
+
             return $this->success($moderated, 'Review moderated successfully');
         } catch (\Exception $e) {
             return $this->error('Failed to moderate review: ' . $e->getMessage(), 500);
@@ -109,7 +110,7 @@ class ProductReviewController extends Controller
                 auth()->id(),
                 $validated['is_helpful']
             );
-            
+
             return $this->success(null, 'Vote recorded successfully');
         } catch (\Exception $e) {
             return $this->error('Failed to record vote: ' . $e->getMessage(), 500);
@@ -120,7 +121,7 @@ class ProductReviewController extends Controller
     {
         try {
             $stats = $this->reviewService->getProductRatingStats($product->id);
-            
+
             return $this->success($stats);
         } catch (\Exception $e) {
             return $this->error('Failed to retrieve stats', 500);

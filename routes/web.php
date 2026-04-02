@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Storefront\StorefrontController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -9,8 +10,6 @@ use Inertia\Inertia;
 | Web Routes - Rutas Globales
 |--------------------------------------------------------------------------
 */
-
-use App\Http\Controllers\StorefrontController;
 
 // Welcome/Landing page
 Route::get('/welcome', function () {

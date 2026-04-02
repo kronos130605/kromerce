@@ -1,12 +1,14 @@
 <script setup>
 import { ref, computed, watch } from 'vue';
 import { Link } from '@inertiajs/vue3';
-import { useCart } from '@/composables/useCart';
-import { useProductPresentation } from '@/composables/useProductPresentation';
-import { useTranslations } from '@/composables/useTranslations';
+import { useCart } from '@/composables/useCart.js';
+import { useProductPresentation } from '@/composables/useProductPresentation.js';
+import { useTranslations } from '@/composables/useTranslations.js';
+import { useProductGallery } from '@/composables/useProductGallery.js';
+import ProductImageGallery from '@/components/shared/ProductImageGallery.vue';
 
 const { t } = useTranslations();
-const { addToCart, isInCart } = useCart();
+const { addToCart, isInCart, createAddToCartHandler } = useCart();
 
 const props = defineProps({
     product: {
@@ -19,16 +21,16 @@ const props = defineProps({
     },
 });
 
-const emit = defineEmits(['close', 'open-details']);
+const emit = defineEmits(['close']);
 
 const quantity = ref(1);
-const added = ref(false);
-const activeImageIndex = ref(0);
 
+// Create the add to cart handler with visual feedback
+const { handleAddToCart, added } = createAddToCartHandler();
+
+// Reset quantity when product changes, but keep added state from composable
 watch(() => props.product, () => {
     quantity.value = 1;
-    added.value = false;
-    activeImageIndex.value = 0;
 });
 
 const productRef = computed(() => props.product);
@@ -45,22 +47,13 @@ const {
     formatPrice,
 } = useProductPresentation(productRef, { galleryLimit: 6 });
 
-const imageUrl = computed(() =>
-    gallery.value[activeImageIndex.value]?.url
-    || gallery.value[activeImageIndex.value]?.thumbnail_url
-    || '/images/placeholder-product.png'
-);
-
-const handleAddToCart = () => {
-    if (!props.product || isOutOfStock.value) return;
-    addToCart(props.product, quantity.value);
-    added.value = true;
-    setTimeout(() => { added.value = false; }, 2000);
-};
-
-const openDetails = () => {
-    emit('open-details', props.product);
-};
+// Use the gallery composable for image navigation
+const {
+    activeImageIndex,
+    activeImageUrl,
+    isActiveImage,
+    setActiveImage,
+} = useProductGallery(productRef, { galleryRef: gallery });
 
 const close = () => emit('close');
 </script>
@@ -93,37 +86,16 @@ const close = () => emit('close');
                     </button>
 
                     <div class="grid grid-cols-1 lg:grid-cols-[1.05fr_0.95fr]">
-                        <div class="bg-gradient-to-br from-slate-50 via-white to-blue-50/70 p-6 dark:from-gray-800 dark:via-gray-900 dark:to-blue-950/30">
-                            <div class="overflow-hidden rounded-[1.5rem] bg-white shadow-sm dark:bg-gray-800">
-                                <div class="aspect-[4/3] overflow-hidden bg-gray-100 dark:bg-gray-700">
-                                    <img
-                                        :src="imageUrl"
-                                        :alt="product.name"
-                                        class="h-full w-full object-cover"
-                                    />
-                                </div>
-                            </div>
-
-                            <div class="mt-4 flex gap-3 overflow-x-auto pb-1">
-                                <button
-                                    v-for="(img, idx) in gallery.slice(0, 6)"
-                                    :key="idx"
-                                    @click="activeImageIndex = idx"
-                                    :class="[
-                                        'h-16 w-16 flex-shrink-0 overflow-hidden rounded-2xl border-2 bg-white transition-all dark:bg-gray-800',
-                                        activeImageIndex === idx
-                                            ? 'border-blue-500 shadow-md shadow-blue-500/20'
-                                            : 'border-transparent hover:border-gray-300 dark:hover:border-gray-600'
-                                    ]"
-                                >
-                                    <img
-                                        :src="img.url || img.thumbnail_url"
-                                        :alt="`${product.name} ${idx + 1}`"
-                                        class="h-full w-full object-cover"
-                                    />
-                                </button>
-                            </div>
-                        </div>
+                        <ProductImageGallery
+                            :product="product"
+                            :gallery="gallery"
+                            :active-image-url="activeImageUrl"
+                            :active-image-index="activeImageIndex"
+                            :thumbnail-limit="6"
+                            thumbnail-size="sm"
+                            container-class="p-6"
+                            @set-active="setActiveImage"
+                        />
 
                         <div class="flex flex-col p-6 lg:p-7">
                             <div class="flex flex-wrap gap-2">
@@ -259,17 +231,18 @@ const close = () => emit('close');
                             </div>
 
                             <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                                <button
-                                    @click="openDetails"
+                                <Link
+                                    :href="`/marketplace/products/${product.id}`"
+                                    @click="close"
                                     class="inline-flex items-center gap-2 text-sm font-semibold text-indigo-600 transition-colors hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
                                 >
                                     {{ t('storefront.product.view_details') }}
                                     <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                                     </svg>
-                                </button>
+                                </Link>
                                 <Link
-                                    :href="`/products/${product.slug}`"
+                                    :href="`/marketplace/products/${product.id}`"
                                     @click="close"
                                     class="text-sm text-blue-600 hover:underline dark:text-blue-400"
                                 >

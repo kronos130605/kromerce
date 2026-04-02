@@ -1,6 +1,6 @@
 <script setup>
 import { Link } from '@inertiajs/vue3';
-import CategoryCard from '@/components/storefront/CategoryCard.vue';
+import CategoryCard from '@/modules/storefront/components/CategoryCard.vue';
 import { useTranslations } from '@/composables/useTranslations';
 
 const { t } = useTranslations();
@@ -20,7 +20,7 @@ defineProps({
                 {{ t('storefront.sections.featured_categories') }}
             </h2>
             <Link
-                href="/products"
+                href="/marketplace/products"
                 class="text-sm text-blue-600 dark:text-blue-400 hover:underline font-medium flex items-center gap-1"
             >
                 {{ t('storefront.sections.view_all') }}

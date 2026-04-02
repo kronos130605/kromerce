@@ -1,6 +1,6 @@
 <script setup>
 import { Link } from '@inertiajs/vue3';
-import { useTranslations } from '@/composables/useTranslations';
+import { useTranslations } from '@/composables/useTranslations.js';
 
 const { t } = useTranslations();
 
@@ -13,7 +13,7 @@ defineProps({
 </script>
 
 <template>
-    <Link :href="`/category/${category.slug}`" class="group block bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+    <Link :href="`/marketplace/category/${category.slug}`" class="group block bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
         <!-- Category Image/Icon -->
         <div class="aspect-square bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/30 dark:to-purple-900/30 flex items-center justify-center">
             <div v-if="category.image" class="w-full h-full">

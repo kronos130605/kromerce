@@ -1,6 +1,6 @@
 <script setup>
 import { Link } from '@inertiajs/vue3';
-import { useTranslations } from '@/composables/useTranslations';
+import { useTranslations } from '@/composables/useTranslations.js';
 
 const { t } = useTranslations();
 
@@ -13,7 +13,7 @@ defineProps({
 </script>
 
 <template>
-    <Link :href="`/stores/${store.slug}`" class="group block bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-lg transition-shadow duration-300">
+    <Link :href="`/marketplace/stores/${store.slug}`" class="group block bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-lg transition-shadow duration-300">
         <!-- Store Banner/Cover -->
         <div class="h-24 bg-gradient-to-r from-blue-500 to-purple-600"></div>
 
