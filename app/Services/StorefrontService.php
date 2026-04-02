@@ -8,6 +8,7 @@ use App\Repositories\Store\StoreRepository;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 
 class StorefrontService
 {
@@ -40,7 +41,7 @@ class StorefrontService
 
                 return $result;
             } catch (\Exception $e) {
-                \Log::error('Error getting home page data: ' . $e->getMessage(), [
+                Log::error('Error getting home page data: ' . $e->getMessage(), [
                     'trace' => $e->getTraceAsString(),
                 ]);
 
