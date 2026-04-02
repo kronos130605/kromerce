@@ -2,7 +2,11 @@
 
 namespace App\Http\Controllers\Storefront;
 
+use App\Helpers\TranslationHelper;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\Storefront\CategoryCardResource;
+use App\Http\Resources\Storefront\ProductCardResource;
+use App\Http\Resources\Storefront\StoreCardResource;
 use App\Models\Store;
 use App\Services\StorePageService;
 use Illuminate\Http\Request;
@@ -23,9 +27,13 @@ class StorePageController extends Controller
         $store->load(['owner']);
         $data = $this->storePageService->getStoreHomeData($store->id);
 
-        return Inertia::render('storefront/StoreHome', array_merge([
-            'store' => $store,
-        ], $data));
+        return Inertia::render('storefront/StoreHome', [
+            'store' => (new StoreCardResource($store))->resolve(),
+            'featured_products' => ProductCardResource::collection($data['featured_products'])->resolve(),
+            'all_products' => ProductCardResource::collection($data['all_products'])->resolve(),
+            'stats' => $data['stats'],
+            'translations' => TranslationHelper::forPreset('storefront'),
+        ]);
     }
 
     /**
@@ -33,15 +41,22 @@ class StorePageController extends Controller
      */
     public function products(Store $store, Request $request): Response
     {
+        $store->load(['owner']);
         $filters = $request->only(['search', 'category', 'min_price', 'max_price', 'sort_by', 'sort_order']);
         $products = $this->storePageService->getStoreProducts($store->id, $filters);
         $categories = $this->storePageService->getStoreCategories($store->id);
 
+        // Transform products while preserving pagination structure
+        $products->setCollection(
+            collect(ProductCardResource::collection($products->getCollection())->resolve())
+        );
+
         return Inertia::render('storefront/StoreProducts', [
-            'store' => $store,
+            'store' => (new StoreCardResource($store))->resolve(),
             'products' => $products,
-            'categories' => $categories,
+            'categories' => CategoryCardResource::collection($categories)->resolve(),
             'filters' => $filters,
+            'translations' => TranslationHelper::forPreset('storefront'),
         ]);
     }
 
@@ -53,7 +68,8 @@ class StorePageController extends Controller
         $store->load(['owner']);
 
         return Inertia::render('storefront/StoreAbout', [
-            'store' => $store,
+            'store' => (new StoreCardResource($store))->resolve(),
+            'translations' => TranslationHelper::forPreset('storefront'),
         ]);
     }
 }

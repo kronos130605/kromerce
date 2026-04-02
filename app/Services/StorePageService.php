@@ -57,7 +57,7 @@ class StorePageService
      */
     public function getStoreProducts(string $storeId, array $filters): LengthAwarePaginator
     {
-        $filters['store_id'] = $storeId;
+        $filters['store'] = $storeId;
         $filters['status'] = 'active';
         
         return $this->productRepository->getProductsWithFilters($filters, 24);
@@ -66,7 +66,7 @@ class StorePageService
     /**
      * Get store categories.
      */
-    public function getStoreCategories(string $storeId): Collection
+    public function getStoreCategories(string $storeId): \Illuminate\Support\Collection
     {
         // Get unique categories from store products
         $products = $this->productRepository->getBy([

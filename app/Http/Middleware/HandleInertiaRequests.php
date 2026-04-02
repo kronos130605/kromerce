@@ -39,7 +39,6 @@ class HandleInertiaRequests extends Middleware
             $storeService = app(\App\Services\StoreService::class);
             $store = $storeService->resolveCurrentStoreForRequest($request);
             $shared['current_store'] = $store ? $storeService->getBasicStoreDataForFrontend($store->id) : null;
-            logger('[HandleInertiaRequests] current_store resolved successfully.');
         } catch (\Throwable $e) {
             logger('[HandleInertiaRequests] ERROR resolving current_store: ' . $e->getMessage());
             $shared['current_store'] = null;

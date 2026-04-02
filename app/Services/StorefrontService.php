@@ -7,9 +7,13 @@ use App\Repositories\Product\ProductCategoryRepository;
 use App\Repositories\Store\StoreRepository;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Cache;
 
 class StorefrontService
 {
+    // Cache TTL in seconds (1 minute for home page data)
+    private const HOME_CACHE_TTL = 60;
+
     public function __construct(
         private ProductRepository $productRepository,
         private ProductCategoryRepository $categoryRepository,
@@ -17,28 +21,48 @@ class StorefrontService
     ) {}
 
     /**
-     * Get data for marketplace home page.
+     * Get data for marketplace home page with caching.
      */
     public function getHomePageData(): array
     {
-        try {
-            return [
-                'featured_categories' => $this->getFeaturedCategories() ?? collect([]),
-                'trending_products' => $this->getTrendingProducts() ?? collect([]),
-                'new_arrivals' => $this->getNewArrivals() ?? collect([]),
-                'top_stores' => $this->getTopStores() ?? collect([]),
-                'deals_of_the_day' => $this->getDealsOfTheDay() ?? collect([]),
-            ];
-        } catch (\Exception $e) {
-            \Log::error('Error getting home page data: ' . $e->getMessage());
-            return [
-                'featured_categories' => collect([]),
-                'trending_products' => collect([]),
-                'new_arrivals' => collect([]),
-                'top_stores' => collect([]),
-                'deals_of_the_day' => collect([]),
-            ];
-        }
+        // DEBUG: Limpiar caché para ver datos reales
+        Cache::forget('storefront.home_data');
+
+        $data = Cache::remember('storefront.home_data', self::HOME_CACHE_TTL, function () {
+            try {
+                $result = [
+                    'featured_categories' => $this->getFeaturedCategories(),
+                    'trending_products' => $this->getTrendingProducts(),
+                    'new_arrivals' => $this->getNewArrivals(),
+                    'top_stores' => $this->getTopStores(),
+                    'deals_of_the_day' => $this->getDealsOfTheDay(),
+                ];
+
+                return $result;
+            } catch (\Exception $e) {
+                \Log::error('Error getting home page data: ' . $e->getMessage(), [
+                    'trace' => $e->getTraceAsString(),
+                ]);
+
+                return [
+                    'featured_categories' => collect(),
+                    'trending_products' => collect(),
+                    'new_arrivals' => collect(),
+                    'top_stores' => collect(),
+                    'deals_of_the_day' => collect(),
+                ];
+            }
+        });
+
+        return $data;
+    }
+
+    /**
+     * Clear home page cache.
+     */
+    public function clearHomeCache(): void
+    {
+        Cache::forget('storefront.home_data');
     }
 
     /**
@@ -103,7 +127,7 @@ class StorefrontService
     public function getProductsByCategory(string $categorySlug, array $filters, int $perPage = 24): array
     {
         $category = $this->categoryRepository->getFirstBy(['slug' => $categorySlug]);
-        
+
         if (!$category) {
             return [
                 'category' => null,

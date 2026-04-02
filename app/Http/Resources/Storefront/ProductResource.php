@@ -35,33 +35,43 @@ class ProductResource extends JsonResource
             'is_new' => $this->is_new,
             'images' => $this->whenLoaded('images', fn () => $this->images->map(fn ($img) => [
                 'id' => $img->id,
-                'url' => $img->url,
-                'thumbnail_url' => $img->thumbnail_url,
+                'url' => $this->formatImageUrl($img->url),
+                'thumbnail_url' => $this->formatImageUrl($img->thumbnail_url),
                 'alt_text' => $img->alt_text,
                 'is_primary' => $img->is_primary,
-            ])),
+            ])->toArray(), []),
             'variants' => $this->whenLoaded('variants', fn () => $this->variants->map(fn ($v) => [
                 'id' => $v->id,
                 'name' => $v->name,
                 'sku' => $v->sku,
                 'price_adjustment' => $v->price_adjustment,
                 'stock_quantity' => $v->stock_quantity,
-            ])),
+            ])->toArray(), []),
             'categories' => $this->whenLoaded('categories', fn () => $this->categories->map(fn ($cat) => [
                 'id' => $cat->id,
                 'name' => $cat->name,
                 'slug' => $cat->slug,
-            ])),
+            ])->toArray(), []),
             'store' => $this->whenLoaded('store', fn () => [
                 'id' => $this->store->id,
                 'name' => $this->store->name,
                 'slug' => $this->store->slug,
                 'logo' => $this->store->logo,
-                'status' => $this->store->status,
-                'verified_business' => $this->store->verified_business,
-            ]),
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
+            ], null),
+            'created_at' => $this->created_at?->toIso8601String(),
+            'updated_at' => $this->updated_at?->toIso8601String(),
         ];
+    }
+
+    /**
+     * Format image URL to be absolute.
+     */
+    private function formatImageUrl(?string $url): ?string
+    {
+        if (!$url) {
+            return null;
+        }
+
+        return str_starts_with($url, 'http') ? $url : asset($url);
     }
 }

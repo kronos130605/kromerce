@@ -17,6 +17,8 @@ const props = defineProps({
     product: { type: Object, required: true },
     related_products: { type: Array, default: () => [] },
     store_products: { type: Array, default: () => [] },
+    breadcrumb_context: { type: String, default: 'default' },
+    breadcrumb_store: { type: Object, default: null },
 });
 
 const quantity = ref(1);
@@ -82,8 +84,23 @@ const closeDetailsView = () => {
             <!-- Breadcrumb -->
             <nav class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-6">
                 <Link href="/" class="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">{{ t('storefront.navigation.home') }}</Link>
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                <Link href="/marketplace/products" class="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">{{ t('storefront.navigation.products') }}</Link>
+                
+                <!-- Store context: Home > Store Name > Product -->
+                <template v-if="breadcrumb_context === 'store' && breadcrumb_store">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                    <Link :href="`/marketplace/stores/${breadcrumb_store.slug}`" class="hover:text-blue-600 dark:hover:text-blue-400 transition-colors truncate max-w-[150px]">
+                        {{ breadcrumb_store.name }}
+                    </Link>
+                </template>
+                
+                <!-- Products listing context: Home > Products > Product -->
+                <template v-else-if="breadcrumb_context === 'products'">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                    <Link href="/marketplace/products" class="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">{{ t('storefront.navigation.products') }}</Link>
+                </template>
+                
+                <!-- Default/Other: Home > Product (no middle item) -->
+                
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                 <span class="text-gray-900 dark:text-white font-medium truncate max-w-[200px]">{{ product.name }}</span>
             </nav>
