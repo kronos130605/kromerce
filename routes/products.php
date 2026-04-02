@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware(['auth', 'verified', 'App\Http\Middleware\IdentifyStore'])
+Route::middleware(['web', 'auth', 'verified', 'App\Http\Middleware\IdentifyStore'])
     ->prefix('products')
     ->name('products.')
     ->group(function () {

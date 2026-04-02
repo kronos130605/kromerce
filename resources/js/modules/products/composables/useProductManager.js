@@ -276,28 +276,20 @@ export function useProductManager(options = {}) {
         loading.value = true;
         closeConfirmModal();
 
-        try {
-            const response = await fetch(`/products/${product.id}`, {
-                method: 'DELETE',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-                    'Accept': 'application/json'
-                }
-            });
-
-            if (response.ok) {
+        router.delete(`/products/${product.id}`, {
+            preserveScroll: true,
+            onSuccess: () => {
                 refreshProducts();
                 toastSuccess(t('products.messages.deleted'));
-            } else {
-                console.error('Delete failed:', await response.text());
+            },
+            onError: (err) => {
+                console.error('Delete error:', err);
                 toastError(t('products.messages.delete_failed'));
-            }
-        } catch (error) {
-            console.error('Delete error:', error);
-            toastError(t('products.messages.delete_failed'));
-        } finally {
-            loading.value = false;
-        }
+            },
+            onFinish: () => {
+                loading.value = false;
+            },
+        });
     };
 
     const closeConfirmModal = () => {
