@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Business;
 
 use App\Helpers\TranslationHelper;
 use App\Http\Controllers\Controller;
+use App\Jobs\Orders\SendOrderStatusNotification;
 use App\Models\Order;
 use App\Services\OrderService;
 use Illuminate\Http\JsonResponse;
@@ -110,6 +111,8 @@ class OrderController extends Controller
                 'notes' => 'nullable|string|max:500',
             ]);
 
+            $oldStatus = $order->status;
+
             $updated = $this->orderService->updateOrderStatus(
                 $order,
                 $validated['status'],
@@ -120,6 +123,15 @@ class OrderController extends Controller
             if (!$updated) {
                 return $this->error('Failed to update order status', 500);
             }
+
+            // Dispatch notification job
+            SendOrderStatusNotification::dispatch(
+                $order->fresh(),
+                $oldStatus,
+                $validated['status'],
+                $validated['notes'] ?? null,
+                auth()->id()
+            );
 
             if ($request->wantsJson()) {
                 return $this->success(null, 'Order status updated successfully');
@@ -198,6 +210,8 @@ class OrderController extends Controller
                 'reason' => 'nullable|string|max:500',
             ]);
 
+            $oldStatus = $order->status;
+
             $cancelled = $this->orderService->cancelOrder(
                 $order,
                 $validated['reason'] ?? null,
@@ -207,6 +221,15 @@ class OrderController extends Controller
             if (!$cancelled) {
                 return $this->error('Failed to cancel order', 500);
             }
+
+            // Dispatch notification job
+            SendOrderStatusNotification::dispatch(
+                $order->fresh(),
+                $oldStatus,
+                'cancelled',
+                $validated['reason'] ?? null,
+                auth()->id()
+            );
 
             if ($request->wantsJson()) {
                 return $this->success(null, 'Order cancelled successfully');

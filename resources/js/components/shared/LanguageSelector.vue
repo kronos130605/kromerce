@@ -22,13 +22,17 @@ const changeLanguage = async (langCode) => {
   locale.value = langCode;
   setLocaleCookie(langCode);
 
-  // Dispatch event to notify components to reload their translations
+  // Dispatch event to notify components
   window.dispatchEvent(new CustomEvent('locale-changed', { detail: langCode }));
 
-  // Reload current Inertia page props without a full browser refresh
-  router.reload({
-    preserveState: true,
+  // Visit current page to reload translations from server
+  // Add X-Locale header to ensure server receives the locale
+  router.visit(window.location.pathname, {
     preserveScroll: true,
+    preserveState: false,
+    headers: {
+      'X-Locale': langCode,
+    },
   });
 };
 </script>

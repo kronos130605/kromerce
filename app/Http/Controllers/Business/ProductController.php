@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Business;
 
+use App\Jobs\Products\ExportProducts;
+use App\Jobs\Products\ProcessProductImage;
 use App\Helpers\TranslationHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ProductImageRequest;
@@ -14,7 +16,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Inertia\Response;
-use Intervention\Image\Laravel\Facades\Image;
 
 class ProductController extends Controller
 {
@@ -191,7 +192,7 @@ class ProductController extends Controller
     }
 
     /**
-     * Upload image for a product with thumbnail generation.
+     * Upload image for a product with async thumbnail generation.
      */
     public function uploadImage(ProductImageRequest $request, Product $product): JsonResponse
     {
@@ -205,66 +206,29 @@ class ProductController extends Controller
 
             $file = $request->file('image');
             $filename = uniqid() . '.' . $file->getClientOriginalExtension();
-            $directory = 'products/' . $product->id;
 
-            // Store original image
-            $originalPath = $file->storeAs($directory, $filename, 'public');
+            // Store temp file for job processing
+            $tempPath = $file->store('temp/uploads', 'local');
+            $fullTempPath = storage_path('app/' . $tempPath);
 
-            // Create thumbnail (300x300, cropped)
-            $thumbnailFilename = 'thumb_' . $filename;
-            $thumbnailPath = storage_path('app/public/' . $directory . '/' . $thumbnailFilename);
-
-            $image = Image::read($file->getRealPath());
-            $image->cover(300, 300);
-            $image->save($thumbnailPath, quality: 80);
-
-            // Create medium size (800x800, fitted)
-            $mediumFilename = 'medium_' . $filename;
-            $mediumPath = storage_path('app/public/' . $directory . '/' . $mediumFilename);
-
-            $mediumImage = Image::read($file->getRealPath());
-            $mediumImage->scaleDown(800, 800);
-            $mediumImage->save($mediumPath, quality: 85);
-
-            // Parse values from request
-            $isPrimary = $request->booleanIsPrimary();
-            $order = $request->integerOrder($product->images()->count());
-
-            // Create image record with relative paths (not full URLs)
-            $imageRecord = $product->images()->create([
-                'url' => 'storage/' . $originalPath,
+            // Prepare metadata
+            $metadata = [
                 'alt' => $request->input('alt', $product->name),
                 'title' => $request->input('title'),
-                'is_primary' => $isPrimary,
-                'order' => $order,
-                'metadata' => [
-                    'thumbnail' => 'storage/' . $directory . '/' . $thumbnailFilename,
-                    'medium' => 'storage/' . $directory . '/' . $mediumFilename,
-                    'sizes' => [
-                        'original' => $originalPath,
-                        'thumbnail' => $directory . '/' . $thumbnailFilename,
-                        'medium' => $directory . '/' . $mediumFilename,
-                    ],
-                ],
-            ]);
+                'is_primary' => $request->booleanIsPrimary(),
+                'order' => $request->integerOrder($product->images()->count()),
+            ];
 
-            // If this is the first image or is_primary is true, set as primary
-            if ($isPrimary || $product->images()->count() === 1) {
-                $product->images()->where('id', '!=', $imageRecord->id)->update(['is_primary' => false]);
-                $imageRecord->update(['is_primary' => true]);
-            }
+            // Dispatch job for async processing
+            ProcessProductImage::dispatch($product, [
+                'temp_path' => $fullTempPath,
+                'filename' => $filename,
+            ], $metadata);
 
             return $this->success([
-                'id' => $imageRecord->id,
-                'url' => asset($imageRecord->url),
-                'full_url' => asset($imageRecord->url),
-                'thumbnail_url' => asset($imageRecord->metadata['thumbnail'] ?? $imageRecord->url),
-                'medium_url' => asset($imageRecord->metadata['medium'] ?? $imageRecord->url),
-                'alt' => $imageRecord->alt,
-                'title' => $imageRecord->title,
-                'is_primary' => $imageRecord->is_primary,
-                'order' => $imageRecord->order,
-            ], 'Image uploaded successfully', 201);
+                'processing' => true,
+                'message' => 'Image upload started. It will be available shortly.',
+            ], 'Image processing started', 202);
 
         } catch (\Exception $e) {
             Log::error('ProductController::uploadImage - ERROR', [
@@ -459,9 +423,9 @@ class ProductController extends Controller
     }
 
     /**
-     * Export products.
+     * Export products (async).
      */
-    public function export(Request $request): mixed
+    public function export(Request $request): JsonResponse
     {
         try {
             $validated = $request->validate([
@@ -473,7 +437,13 @@ class ProductController extends Controller
 
             $ids = $validated['ids'] ? explode(',', $validated['ids']) : null;
 
-            return $this->productService->exportProducts($store, $ids, $validated['format']);
+            // Dispatch export job
+            ExportProducts::dispatch($store, $ids, $validated['format'], auth()->id());
+
+            return $this->success([
+                'processing' => true,
+                'message' => 'Export started. You will be notified when it is ready.',
+            ], 'Export queued successfully', 202);
 
         } catch (\Exception $e) {
             Log::error('ProductController::export - ERROR', [
@@ -481,7 +451,7 @@ class ProductController extends Controller
                 'user_id' => auth()->id(),
             ]);
 
-            return $this->error('Failed to export products', 500);
+            return $this->error('Failed to start export', 500);
         }
     }
 }

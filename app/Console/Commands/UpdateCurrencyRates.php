@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Jobs\Currency\UpdateCurrencyRates as UpdateCurrencyRatesJob;
 use App\Services\CurrencyRateService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
@@ -30,27 +31,13 @@ class UpdateCurrencyRates extends Command
         $this->info('Starting currency rate update...');
 
         try {
-            $result = $currencyService->updateDailyRates();
+            // Dispatch job instead of running synchronously
+            UpdateCurrencyRatesJob::dispatch($this->option('force'));
 
-            if ($result['success']) {
-                $this->info("✅ Currency rates updated successfully!");
-                $this->info("Total rates updated: {$result['total_updated']}");
-                
-                if (isset($result['results']['global']['updated'])) {
-                    $this->info("Global rates: {$result['results']['global']['updated']}");
-                }
-                
-                if (isset($result['results']['business']['updated'])) {
-                    $this->info("Business rates: {$result['results']['business']['updated']}");
-                }
+            $this->info('✅ Currency rate update job dispatched successfully!');
+            $this->info('The rates will be updated in the background.');
 
-                return self::SUCCESS;
-            } else {
-                $this->error("❌ Currency rate update failed!");
-                $this->error("Error: {$result['error']}");
-                
-                return self::FAILURE;
-            }
+            return self::SUCCESS;
         } catch (\Exception $e) {
             $this->error("❌ Unexpected error: {$e->getMessage()}");
             Log::error('Currency rate command failed', [

@@ -1,5 +1,20 @@
 {
     "dashboard_nav": {
-
+        "dashboard": "Dashboard",
+        "stores": "Stores",
+        "my_orders": "My Orders",
+        "wishlist": "Wishlist",
+        "deals": "Deals",
+        "products": "Products",
+        "orders": "Orders",
+        "analytics": "Analytics",
+        "marketing": "Marketing",
+        "settings": "Settings",
+        "profile": "Profile",
+        "inventory": "Inventory",
+        "customers": "Customers",
+        "reports": "Reports",
+        "users": "Users",
+        "tenants": "Tenants"
     }
 }
