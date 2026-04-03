@@ -89,9 +89,9 @@ const cancel = () => {
                     </svg>
                 </Link>
                 <div>
-                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ t('products.form.update') }}</h1>
+                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ t('products.actions.update') }}</h1>
                     <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                        {{ t('products.management') }}
+                        {{ t('products.metadata.management') }}
                     </p>
                 </div>
             </div>
@@ -100,7 +100,7 @@ const cancel = () => {
                     @click="cancel"
                     class="px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
                 >
-                    {{ t('products.form.cancel') }}
+                    {{ t('products.actions.cancel') }}
                 </button>
                 <button
                     @click="submit"
@@ -108,7 +108,7 @@ const cancel = () => {
                     class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                     <span v-if="form.processing">{{ t('products.messages.loading') }}</span>
-                    <span v-else>{{ t('products.form.update') }}</span>
+                    <span v-else>{{ t('products.actions.update') }}</span>
                 </button>
             </div>
         </div>
@@ -116,12 +116,12 @@ const cancel = () => {
         <form @submit.prevent="submit" class="space-y-6">
                 <!-- Basic Information -->
                 <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-                    <h2 class="text-lg font-medium text-gray-900 dark:text-white mb-4">{{ t('products.sections.basic_info') }}</h2>
+                    <h2 class="text-lg font-medium text-gray-900 dark:text-white mb-4">{{ t('products.form.sections.basic_info') }}</h2>
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="md:col-span-2">
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                {{ t('products.form.name') }} *
+                                {{ t('products.labels.name') }} *
                             </label>
                             <input
                                 v-model="form.name"
@@ -137,7 +137,7 @@ const cancel = () => {
                         
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                {{ t('products.form.sku') }}
+                                {{ t('products.labels.sku') }}
                             </label>
                             <div class="flex space-x-2">
                                 <input
@@ -163,7 +163,7 @@ const cancel = () => {
                         
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                {{ t('products.form.slug') }}
+                                {{ t('products.labels.slug') }}
                             </label>
                             <div class="flex space-x-2">
                                 <input
@@ -189,7 +189,7 @@ const cancel = () => {
                         
                         <div class="md:col-span-2">
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                {{ t('products.form.description') }}
+                                {{ t('products.labels.description') }}
                             </label>
                             <textarea
                                 v-model="form.description"
@@ -206,12 +206,12 @@ const cancel = () => {
 
                 <!-- Pricing -->
                 <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-                    <h2 class="text-lg font-medium text-gray-900 dark:text-white mb-4">{{ t('products.sections.pricing') }}</h2>
+                    <h2 class="text-lg font-medium text-gray-900 dark:text-white mb-4">{{ t('products.form.sections.pricing') }}</h2>
                     
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                {{ t('products.form.base_price') }} *
+                                {{ t('products.labels.base_price') }} *
                             </label>
                             <div class="relative">
                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -234,7 +234,7 @@ const cancel = () => {
                         
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                {{ t('products.form.sale_price') }}
+                                {{ t('products.labels.sale_price') }}
                             </label>
                             <div class="relative">
                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -341,7 +341,7 @@ const cancel = () => {
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                {{ t('products.form.status') }} *
+                                {{ t('products.labels.status') }} *
                             </label>
                             <select
                                 v-model="form.status"
@@ -360,7 +360,7 @@ const cancel = () => {
                         
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                {{ t('products.form.category') }}
+                                {{ t('products.labels.category') }}
                             </label>
                             <select
                                 v-model="form.category_id"
@@ -385,7 +385,7 @@ const cancel = () => {
                                     class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
                                 />
                                 <span class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                                    {{ t('products.form.featured') }}
+                                    {{ t('products.labels.featured') }}
                                 </span>
                             </label>
                         </div>
@@ -398,7 +398,7 @@ const cancel = () => {
                                     class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
                                 />
                                 <span class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                                    {{ t('products.form.on_sale') }}
+                                    {{ t('products.labels.on_sale') }}
                                 </span>
                             </label>
                         </div>

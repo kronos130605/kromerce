@@ -75,10 +75,10 @@ const currentStepData = props.steps[props.currentStep];
                     <header class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
                         <div>
                             <h2 class="text-xl font-semibold text-gray-900 dark:text-white">
-                                {{ isEditing ? t('products.edit.title') : t('products.create.title') }}
+                                {{ isEditing ? t('products.metadata.edit_title') : t('products.metadata.create_title') }}
                             </h2>
                             <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
-                                {{ isEditing ? t('products.edit.subtitle') : t('products.create.subtitle') }}
+                                {{ isEditing ? t('products.metadata.edit_subtitle') : t('products.metadata.create_subtitle') }}
                             </p>
                         </div>
                         <button
@@ -159,7 +159,7 @@ const currentStepData = props.steps[props.currentStep];
                         <div v-if="currentStep === 0" class="space-y-6">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                    {{ t('products.fields.name') }} *
+                                    {{ t('products.labels.name') }} *
                                 </label>
                                 <input
                                     :value="form.name"
@@ -174,7 +174,7 @@ const currentStepData = props.steps[props.currentStep];
 
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                    {{ t('products.fields.description') }}
+                                    {{ t('products.labels.description') }}
                                 </label>
                                 <textarea
                                     :value="form.description"
@@ -199,7 +199,7 @@ const currentStepData = props.steps[props.currentStep];
                             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                        {{ t('products.fields.price') }} *
+                                        {{ t('products.labels.price') }} *
                                     </label>
                                     <div class="relative">
                                         <span class="absolute left-3 top-2 text-gray-500">$</span>
@@ -218,7 +218,7 @@ const currentStepData = props.steps[props.currentStep];
 
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                        {{ t('products.fields.compare_price') }}
+                                        {{ t('products.labels.compare_price') }}
                                     </label>
                                     <div class="relative">
                                         <span class="absolute left-3 top-2 text-gray-500">$</span>
@@ -235,7 +235,7 @@ const currentStepData = props.steps[props.currentStep];
 
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                        {{ t('products.fields.cost') }}
+                                        {{ t('products.labels.cost') }}
                                     </label>
                                     <div class="relative">
                                         <span class="absolute left-3 top-2 text-gray-500">$</span>
@@ -254,7 +254,7 @@ const currentStepData = props.steps[props.currentStep];
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                        {{ t('products.fields.sku') }}
+                                        {{ t('products.labels.sku') }}
                                     </label>
                                     <input
                                         :value="form.sku"
@@ -266,7 +266,7 @@ const currentStepData = props.steps[props.currentStep];
 
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                        {{ t('products.fields.barcode') }}
+                                        {{ t('products.labels.barcode') }}
                                     </label>
                                     <input
                                         :value="form.barcode"
@@ -280,7 +280,7 @@ const currentStepData = props.steps[props.currentStep];
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                        {{ t('products.fields.currency') }}
+                                        {{ t('products.labels.currency') }}
                                     </label>
                                     <select
                                         :value="form.base_currency"
@@ -299,7 +299,7 @@ const currentStepData = props.steps[props.currentStep];
 
                             <div class="border-t border-gray-200 dark:border-gray-700 pt-6">
                                 <h3 class="text-sm font-medium text-gray-900 dark:text-white mb-4">
-                                    {{ t('products.sections.stock_management') }}
+                                    {{ t('products.form.sections.stock_management') }}
                                 </h3>
 
                                 <div class="space-y-4">
@@ -312,14 +312,14 @@ const currentStepData = props.steps[props.currentStep];
                                             class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
                                         />
                                         <label for="manage_stock" class="ml-2 text-sm text-gray-700 dark:text-gray-300">
-                                            {{ t('products.fields.manage_stock') }}
+                                            {{ t('products.labels.manage_stock') }}
                                         </label>
                                     </div>
 
                                     <div v-if="form.manage_stock" class="grid grid-cols-1 sm:grid-cols-2 gap-4 ml-6">
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                                {{ t('products.fields.stock_quantity') }}
+                                                {{ t('products.labels.stock_quantity') }}
                                             </label>
                                             <input
                                                 :value="form.stock_quantity"
@@ -332,7 +332,7 @@ const currentStepData = props.steps[props.currentStep];
 
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                                {{ t('products.fields.low_stock_threshold') }}
+                                                {{ t('products.labels.low_stock_threshold') }}
                                             </label>
                                             <input
                                                 :value="form.low_stock_threshold"
@@ -353,7 +353,7 @@ const currentStepData = props.steps[props.currentStep];
                                             class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
                                         />
                                         <label for="allow_backorders" class="ml-2 text-sm text-gray-700 dark:text-gray-300">
-                                            {{ t('products.fields.allow_backorders') }}
+                                            {{ t('products.labels.allow_backorders') }}
                                         </label>
                                     </div>
                                 </div>
@@ -361,7 +361,7 @@ const currentStepData = props.steps[props.currentStep];
 
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                    {{ t('products.fields.status') }}
+                                    {{ t('products.labels.status') }}
                                 </label>
                                 <select
                                     :value="form.status"
@@ -388,7 +388,7 @@ const currentStepData = props.steps[props.currentStep];
                         <div v-if="currentStep === 3" class="space-y-6">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                    {{ t('products.fields.seo_title') }}
+                                    {{ t('products.labels.seo_title') }}
                                 </label>
                                 <input
                                     :value="form.seo_title"
@@ -404,7 +404,7 @@ const currentStepData = props.steps[props.currentStep];
 
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                    {{ t('products.fields.seo_description') }}
+                                    {{ t('products.labels.seo_description') }}
                                 </label>
                                 <textarea
                                     :value="form.seo_description"
@@ -419,7 +419,7 @@ const currentStepData = props.steps[props.currentStep];
 
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                    {{ t('products.fields.seo_keywords') }}
+                                    {{ t('products.labels.seo_keywords') }}
                                 </label>
                                 <input
                                     :value="form.seo_keywords"

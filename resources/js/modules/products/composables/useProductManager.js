@@ -86,10 +86,10 @@ export function useProductManager(options = {}) {
     });
 
     const steps = [
-        { id: 'basic', titleKey: 'products.steps.basic', icon: 'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z' },
-        { id: 'pricing', titleKey: 'products.steps.pricing', icon: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08.402-2.599-1' },
-        { id: 'media', titleKey: 'products.steps.media', icon: 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z' },
-        { id: 'seo', titleKey: 'products.steps.seo', icon: 'M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z' },
+        { id: 'basic', titleKey: 'products.wizard.step_basic', icon: 'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z' },
+        { id: 'pricing', titleKey: 'products.wizard.step_pricing', icon: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08.402-2.599-1' },
+        { id: 'media', titleKey: 'products.wizard.step_media', icon: 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z' },
+        { id: 'seo', titleKey: 'products.wizard.step_seo', icon: 'M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z' },
     ];
 
     const errors = ref({});
@@ -169,12 +169,12 @@ export function useProductManager(options = {}) {
         switch (steps[currentStep.value].id) {
             case 'basic':
                 if (!form.value.name?.trim()) {
-                    errors.value.name = t('products.validation.name_required');
+                    errors.value.name = t('products.messages.validation.name_required');
                 }
                 break;
             case 'pricing':
                 if (!form.value.base_price || form.value.base_price <= 0) {
-                    errors.value.base_price = t('products.validation.price_required');
+                    errors.value.base_price = t('products.messages.validation.price_required');
                 }
                 break;
         }
@@ -384,10 +384,10 @@ export function useProductManager(options = {}) {
         errors.value = {};
 
         if (!form.value.name?.trim()) {
-            errors.value.name = t('products.validation.name_required');
+            errors.value.name = t('products.messages.validation.name_required');
         }
         if (!form.value.base_price || form.value.base_price <= 0) {
-            errors.value.base_price = t('products.validation.price_required');
+            errors.value.base_price = t('products.messages.validation.price_required');
         }
 
         return Object.keys(errors.value).length === 0;

@@ -85,9 +85,9 @@ const cancel = () => {
     <div class="max-w-4xl mx-auto">
         <div class="flex justify-between items-center mb-6">
             <div>
-                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ t('products.form.create') }}</h1>
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ t('products.actions.create') }}</h1>
                 <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                    {{ t('products.management') }}
+                    {{ t('products.metadata.management') }}
                 </p>
             </div>
             <div class="flex space-x-3">
@@ -95,7 +95,7 @@ const cancel = () => {
                     @click="cancel"
                     class="px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
                 >
-                    {{ t('products.form.cancel') }}
+                    {{ t('products.actions.cancel') }}
                 </button>
                 <button
                     @click="submit"
@@ -103,7 +103,7 @@ const cancel = () => {
                     class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                     <span v-if="form.processing">{{ t('products.messages.loading') }}</span>
-                    <span v-else>{{ t('products.form.create') }}</span>
+                    <span v-else>{{ t('products.actions.create') }}</span>
                 </button>
             </div>
         </div>
@@ -111,12 +111,12 @@ const cancel = () => {
         <form @submit.prevent="submit" class="space-y-6">
                 <!-- Basic Information -->
                 <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-                    <h2 class="text-lg font-medium text-gray-900 dark:text-white mb-4">{{ t('products.sections.basic_info') }}</h2>
+                    <h2 class="text-lg font-medium text-gray-900 dark:text-white mb-4">{{ t('products.form.sections.basic_info') }}</h2>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="md:col-span-2">
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                {{ t('products.form.name') }} *
+                                {{ t('products.labels.name') }} *
                             </label>
                             <input
                                 v-model="form.name"
@@ -133,7 +133,7 @@ const cancel = () => {
 
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                {{ t('products.form.sku') }}
+                                {{ t('products.labels.sku') }}
                             </label>
                             <div class="flex space-x-2">
                                 <input
@@ -149,7 +149,7 @@ const cancel = () => {
                                     class="px-3 py-2 text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 disabled:opacity-50"
                                 >
                                     <span v-if="isGeneratingSku">{{ t('products.form.generating') }}</span>
-                                    <span v-else>{{ t('products.form.generate_sku') }}</span>
+                                    <span v-else>{{ t('products.actions.generate_sku') }}</span>
                                 </button>
                             </div>
                             <p v-if="form.errors.sku" class="mt-1 text-sm text-red-600 dark:text-red-400">
@@ -159,7 +159,7 @@ const cancel = () => {
 
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                {{ t('products.form.slug') }}
+                                {{ t('products.labels.slug') }}
                             </label>
                             <div class="flex space-x-2">
                                 <input
@@ -175,7 +175,7 @@ const cancel = () => {
                                     class="px-3 py-2 text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 disabled:opacity-50"
                                 >
                                     <span v-if="isGeneratingSlug">{{ t('products.form.generating') }}</span>
-                                    <span v-else>{{ t('products.form.generate_slug') }}</span>
+                                    <span v-else>{{ t('products.actions.generate_slug') }}</span>
                                 </button>
                             </div>
                             <p v-if="form.errors.slug" class="mt-1 text-sm text-red-600 dark:text-red-400">
@@ -185,7 +185,7 @@ const cancel = () => {
 
                         <div class="md:col-span-2">
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                {{ t('products.form.description') }}
+                                {{ t('products.labels.description') }}
                             </label>
                             <textarea
                                 v-model="form.description"
@@ -202,7 +202,7 @@ const cancel = () => {
 
                 <!-- Pricing -->
                 <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-                    <h2 class="text-lg font-medium text-gray-900 dark:text-white mb-4">{{ t('products.sections.pricing') }}</h2>
+                    <h2 class="text-lg font-medium text-gray-900 dark:text-white mb-4">{{ t('products.form.sections.pricing') }}</h2>
 
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div>

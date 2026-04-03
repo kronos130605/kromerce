@@ -57,7 +57,7 @@ const showMenu = ref(false);
                                 @click="emit('clear-selection')"
                                 class="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
                             >
-                                {{ t('products.bulk_actions.clear_selection') }}
+                                {{ t('products.actions.clear_selection') }}
                             </button>
                         </div>
                     </div>

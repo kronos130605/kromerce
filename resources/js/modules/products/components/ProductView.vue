@@ -200,7 +200,7 @@ const originalPrice = computed(() => {
                 <div class="absolute inset-y-0 right-0 w-full max-w-2xl bg-white dark:bg-gray-900 shadow-2xl flex flex-col" @click.stop>
                     <!-- Header -->
                     <header class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm sticky top-0 z-10">
-                        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ t('products.view.title') }}</h2>
+                        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ t('products.metadata.view_title') }}</h2>
                         <div class="flex items-center space-x-2">
                             <button @click="handleEdit" class="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -310,21 +310,21 @@ const originalPrice = computed(() => {
                             <!-- Details Grid -->
                             <div class="grid grid-cols-2 gap-4 text-sm">
                                 <div class="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                                    <p class="text-gray-500 dark:text-gray-400">{{ t('products.fields.sku') }}</p>
+                                    <p class="text-gray-500 dark:text-gray-400">{{ t('products.labels.sku') }}</p>
                                     <p class="font-medium text-gray-900 dark:text-white">{{ product.sku || '-' }}</p>
                                 </div>
                                 <div class="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                                    <p class="text-gray-500 dark:text-gray-400">{{ t('products.fields.barcode') }}</p>
+                                    <p class="text-gray-500 dark:text-gray-400">{{ t('products.labels.barcode') }}</p>
                                     <p class="font-medium text-gray-900 dark:text-white">{{ product.barcode || '-' }}</p>
                                 </div>
                                 <div class="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                                    <p class="text-gray-500 dark:text-gray-400">{{ t('products.fields.stock') }}</p>
+                                    <p class="text-gray-500 dark:text-gray-400">{{ t('products.labels.stock') }}</p>
                                     <p class="font-medium text-gray-900 dark:text-white" :class="product.stock_quantity <= product.low_stock_threshold ? 'text-red-600' : ''">
                                         {{ product.stock_quantity || 0 }}
                                     </p>
                                 </div>
                                 <div class="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                                    <p class="text-gray-500 dark:text-gray-400">{{ t('products.fields.created') }}</p>
+                                    <p class="text-gray-500 dark:text-gray-400">{{ t('products.labels.created') }}</p>
                                     <p class="font-medium text-gray-900 dark:text-white">{{ formatDate(product.created_at) }}</p>
                                 </div>
                             </div>
@@ -335,9 +335,9 @@ const originalPrice = computed(() => {
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                                 </svg>
                                 <span class="text-sm text-blue-800 dark:text-blue-200">
-                                    {{ t('products.stock.managing_stock') }} - 
+                                    {{ t('products.stock.managing') }} - 
                                     <span :class="product.stock_quantity === 0 ? 'text-red-600 font-semibold' : (product.stock_quantity <= product.low_stock_threshold ? 'text-yellow-600 font-semibold' : 'text-green-600')">
-                                        {{ product.stock_quantity === 0 ? t('products.stock.out_of_stock') : (product.stock_quantity <= product.low_stock_threshold ? t('products.stock.low_stock') : t('products.stock.in_stock')) }}
+                                        {{ product.stock_quantity === 0 ? t('products.stock.status.out_of_stock') : (product.stock_quantity <= product.low_stock_threshold ? t('products.stock.status.low_stock') : t('products.stock.status.in_stock')) }}
                                     </span>
                                 </span>
                             </div>

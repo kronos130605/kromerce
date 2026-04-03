@@ -118,29 +118,29 @@ const isOutOfStock = (product) => {
 
     <!-- Filters -->
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
-        <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">{{ t('products.list.filters.title') }}</h3>
+        <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">{{ t('products.filters.title') }}</h3>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    {{ t('products.list.filters.search') }}
+                    {{ t('products.placeholders.search') }}
                 </label>
                 <input
                     v-model="searchQuery"
                     type="text"
-                    :placeholder="t('products.list.search_placeholder')"
+                    :placeholder="t('products.placeholders.search')"
                     class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
                 />
             </div>
 
             <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    {{ t('products.list.filters.category') }}
+                    {{ t('products.labels.category') }}
                 </label>
                 <select
                     v-model="selectedCategory"
                     class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
                 >
-                    <option value="">{{ t('products.list.filters.all_categories') }}</option>
+                    <option value="">{{ t('products.filters.all_categories') }}</option>
                     <option v-for="category in categories" :key="category.id" :value="category.id">
                         {{ category.name }}
                     </option>
@@ -149,34 +149,34 @@ const isOutOfStock = (product) => {
 
             <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    {{ t('products.list.filters.status') }}
+                    {{ t('products.labels.status') }}
                 </label>
                 <select
                     v-model="selectedStatus"
                     class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
                 >
-                    <option value="">{{ t('products.list.filters.all_status') }}</option>
-                    <option value="active">{{ t('products.list.filters.active') }}</option>
-                    <option value="inactive">{{ t('products.list.filters.inactive') }}</option>
-                    <option value="draft">{{ t('products.list.filters.draft') }}</option>
+                    <option value="">{{ t('products.filters.all_status') }}</option>
+                    <option value="active">{{ t('products.filters.active') }}</option>
+                    <option value="inactive">{{ t('products.filters.inactive') }}</option>
+                    <option value="draft">{{ t('products.filters.draft') }}</option>
                 </select>
             </div>
 
             <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    {{ t('products.list.filters.price_range') }}
+                    {{ t('products.labels.price_range') }}
                 </label>
                 <div class="flex space-x-2">
                     <input
                         v-model="minPrice"
                         type="number"
-                        :placeholder="t('products.list.filters.min_price')"
+                        :placeholder="t('products.filters.min_price')"
                         class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
                     />
                     <input
                         v-model="maxPrice"
                         type="number"
-                        :placeholder="t('products.list.filters.max_price')"
+                        :placeholder="t('products.filters.max_price')"
                         class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
                     />
                 </div>
@@ -190,7 +190,7 @@ const isOutOfStock = (product) => {
                     type="checkbox"
                     class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
                 />
-                <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">{{ t('products.list.filters.in_stock_only') }}</span>
+                <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">{{ t('products.filters.in_stock_only') }}</span>
             </label>
 
             <div class="flex space-x-3">
@@ -198,13 +198,13 @@ const isOutOfStock = (product) => {
                     @click="clearFilters"
                     class="px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
                 >
-                    {{ t('products.list.clear_filters') }}
+                    {{ t('products.actions.clear_filters') }}
                 </button>
                 <button
                     @click="applyFilters"
                     class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                 >
-                    {{ t('products.list.apply_filters') }}
+                    {{ t('products.actions.apply_filters') }}
                 </button>
             </div>
         </div>
@@ -244,10 +244,10 @@ const isOutOfStock = (product) => {
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293H8m0 0l2.586 2.586a1 1 0 01.707.293l2.414-2.586a1 1 0 01.707-.293H16m-2-2h2M6 13h2" />
                             </svg>
                             <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                                {{ t('products.list.table.no_products') }}
+                                {{ t('products.empty_state.no_results_title') }}
                             </h3>
                             <p class="text-gray-500 dark:text-gray-400 mb-4">
-                                {{ t('products.list.table.no_products_description') }}
+                                {{ t('products.empty_state.no_results_title_description') }}
                             </p>
                             <Link
                                 href="/products/create"
@@ -256,7 +256,7 @@ const isOutOfStock = (product) => {
                                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                                 </svg>
-                                {{ t('products.list.table.create_first') }}
+                                {{ t('products.empty_state.create_first') }}
                             </Link>
                         </div>
                     </td>
@@ -325,19 +325,19 @@ const isOutOfStock = (product) => {
                                 :href="`/products/${product.id}`"
                                 class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
                             >
-                                {{ t('products.list.table.view') }}
+                                {{ t('products.actions.view') }}
                             </Link>
                             <Link
                                 :href="`/products/${product.id}/edit`"
                                 class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300"
                             >
-                                {{ t('products.list.table.edit') }}
+                                {{ t('products.actions.edit') }}
                             </Link>
                             <button
                                 @click="deleteProduct(product.id)"
                                 class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
                             >
-                                {{ t('products.list.table.delete') }}
+                                {{ t('products.actions.delete') }}
                             </button>
                         </div>
                     </td>
@@ -362,14 +362,14 @@ const isOutOfStock = (product) => {
                 :href="products.prev_page_url"
                 class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
             >
-                {{ t('products.list.previous') }}
+                {{ t('products.actions.previous') }}
             </Link>
             <Link
                 v-if="products.next_page_url"
                 :href="products.next_page_url"
                 class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
             >
-                {{ t('products.list.next') }}
+                {{ t('products.actions.next') }}
             </Link>
         </div>
     </div>

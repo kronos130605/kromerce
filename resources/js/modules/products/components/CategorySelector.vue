@@ -20,7 +20,7 @@
                 @input="setSearch($event.target.value)"
                 type="text"
                 class="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                :placeholder="t('products.categories.search_placeholder')"
+                :placeholder="t('products.placeholders.search_categories')"
             >
             <button
                 v-if="searchQuery"

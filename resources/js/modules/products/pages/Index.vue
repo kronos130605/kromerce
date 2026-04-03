@@ -86,7 +86,7 @@ const {
 const tableColumns = [
     {
         key: 'name',
-        label: t('products.fields.product'),
+        label: t('products.labels.product'),
         type: 'image-text',
         imageKey: 'images.0.thumbnail_url',
         labelKey: 'name',
@@ -95,24 +95,24 @@ const tableColumns = [
     },
     {
         key: 'categories',
-        label: t('products.fields.categories'),
+        label: t('products.labels.categories'),
         type: 'custom',
     },
     {
         key: 'base_price',
-        label: t('products.fields.price'),
+        label: t('products.labels.price'),
         type: 'currency',
         currencyKey: 'base_currency',
         align: 'left',
     },
     {
         key: 'stock_quantity',
-        label: t('products.fields.stock'),
+        label: t('products.labels.stock'),
         type: 'custom',
     },
     {
         key: 'status',
-        label: t('products.fields.status'),
+        label: t('products.labels.status'),
         type: 'custom',
     },
 ];
@@ -168,14 +168,14 @@ const getStatusColor = (status) => ({
             <!-- Header -->
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
-                    <h1 class="text-xl font-bold text-gray-900 dark:text-white">{{ t('products.title') }}</h1>
-                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">{{ t('products.subtitle') }}</p>
+                    <h1 class="text-xl font-bold text-gray-900 dark:text-white">{{ t('products.metadata.page_title') }}</h1>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">{{ t('products.metadata.page_subtitle') }}</p>
                 </div>
                 <button @click="openCreate" class="btn btn-primary">
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                     </svg>
-                    {{ t('products.add') }}
+                    {{ t('products.actions.add') }}
                 </button>
             </div>
 
@@ -205,8 +205,8 @@ const getStatusColor = (status) => ({
                     :active-filter-count="activeFilterCount"
                     :filters-open="showFilters"
                     :quick-filters="[
-                        { key: 'active', label: t('products.list.filters.active'), icon: CheckCircleIcon, color: 'green' },
-                        { key: 'draft', label: t('products.list.filters.draft'), icon: DocumentTextIcon, color: 'yellow' }
+                        { key: 'active', label: t('products.filters.active'), icon: CheckCircleIcon, color: 'green' },
+                        { key: 'draft', label: t('products.filters.draft'), icon: DocumentTextIcon, color: 'yellow' }
                     ]"
                     :active-quick-filter="activeFilters.status"
                     @search="searchProducts"
@@ -240,8 +240,8 @@ const getStatusColor = (status) => ({
                 :selected-items="selectedItems"
                 @action="handleTableAction"
                 @selection-change="selectedItems = $event"
-                :empty-title="t('products.empty.title')"
-                :empty-description="t('products.empty.description')"
+                :empty-title="t('products.empty_state.title')"
+                :empty-description="t('products.empty_state.description')"
                 empty-icon="📦"
             >
                 <!-- Custom Slots -->
@@ -281,7 +281,7 @@ const getStatusColor = (status) => ({
                 </template>
 
                 <template #empty-action>
-                    <button @click="openCreate" class="mt-4 btn btn-primary">{{ t('products.add_first') }}</button>
+                    <button @click="openCreate" class="mt-4 btn btn-primary">{{ t('products.empty_state.create_first') }}</button>
                 </template>
             </DataTable>
 
