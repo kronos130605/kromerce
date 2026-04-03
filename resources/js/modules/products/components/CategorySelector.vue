@@ -20,7 +20,7 @@
                 @input="setSearch($event.target.value)"
                 type="text"
                 class="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                :placeholder="t('products.categories.search_placeholder', 'Buscar categorías...')"
+                :placeholder="t('products.categories.search_placeholder')"
             >
             <button
                 v-if="searchQuery"
@@ -35,7 +35,7 @@
 
         <!-- Selected Categories -->
         <div v-if="selectedItems.length > 0" class="mb-3">
-            <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">{{ t('products.categories.selected', 'Seleccionadas') }}:</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">{{ t('products.categories.selected') }}:</p>
             <div class="flex flex-wrap gap-2">
                 <span
                     v-for="category in selectedItems"
@@ -46,7 +46,7 @@
                     <button
                         @click.stop="toggle(category.id)"
                         class="ml-2 text-blue-600 dark:text-blue-300 hover:text-blue-800 dark:hover:text-blue-100 focus:outline-none"
-                        :title="t('common.remove', 'Quitar')"
+                        :title="t('common.remove')"
                     >
                         <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -59,7 +59,7 @@
         <!-- Available Categories Grid -->
         <div class="category-grid">
             <p v-if="filteredItems.length === 0" class="text-sm text-gray-500 dark:text-gray-400 italic">
-                {{ t('products.categories.no_results', 'No se encontraron categorías') }}
+                {{ t('products.categories.no_results') }}
             </p>
             <div v-else class="flex flex-wrap gap-2">
                 <button
@@ -88,7 +88,7 @@
                 @click="clearAll"
                 class="text-xs text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 underline"
             >
-                {{ t('products.categories.clear_all', 'Limpiar todas') }}
+                {{ t('products.categories.clear_all') }}
             </button>
         </div>
     </div>

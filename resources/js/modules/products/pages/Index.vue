@@ -2,6 +2,7 @@
 import { computed, onMounted } from 'vue';
 import { Link, usePage } from '@inertiajs/vue3';
 import { useTranslations } from '@/composables/useTranslations';
+import { CheckCircleIcon, DocumentTextIcon } from '@heroicons/vue/24/outline';
 import BusinessLayout from '@/layouts/BusinessLayout.vue';
 import { useProductManager } from '../composables/useProductManager.js';
 import { useProductFilters } from '../composables/useProductFilters.js';
@@ -13,7 +14,9 @@ import DataTable from '@/components/shared/DataTable.vue';
 import ConfirmationModal from '@/components/shared/ConfirmationModal.vue';
 import ProductView from '../components/ProductView.vue';
 import SearchFilterBar from '@/components/shared/SearchFilterBar.vue';
+import DataActionsBar from '@/components/shared/DataActionsBar.vue';
 import StockIndicator from '@/components/ui/data-display/StockIndicator.vue';
+import StatusBadge from "@/components/ui/data-display/StatusBadge.vue";
 
 const { t } = useTranslations();
 const page = usePage();
@@ -193,22 +196,31 @@ const getStatusColor = (status) => ({
                 </div>
             </div>
 
-        <!-- Search and Filters Bar -->
-        <SearchFilterBar
-            :search-value="activeFilters.search"
-            :search-placeholder="t('products.list.search_placeholder')"
-            :has-active-filters="hasActiveFilters"
-            :active-filter-count="activeFilterCount"
-            :filters-button-label="t('products.list.filters.title')"
-            :quick-filters="[
-                { key: 'active', label: t('products.list.filters.active'), activeClass: 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' },
-                { key: 'draft', label: t('products.list.filters.draft'), activeClass: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400' }
-            ]"
-            :active-quick-filter="activeFilters.status"
-            @search="searchProducts"
-            @toggle-filters="toggleFilters"
-            @quick-filter="(filter) => { activeFilters.status = filter.key; updateFilter('status', filter.key); }"
-        />
+            <!-- Data Actions & Search Bar -->
+            <div class="flex flex-wrap items-center gap-3">
+                <SearchFilterBar
+                    :search-value="activeFilters.search"
+                    :search-placeholder="t('common.search')"
+                    :has-active-filters="hasActiveFilters"
+                    :active-filter-count="activeFilterCount"
+                    :filters-open="showFilters"
+                    :quick-filters="[
+                        { key: 'active', label: t('products.list.filters.active'), icon: CheckCircleIcon, color: 'green' },
+                        { key: 'draft', label: t('products.list.filters.draft'), icon: DocumentTextIcon, color: 'yellow' }
+                    ]"
+                    :active-quick-filter="activeFilters.status"
+                    @search="searchProducts"
+                    @toggle-filters="toggleFilters"
+                    @quick-filter="(filter) => { activeFilters.status = filter.key; updateFilter('status', filter.key); }"
+                />
+
+                <div class="ml-auto">
+                    <DataActionsBar
+                        @export="(format) => console.log('Export:', format)"
+                        @import="(format) => console.log('Import:', format)"
+                    />
+                </div>
+            </div>
 
             <!-- Filters Panel -->
             <ProductFilters

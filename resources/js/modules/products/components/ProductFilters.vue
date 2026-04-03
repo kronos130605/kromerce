@@ -1,6 +1,9 @@
 <script setup>
 import { computed } from 'vue';
+import { useTranslations } from '@/composables/useTranslations';
 import PriceInput from '@/components/ui/forms/PriceInput.vue';
+
+const { t } = useTranslations();
 
 const props = defineProps({
     filters: {
@@ -19,19 +22,19 @@ const props = defineProps({
 
 const emit = defineEmits(['update:filter', 'clear', 'apply']);
 
-const statusOptions = [
-    { value: '', label: 'All Statuses' },
-    { value: 'active', label: 'Active' },
-    { value: 'inactive', label: 'Inactive' },
-    { value: 'draft', label: 'Draft' }
-];
+const statusOptions = computed(() => [
+    { value: '', label: t('products.list.filters.all_status') },
+    { value: 'active', label: t('products.list.filters.active') },
+    { value: 'inactive', label: t('products.status.inactive') },
+    { value: 'draft', label: t('products.list.filters.draft') }
+]);
 
-const stockStatusOptions = [
-    { value: '', label: 'All Stock' },
-    { value: 'in_stock', label: 'In Stock' },
-    { value: 'low', label: 'Low Stock' },
-    { value: 'out', label: 'Out of Stock' }
-];
+const stockStatusOptions = computed(() => [
+    { value: '', label: t('products.list.filters.all_stock') || 'All Stock' },
+    { value: 'in_stock', label: t('products.stock.in_stock') },
+    { value: 'low', label: t('products.stock.low_stock') },
+    { value: 'out', label: t('products.stock.out_of_stock') }
+]);
 
 const updateFilter = (key, value) => {
     emit('update:filter', key, value);
@@ -50,13 +53,13 @@ const updateFilter = (key, value) => {
         <div v-if="show" class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 mb-6">
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                    Filters
+                    {{ t('products.list.filters.title') }}
                 </h3>
                 <button
                     @click="emit('clear')"
                     class="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
                 >
-                    Clear All
+                    {{ t('products.list.clear_filters') }}
                 </button>
             </div>
 
@@ -64,14 +67,14 @@ const updateFilter = (key, value) => {
                 <!-- Category Filter -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Category
+                        {{ t('products.list.filters.category') }}
                     </label>
                     <select
                         :value="filters.category_id"
                         @change="updateFilter('category_id', $event.target.value)"
                         class="block w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 px-3 py-2"
                     >
-                        <option value="">All Categories</option>
+                        <option value="">{{ t('products.list.filters.all_categories') }}</option>
                         <option
                             v-for="category in categories"
                             :key="category.id"
@@ -85,7 +88,7 @@ const updateFilter = (key, value) => {
                 <!-- Status Filter -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Status
+                        {{ t('products.list.filters.status') }}
                     </label>
                     <select
                         :value="filters.status"
@@ -105,7 +108,7 @@ const updateFilter = (key, value) => {
                 <!-- Stock Status Filter -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Stock Status
+                        {{ t('products.fields.stock') }}
                     </label>
                     <select
                         :value="filters.stock_status"
@@ -125,16 +128,16 @@ const updateFilter = (key, value) => {
                 <!-- Featured Filter -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Featured
+                        {{ t('products.form.featured') }}
                     </label>
                     <select
                         :value="filters.featured"
                         @change="updateFilter('featured', $event.target.value)"
                         class="block w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 px-3 py-2"
                     >
-                        <option value="">All Products</option>
-                        <option value="1">Featured Only</option>
-                        <option value="0">Not Featured</option>
+                        <option value="">{{ t('products.list.filters.all_products') || 'All' }}</option>
+                        <option value="1">{{ t('products.list.filters.featured_only') || 'Featured Only' }}</option>
+                        <option value="0">{{ t('products.list.filters.not_featured') || 'Not Featured' }}</option>
                     </select>
                 </div>
             </div>
@@ -144,13 +147,13 @@ const updateFilter = (key, value) => {
                 <PriceInput
                     :model-value="filters.min_price"
                     @update:model-value="updateFilter('min_price', $event)"
-                    label="Min Price"
+                    :label="t('products.list.filters.min_price')"
                     placeholder="0.00"
                 />
                 <PriceInput
                     :model-value="filters.max_price"
                     @update:model-value="updateFilter('max_price', $event)"
-                    label="Max Price"
+                    :label="t('products.list.filters.max_price')"
                     placeholder="0.00"
                 />
             </div>

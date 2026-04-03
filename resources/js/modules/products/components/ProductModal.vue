@@ -189,7 +189,7 @@ const currentStepData = props.steps[props.currentStep];
                                 <CategorySelector
                                     :categories="props.categories"
                                     v-model="form.category_ids"
-                                    :label="t('products.fields.categories')"
+                                    :label="t('products.categories.title')"
                                 />
                             </div>
                         </div>

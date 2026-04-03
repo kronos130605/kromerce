@@ -91,10 +91,14 @@
                 "price_range": "Rango de Precio",
                 "stock": "Stock",
                 "all_categories": "Todas las Categorías",
+                "all_products": "Todos los Productos",
                 "all_status": "Todos los Estados",
+                "all_stock": "Todo el Stock",
                 "active": "Activo",
                 "inactive": "Inactivo",
                 "draft": "Borrador",
+                "featured_only": "Solo Destacados",
+                "not_featured": "No Destacados",
                 "min_price": "Precio Mínimo",
                 "max_price": "Precio Máximo",
                 "in_stock_only": "Solo en Stock"
@@ -192,6 +196,14 @@
             "pricing": "Precios y Stock",
             "media": "Imágenes",
             "seo": "SEO"
+        },
+        "categories": {
+            "title": "Categorías",
+            "all": "Todas las Categorías",
+            "clear_all": "Limpiar todo",
+            "selected": "Seleccionadas",
+            "search_placeholder": "Buscar Categorías...",
+            "no_results": "No se encontraron resultados"
         },
         "placeholders": {
             "name": "Nombre del producto",

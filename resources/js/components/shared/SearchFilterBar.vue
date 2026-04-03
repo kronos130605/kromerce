@@ -1,5 +1,25 @@
 <script setup>
 import { computed } from 'vue';
+import { 
+    FunnelIcon, 
+    ChevronDownIcon, 
+    ChevronUpIcon,
+    MagnifyingGlassIcon
+} from '@heroicons/vue/24/outline';
+
+// Color presets for quick filters
+const colorPresets = {
+    blue: 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400',
+    green: 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400',
+    yellow: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400',
+    red: 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400',
+    purple: 'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400',
+    pink: 'bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400',
+    gray: 'bg-gray-100 dark:bg-gray-900/30 text-gray-600 dark:text-gray-400',
+    orange: 'bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400',
+    teal: 'bg-teal-100 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400',
+    cyan: 'bg-cyan-100 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400',
+};
 
 const props = defineProps({
     searchValue: {
@@ -22,9 +42,9 @@ const props = defineProps({
         type: Boolean,
         default: true
     },
-    filtersButtonLabel: {
-        type: String,
-        default: 'Filters'
+    filtersOpen: {
+        type: Boolean,
+        default: false
     },
     quickFilters: {
         type: Array,
@@ -56,67 +76,75 @@ const handleQuickFilter = (filter) => {
 
 const getQuickFilterClasses = (filter) => {
     const isActive = props.activeQuickFilter === filter.key;
-    const baseClasses = 'px-3 py-2 text-sm rounded-lg transition-colors';
+    const baseClasses = 'inline-flex items-center justify-center w-9 h-9 rounded-lg transition-colors';
+    const color = filter.color || 'blue';
+    const activeClasses = colorPresets[color] || colorPresets.blue;
     
     if (isActive) {
-        return `${baseClasses} ${filter.activeClass || 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'}`;
+        return `${baseClasses} ${activeClasses}`;
     }
-    return `${baseClasses} bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600`;
+    return `${baseClasses} bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600`;
 };
 </script>
 
 <template>
-    <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
-        <div class="flex flex-col sm:flex-row gap-4">
-            <!-- Search -->
-            <div class="flex-1">
-                <div class="relative">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
-                    </div>
-                    <input
-                        :value="searchValue"
-                        @input="handleSearchInput"
-                        type="text"
-                        :placeholder="searchPlaceholder"
-                        class="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                </div>
+    <div class="flex flex-wrap items-center gap-2">
+        <!-- Search Input (compact style) -->
+        <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <MagnifyingGlassIcon class="h-5 w-5 text-gray-400" />
             </div>
-
-            <!-- Filter Toggle Button -->
-            <button
-                v-if="showFiltersButton"
-                @click="handleToggleFilters"
-                :class="[
-                    'inline-flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors',
-                    hasActiveFilters
-                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'
-                        : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'
-                ]"
-            >
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                </svg>
-                <span>{{ filtersButtonLabel }}</span>
-                <span v-if="activeFilterCount > 0" class="inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-blue-600 rounded-full">
-                    {{ activeFilterCount }}
-                </span>
-            </button>
-
-            <!-- Quick Filters -->
-            <div v-if="quickFilters.length > 0" class="flex gap-2">
-                <button
-                    v-for="filter in quickFilters"
-                    :key="filter.key"
-                    @click="handleQuickFilter(filter)"
-                    :class="getQuickFilterClasses(filter)"
-                >
-                    {{ filter.label }}
-                </button>
-            </div>
+            <input
+                :value="searchValue"
+                @input="handleSearchInput"
+                type="text"
+                :placeholder="searchPlaceholder"
+                class="w-[180px] sm:w-[220px] pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm"
+            />
         </div>
+
+        <!-- Filter Toggle Button -->
+        <button
+            v-if="showFiltersButton"
+            @click="handleToggleFilters"
+            :class="[
+                'inline-flex items-center justify-center w-9 h-9 rounded-lg border transition-colors relative',
+                hasActiveFilters
+                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
+                    : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'
+            ]"
+            :aria-expanded="filtersOpen"
+        >
+            <FunnelIcon class="w-5 h-5" />
+            <!-- Arrow indicator -->
+            <span class="absolute -bottom-0.5 -right-0.5 bg-white dark:bg-gray-800 rounded-full p-0.5">
+                <ChevronDownIcon 
+                    v-if="!filtersOpen"
+                    class="w-3 h-3" 
+                />
+                <ChevronUpIcon 
+                    v-else
+                    class="w-3 h-3" 
+                />
+            </span>
+            <!-- Badge -->
+            <span 
+                v-if="activeFilterCount > 0" 
+                class="absolute -top-1.5 -right-1.5 inline-flex items-center justify-center min-w-[18px] h-[18px] text-[10px] font-bold text-white bg-blue-600 rounded-full px-1"
+            >
+                {{ activeFilterCount > 9 ? '9+' : activeFilterCount }}
+            </span>
+        </button>
+
+        <!-- Quick Filters -->
+        <button
+            v-for="filter in quickFilters"
+            :key="filter.key"
+            @click="handleQuickFilter(filter)"
+            :class="getQuickFilterClasses(filter)"
+            :title="filter.label"
+        >
+            <component :is="filter.icon" class="w-5 h-5" />
+        </button>
     </div>
 </template>
