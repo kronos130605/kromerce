@@ -5,6 +5,7 @@ namespace App\Repositories\Currency;
 use App\Models\CurrencyRateGlobal;
 use App\Repositories\BaseRepository;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Log;
 
 class CurrencyRateGlobalRepository extends BaseRepository
 {
@@ -14,7 +15,34 @@ class CurrencyRateGlobalRepository extends BaseRepository
     }
 
     /**
-     * Get latest rate for currency pair.
+     * Get latest rate for currency pair filtered by source.
+     */
+    public function getLatestRateBySource(string $fromCurrency, string $toCurrency, string $source): ?CurrencyRateGlobal
+    {
+        return $this->model
+            ->where('from_currency', $fromCurrency)
+            ->where('to_currency', $toCurrency)
+            ->where('source', $source)
+            ->orderBy('effective_date', 'desc')
+            ->first();
+    }
+
+    /**
+     * Get rate for specific date filtered by source.
+     */
+    public function getRateForDateBySource(string $fromCurrency, string $toCurrency, string $date, string $source): ?CurrencyRateGlobal
+    {
+        return $this->model
+            ->where('from_currency', $fromCurrency)
+            ->where('to_currency', $toCurrency)
+            ->where('source', $source)
+            ->where('effective_date', '<=', $date)
+            ->orderBy('effective_date', 'desc')
+            ->first();
+    }
+
+    /**
+     * Get latest rate for currency pair (fallback to any source if specific not found).
      */
     public function getLatestRate(string $fromCurrency, string $toCurrency): ?CurrencyRateGlobal
     {
@@ -56,17 +84,44 @@ class CurrencyRateGlobalRepository extends BaseRepository
      */
     public function updateOrCreateRate(string $fromCurrency, string $toCurrency, float $rate, string $date, string $source = 'api'): CurrencyRateGlobal
     {
-        return $this->updateOrCreate(
-            [
-                'from_currency' => $fromCurrency,
-                'to_currency' => $toCurrency,
-                'effective_date' => $date,
-            ],
-            [
-                'rate' => $rate,
-                'source' => $source,
-            ]
-        );
+        Log::debug('Repository: Looking for existing rate', ['from' => $fromCurrency, 'to' => $toCurrency, 'date' => $date]);
+
+        $existing = $this->model
+            ->where('from_currency', $fromCurrency)
+            ->where('to_currency', $toCurrency)
+            ->where('effective_date', $date)
+            ->first();
+
+        if ($existing) {
+            Log::debug('Repository: Updating existing rate', ['id' => $existing->id]);
+            $existing->update(['rate' => $rate, 'source' => $source]);
+            return $existing;
+        }
+
+        Log::debug('Repository: Creating new rate with UUID');
+
+        try {
+            // Use new instance + save instead of create() for proper persistence
+            $newRate = new \App\Models\CurrencyRateGlobal();
+            $newRate->id = (string) \Illuminate\Support\Str::uuid();
+            $newRate->from_currency = $fromCurrency;
+            $newRate->to_currency = $toCurrency;
+            $newRate->effective_date = $date;
+            $newRate->rate = $rate;
+            $newRate->source = $source;
+            $newRate->save();
+
+            Log::debug('Repository: Created rate with save()', ['id' => $newRate->id, 'from' => $newRate->from_currency, 'to' => $newRate->to_currency, 'exists' => $newRate->exists]);
+
+            return $newRate;
+        } catch (\Exception $e) {
+            Log::error('Repository: Failed to create rate', [
+                'from' => $fromCurrency,
+                'to' => $toCurrency,
+                'error' => $e->getMessage(),
+            ]);
+            throw $e;
+        }
     }
 
     /**

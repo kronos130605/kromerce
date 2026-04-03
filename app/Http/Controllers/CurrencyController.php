@@ -67,7 +67,7 @@ class CurrencyController extends Controller
     public function getCurrentRates(Request $request): JsonResponse
     {
         $store = $request->user()->currentStore();
-        $currencyConfig = $this->configRepo->getByStoreId($store->id);
+        $currencyConfig = $this->configRepo->getFirstBy(['store_id' => $store->id]);;
 
         if (!$currencyConfig) {
             return response()->json(['error' => 'Currency configuration not found'], 404);

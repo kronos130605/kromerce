@@ -22,6 +22,11 @@ class I18nServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        // Only share translations in web context (not in console/queue)
+        if ($this->app->runningInConsole()) {
+            return;
+        }
+
         // Share translations with frontend
         $this->shareTranslations();
     }

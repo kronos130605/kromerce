@@ -38,5 +38,8 @@ class DatabaseSeeder extends Seeder
 
         // Seed marketplace
         $this->call(MarketplaceSeeder::class);
+
+        // Seed business currency configs
+        $this->call(CurrencySourceSeederUpdated::class);
     }
 }

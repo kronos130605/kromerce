@@ -11,7 +11,11 @@ class CurrencyRateGlobal extends Model
 
     protected $table = 'currency_rates_global';
 
+    protected $keyType = 'string';
+    public $incrementing = false;
+
     protected $fillable = [
+        'id',
         'from_currency',
         'to_currency',
         'rate',
@@ -23,6 +27,17 @@ class CurrencyRateGlobal extends Model
         'rate' => 'decimal:6',
         'effective_date' => 'date',
     ];
+
+    protected static function boot(): void
+    {
+        parent::boot();
+
+        static::creating(function ($model) {
+            if (empty($model->id)) {
+                $model->id = (string) \Illuminate\Support\Str::uuid();
+            }
+        });
+    }
 
     /**
      * Get the latest rate for a currency pair.

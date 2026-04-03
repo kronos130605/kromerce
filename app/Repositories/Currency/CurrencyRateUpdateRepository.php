@@ -40,31 +40,41 @@ class CurrencyRateUpdateRepository extends BaseRepository
     }
 
     /**
-     * Create success record.
+     * Create or update success record.
      */
     public function createSuccess(array $currencies, string $source, int $totalUpdated): CurrencyRateUpdate
     {
-        return $this->create([
-            'success' => true,
-            'currencies_updated' => json_encode($currencies),
-            'source' => $source,
-            'total_updated' => $totalUpdated,
-            'error_message' => null,
-        ]);
+        $today = now()->format('Y-m-d');
+
+        return $this->model->updateOrCreate(
+            ['update_date' => $today],
+            [
+                'success' => true,
+                'currencies_updated' => json_encode($currencies),
+                'source' => $source,
+                'total_updated' => $totalUpdated,
+                'error_message' => null,
+            ]
+        );
     }
 
     /**
-     * Create failure record.
+     * Create or update failure record.
      */
     public function createFailure(array $currencies, string $source, string $errorMessage): CurrencyRateUpdate
     {
-        return $this->create([
-            'success' => false,
-            'currencies_updated' => json_encode($currencies),
-            'source' => $source,
-            'total_updated' => 0,
-            'error_message' => $errorMessage,
-        ]);
+        $today = now()->format('Y-m-d');
+
+        return $this->model->updateOrCreate(
+            ['update_date' => $today],
+            [
+                'success' => false,
+                'currencies_updated' => json_encode($currencies),
+                'source' => $source,
+                'total_updated' => 0,
+                'error_message' => $errorMessage,
+            ]
+        );
     }
 
     /**

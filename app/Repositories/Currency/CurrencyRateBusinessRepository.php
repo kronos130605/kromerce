@@ -57,18 +57,27 @@ class CurrencyRateBusinessRepository extends BaseRepository
      */
     public function updateOrCreateRate(string $storeId, string $fromCurrency, string $toCurrency, float $rate, string $date, string $source = 'manual'): CurrencyRateBusiness
     {
-        return $this->model->updateOrCreate(
-            [
-                'store_id' => $storeId,
-                'from_currency' => $fromCurrency,
-                'to_currency' => $toCurrency,
-                'effective_date' => $date,
-            ],
-            [
-                'rate' => $rate,
-                'source' => $source,
-            ]
-        );
+        $existing = $this->model
+            ->where('store_id', $storeId)
+            ->where('from_currency', $fromCurrency)
+            ->where('to_currency', $toCurrency)
+            ->where('effective_date', $date)
+            ->first();
+
+        if ($existing) {
+            $existing->update(['rate' => $rate, 'source' => $source]);
+            return $existing;
+        }
+
+        return $this->model->create([
+            'id' => (string) \Illuminate\Support\Str::uuid(),
+            'store_id' => $storeId,
+            'from_currency' => $fromCurrency,
+            'to_currency' => $toCurrency,
+            'effective_date' => $date,
+            'rate' => $rate,
+            'source' => $source,
+        ]);
     }
 
     /**

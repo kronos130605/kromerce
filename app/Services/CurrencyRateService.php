@@ -2,29 +2,31 @@
 
 namespace App\Services;
 
+use App\Models\CurrencySource;
 use App\Repositories\Store\BusinessCurrencyConfigRepository;
-use App\Repositories\Currency\CurrencyRateBusinessRepository;
+use App\Repositories\Store\CurrencySourceRepository;
 use App\Repositories\Currency\CurrencyRateGlobalRepository;
 use App\Repositories\Currency\CurrencyRateUpdateRepository;
+use App\Services\Currency\CurrencyProviderFactory;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 
 class CurrencyRateService
 {
     private BusinessCurrencyConfigRepository $configRepo;
+    private CurrencySourceRepository $sourceRepo;
     private CurrencyRateGlobalRepository $globalRateRepo;
-    private CurrencyRateBusinessRepository $businessRateRepo;
     private CurrencyRateUpdateRepository $updateRepo;
 
     public function __construct(
         BusinessCurrencyConfigRepository $configRepo,
+        CurrencySourceRepository $sourceRepo,
         CurrencyRateGlobalRepository $globalRateRepo,
-        CurrencyRateBusinessRepository $businessRateRepo,
         CurrencyRateUpdateRepository $updateRepo
     ) {
         $this->configRepo = $configRepo;
+        $this->sourceRepo = $sourceRepo;
         $this->globalRateRepo = $globalRateRepo;
-        $this->businessRateRepo = $businessRateRepo;
         $this->updateRepo = $updateRepo;
     }
     /**
@@ -33,28 +35,30 @@ class CurrencyRateService
     public function updateDailyRates(): array
     {
         $today = now()->format('Y-m-d');
-        $currencies = array_keys(config('currencies.supported', []));
         $results = [];
         $totalUpdated = 0;
 
         try {
-            // Update global rates
-            $globalResults = $this->updateGlobalRates($currencies, $today);
-            $results['global'] = $globalResults;
-            $totalUpdated += $globalResults['updated'];
+            // Update global rates using default source
+            $globalSource = $this->sourceRepo->getGlobalDefault();
+            if ($globalSource) {
+                $globalResults = $this->updateGlobalRatesFromSource($globalSource, $today);
+                $results['global'] = $globalResults;
+                $totalUpdated += $globalResults['updated'];
+            }
 
-            // Update business rates for auto-update enabled businesses
-            $businessResults = $this->updateBusinessRates($today);
+            // Update business rates for each store using their configured source
+            $businessResults = $this->updateBusinessRatesFromSources($today);
             $results['business'] = $businessResults;
             $totalUpdated += $businessResults['updated'];
 
-            // Clean up old rates
-            $this->cleanupOldRates();
-
             // Log successful update
             $this->updateRepo->createSuccess(
-                array_merge($globalResults['currencies'], $businessResults['currencies']),
-                'api',
+                array_merge(
+                    $globalResults['currencies'] ?? [],
+                    $businessResults['currencies'] ?? []
+                ),
+                'provider_sources',
                 $totalUpdated
             );
 
@@ -72,8 +76,11 @@ class CurrencyRateService
 
             // Log failed update
             $this->updateRepo->createFailure(
-                array_merge($globalResults['currencies'] ?? [], $businessResults['currencies'] ?? []),
-                'api',
+                array_merge(
+                    $globalResults['currencies'] ?? [],
+                    $businessResults['currencies'] ?? []
+                ),
+                'provider_sources',
                 $e->getMessage()
             );
 
@@ -83,6 +90,243 @@ class CurrencyRateService
                 'results' => $results ?? [],
             ];
         }
+    }
+
+    /**
+     * Update global rates from a source.
+     */
+    private function updateGlobalRatesFromSource(CurrencySource $source, string $date): array
+    {
+        $currencies = array_keys(config('currencies.supported', []));
+        $updated = 0;
+        $currencyPairs = [];
+
+        try {
+            $provider = CurrencyProviderFactory::make($source);
+
+            // Prepare currency pairs
+            $pairs = [];
+            foreach ($currencies as $from) {
+                foreach ($currencies as $to) {
+                    if ($from !== $to && $provider->supportsCurrency($from) && $provider->supportsCurrency($to)) {
+                        $pairs[] = ['from' => $from, 'to' => $to];
+                    }
+                }
+            }
+
+            if (empty($pairs)) {
+                return ['updated' => 0, 'currencies' => []];
+            }
+
+            // Fetch rates from provider
+            $rates = $provider->fetchRates($pairs);
+
+            Log::debug('Rates fetched from provider', [
+                'source' => $source->name,
+                'pairs_requested' => count($pairs),
+                'rates_received' => count($rates),
+                'sample_rates' => array_slice(array_keys($rates), 0, 3),
+            ]);
+
+            // Save rates
+            foreach ($rates as $from => $tos) {
+                foreach ($tos as $to => $rate) {
+                    Log::debug('Saving rate', ['from' => $from, 'to' => $to, 'rate' => $rate]);
+                    $this->globalRateRepo->updateOrCreateRate($from, $to, $rate, $date, $source->name);
+                    $updated++;
+                    $currencyPairs[] = "{$from}-{$to}";
+                }
+            }
+
+            Log::info('Global rates updated', [
+                'source' => $source->name,
+                'updated_count' => $updated,
+            ]);
+
+            // Record success
+            $source->recordSuccess();
+
+        } catch (\Exception $e) {
+            Log::error('Failed to update global rates from source', [
+                'source' => $source->name,
+                'error' => $e->getMessage(),
+            ]);
+            $source->recordFailure($e->getMessage());
+        }
+
+        return [
+            'updated' => $updated,
+            'currencies' => $currencyPairs,
+        ];
+    }
+
+    /**
+     * Update rates from all active sources.
+     */
+    private function updateAllSources(string $date): array
+    {
+        $totalUpdated = 0;
+        $results = [];
+
+        // Get all active sources
+        $sources = $this->sourceRepo->getBy(['is_active' => true]);
+
+        foreach ($sources as $source) {
+            try {
+                $result = $this->updateAllSources($date);
+                $totalUpdated += $result['updated'];
+                $results[$source->name] = $result;
+            } catch (\Exception $e) {
+                Log::error('Failed to update from source', [
+                    'source' => $source->name,
+                    'error' => $e->getMessage(),
+                ]);
+                $results[$source->name] = [
+                    'updated' => 0,
+                    'error' => $e->getMessage(),
+                ];
+            }
+        }
+
+        return [
+            'total_updated' => $totalUpdated,
+            'results' => $results,
+        ];
+    }
+
+    /**
+     * Update business rates from each store's configured source.
+     */
+    private function updateBusinessRatesFromSources(string $date): array
+    {
+        $updated = 0;
+        $currencyPairs = [];
+
+        $businesses = $this->configRepo->getNeedingRateUpdate();
+
+        foreach ($businesses as $config) {
+            try {
+                if ($config->source_id) {
+                    // Use store's custom source
+                    $result = $this->updateStoreRatesFromSource($config, $date);
+                } else {
+                    // Use global rates (copy to business rates)
+                    $result = $this->updateStoreRatesFromGlobal($config, $date);
+                }
+
+                $updated += $result['updated'];
+                $currencyPairs = array_merge($currencyPairs, $result['currencies']);
+
+                // Update last rate update date
+                $this->configRepo->updateBy(['store_id' => $config->store_id], ['last_rate_update' => $date]);
+
+            } catch (\Exception $e) {
+                Log::error('Failed to update business rates', [
+                    'store_id' => $config->store_id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+
+        return [
+            'updated' => $updated,
+            'currencies' => $currencyPairs,
+        ];
+    }
+
+    /**
+     * Update store rates from its configured source.
+     */
+    private function updateStoreRatesFromSource($config, string $date): array
+    {
+        $source = $this->sourceRepo->getFirstBy(['id' => $config->source_id]);
+
+        if (!$source || !$source->is_active) {
+            // Fallback to global
+            return $this->updateStoreRatesFromGlobal($config, $date);
+        }
+
+        $updated = 0;
+        $currencyPairs = [];
+        $baseCurrency = $config->default_currency;
+        $targetCurrencies = $config->display_currencies;
+
+        try {
+            $provider = CurrencyProviderFactory::make($source, $config->source_config_override);
+
+            // Prepare pairs
+            $pairs = [];
+            foreach ($targetCurrencies as $target) {
+                if ($target !== $baseCurrency) {
+                    $pairs[] = ['from' => $baseCurrency, 'to' => $target];
+                }
+            }
+
+            if (empty($pairs)) {
+                return ['updated' => 0, 'currencies' => []];
+            }
+
+            // Fetch rates
+            $rates = $provider->fetchRates($pairs);
+
+            // Save rates to global table
+            foreach ($rates as $from => $tos) {
+                foreach ($tos as $to => $rate) {
+                    $this->globalRateRepo->updateOrCreateRate($from, $to, $rate, $date, $source->name);
+                    $updated++;
+                    $currencyPairs[] = "{$from}-{$to}";
+                }
+            }
+
+            $source->recordSuccess();
+
+        } catch (\Exception $e) {
+            Log::error('Provider failed for store, falling back to global', [
+                'store_id' => $config->store_id,
+                'source' => $source->name,
+                'error' => $e->getMessage(),
+            ]);
+
+            $source->recordFailure($e->getMessage());
+
+            // Fallback to global rates
+            return $this->updateStoreRatesFromGlobal($config, $date);
+        }
+
+        return [
+            'updated' => $updated,
+            'currencies' => $currencyPairs,
+        ];
+    }
+
+    /**
+     * Update store rates from global rates (fallback).
+     */
+    private function updateStoreRatesFromGlobal($config, string $date): array
+    {
+        $updated = 0;
+        $currencyPairs = [];
+        $baseCurrency = $config->default_currency;
+        $targetCurrencies = $config->display_currencies;
+
+        foreach ($targetCurrencies as $targetCurrency) {
+            if ($targetCurrency === $baseCurrency) {
+                continue;
+            }
+
+            $globalRate = $this->globalRateRepo->getRateForDate($baseCurrency, $targetCurrency, $date);
+
+            if ($globalRate) {
+                // Rate already exists in global table, no need to duplicate
+                $updated++;
+                $currencyPairs[] = "{$baseCurrency}-{$targetCurrency}";
+            }
+        }
+
+        return [
+            'updated' => $updated,
+            'currencies' => $currencyPairs,
+        ];
     }
 
     /**
@@ -126,151 +370,20 @@ class CurrencyRateService
     }
 
     /**
-     * Update business rates for auto-update enabled businesses.
+     * Test a currency source connection.
      */
-    private function updateBusinessRates(string $date): array
+    public function testSourceConnection(string $sourceId, ?array $configOverride = null): array
     {
-        $updated = 0;
-        $currencyPairs = [];
+        $source = $this->sourceRepo->getFirstBy(['id' => $sourceId]);
 
-        $businesses = $this->configRepo->getNeedingRateUpdate();
-
-        foreach ($businesses as $config) {
-            $baseCurrency = $config->default_currency;
-            $targetCurrencies = $config->display_currencies;
-
-            foreach ($targetCurrencies as $targetCurrency) {
-                if ($targetCurrency === $baseCurrency) {
-                    continue;
-                }
-
-                try {
-                    $rate = $this->fetchRateFromAPI($baseCurrency, $targetCurrency);
-
-                    if ($rate) {
-                        $this->businessRateRepo->updateOrCreateRate(
-                            $config->store_id,
-                            $baseCurrency,
-                            $targetCurrency,
-                            $rate,
-                            $date,
-                            'api'
-                        );
-                        $updated++;
-                        $currencyPairs[] = "{$baseCurrency}-{$targetCurrency}";
-                    }
-                } catch (\Exception $e) {
-                    // Use global rate as fallback
-                    $globalRate = $this->globalRateRepo->getRateForDate($baseCurrency, $targetCurrency, $date);
-                    if ($globalRate) {
-                        $this->businessRateRepo->updateOrCreateRate(
-                            $config->store_id,
-                            $baseCurrency,
-                            $targetCurrency,
-                            $globalRate->rate,
-                            $date,
-                            'global_fallback'
-                        );
-                        $updated++;
-                        $currencyPairs[] = "{$baseCurrency}-{$targetCurrency}";
-                    }
-                }
-            }
-
-            // Update last rate update date
-            $this->configRepo->updateForStore($config->store_id, ['last_rate_update' => $date]);
-        }
-
-        return [
-            'updated' => $updated,
-            'currencies' => $currencyPairs,
-        ];
-    }
-
-    /**
-     * Fetch rate from API.
-     */
-    private function fetchRateFromAPI(string $fromCurrency, string $toCurrency): ?float
-    {
-        // For now, using a mock implementation
-        // In production, integrate with real API like OpenExchangeRates, CurrencyLayer, etc.
-
-        if ($fromCurrency === $toCurrency) {
-            return 1.0;
-        }
-
-        // Mock rates for development
-        $mockRates = $this->getMockRates();
-        $key = "{$fromCurrency}-{$toCurrency}";
-
-        if (isset($mockRates[$key])) {
-            return $mockRates[$key];
-        }
-
-        // Try inverse rate
-        $inverseKey = "{$toCurrency}-{$fromCurrency}";
-        if (isset($mockRates[$inverseKey])) {
-            return 1 / $mockRates[$inverseKey];
-        }
-
-        // Default to USD conversion
-        if ($fromCurrency === 'USD') {
-            $usdRates = [
-                'EUR' => 0.92,
-                'GBP' => 0.79,
-                'JPY' => 149.50,
-                'COP' => 4000.0,
-                'MXN' => 17.15,
-                'CAD' => 1.36,
-                'AUD' => 1.53,
-                'CHF' => 0.87,
-                'CNY' => 7.24,
-                'INR' => 83.12,
+        if (!$source) {
+            return [
+                'success' => false,
+                'message' => 'Source not found',
             ];
-
-            return $usdRates[$toCurrency] ?? null;
         }
 
-        return null;
-    }
-
-    /**
-     * Get mock rates for development.
-     */
-    private function getMockRates(): array
-    {
-        return [
-            'USD-EUR' => 0.92,
-            'USD-GBP' => 0.79,
-            'USD-JPY' => 149.50,
-            'USD-COP' => 4000.0,
-            'USD-MXN' => 17.15,
-            'USD-CAD' => 1.36,
-            'USD-AUD' => 1.53,
-            'USD-CHF' => 0.87,
-            'USD-CNY' => 7.24,
-            'USD-INR' => 83.12,
-            'EUR-USD' => 1.09,
-            'EUR-GBP' => 0.86,
-            'EUR-JPY' => 162.89,
-            'EUR-COP' => 4347.83,
-            'EUR-MXN' => 18.64,
-            'EUR-CAD' => 1.48,
-            'EUR-AUD' => 1.66,
-            'EUR-CHF' => 0.95,
-            'EUR-CNY' => 7.87,
-            'EUR-INR' => 90.35,
-            'GBP-USD' => 1.27,
-            'GBP-EUR' => 1.16,
-            'GBP-JPY' => 189.37,
-            'GBP-COP' => 5063.29,
-            'GBP-MXN' => 21.71,
-            'GBP-CAD' => 1.72,
-            'GBP-AUD' => 1.94,
-            'GBP-CHF' => 1.10,
-            'GBP-CNY' => 9.16,
-            'GBP-INR' => 105.20,
-        ];
+        return CurrencyProviderFactory::testSource($source, $configOverride);
     }
 
     /**
@@ -292,51 +405,153 @@ class CurrencyRateService
     {
         // Clean global rates (keep 2 years)
         $this->globalRateRepo->cleanupOldRates(2);
-
-        // Clean business rates based on their retention settings
-        $configs = $this->configRepo->getAll();
-
-        foreach ($configs as $config) {
-            $this->businessRateRepo->cleanupOldRates($config->store_id, $config->historical_retention_years);
-        }
     }
 
     /**
-     * Get effective rate for a store.
+     * Get effective rate for a store with currency-aware source selection.
+     *
+     * Logic:
+     * - Conversions involving CUP or CLA: Use store's configured Cuba source (BCC or ElToque)
+     * - Conversions NOT involving CUP/CLA: Use global international source (OpenExchangeRates)
+     * - CLA (Tarjeta Clasica) is treated as equivalent to USD
      */
     public function getEffectiveRate(string $storeId, string $fromCurrency, string $toCurrency, ?string $date = null): array
     {
-        $config = $this->configRepo->getByStoreId($storeId);
+        $config = $this->configRepo->getFirstBy(['store_id' => $storeId]);
 
         if (!$config) {
             throw new \Exception("Currency configuration not found for store: {$storeId}");
         }
 
-        // Try business custom rate first
-        if ($config->use_custom_rates) {
-            $businessRate = $this->businessRateRepo->getRateForDate($storeId, $fromCurrency, $toCurrency, $date);
+        // Normalize currencies: CLA = USD
+        $fromCurrency = $this->normalizeCurrency($fromCurrency);
+        $toCurrency = $this->normalizeCurrency($toCurrency);
 
-            if ($businessRate) {
-                return [
-                    'rate' => $businessRate->rate,
-                    'source' => 'business_custom',
-                    'effective_date' => $businessRate->effective_date->format('Y-m-d'),
-                ];
+        // Determine which source to use based on currencies involved
+        if ($this->isCubanCurrencyConversion($fromCurrency, $toCurrency)) {
+            // Use store's Cuba source for CUP-related conversions
+            return $this->getCubaRate($storeId, $config, $fromCurrency, $toCurrency, $date);
+        }
+
+        // Use international global source for non-CUP conversions
+        return $this->getInternationalRate($fromCurrency, $toCurrency, $date);
+    }
+
+    /**
+     * Check if a currency is a Cuban currency (CUP or CLA).
+     */
+    private function isCubanCurrency(string $currency): bool
+    {
+        return in_array(strtoupper($currency), ['CUP', 'CLA']);
+    }
+
+    /**
+     * Check if conversion involves any Cuban currency.
+     */
+    private function isCubanCurrencyConversion(string $from, string $to): bool
+    {
+        return $this->isCubanCurrency($from) || $this->isCubanCurrency($to);
+    }
+
+    /**
+     * Normalize currency code.
+     * CLA (Tarjeta Clasica) is treated as USD.
+     */
+    private function normalizeCurrency(string $currency): string
+    {
+        $currency = strtoupper($currency);
+        return $currency === 'CLA' ? 'USD' : $currency;
+    }
+
+    /**
+     * Get rate for Cuba-related conversion (using store's configured Cuba source).
+     */
+    private function getCubaRate(string $storeId, $config, string $from, string $to, ?string $date): array
+    {
+        // Use preferred Cuba source from store config
+        $preferredSourceId = $config->preferred_cuba_source_id ?? $config->source_id;
+
+        if ($preferredSourceId) {
+            $source = $this->sourceRepo->getFirstBy(['id' => $preferredSourceId]);
+
+            if ($source && $source->is_active && $this->isCubaSource($source)) {
+                // Try to get rate from global rates filtered by source
+                $rate = $this->globalRateRepo->getRateForDateBySource($from, $to, $date ?? now()->format('Y-m-d'), $source->name);
+
+                if ($rate) {
+                    return [
+                        'rate' => $rate->rate,
+                        'source' => $source->name,
+                        'effective_date' => $rate->effective_date->format('Y-m-d'),
+                        'source_type' => 'store_cuba',
+                    ];
+                }
             }
         }
 
-        // Fallback to global rate
-        $globalRate = $this->globalRateRepo->getRateForDate($fromCurrency, $toCurrency, $date);
+        // Fallback to any available Cuba rate in global table
+        $globalRate = $this->globalRateRepo->getRateForDate($from, $to, $date);
 
         if ($globalRate) {
             return [
                 'rate' => $globalRate->rate,
-                'source' => 'global_default',
+                'source' => $globalRate->source ?? 'global_fallback',
                 'effective_date' => $globalRate->effective_date->format('Y-m-d'),
+                'source_type' => 'fallback',
             ];
         }
 
-        throw new \Exception("Rate not found for {$fromCurrency} to {$toCurrency}");
+        throw new \Exception("Rate not found for {$from} to {$to} (Cuba conversion)");
+    }
+
+    /**
+     * Check if a source is a Cuba-specific source.
+     */
+    private function isCubaSource(CurrencySource $source): bool
+    {
+        $cubaScopes = ['cuba-official', 'cuba-informal'];
+        $sourceScope = $source->config['scope'] ?? null;
+
+        return in_array($sourceScope, $cubaScopes) ||
+               in_array($source->code, ['bcc-cuba', 'eltoque-cuba']);
+    }
+
+    /**
+     * Get rate for international conversion (using global OpenExchangeRates).
+     */
+    private function getInternationalRate(string $from, string $to, ?string $date): array
+    {
+        $globalSource = $this->sourceRepo->findByCode('openexchange-global');
+
+        if (!$globalSource || !$globalSource->is_active) {
+            // Fallback to any global rate
+            $globalRate = $this->globalRateRepo->getRateForDate($from, $to, $date);
+
+            if ($globalRate) {
+                return [
+                    'rate' => $globalRate->rate,
+                    'source' => $globalRate->source ?? 'global',
+                    'effective_date' => $globalRate->effective_date->format('Y-m-d'),
+                    'source_type' => 'global_fallback',
+                ];
+            }
+
+            throw new \Exception("Rate not found for {$from} to {$to} (international conversion)");
+        }
+
+        // Get rate from global rates
+        $globalRate = $this->globalRateRepo->getRateForDate($from, $to, $date);
+
+        if ($globalRate) {
+            return [
+                'rate' => $globalRate->rate,
+                'source' => $globalSource->name,
+                'effective_date' => $globalRate->effective_date->format('Y-m-d'),
+                'source_type' => 'international_global',
+            ];
+        }
+
+        throw new \Exception("Rate not found for {$from} to {$to} (international conversion)");
     }
 
     /**
@@ -344,7 +559,7 @@ class CurrencyRateService
      */
     public function getSupportedCurrenciesWithRates(string $storeId): array
     {
-        $config = $this->configRepo->getByStoreId($storeId);
+        $config = $this->configRepo->getFirstBy(['store_id' => $storeId]);
 
         if (!$config) {
             return [];
@@ -390,7 +605,7 @@ class CurrencyRateService
      */
     public function updateCustomRates(string $storeId, array $rates, string $effectiveDate): array
     {
-        $config = $this->configRepo->getByStoreId($storeId);
+        $config = $this->configRepo->getFirstBy(['store_id' => $storeId]);
 
         if (!$config) {
             throw new \Exception("Currency configuration not found for store: {$storeId}");
@@ -405,8 +620,8 @@ class CurrencyRateService
             }
 
             try {
-                $this->businessRateRepo->updateOrCreateRate(
-                    $storeId,
+                // Custom rates are now stored in global table with source='manual'
+                $this->globalRateRepo->updateOrCreateRate(
                     $baseCurrency,
                     $targetCurrency,
                     $rate,
@@ -432,7 +647,7 @@ class CurrencyRateService
         }
 
         // Update last rate update date
-        $this->configRepo->updateForStore($storeId, ['last_rate_update' => $effectiveDate]);
+        $this->configRepo->updateBy(['store_id' => $storeId], ['last_rate_update' => $effectiveDate]);
 
         return $results;
     }
@@ -442,41 +657,22 @@ class CurrencyRateService
      */
     public function getRateHistory(string $fromCurrency, string $toCurrency, string $startDate, string $endDate, string $storeId): array
     {
+        // Get all rates from global table for the date range
         $history = [];
-
-        // Get custom rates first
-        $customHistory = $this->businessRateRepo->getRatesForDateRange(
-            $storeId,
-            $fromCurrency,
-            $toCurrency,
-            $startDate,
-            $endDate
-        );
-
-        foreach ($customHistory as $rate) {
-            $history[] = [
-                'date' => $rate->effective_date->format('Y-m-d'),
-                'rate' => $rate->rate,
-                'source' => 'business_custom',
-            ];
-        }
-
-        // Get global rates for dates without custom rates
-        $existingDates = collect($history)->pluck('date')->toArray();
 
         $globalHistory = $this->globalRateRepo->getHistory(
             $fromCurrency,
             $toCurrency,
             $startDate,
             $endDate,
-            $existingDates
+            []
         );
 
         foreach ($globalHistory as $rate) {
             $history[] = [
                 'date' => $rate->effective_date->format('Y-m-d'),
                 'rate' => $rate->rate,
-                'source' => 'global_default',
+                'source' => $rate->source,
             ];
         }
 
@@ -498,10 +694,12 @@ class CurrencyRateService
 
     /**
      * Reset custom rates to use global rates.
+     * Since all rates are now in the global table, this method is deprecated.
+     * It now just clears manual rates for this store's currency pairs.
      */
     public function resetToGlobal(string $storeId, array $currencies): int
     {
-        $config = $this->configRepo->getByStoreId($storeId);
+        $config = $this->configRepo->getFirstBy(['store_id' => $storeId]);
 
         if (!$config) {
             throw new \Exception("Currency configuration not found for store: {$storeId}");
@@ -515,11 +713,12 @@ class CurrencyRateService
                 continue;
             }
 
-            $deleted += $this->businessRateRepo->deleteRate(
-                $storeId,
-                $baseCurrency,
-                $targetCurrency
-            );
+            // Delete manual rates from global table
+            $deleted += $this->globalRateRepo->deleteBy([
+                'source' => 'manual',
+                'from_currency' => $baseCurrency,
+                'to_currency' => $targetCurrency,
+            ]);
         }
 
         return $deleted;
@@ -603,7 +802,7 @@ class CurrencyRateService
      */
     public function getCurrencyPerformance(string $storeId, int $days = 30): array
     {
-        $config = $this->configRepo->getByStoreId($storeId);
+        $config = $this->configRepo->getFirstBy(['store_id' => $storeId]);
 
         if (!$config) {
             return [];

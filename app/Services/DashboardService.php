@@ -97,7 +97,7 @@ class DashboardService
     public function getCurrencyStatus($store): array
     {
         try {
-            $config = $this->configRepo->getByStoreId($store->id);
+            $config = $this->configRepo->getFirstBy(['store_id' => $store->id]);
 
             if (!$config) {
                 return [
@@ -178,7 +178,7 @@ class DashboardService
             }
 
             // Currency update alerts
-            $config = $this->configRepo->getByStoreId($store->id);
+            $config = $this->configRepo->getFirstBy(['store_id' => $store->id]);
             if ($config && $config->auto_update_rates) {
                 $daysSinceUpdate = $config->last_rate_update ?
                     Carbon::parse($config->last_rate_update)->diffInDays(now()) : 999;

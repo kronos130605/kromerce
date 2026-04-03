@@ -22,6 +22,7 @@ class BusinessCurrencyConfig extends Model
         'rate_update_frequency',
         'last_rate_update',
         'historical_retention_years',
+        'preferred_cuba_source_id',
     ];
 
     protected $casts = [
@@ -41,11 +42,11 @@ class BusinessCurrencyConfig extends Model
     }
 
     /**
-     * Get the custom rates for this business.
+     * Get the Cuba source preference for this store.
      */
-    public function customRates(): HasMany
+    public function preferredCubaSource(): BelongsTo
     {
-        return $this->hasMany(CurrencyRateBusiness::class, 'store_id', 'store_id');
+        return $this->belongsTo(CurrencySource::class, 'preferred_cuba_source_id');
     }
 
     /**

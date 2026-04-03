@@ -30,18 +30,6 @@ return [
             'symbol' => '£',
             'flag' => '🇬🇧',
         ],
-        'JPY' => [
-            'code' => 'JPY',
-            'name' => 'Japanese Yen',
-            'symbol' => '¥',
-            'flag' => '🇯🇵',
-        ],
-        'COP' => [
-            'code' => 'COP',
-            'name' => 'Colombian Peso',
-            'symbol' => '$',
-            'flag' => '🇨🇴',
-        ],
         'MXN' => [
             'code' => 'MXN',
             'name' => 'Mexican Peso',
@@ -53,31 +41,7 @@ return [
             'name' => 'Canadian Dollar',
             'symbol' => 'C$',
             'flag' => '🇨🇦',
-        ],
-        'AUD' => [
-            'code' => 'AUD',
-            'name' => 'Australian Dollar',
-            'symbol' => 'A$',
-            'flag' => '🇦🇺',
-        ],
-        'CHF' => [
-            'code' => 'CHF',
-            'name' => 'Swiss Franc',
-            'symbol' => 'Fr',
-            'flag' => '🇨🇭',
-        ],
-        'CNY' => [
-            'code' => 'CNY',
-            'name' => 'Chinese Yuan',
-            'symbol' => '¥',
-            'flag' => '🇨🇳',
-        ],
-        'INR' => [
-            'code' => 'INR',
-            'name' => 'Indian Rupee',
-            'symbol' => '₹',
-            'flag' => '🇮🇳',
-        ],
+        ]
     ],
 
     /*
@@ -100,5 +64,5 @@ return [
     |
     */
 
-    'default_display' => ['USD', 'EUR', 'COP'],
+    'default_display' => ['USD', 'EUR', 'CAD'],
 ];
