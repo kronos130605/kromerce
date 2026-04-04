@@ -45,11 +45,11 @@ class I18nServiceProvider extends ServiceProvider
 
         foreach ($locales as $localeCode => $localeName) {
             $localePath = "{$langPath}/{$localeCode}";
-            
+
             if (File::isDirectory($localePath)) {
                 $files = File::files($localePath, '*.json');
                 $localeTranslations = [];
-                
+
                 foreach ($files as $file) {
                     $namespace = $file->getFilenameWithoutExtension();
                     $content = json_decode(File::get($file->getPathname()), true);
@@ -57,20 +57,12 @@ class I18nServiceProvider extends ServiceProvider
                         $localeTranslations[$namespace] = $content;
                     }
                 }
-                
+
                 if (!empty($localeTranslations)) {
                     $translations[$localeCode] = $localeTranslations;
                 }
             }
         }
-
-        // Log para depuración
-        Log::debug('I18nServiceProvider sharing translations', [
-            'current_locale' => $locale,
-            'available_locales' => array_keys($translations),
-            'has_products_es' => isset($translations['es']['products']),
-            'has_products_en' => isset($translations['en']['products']),
-        ]);
 
         // Share with Inertia
         Inertia::share('translations', $translations);

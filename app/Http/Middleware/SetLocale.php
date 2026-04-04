@@ -28,15 +28,6 @@ class SetLocale
         App::setLocale($locale);
         session(['locale' => $locale]);
 
-        // Log para depuración (eliminar en producción)
-        Log::debug('SetLocale middleware', [
-            'cookie_locale' => $request->cookie('kromerce_locale'),
-            'header_locale' => $request->header('X-Locale'),
-            'session_locale' => session('locale'),
-            'final_locale' => $locale,
-            'cookies_all' => $request->cookies->all(),
-        ]);
-
         return $next($request);
     }
 }
