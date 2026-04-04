@@ -11,6 +11,16 @@ const props = defineProps({
 
 const { t } = useTranslations();
 
+// Map full source names to short badges
+const getSourceBadge = (fullName) => {
+    if (!fullName) return '?';
+    if (fullName.includes('Banco Central')) return 'BCC';
+    if (fullName.includes('ElToque')) return 'ElToque';
+    if (fullName.includes('ExchangeRate')) return 'ExchangeRate';
+    if (fullName.includes('OpenExchange')) return 'OpenEx';
+    return fullName.split(' ')[0];
+};
+
 const hasData = computed(() => props.currencyStatus?.rates?.length > 0);
 
 const rates = computed(() => props.currencyStatus?.rates ?? []);
@@ -49,18 +59,24 @@ const sourceLabel = computed(() => {
         <!-- Rate pairs grid -->
         <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div v-for="item in rates" :key="`${item.from}-${item.to}`"
-                 class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
-                <div class="flex items-center justify-between mb-2">
-                    <span class="text-sm font-semibold text-gray-700 dark:text-gray-200">
-                        {{ item.from }} → {{ item.to }}
-                    </span>
-                    <span class="text-xs px-1.5 py-0.5 bg-gray-200 dark:bg-gray-600 text-gray-500 dark:text-gray-400 rounded">
-                        {{ item.source }}
-                    </span>
+                 class="relative bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                <!-- Source badge - top left corner, no margin -->
+                <span class="absolute top-0 left-0 text-[10px] px-1.5 py-0.5 bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 rounded-br rounded-tl font-medium tracking-tight">
+                    {{ getSourceBadge(item.source) }}
+                </span>
+
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="text-lg font-bold text-gray-900 dark:text-white">{{ item.from }}</span>
+                    <svg class="h-3 w-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                    </svg>
+                    <span class="text-lg font-bold text-gray-900 dark:text-white">{{ item.to }}</span>
                 </div>
+
                 <div class="text-2xl font-bold text-gray-900 dark:text-white">
                     {{ item.rate.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 4 }) }}
                 </div>
+
                 <div class="text-xs text-gray-400 dark:text-gray-500 mt-1">
                     {{ item.effective_date }}
                 </div>

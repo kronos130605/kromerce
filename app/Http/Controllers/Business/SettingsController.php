@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Business;
 
 use App\Helpers\TranslationHelper;
 use App\Http\Controllers\Controller;
-use App\Repositories\Store\BusinessCurrencyConfigRepository;
+use App\Repositories\Store\StoreCurrencyConfigRepository;
 use App\Repositories\Store\CurrencySourceRepository;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -16,7 +16,7 @@ class SettingsController extends Controller
 {
     public function __construct(
         private CurrencySourceRepository $sourceRepo,
-        private BusinessCurrencyConfigRepository $configRepo,
+        private StoreCurrencyConfigRepository $configRepo,
     ) {}
 
     /**

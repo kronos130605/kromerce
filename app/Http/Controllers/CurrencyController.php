@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Repositories\Store\BusinessCurrencyConfigRepository;
+use App\Repositories\Store\StoreCurrencyConfigRepository;
 use App\Services\CurrencyRateService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
@@ -13,7 +13,7 @@ class CurrencyController extends Controller
 {
     public function __construct(
         private CurrencyRateService $currencyService,
-        private BusinessCurrencyConfigRepository $configRepo
+        private StoreCurrencyConfigRepository $configRepo
     ) {}
     /**
      * Display the currency configuration page.

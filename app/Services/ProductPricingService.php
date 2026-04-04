@@ -4,19 +4,18 @@ namespace App\Services;
 
 use App\Models\Product;
 use App\Models\ProductVariant;
-use App\Repositories\Store\BusinessCurrencyConfigRepository;
 use App\Repositories\Store\StoreCurrencyConfigRepository;
 use App\Repositories\Product\ProductRepository;
 use Illuminate\Support\Collection;
 
 class ProductPricingService
 {
-    private BusinessCurrencyConfigRepository $configRepo;
+    private StoreCurrencyConfigRepository $configRepo;
     private ProductRepository $productRepo;
     private CurrencyRateService $currencyService;
 
     public function __construct(
-        BusinessCurrencyConfigRepository $configRepo,
+        StoreCurrencyConfigRepository $configRepo,
         ProductRepository $productRepo,
         CurrencyRateService $currencyService
     ) {

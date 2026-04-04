@@ -5,7 +5,7 @@ namespace App\Services;
 use App\Models\Store;
 use App\Models\User;
 use App\Repositories\Currency\CurrencyRateGlobalRepository;
-use App\Repositories\Store\BusinessCurrencyConfigRepository;
+use App\Repositories\Store\StoreCurrencyConfigRepository;
 use App\Repositories\Store\StoreStatisticsRepository;
 use Illuminate\Support\Facades\Log;
 
@@ -16,7 +16,7 @@ class DashboardRoutingService
         private RoleService $roleService,
         private StoreStatisticsRepository $statisticsRepo,
         private CurrencyRateGlobalRepository $rateRepo,
-        private BusinessCurrencyConfigRepository $configRepo,
+        private StoreCurrencyConfigRepository $configRepo,
     ) {}
 
     /**

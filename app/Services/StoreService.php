@@ -6,6 +6,7 @@ use App\Models\Store;
 use App\Models\StoreContact;
 use App\Models\StoreCurrencyConfig;
 use App\Models\StorePaymentMethod;
+use App\Repositories\Store\StoreActiveCurrencyRepository;
 use App\Repositories\Store\StoreContactRepository;
 use App\Repositories\Store\StoreCurrencyConfigRepository;
 use App\Repositories\Store\StorePaymentMethodRepository;
@@ -25,6 +26,7 @@ class StoreService
         private StoreContactRepository $storeContactRepository,
         private StorePaymentMethodRepository $storePaymentMethodRepository,
         private StoreCurrencyConfigRepository $storeCurrencyConfigRepository,
+        private StoreActiveCurrencyRepository $storeActiveCurrencyRepository,
         private StoreStatisticsRepository $storeStatisticsRepository,
         private UserStoreRepository $userStoreRepository
     ) {}
@@ -60,6 +62,17 @@ class StoreService
                 'rate_update_frequency' => 'weekly',
                 'historical_retention_years' => 2,
             ]);
+
+            // Initialize all supported currencies as active for the new store
+            $supported = array_keys(config('currencies.supported', []));
+            foreach ($supported as $index => $code) {
+                $this->storeActiveCurrencyRepository->create([
+                    'store_id'      => $store->id,
+                    'currency_code' => $code,
+                    'is_active'     => true,
+                    'sort_order'    => $index,
+                ]);
+            }
 
             DB::commit();
 

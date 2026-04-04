@@ -30,18 +30,48 @@ return [
             'symbol' => '£',
             'flag' => '🇬🇧',
         ],
+        'CAD' => [
+            'code' => 'CAD',
+            'name' => 'Canadian Dollar',
+            'symbol' => 'C$',
+            'flag' => '🇨🇦',
+        ],
         'MXN' => [
             'code' => 'MXN',
             'name' => 'Mexican Peso',
             'symbol' => '$',
             'flag' => '🇲🇽',
         ],
-        'CAD' => [
-            'code' => 'CAD',
-            'name' => 'Canadian Dollar',
-            'symbol' => 'C$',
-            'flag' => '🇨🇦',
-        ]
+        'CUP' => [
+            'code' => 'CUP',
+            'name' => 'Peso Cubano',
+            'symbol' => '$',
+            'flag' => '🇨🇺',
+        ],
+        'MLC' => [
+            'code' => 'MLC',
+            'name' => 'Moneda Libremente Convertible',
+            'symbol' => 'MLC',
+            'flag' => '🇨🇺',
+        ],
+        'CLA' => [
+            'code' => 'CLA',
+            'name' => 'CLA (equiv. USD)',
+            'symbol' => 'CLA',
+            'flag' => '🇨🇺',
+        ],
+        'BRL' => [
+            'code' => 'BRL',
+            'name' => 'Brazilian Real',
+            'symbol' => 'R$',
+            'flag' => '🇧🇷',
+        ],
+        'ARS' => [
+            'code' => 'ARS',
+            'name' => 'Argentine Peso',
+            'symbol' => '$',
+            'flag' => '🇦🇷',
+        ],
     ],
 
     /*

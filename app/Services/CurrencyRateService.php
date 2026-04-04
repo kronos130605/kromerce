@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use App\Models\CurrencySource;
-use App\Repositories\Store\BusinessCurrencyConfigRepository;
+use App\Repositories\Store\StoreCurrencyConfigRepository;
 use App\Repositories\Store\CurrencySourceRepository;
 use App\Repositories\Currency\CurrencyRateGlobalRepository;
 use App\Repositories\Currency\CurrencyRateUpdateRepository;
@@ -13,13 +13,13 @@ use Illuminate\Support\Facades\Log;
 
 class CurrencyRateService
 {
-    private BusinessCurrencyConfigRepository $configRepo;
+    private StoreCurrencyConfigRepository $configRepo;
     private CurrencySourceRepository $sourceRepo;
     private CurrencyRateGlobalRepository $globalRateRepo;
     private CurrencyRateUpdateRepository $updateRepo;
 
     public function __construct(
-        BusinessCurrencyConfigRepository $configRepo,
+        StoreCurrencyConfigRepository $configRepo,
         CurrencySourceRepository $sourceRepo,
         CurrencyRateGlobalRepository $globalRateRepo,
         CurrencyRateUpdateRepository $updateRepo

@@ -37,6 +37,12 @@ class Product extends Model
         'historical_cost_amount',
         'historical_cost_rate',
         'historical_cost_date',
+        'cost_cup_amount',
+        'cost_cup_rate',
+        'cost_cup_date',
+        'cost_cla_amount',
+        'cost_cla_rate',
+        'cost_cla_date',
         'track_cost',
         'show_cost_to_customer',
         'sku',
@@ -72,6 +78,12 @@ class Product extends Model
         'historical_cost_amount' => 'decimal:2',
         'historical_cost_rate' => 'decimal:6',
         'historical_cost_date' => 'date',
+        'cost_cup_amount' => 'decimal:2',
+        'cost_cup_rate' => 'decimal:6',
+        'cost_cup_date' => 'date',
+        'cost_cla_amount' => 'decimal:2',
+        'cost_cla_rate' => 'decimal:6',
+        'cost_cla_date' => 'date',
         'track_cost' => 'boolean',
         'show_cost_to_customer' => 'boolean',
         'featured' => 'boolean',
@@ -190,6 +202,22 @@ class Product extends Model
     public function variants(): HasMany
     {
         return $this->hasMany(ProductVariant::class);
+    }
+
+    /**
+     * Get the sale currencies for the product.
+     */
+    public function saleCurrencies(): HasMany
+    {
+        return $this->hasMany(ProductSaleCurrency::class);
+    }
+
+    /**
+     * Get only enabled sale currencies.
+     */
+    public function enabledSaleCurrencies(): HasMany
+    {
+        return $this->hasMany(ProductSaleCurrency::class)->where('is_enabled', true);
     }
 
     /**

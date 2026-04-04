@@ -7,6 +7,8 @@ use App\Models\Store;
 use App\Models\User;
 use App\Repositories\Product\ProductCategoryRepository;
 use App\Repositories\Product\ProductRepository;
+use App\Repositories\Product\ProductSaleCurrencyRepository;
+use App\Services\StoreCurrencyService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
@@ -15,7 +17,9 @@ class ProductService
 {
     public function __construct(
         private ProductRepository $productRepository,
-        private ProductCategoryRepository $productCategoryRepository
+        private ProductCategoryRepository $productCategoryRepository,
+        private StoreCurrencyService $currencyService,
+        private ProductSaleCurrencyRepository $saleCurrencyRepository
     ) {}
 
     /**
@@ -75,15 +79,39 @@ class ProductService
                 $data['store_id'] = $store->id;
                 $data['created_by'] = $user->id;
 
-                // Extract category_ids before creating product
-                $categoryIds = $data['category_ids'] ?? [];
-                unset($data['category_ids']);
+                $categoryIds   = $data['category_ids'] ?? [];
+                $saleCurrencies = $data['sale_currencies'] ?? [];
+                unset($data['category_ids'], $data['sale_currencies']);
+
+                // Auto-compute CUP/CLA cost conversions if cost_price is provided
+                if (!empty($data['cost_price']) && !empty($data['base_currency'])) {
+                    $conversions = $this->currencyService->computeCupClaCostConversion(
+                        $store->id,
+                        (float) $data['cost_price'],
+                        $data['base_currency']
+                    );
+
+                    if ($conversions['cup']) {
+                        $data['cost_cup_amount'] = $conversions['cup']['amount'];
+                        $data['cost_cup_rate']   = $conversions['cup']['rate'];
+                        $data['cost_cup_date']   = $conversions['cup']['date'];
+                    }
+
+                    if ($conversions['cla']) {
+                        $data['cost_cla_amount'] = $conversions['cla']['amount'];
+                        $data['cost_cla_rate']   = $conversions['cla']['rate'];
+                        $data['cost_cla_date']   = $conversions['cla']['date'];
+                    }
+                }
 
                 $product = $this->productRepository->create($data);
 
-                // Sync categories if provided
                 if (!empty($categoryIds)) {
                     $product->categories()->sync($categoryIds);
+                }
+
+                if (!empty($saleCurrencies)) {
+                    $this->saleCurrencyRepository->syncForProduct($product->id, $saleCurrencies);
                 }
 
                 return $product;
@@ -113,21 +141,45 @@ class ProductService
     {
         try {
             return \DB::transaction(function () use ($store, $productId, $data) {
-                // Extract category_ids before updating product
-                $categoryIds = $data['category_ids'] ?? null;
-                unset($data['category_ids']);
-                
-                // Add updated_by
+                $categoryIds    = $data['category_ids'] ?? null;
+                $saleCurrencies = $data['sale_currencies'] ?? null;
+                unset($data['category_ids'], $data['sale_currencies']);
+
                 $data['updated_by'] = auth()->id();
+
+                // Recalculate CUP/CLA cost conversions if cost_price changed
+                if (!empty($data['cost_price']) && !empty($data['base_currency'])) {
+                    $conversions = $this->currencyService->computeCupClaCostConversion(
+                        $store->id,
+                        (float) $data['cost_price'],
+                        $data['base_currency']
+                    );
+
+                    if ($conversions['cup']) {
+                        $data['cost_cup_amount'] = $conversions['cup']['amount'];
+                        $data['cost_cup_rate']   = $conversions['cup']['rate'];
+                        $data['cost_cup_date']   = $conversions['cup']['date'];
+                    }
+
+                    if ($conversions['cla']) {
+                        $data['cost_cla_amount'] = $conversions['cla']['amount'];
+                        $data['cost_cla_rate']   = $conversions['cla']['rate'];
+                        $data['cost_cla_date']   = $conversions['cla']['date'];
+                    }
+                }
 
                 $updated = $this->productRepository
                     ->updateBy(['id' => $productId, 'store_id' => $store->id], $data);
 
-                // Sync categories if provided
-                if ($categoryIds !== null && $updated > 0) {
+                if ($updated > 0) {
                     $product = $this->productRepository->getById($productId);
                     if ($product) {
-                        $product->categories()->sync($categoryIds);
+                        if ($categoryIds !== null) {
+                            $product->categories()->sync($categoryIds);
+                        }
+                        if ($saleCurrencies !== null) {
+                            $this->saleCurrencyRepository->syncForProduct($product->id, $saleCurrencies);
+                        }
                     }
                 }
 

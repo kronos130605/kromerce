@@ -8,7 +8,8 @@
         "cancel": "Cancel",
         "tabs": {
             "general": "General",
-            "currency": "Currencies",
+            "currency": "Rate Sources",
+            "active_currencies": "Active Currencies",
             "store": "Store",
             "notifications": "Notifications"
         },
@@ -65,6 +66,29 @@
             "no_sources_available": "No sources available at this time",
             "dashboard_pairs_title": "Dashboard Currency Pairs",
             "dashboard_pairs_subtitle": "Select which currency pairs to display in the Currency Status block on your dashboard."
+        },
+        "active_currencies": {
+            "title": "Active Currencies",
+            "subtitle": "Manage which currencies are available for your store. Active currencies can be used when creating products and accepting payments.",
+            "active": "active",
+            "inactive": "available",
+            "active_section": "Active currencies",
+            "available_section": "Available to activate",
+            "activate": "Activate",
+            "deactivate": "Deactivate",
+            "status_active": "Active",
+            "no_active": "No active currencies. Activate at least one to start using multi-currency features.",
+            "cuba_currency": "Cuban",
+            "products_affected_title": "Products using this currency",
+            "products_affected_desc": "{count} product(s) are currently selling in {currency}. Choose what to do before deactivating.",
+            "migrate_option": "Migrate products to another currency",
+            "no_migrate": "Do not migrate (disable manually)",
+            "no_migrate_warning": "You will need to edit each product manually to remove this currency.",
+            "migrate_and_deactivate": "Migrate & Deactivate",
+            "deactivate_anyway": "Deactivate anyway",
+            "confirm_deactivate": "Yes, deactivate",
+            "confirm_deactivate_title": "Deactivate {currency}?",
+            "confirm_deactivate_desc": "This currency will no longer be available for products or payments in your store."
         }
     }
 }

@@ -8,7 +8,8 @@
         "cancel": "Cancelar",
         "tabs": {
             "general": "General",
-            "currency": "Monedas",
+            "currency": "Fuentes de Tasas",
+            "active_currencies": "Monedas Activas",
             "store": "Tienda",
             "notifications": "Notificaciones"
         },
@@ -65,6 +66,29 @@
             "no_sources_available": "No hay fuentes disponibles en este momento",
             "dashboard_pairs_title": "Pares de Monedas en Dashboard",
             "dashboard_pairs_subtitle": "Selecciona qué pares de monedas mostrar en el bloque de Estado de Divisas en tu dashboard."
+        },
+        "active_currencies": {
+            "title": "Monedas Activas",
+            "subtitle": "Gestiona qué monedas están disponibles en tu tienda. Las monedas activas pueden usarse al crear productos y aceptar pagos.",
+            "active": "activas",
+            "inactive": "disponibles",
+            "active_section": "Monedas activas",
+            "available_section": "Disponibles para activar",
+            "activate": "Activar",
+            "deactivate": "Desactivar",
+            "status_active": "Activa",
+            "no_active": "No hay monedas activas. Activa al menos una para usar las funciones multi-moneda.",
+            "cuba_currency": "Cuba",
+            "products_affected_title": "Productos usando esta moneda",
+            "products_affected_desc": "{count} producto(s) están actualmente vendiéndose en {currency}. Elige qué hacer antes de desactivar.",
+            "migrate_option": "Migrar productos a otra moneda",
+            "no_migrate": "No migrar (deshabilitar manualmente)",
+            "no_migrate_warning": "Deberás editar cada producto manualmente para eliminar esta moneda.",
+            "migrate_and_deactivate": "Migrar y Desactivar",
+            "deactivate_anyway": "Desactivar de todos modos",
+            "confirm_deactivate": "Sí, desactivar",
+            "confirm_deactivate_title": "¿Desactivar {currency}?",
+            "confirm_deactivate_desc": "Esta moneda dejará de estar disponible para productos y pagos en tu tienda."
         }
     }
 }

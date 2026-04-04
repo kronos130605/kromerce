@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Repositories\Store\BusinessCurrencyConfigRepository;
+use App\Repositories\Store\StoreCurrencyConfigRepository;
 use App\Repositories\Product\ProductCategoryRepository;
 use App\Repositories\Product\ProductRepository;
 use App\Repositories\Product\ProductTagRepository;
@@ -14,14 +14,14 @@ class DashboardService
     private ProductRepository $productRepo;
     private ProductCategoryRepository $categoryRepo;
     private ProductTagRepository $tagRepo;
-    private BusinessCurrencyConfigRepository $configRepo;
+    private StoreCurrencyConfigRepository $configRepo;
     private CurrencyRateService $currencyService;
 
     public function __construct(
         ProductRepository $productRepo,
         ProductCategoryRepository $categoryRepo,
         ProductTagRepository $tagRepo,
-        BusinessCurrencyConfigRepository $configRepo,
+        StoreCurrencyConfigRepository $configRepo,
         CurrencyRateService $currencyService
     ) {
         $this->productRepo = $productRepo;

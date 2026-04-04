@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Business;
 
 use App\Helpers\TranslationHelper;
 use App\Http\Controllers\Controller;
-use App\Repositories\Store\BusinessCurrencyConfigRepository;
+use App\Repositories\Store\StoreCurrencyConfigRepository;
 use App\Repositories\Store\CurrencySourceRepository;
 use App\Services\CurrencyRateService;
 use Illuminate\Http\JsonResponse;
@@ -17,7 +17,7 @@ class CurrencySourceController extends Controller
 {
     public function __construct(
         private CurrencySourceRepository $sourceRepo,
-        private BusinessCurrencyConfigRepository $configRepo,
+        private StoreCurrencyConfigRepository $configRepo,
         private CurrencyRateService $currencyService
     ) {
         $this->middleware('role:business_owner');

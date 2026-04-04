@@ -2,22 +2,19 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class StoreCurrencyConfig extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, HasUuids;
 
     protected $keyType = 'string';
     public $incrementing = false;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
         'id',
         'store_id',
@@ -28,17 +25,16 @@ class StoreCurrencyConfig extends Model
         'rate_update_frequency',
         'last_rate_update',
         'historical_retention_years',
+        'preferred_cuba_source_id',
+        'preferred_foreign_source_id',
+        'dashboard_pairs',
     ];
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
     protected $casts = [
         'use_custom_rates' => 'boolean',
         'auto_update_rates' => 'boolean',
         'display_currencies' => 'array',
+        'dashboard_pairs' => 'array',
         'last_rate_update' => 'date',
         'historical_retention_years' => 'integer',
         'created_at' => 'datetime',
@@ -46,68 +42,49 @@ class StoreCurrencyConfig extends Model
         'deleted_at' => 'datetime',
     ];
 
-    /**
-     * Get the attributes that should be hidden for arrays.
-     *
-     * @var array<int, string>
-     */
     protected $hidden = [
         'deleted_at',
     ];
 
-    /**
-     * Get the store that owns the currency configuration.
-     */
-    public function store(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function store(): BelongsTo
     {
         return $this->belongsTo(Store::class);
     }
 
-    /**
-     * Scope a query to only include stores with custom rates.
-     */
+    public function preferredCubaSource(): BelongsTo
+    {
+        return $this->belongsTo(CurrencySource::class, 'preferred_cuba_source_id');
+    }
+
+    public function preferredForeignSource(): BelongsTo
+    {
+        return $this->belongsTo(CurrencySource::class, 'preferred_foreign_source_id');
+    }
+
     public function scopeWithCustomRates($query)
     {
         return $query->where('use_custom_rates', true);
     }
 
-    /**
-     * Scope a query to only include stores with auto update.
-     */
     public function scopeWithAutoUpdate($query)
     {
         return $query->where('auto_update_rates', true);
     }
 
-    /**
-     * Get the display currencies as array.
-     */
     public function getDisplayCurrenciesAttribute(): array
     {
-        return $this->display_currencies ?? [];
+        return $this->attributes['display_currencies']
+            ? json_decode($this->attributes['display_currencies'], true) ?? []
+            : [];
     }
 
-    /**
-     * Check if the store uses custom rates.
-     */
     public function usesCustomRates(): bool
     {
         return $this->use_custom_rates;
     }
 
-    /**
-     * Check if the store has auto update enabled.
-     */
     public function hasAutoUpdate(): bool
     {
         return $this->auto_update_rates;
-    }
-
-    /**
-     * Get the default currency.
-     */
-    public function getDefaultCurrencyAttribute(): string
-    {
-        return $this->default_currency ?? 'USD';
     }
 }

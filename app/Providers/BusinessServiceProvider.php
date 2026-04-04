@@ -3,8 +3,12 @@
 namespace App\Providers;
 
 use App\Factories\RepositoryFactory;
-use App\Models\BusinessCurrencyConfig;
 use App\Models\CurrencyRateBusiness;
+use App\Models\StoreActiveCurrency;
+use App\Models\ProductSaleCurrency;
+use App\Repositories\Store\StoreActiveCurrencyRepository;
+use App\Repositories\Product\ProductSaleCurrencyRepository;
+use App\Services\StoreCurrencyService;
 use App\Models\CurrencyRateGlobal;
 use App\Models\CurrencyRateUpdate;
 use App\Models\Product;
@@ -15,13 +19,13 @@ use App\Models\StoreContact;
 use App\Models\StoreCurrencyConfig;
 use App\Models\StorePaymentMethod;
 use App\Models\User;
-use App\Repositories\Store\BusinessCurrencyConfigRepository;
 use App\Repositories\Currency\CurrencyRateBusinessRepository;
 use App\Repositories\Currency\CurrencyRateGlobalRepository;
 use App\Repositories\Currency\CurrencyRateUpdateRepository;
 use App\Repositories\Product\ProductCategoryRepository;
 use App\Repositories\Product\ProductRepository;
 use App\Repositories\Product\ProductTagRepository;
+use App\Repositories\Store\CurrencySourceRepository;
 use App\Repositories\Store\StoreBrandingRepository;
 use App\Repositories\Store\StoreConfigRepository;
 use App\Repositories\Store\StoreContactRepository;
@@ -83,8 +87,8 @@ class BusinessServiceProvider extends ServiceProvider
     private function registerRepositories(): void
     {
         // Currency repositories
-        $this->app->singleton(BusinessCurrencyConfigRepository::class,
-            fn() => new BusinessCurrencyConfigRepository(new BusinessCurrencyConfig()));
+        $this->app->singleton(StoreCurrencyConfigRepository::class,
+            fn() => new StoreCurrencyConfigRepository(new StoreCurrencyConfig()));
 
         $this->app->singleton(CurrencyRateGlobalRepository::class,
             fn() => new CurrencyRateGlobalRepository(new CurrencyRateGlobal()));
@@ -94,6 +98,12 @@ class BusinessServiceProvider extends ServiceProvider
 
         $this->app->singleton(CurrencyRateUpdateRepository::class,
             fn() => new CurrencyRateUpdateRepository(new CurrencyRateUpdate()));
+
+        $this->app->singleton(StoreActiveCurrencyRepository::class,
+            fn() => new StoreActiveCurrencyRepository(new StoreActiveCurrency()));
+
+        $this->app->singleton(ProductSaleCurrencyRepository::class,
+            fn() => new ProductSaleCurrencyRepository(new ProductSaleCurrency()));
 
         // Product repositories
         $this->app->singleton(ProductRepository::class,
@@ -117,9 +127,6 @@ class BusinessServiceProvider extends ServiceProvider
 
         $this->app->singleton(StorePaymentMethodRepository::class,
             fn() => new StorePaymentMethodRepository(new StorePaymentMethod()));
-
-        $this->app->singleton(StoreCurrencyConfigRepository::class,
-            fn() => new StoreCurrencyConfigRepository(new StoreCurrencyConfig()));
 
         $this->app->singleton(StoreStatisticsRepository::class,
             fn() => new StoreStatisticsRepository(new Store()));
@@ -146,9 +153,9 @@ class BusinessServiceProvider extends ServiceProvider
         // Register Currency Rate Service with repositories
         $this->app->singleton(CurrencyRateService::class, function ($app) {
             return new CurrencyRateService(
-                $app->make(BusinessCurrencyConfigRepository::class),
+                $app->make(StoreCurrencyConfigRepository::class),
+                $app->make(CurrencySourceRepository::class),
                 $app->make(CurrencyRateGlobalRepository::class),
-                $app->make(CurrencyRateBusinessRepository::class),
                 $app->make(CurrencyRateUpdateRepository::class)
             );
         });
@@ -156,7 +163,7 @@ class BusinessServiceProvider extends ServiceProvider
         // Register Product Pricing Service with repositories
         $this->app->singleton(ProductPricingService::class, function ($app) {
             return new ProductPricingService(
-                $app->make(BusinessCurrencyConfigRepository::class),
+                $app->make(StoreCurrencyConfigRepository::class),
                 $app->make(ProductRepository::class),
                 $app->make(CurrencyRateService::class)
             );
@@ -168,7 +175,7 @@ class BusinessServiceProvider extends ServiceProvider
                 $app->make(ProductRepository::class),
                 $app->make(ProductCategoryRepository::class),
                 $app->make(ProductTagRepository::class),
-                $app->make(BusinessCurrencyConfigRepository::class),
+                $app->make(StoreCurrencyConfigRepository::class),
                 $app->make(CurrencyRateService::class)
             );
         });
@@ -180,6 +187,7 @@ class BusinessServiceProvider extends ServiceProvider
                 $app->make(StoreContactRepository::class),
                 $app->make(StorePaymentMethodRepository::class),
                 $app->make(StoreCurrencyConfigRepository::class),
+                $app->make(StoreActiveCurrencyRepository::class),
                 $app->make(StoreStatisticsRepository::class),
                 $app->make(UserStoreRepository::class)
             );
@@ -198,7 +206,9 @@ class BusinessServiceProvider extends ServiceProvider
             return new DashboardRoutingService(
                 $app->make(StoreUserService::class),
                 $app->make(RoleService::class),
-                $app->make(StoreStatisticsRepository::class)
+                $app->make(StoreStatisticsRepository::class),
+                $app->make(CurrencyRateGlobalRepository::class),
+                $app->make(StoreCurrencyConfigRepository::class)
             );
         });
 
@@ -216,11 +226,24 @@ class BusinessServiceProvider extends ServiceProvider
             );
         });
 
+        // Register Store Currency Service
+        $this->app->singleton(StoreCurrencyService::class, function ($app) {
+            return new StoreCurrencyService(
+                $app->make(StoreActiveCurrencyRepository::class),
+                $app->make(StoreCurrencyConfigRepository::class),
+                $app->make(ProductRepository::class),
+                $app->make(ProductSaleCurrencyRepository::class),
+                $app->make(CurrencyRateService::class)
+            );
+        });
+
         // Register Product Service
         $this->app->singleton(ProductService::class, function ($app) {
             return new ProductService(
                 $app->make(ProductRepository::class),
-                $app->make(ProductCategoryRepository::class)
+                $app->make(ProductCategoryRepository::class),
+                $app->make(StoreCurrencyService::class),
+                $app->make(ProductSaleCurrencyRepository::class)
             );
         });
 
@@ -249,7 +272,7 @@ class BusinessServiceProvider extends ServiceProvider
     {
         // Store relationship with currency config
         \App\Models\Store::resolveRelationUsing('currencyConfig', function ($store) {
-            return $store->hasOne(BusinessCurrencyConfig::class);
+            return $store->hasOne(StoreCurrencyConfig::class);
         });
 
         // User relationship with stores

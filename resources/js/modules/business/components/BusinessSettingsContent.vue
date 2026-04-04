@@ -55,7 +55,7 @@
             <div class="flex-1 min-w-0">
                 <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
 
-                    <!-- Currency Tab -->
+                    <!-- Currency Rate Sources Tab -->
                     <CurrencyRateSourceTab
                         v-if="activeTab === 'currency'"
                         :cup-sources="currencySettings.cup_sources"
@@ -65,6 +65,9 @@
                         :dashboard-pairs="currencySettings.dashboard_pairs"
                         @updated="onCurrencyUpdated"
                     />
+
+                    <!-- Active Currencies Tab -->
+                    <ActiveCurrenciesTab v-else-if="activeTab === 'active_currencies'" />
 
                     <!-- Placeholder tabs -->
                     <PlaceholderTab
@@ -85,6 +88,7 @@ import { ref, computed, defineComponent, h } from 'vue';
 import { usePage } from '@inertiajs/vue3';
 import { useTranslations } from '@/composables/useTranslations';
 import CurrencyRateSourceTab from '@/modules/business/components/settings/CurrencyRateSourceTab.vue';
+import ActiveCurrenciesTab from '@/modules/business/components/settings/ActiveCurrenciesTab.vue';
 
 const page = usePage();
 const { t } = useTranslations();
@@ -126,6 +130,12 @@ const IconNotifications = defineComponent({
     ])
 });
 
+const IconActiveCurrencies = defineComponent({
+    render: () => h('svg', { fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [
+        h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z' })
+    ])
+});
+
 // Placeholder tab component
 const PlaceholderTab = defineComponent({
     props: { title: String, subtitle: String },
@@ -159,6 +169,13 @@ const tabs = computed(() => [
         icon: IconCurrency,
         titleKey: 'settings.currency.title',
         subtitleKey: 'settings.currency.subtitle',
+    },
+    {
+        key: 'active_currencies',
+        label: t('settings.tabs.active_currencies'),
+        icon: IconActiveCurrencies,
+        titleKey: 'settings.active_currencies.title',
+        subtitleKey: 'settings.active_currencies.subtitle',
     },
     {
         key: 'store',

@@ -4,8 +4,9 @@ namespace App\Factories;
 
 use App\Repositories\Product\ProductCategoryRepository;
 use App\Repositories\Product\ProductRepository;
+use App\Repositories\Product\ProductSaleCurrencyRepository;
 use App\Repositories\Product\ProductTagRepository;
-use App\Repositories\Store\BusinessCurrencyConfigRepository;
+use App\Repositories\Store\StoreActiveCurrencyRepository;
 use App\Repositories\Store\StoreBrandingRepository;
 use App\Repositories\Store\StoreConfigRepository;
 use App\Repositories\Store\StoreContactRepository;
@@ -73,6 +74,16 @@ class RepositoryFactory
         return app()->make(StoreCurrencyConfigRepository::class);
     }
 
+    public function storeActiveCurrencyRepository(): StoreActiveCurrencyRepository
+    {
+        return app()->make(StoreActiveCurrencyRepository::class);
+    }
+
+    public function productSaleCurrencyRepository(): ProductSaleCurrencyRepository
+    {
+        return app()->make(ProductSaleCurrencyRepository::class);
+    }
+
     public function storeStatisticsRepository(): StoreStatisticsRepository
     {
         return app()->make(StoreStatisticsRepository::class);
@@ -81,11 +92,6 @@ class RepositoryFactory
     public function storeConfigRepository(): StoreConfigRepository
     {
         return app()->make(StoreConfigRepository::class);
-    }
-
-    public function businessCurrencyConfigRepository(): BusinessCurrencyConfigRepository
-    {
-        return app()->make(BusinessCurrencyConfigRepository::class);
     }
 
     public function userRoleRepository(): UserRoleRepository
