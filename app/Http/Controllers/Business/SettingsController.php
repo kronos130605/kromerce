@@ -60,13 +60,14 @@ class SettingsController extends Controller
                 'translations' => TranslationHelper::forPreset('settings'),
                 'settings'     => [
                     'currency' => [
-                        'cup_sources'               => $cupSources,
-                        'foreign_sources'           => $foreignSources,
-                        'preferred_cuba_source_id'  => $config->preferred_cuba_source_id,
-                        'preferred_foreign_source_id' => $config->preferred_foreign_source_id,
-                        'default_currency'          => $config->default_currency,
-                        'display_currencies'        => $config->display_currencies ?? [],
-                        'auto_update_rates'       => $config->auto_update_rates,
+                        'cup_sources'                => $cupSources,
+                        'foreign_sources'            => $foreignSources,
+                        'preferred_cuba_source_id'   => $config->preferred_cuba_source_id,
+                        'preferred_foreign_source_id'=> $config->preferred_foreign_source_id,
+                        'default_currency'           => $config->default_currency,
+                        'display_currencies'         => $config->display_currencies ?? [],
+                        'dashboard_pairs'            => $config->dashboard_pairs ?? [],
+                        'auto_update_rates'          => $config->auto_update_rates,
                     ],
                 ],
             ]);
@@ -88,7 +89,10 @@ class SettingsController extends Controller
             $validated = $request->validate([
                 'preferred_cuba_source_id'    => 'nullable|uuid|exists:currency_sources,id',
                 'preferred_foreign_source_id' => 'nullable|uuid|exists:currency_sources,id',
-                'type'                        => 'required|in:cup,foreign',
+                'dashboard_pairs'             => 'nullable|array',
+                'dashboard_pairs.*.from'      => 'required_with:dashboard_pairs|string|max:10',
+                'dashboard_pairs.*.to'        => 'required_with:dashboard_pairs|string|max:10',
+                'type'                        => 'required|in:cup,foreign,dashboard_pairs',
             ]);
 
             $updateData = [];
@@ -101,11 +105,15 @@ class SettingsController extends Controller
                 $updateData['preferred_foreign_source_id'] = $validated['preferred_foreign_source_id'];
             }
 
+            if ($validated['type'] === 'dashboard_pairs' && isset($validated['dashboard_pairs'])) {
+                $updateData['dashboard_pairs'] = $validated['dashboard_pairs'];
+            }
+
             if (!empty($updateData)) {
                 $this->configRepo->updateBy(['store_id' => $store->id], $updateData);
             }
 
-            return $this->success([], 'Currency source updated');
+            return $this->success([], 'Currency config updated');
 
         } catch (\Exception $e) {
             Log::error('SettingsController::updateCurrencySource', ['error' => $e->getMessage()]);

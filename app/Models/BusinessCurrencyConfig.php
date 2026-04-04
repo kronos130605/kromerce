@@ -28,10 +28,12 @@ class BusinessCurrencyConfig extends Model
         'historical_retention_years',
         'preferred_cuba_source_id',
         'preferred_foreign_source_id',
+        'dashboard_pairs',
     ];
 
     protected $casts = [
         'display_currencies' => 'array',
+        'dashboard_pairs' => 'array',
         'use_custom_rates' => 'boolean',
         'auto_update_rates' => 'boolean',
         'last_rate_update' => 'date',

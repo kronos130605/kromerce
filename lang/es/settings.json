@@ -62,7 +62,9 @@
             "bcc_description": "Tasa oficial del Banco Central de Cuba. Precio fijado por el gobierno.",
             "openexchange_description": "Fuente global de tasas de cambio. Ideal para conversiones entre divisas internacionales como USD, EUR, GBP, etc.",
             "exchangerate_api_description": "API alternativa gratuita para tasas de cambio internacionales. 1000 peticiones/mes en plan gratuito.",
-            "no_sources_available": "No hay fuentes disponibles en este momento"
+            "no_sources_available": "No hay fuentes disponibles en este momento",
+            "dashboard_pairs_title": "Pares de Monedas en Dashboard",
+            "dashboard_pairs_subtitle": "Selecciona qué pares de monedas mostrar en el bloque de Estado de Divisas en tu dashboard."
         }
     }
 }

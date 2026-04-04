@@ -11,23 +11,20 @@ const props = defineProps({
 
 const { t } = useTranslations();
 
-// Mock data for now
-const mockCurrencyStatus = computed(() => ({
-    baseCurrency: 'USD',
-    supportedCurrencies: ['USD', 'MXN', 'EUR', 'GBP'],
-    lastUpdated: new Date().toISOString(),
-    rates: {
-        USD: 1.00,
-        MXN: 17.50,
-        EUR: 0.85,
-        GBP: 0.73
-    }
-}));
+const hasData = computed(() => props.currencyStatus?.rates?.length > 0);
 
-const currencyData = computed(() => ({
-    ...mockCurrencyStatus.value,
-    ...props.currencyStatus
-}));
+const rates = computed(() => props.currencyStatus?.rates ?? []);
+
+const lastUpdated = computed(() => props.currencyStatus?.last_updated ?? null);
+
+const sourceLabel = computed(() => {
+    const s = props.currencyStatus;
+    if (!s) return null;
+    const parts = [];
+    if (s.cuba_source) parts.push(s.cuba_source);
+    if (s.foreign_source && s.foreign_source !== s.cuba_source) parts.push(s.foreign_source);
+    return parts.join(' · ') || null;
+});
 </script>
 
 <template>
@@ -44,23 +41,28 @@ const currencyData = computed(() => ({
             </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div v-for="currency in currencyData.supportedCurrencies" :key="currency"
+        <!-- No data state -->
+        <div v-if="!hasData" class="py-8 text-center">
+            <p class="text-sm text-gray-400 dark:text-gray-500">{{ t('currency.no_rates_available') }}</p>
+        </div>
+
+        <!-- Rate pairs grid -->
+        <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div v-for="item in rates" :key="`${item.from}-${item.to}`"
                  class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
                 <div class="flex items-center justify-between mb-2">
-                    <span class="text-sm font-medium text-gray-600 dark:text-gray-300">
-                        {{ currency }}
+                    <span class="text-sm font-semibold text-gray-700 dark:text-gray-200">
+                        {{ item.from }} → {{ item.to }}
                     </span>
-                    <div v-if="currency === currencyData.baseCurrency"
-                         class="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded-full text-xs font-medium">
-                        {{ t('currency.base') }}
-                    </div>
+                    <span class="text-xs px-1.5 py-0.5 bg-gray-200 dark:bg-gray-600 text-gray-500 dark:text-gray-400 rounded">
+                        {{ item.source }}
+                    </span>
                 </div>
-                <div class="text-xl font-bold text-gray-900 dark:text-white">
-                    {{ currencyData.rates[currency]?.toFixed(2) || '0.00' }}
+                <div class="text-2xl font-bold text-gray-900 dark:text-white">
+                    {{ item.rate.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 4 }) }}
                 </div>
-                <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    {{ t('currency.per_usd') }}
+                <div class="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                    {{ item.effective_date }}
                 </div>
             </div>
         </div>
@@ -68,12 +70,10 @@ const currencyData = computed(() => ({
         <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-600">
             <div class="flex items-center justify-between text-sm">
                 <span class="text-gray-500 dark:text-gray-400">
-                    {{ t('currency.last_updated') }}:
-                    {{ new Date(currencyData.lastUpdated).toLocaleString() }}
+                    <template v-if="sourceLabel">{{ sourceLabel }} · </template>
+                    <template v-if="lastUpdated">{{ t('currency.last_updated') }}: {{ new Date(lastUpdated).toLocaleDateString() }}</template>
+                    <template v-else>{{ t('currency.no_rates_available') }}</template>
                 </span>
-                <button class="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium">
-                    {{ t('currency.refresh_rates') }}
-                </button>
             </div>
         </div>
     </div>

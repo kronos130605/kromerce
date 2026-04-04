@@ -12,7 +12,7 @@ use Inertia\Response;
 class DashboardController extends Controller
 {
     public function __construct(
-        private DashboardRoutingService $dashboardRoutingService
+        private DashboardRoutingService $dashboardRoutingService,
     ) {}
 
     /**
@@ -33,8 +33,8 @@ class DashboardController extends Controller
             // For business users, use the new SPA structure
             if ($dashboardView === 'modules/dashboard/pages/DashboardBusiness') {
                 return Inertia::render('Business/Index', array_merge($dashboardData, [
-                    'activeTab' => 'overview',
-                    'translations' => TranslationHelper::forPreset('dashboard'),
+                    'activeTab'      => 'overview',
+                    'translations'   => TranslationHelper::forPreset('dashboard'),
                 ]));
             }
 
@@ -50,7 +50,6 @@ class DashboardController extends Controller
                 'trace' => $e->getTraceAsString(),
             ]);
 
-            // Return error page with Inertia instead of JsonResponse
             return Inertia::render('modules/dashboard/pages/Error', [
                 'error' => 'Failed to load dashboard',
                 'message' => $e->getMessage(),

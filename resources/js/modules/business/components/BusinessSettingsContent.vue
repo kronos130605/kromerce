@@ -62,6 +62,7 @@
                         :foreign-sources="currencySettings.foreign_sources"
                         :preferred-cuba-source-id="currencySettings.preferred_cuba_source_id"
                         :preferred-foreign-source-id="currencySettings.preferred_foreign_source_id"
+                        :dashboard-pairs="currencySettings.dashboard_pairs"
                         @updated="onCurrencyUpdated"
                     />
 

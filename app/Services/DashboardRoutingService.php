@@ -4,6 +4,8 @@ namespace App\Services;
 
 use App\Models\Store;
 use App\Models\User;
+use App\Repositories\Currency\CurrencyRateGlobalRepository;
+use App\Repositories\Store\BusinessCurrencyConfigRepository;
 use App\Repositories\Store\StoreStatisticsRepository;
 use Illuminate\Support\Facades\Log;
 
@@ -12,7 +14,9 @@ class DashboardRoutingService
     public function __construct(
         private StoreUserService $storeUserService,
         private RoleService $roleService,
-        private StoreStatisticsRepository $statisticsRepo
+        private StoreStatisticsRepository $statisticsRepo,
+        private CurrencyRateGlobalRepository $rateRepo,
+        private BusinessCurrencyConfigRepository $configRepo,
     ) {}
 
     /**
@@ -160,6 +164,7 @@ class DashboardRoutingService
             // Add store-specific data if store exists
             if ($store) {
                 $data['statistics'] = $this->getStoreStatistics($store);
+                $data['currencyStatus'] = $this->getCurrencyStatusForStore($store->id);
             }
 
             // Add view-specific data
@@ -263,6 +268,80 @@ class DashboardRoutingService
                 'error' => $e->getMessage(),
             ]);
 
+            return [];
+        }
+    }
+
+    /**
+     * Get real-time currency status for the store dashboard.
+     */
+    private function getCurrencyStatusForStore(string $storeId): array
+    {
+        try {
+            $config = $this->configRepo->getFirstBy(['store_id' => $storeId]);
+
+            if (!$config) {
+                return [];
+            }
+
+            // Load preferred source codes via relationships
+            $cubaSource   = $config->preferredCubaSource;
+            $foreignSource = $config->preferredForeignSource;
+
+            // Use source name (not code) since currency_rates_global stores full names
+            $cubaSourceName    = $cubaSource?->name;
+            $foreignSourceName = $foreignSource?->name;
+
+            // Get pairs to display, or use default pairs
+            $pairs = $config->dashboard_pairs ?? [
+                ['from' => 'USD', 'to' => 'CUP'],
+                ['from' => 'EUR', 'to' => 'CUP'],
+                ['from' => 'MLC', 'to' => 'CUP'],
+                ['from' => 'USD', 'to' => 'EUR'],
+            ];
+
+            $rates = [];
+            $lastUpdated = null;
+
+            foreach ($pairs as $pair) {
+                $from = strtoupper($pair['from']);
+                $to   = strtoupper($pair['to']);
+
+                // Determine which source to use for this pair
+                $sourceName = ($to === 'CUP' || $from === 'CUP') ? $cubaSourceName : $foreignSourceName;
+
+                $rate = $sourceName
+                    ? $this->rateRepo->getLatestRateBySource($from, $to, $sourceName)
+                    : $this->rateRepo->getLatestRate($from, $to);
+
+                if ($rate) {
+                    $rates[] = [
+                        'from'         => $from,
+                        'to'           => $to,
+                        'rate'         => (float) $rate->rate,
+                        'source'       => $rate->source,
+                        'effective_date' => $rate->effective_date?->toDateString(),
+                    ];
+
+                    if (!$lastUpdated || $rate->effective_date > $lastUpdated) {
+                        $lastUpdated = $rate->effective_date;
+                    }
+                }
+            }
+
+            return [
+                'rates'        => $rates,
+                'last_updated' => $lastUpdated?->toDateTimeString(),
+                'cuba_source'  => $cubaSource?->name,
+                'foreign_source' => $foreignSource?->name,
+                'configured_pairs' => $pairs,
+            ];
+
+        } catch (\Exception $e) {
+            Log::error('Failed to get currency status for store', [
+                'store_id' => $storeId,
+                'error'    => $e->getMessage(),
+            ]);
             return [];
         }
     }

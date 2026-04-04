@@ -1,5 +1,11 @@
 {
     "currency": {
-
+        "currency_status": "Currency Status",
+        "live_rates": "Live rates",
+        "last_updated": "Last updated",
+        "no_rates_available": "No rates available. Run the update command to fetch rates.",
+        "base": "Base",
+        "per_usd": "per USD",
+        "refresh_rates": "Refresh"
     }
 }

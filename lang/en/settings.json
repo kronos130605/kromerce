@@ -62,7 +62,9 @@
             "bcc_description": "Official rate from Cuba's Central Bank. Government-set price.",
             "openexchange_description": "Global exchange rate source. Ideal for conversions between international currencies like USD, EUR, GBP, etc.",
             "exchangerate_api_description": "Free alternative API for international exchange rates. 1000 requests/month on free plan.",
-            "no_sources_available": "No sources available at this time"
+            "no_sources_available": "No sources available at this time",
+            "dashboard_pairs_title": "Dashboard Currency Pairs",
+            "dashboard_pairs_subtitle": "Select which currency pairs to display in the Currency Status block on your dashboard."
         }
     }
 }

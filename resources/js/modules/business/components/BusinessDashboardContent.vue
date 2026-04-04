@@ -20,6 +20,9 @@ const { t } = useTranslations();
 // Dashboard data from backend
 const dashboardData = computed(() => page.props.dashboard_data || {});
 
+// Currency status is passed as top-level prop from DashboardController
+const currencyStatus = computed(() => page.props.currencyStatus || {});
+
 // Tab options
 const tabOptions = computed(() => [
     { key: 'overview', label: t('dashboard.overview'), href: '/dashboard' },
@@ -74,7 +77,7 @@ const formatPrice = (price, currency) => {
 
             <!-- Currency Status -->
             <div>
-                <BusinessCurrencyStatus :currency-status="dashboardData.currencyStatus || {}" />
+                <BusinessCurrencyStatus :currency-status="currencyStatus || {}" />
             </div>
         </div>
 

@@ -5,6 +5,7 @@
         "per_usd": "por USD",
         "live_rates": "Tasas en Vivo",
         "last_updated": "Última actualización",
-        "refresh_rates": "Actualizar tasas"
+        "refresh_rates": "Actualizar tasas",
+        "no_rates_available": "No hay tasas disponibles. Ejecuta el comando de actualización para obtener tasas."
     }
 }
