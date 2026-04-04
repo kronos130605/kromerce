@@ -30,9 +30,15 @@
         "currency": {
             "title": "Currency Settings",
             "subtitle": "Manage currencies and exchange rate sources",
+            "cup_section_title": "Sources for CUP (Cuba)",
+            "cup_section_subtitle": "Select the exchange rate provider for the Cuban Peso (CUP). These sources are specific to Cuba.",
+            "foreign_section_title": "Sources for Foreign Currencies",
+            "foreign_section_subtitle": "Select the provider for international currency conversions (USD, EUR, etc.).",
             "cup_rate_source_title": "CUP Rate Source",
             "cup_rate_source_subtitle": "Select the exchange rate provider for the Cuban Peso (CUP). This applies to all products that accept CUP payments.",
             "cup_rate_source_label": "CUP Rate Provider",
+            "no_cup_sources": "No sources available for CUP",
+            "no_foreign_sources": "No sources available for foreign currencies",
             "source_type_api": "REST API",
             "source_type_web": "Web Scraping",
             "global_default": "Global default",
@@ -54,6 +60,8 @@
             "info_box_body": "Rates are updated daily. When a customer purchases in CUP, the system converts the product's base price using the current rate from the selected source.",
             "eltoque_description": "Cuban informal market rate. Reflects the real buy/sell price in the market.",
             "bcc_description": "Official rate from Cuba's Central Bank. Government-set price.",
+            "openexchange_description": "Global exchange rate source. Ideal for conversions between international currencies like USD, EUR, GBP, etc.",
+            "exchangerate_api_description": "Free alternative API for international exchange rates. 1000 requests/month on free plan.",
             "no_sources_available": "No sources available at this time"
         }
     }

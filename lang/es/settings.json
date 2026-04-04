@@ -30,9 +30,15 @@
         "currency": {
             "title": "Configuración de Monedas",
             "subtitle": "Gestiona las monedas y fuentes de tasas de cambio",
+            "cup_section_title": "Fuentes para CUP (Cuba)",
+            "cup_section_subtitle": "Selecciona el proveedor de tasas de cambio para el Peso Cubano (CUP). Estas fuentes son específicas para Cuba.",
+            "foreign_section_title": "Fuentes para Divisas Extranjeras",
+            "foreign_section_subtitle": "Selecciona el proveedor para conversiones entre divisas internacionales (USD, EUR, etc.).",
             "cup_rate_source_title": "Fuente de Tasas CUP",
             "cup_rate_source_subtitle": "Selecciona el proveedor de tasas de cambio para el Peso Cubano (CUP). Esto aplica a todos los productos que acepten pagos en CUP.",
             "cup_rate_source_label": "Proveedor de Tasa CUP",
+            "no_cup_sources": "No hay fuentes disponibles para CUP",
+            "no_foreign_sources": "No hay fuentes disponibles para divisas extranjeras",
             "source_type_api": "API REST",
             "source_type_web": "Web Scraping",
             "global_default": "Predeterminado global",
@@ -54,6 +60,8 @@
             "info_box_body": "Las tasas se actualizan diariamente. Cuando un cliente compra en CUP, el sistema convierte el precio base del producto usando la tasa vigente de la fuente seleccionada.",
             "eltoque_description": "Tasa del mercado informal cubano. Refleja el precio real de compra/venta en el mercado.",
             "bcc_description": "Tasa oficial del Banco Central de Cuba. Precio fijado por el gobierno.",
+            "openexchange_description": "Fuente global de tasas de cambio. Ideal para conversiones entre divisas internacionales como USD, EUR, GBP, etc.",
+            "exchangerate_api_description": "API alternativa gratuita para tasas de cambio internacionales. 1000 peticiones/mes en plan gratuito.",
             "no_sources_available": "No hay fuentes disponibles en este momento"
         }
     }

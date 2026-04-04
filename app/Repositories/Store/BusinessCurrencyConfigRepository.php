@@ -11,7 +11,7 @@ class BusinessCurrencyConfigRepository extends BaseRepository
     protected array $allowedFields = [
         'store_id', 'default_currency', 'display_currencies', 'use_custom_rates',
         'auto_update_rates', 'rate_update_frequency', 'last_rate_update',
-        'historical_retention_years', 'preferred_cuba_source_id',
+        'historical_retention_years', 'preferred_cuba_source_id', 'preferred_foreign_source_id',
     ];
 
     public function __construct(BusinessCurrencyConfig $model)

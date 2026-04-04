@@ -27,6 +27,7 @@ class BusinessCurrencyConfig extends Model
         'last_rate_update',
         'historical_retention_years',
         'preferred_cuba_source_id',
+        'preferred_foreign_source_id',
     ];
 
     protected $casts = [
@@ -51,6 +52,14 @@ class BusinessCurrencyConfig extends Model
     public function preferredCubaSource(): BelongsTo
     {
         return $this->belongsTo(CurrencySource::class, 'preferred_cuba_source_id');
+    }
+
+    /**
+     * Get the foreign currency source preference for this store.
+     */
+    public function preferredForeignSource(): BelongsTo
+    {
+        return $this->belongsTo(CurrencySource::class, 'preferred_foreign_source_id');
     }
 
     /**

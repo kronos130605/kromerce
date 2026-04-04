@@ -44,7 +44,7 @@ class UpdateCurrencyRates extends Command
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            
+
             return self::FAILURE;
         }
     }

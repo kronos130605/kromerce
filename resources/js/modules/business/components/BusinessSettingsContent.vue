@@ -58,8 +58,10 @@
                     <!-- Currency Tab -->
                     <CurrencyRateSourceTab
                         v-if="activeTab === 'currency'"
-                        :sources="currencySettings.sources"
+                        :cup-sources="currencySettings.cup_sources"
+                        :foreign-sources="currencySettings.foreign_sources"
                         :preferred-cuba-source-id="currencySettings.preferred_cuba_source_id"
+                        :preferred-foreign-source-id="currencySettings.preferred_foreign_source_id"
                         @updated="onCurrencyUpdated"
                     />
 
@@ -89,8 +91,10 @@ const { t } = useTranslations();
 const activeTab = ref('currency');
 
 const currencySettings = computed(() => page.props.settings?.currency ?? {
-    sources: [],
+    cup_sources: [],
+    foreign_sources: [],
     preferred_cuba_source_id: null,
+    preferred_foreign_source_id: null,
     default_currency: 'USD',
     display_currencies: [],
     auto_update_rates: false,
@@ -175,7 +179,11 @@ const currentTab = computed(() => tabs.value.find(tab => tab.key === activeTab.v
 
 const onCurrencyUpdated = (data) => {
     if (page.props.settings?.currency) {
-        page.props.settings.currency.preferred_cuba_source_id = data.preferred_cuba_source_id;
+        if (data.type === 'cup') {
+            page.props.settings.currency.preferred_cuba_source_id = data.preferred_cuba_source_id;
+        } else if (data.type === 'foreign') {
+            page.props.settings.currency.preferred_foreign_source_id = data.preferred_foreign_source_id;
+        }
     }
 };
 </script>

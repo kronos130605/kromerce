@@ -19,26 +19,26 @@ class CurrencySourceSeederUpdated extends Seeder
     {
         $sources = [
             // Tier 1: International Global Source
-            // Used for all conversions NOT involving CUP/CLA
+            // ExchangeRate-API - Unico proveedor internacional activo
             [
-                'name' => 'OpenExchangeRates - Global',
-                'code' => 'openexchange-global',
+                'name' => 'ExchangeRate-API - Global',
+                'code' => 'exchangerate-api',
                 'type' => 'api',
                 'provider_class' => 'App\Services\Currency\Providers\ApiCurrencyProvider',
                 'is_active' => true,
                 'is_global_default' => true,
-                'base_url' => 'https://openexchangerates.org/api',
-                'auth_type' => 'api_key',
+                'base_url' => 'https://open.er-api.com/v6',
+                'auth_type' => 'none',
+                'supported_currencies' => ['USD', 'EUR', 'GBP', 'CAD', 'MXN', 'BRL'],
                 'config' => [
-                    'rates_endpoint' => '/latest.json',
-                    'test_endpoint' => '/latest.json',
-                    'response_format' => 'openexchange',
-                    'api_key_location' => 'query',
-                    'api_key_name' => 'app_id',
+                    'rates_endpoint' => '/latest/{base_currency}',
+                    'test_endpoint' => '/latest/USD',
+                    'response_format' => 'exchangerate-api',
                     'base_currency' => 'USD',
-                    'currencies_supported' => ['USD', 'EUR', 'GBP', 'JPY', 'CAD', 'AUD', 'CHF', 'CNY', 'INR', 'COP', 'MXN', 'BRL', 'ARS'],
+                    'currencies_supported' => ['USD', 'EUR', 'GBP', 'CAD', 'MXN', 'BRL'],
                     'scope' => 'international',
-                    'timeout' => 30,
+                    'timeout' => 15,
+                    'free_tier_limit' => 1000,
                 ],
                 'default_credentials' => null,
             ],
@@ -53,6 +53,7 @@ class CurrencySourceSeederUpdated extends Seeder
                 'is_global_default' => false,
                 'base_url' => 'https://api.bc.gob.cu',
                 'auth_type' => 'none',
+                'supported_currencies' => ['CUP', 'USD', 'EUR', 'MLC'],
                 'config' => [
                     'rates_endpoint' => '/v1/tasas-de-cambio/activas',
                     'historical_endpoint' => '/v1/tasas-de-cambio/activas-por-fecha',
@@ -77,6 +78,7 @@ class CurrencySourceSeederUpdated extends Seeder
                 'is_global_default' => false,
                 'base_url' => 'https://eltoque.com/tasas-de-cambio-cuba/mercado-informal',
                 'auth_type' => 'none',
+                'supported_currencies' => ['CUP', 'USD', 'EUR', 'MLC'],
                 'config' => [
                     'selectors' => [
                         'rates_container' => '.exchange-rates-container',
@@ -92,6 +94,33 @@ class CurrencySourceSeederUpdated extends Seeder
                     'cla_equals_usd' => true,
                 ],
                 'default_credentials' => null,
+            ],
+
+            // Tier 4: OpenExchangeRates - Desactivado (no soporta bases distintas a USD)
+            [
+                'name' => 'OpenExchangeRates - Global (Inactivo)',
+                'code' => 'openexchange-global',
+                'type' => 'api',
+                'provider_class' => 'App\Services\Currency\Providers\ApiCurrencyProvider',
+                'is_active' => false,
+                'is_global_default' => false,
+                'base_url' => 'https://openexchangerates.org/api',
+                'auth_type' => 'api_key',
+                'supported_currencies' => ['USD', 'EUR', 'GBP', 'CAD', 'MXN', 'BRL'],
+                'config' => [
+                    'rates_endpoint' => '/latest.json?app_id={api_key}&base={base_currency}',
+                    'test_endpoint' => '/latest.json',
+                    'response_format' => 'openexchange',
+                    'api_key_location' => 'query',
+                    'api_key_name' => 'app_id',
+                    'base_currency' => 'USD',
+                    'currencies_supported' => ['USD', 'EUR', 'GBP', 'CAD', 'MXN', 'BRL'],
+                    'scope' => 'international',
+                    'timeout' => 30,
+                ],
+                'default_credentials' => [
+                    'api_key' => 'cf63e3c7798e41009f2f0baef3d0ecfd',
+                ],
             ],
         ];
 
@@ -117,9 +146,15 @@ class CurrencySourceSeederUpdated extends Seeder
         $this->command->info('Currency sources seeded successfully!');
         $this->command->info('');
         $this->command->info('Architecture:');
-        $this->command->info('  1. openexchange-global: International conversions (non-CUP)');
-        $this->command->info('  2. bcc-cuba: CUP official rates (default for CUP conversions)');
-        $this->command->info('  3. eltoque-cuba: CUP informal rates (optional store choice)');
+        $this->command->info('  Foreign Currencies (NO CUP):');
+        $this->command->info('    1. exchangerate-api: International conversions (1000 req/month free)');
+        $this->command->info('');
+        $this->command->info('  CUP (Cuba only):');
+        $this->command->info('    2. bcc-cuba: Official rates from Central Bank');
+        $this->command->info('    3. eltoque-cuba: Informal market rates');
+        $this->command->info('');
+        $this->command->info('  Inactive:');
+        $this->command->info('    4. openexchange-global: Disabled (USD-only base on free plan)');
         $this->command->info('');
         $this->command->info('CLA (Tarjeta Clasica) automatically uses USD rate');
     }

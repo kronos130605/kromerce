@@ -12,7 +12,8 @@ class CurrencySourceRepository extends BaseRepository
         'name', 'code', 'type', 'provider_class', 'is_active',
         'is_global_default', 'base_url', 'config', 'auth_type',
         'default_credentials', 'last_tested_at', 'last_test_success',
-        'last_test_message', 'success_count', 'failure_count'
+        'last_test_message', 'success_count', 'failure_count',
+        'supported_currencies',
     ];
 
     public function __construct(CurrencySource $model)

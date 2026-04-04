@@ -19,46 +19,72 @@ class ApiCurrencyProvider extends BaseCurrencyProvider
 
     /**
      * Fetch rates from REST API.
+     * Makes one API call per supported currency as base, extracting rates directly from 'rates' field.
      */
     public function fetchRates(array $currencyPairs): array
     {
         try {
-            $pairs = $this->normalizePairs($currencyPairs);
-            $endpoint = $this->config['rates_endpoint'] ?? '/latest.json';
-            $baseCurrency = $this->config['base_currency'] ?? 'USD';
+            $endpointTemplate = $this->config['rates_endpoint'] ?? '/latest.json';
+            $supportedCurrencies = $this->config['currencies_supported'] ?? $this->config['supported_currencies'] ?? ['USD'];
 
-            $url = rtrim($this->baseUrl, '/') . $endpoint;
+            $allRates = [];
 
-            // Build query parameters
-            $params = [];
-            
-            if ($this->config['auth_type'] === 'api_key' && ($this->config['api_key_location'] ?? 'query') === 'query') {
-                $params[$this->config['api_key_name'] ?? 'api_key'] = $this->credentials['api_key'] ?? '';
+            // Make one API call per supported currency as base
+            foreach ($supportedCurrencies as $fromCurrency) {
+                $fromCurrency = strtoupper($fromCurrency);
+
+                // Replace {base_currency} placeholder in endpoint
+                $endpoint = str_replace('{base_currency}', $fromCurrency, $endpointTemplate);
+
+                // Replace {api_key} placeholder if present
+                $apiKey = $this->credentials['api_key'] ?? '';
+                $endpoint = str_replace('{api_key}', $apiKey, $endpoint);
+
+                $url = rtrim($this->baseUrl, '/') . $endpoint;
+
+                // Build query parameters (skip if api_key already in URL)
+                $params = [];
+                if ($this->config['auth_type'] === 'api_key' &&
+                    ($this->config['api_key_location'] ?? 'query') === 'query' &&
+                    !str_contains($endpoint, $apiKey)) {
+                    $params[$this->config['api_key_name'] ?? 'api_key'] = $apiKey;
+                }
+
+                $response = $this->httpClient()->get($url, $params);
+
+                if (!$response->successful()) {
+                    $this->logError('API request failed', [
+                        'url' => $url,
+                        'status' => $response->status(),
+                        'body' => $response->body(),
+                    ]);
+                    continue;
+                }
+
+                $data = $response->json();
+                $rates = $data['rates'] ?? $data['conversion_rates'] ?? [];
+
+
+                // Initialize rates array for this base currency
+                $allRates[$fromCurrency] = [];
+
+                // Extract rates directly from the 'rates' field
+                foreach ($supportedCurrencies as $toCurrency) {
+                    $toCurrency = strtoupper($toCurrency);
+
+                    // Skip when from == to
+                    if ($fromCurrency === $toCurrency) {
+                        continue;
+                    }
+
+                    // Get rate directly from API response (fromCurrency is base)
+                    if (isset($rates[$toCurrency])) {
+                        $allRates[$fromCurrency][$toCurrency] = (float) $rates[$toCurrency];
+                    }
+                }
             }
 
-            $response = $this->httpClient()->get($url, $params);
-
-            if (!$response->successful()) {
-                $this->logError('API request failed', [
-                    'status' => $response->status(),
-                    'body' => $response->body(),
-                ]);
-                return [];
-            }
-
-            $data = $response->json();
-
-            // Log detailed response for debugging
-            Log::debug('Currency API response', [
-                'provider' => $this->getName(),
-                'url' => $url,
-                'status' => $response->status(),
-                'response_keys' => array_keys($data),
-                'has_rates' => isset($data['rates']) || isset($data['conversion_rates']),
-                'sample_data' => $this->getSampleData($data),
-            ]);
-
-            return $this->parseRates($data, $pairs, $baseCurrency);
+            return $allRates;
 
         } catch (\Exception $e) {
             $this->logError('Exception fetching rates', [
@@ -78,9 +104,9 @@ class ApiCurrencyProvider extends BaseCurrencyProvider
     }
 
     /**
-     * Parse rates from API response based on provider format.
+     * Parse rates from API response for a specific batch of pairs.
      */
-    protected function parseRates(array $data, array $pairs, string $baseCurrency): array
+    protected function parseRatesForData(array $data, array $pairs, string $baseCurrency): array
     {
         $rates = [];
         $responseFormat = $this->config['response_format'] ?? 'openexchange';
@@ -110,7 +136,7 @@ class ApiCurrencyProvider extends BaseCurrencyProvider
     protected function parseOpenExchangeFormat(array $data, string $from, string $to, string $baseCurrency): ?float
     {
         $rates = $data['rates'] ?? [];
-        
+
         if ($from === $baseCurrency) {
             return $rates[$to] ?? null;
         }
@@ -182,7 +208,7 @@ class ApiCurrencyProvider extends BaseCurrencyProvider
     protected function getNestedValue(array $array, array $path): mixed
     {
         $current = $array;
-        
+
         foreach ($path as $key) {
             if (!isset($current[$key])) {
                 return null;
@@ -201,7 +227,7 @@ class ApiCurrencyProvider extends BaseCurrencyProvider
         try {
             $endpoint = $this->config['test_endpoint'] ?? $this->config['rates_endpoint'] ?? '/latest.json';
             $url = rtrim($this->baseUrl, '/') . $endpoint;
-            
+
             $params = [];
             if ($this->config['auth_type'] === 'api_key' && ($this->config['api_key_location'] ?? 'query') === 'query') {
                 $params[$this->config['api_key_name'] ?? 'api_key'] = $this->credentials['api_key'] ?? '';

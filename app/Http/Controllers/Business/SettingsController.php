@@ -28,28 +28,45 @@ class SettingsController extends Controller
             $store = $this->validateStore();
             $config = $this->configRepo->getOrCreateForStore($store->id);
 
-            $sources = $this->sourceRepo->getActive()->map(fn ($source) => [
-                'id'               => $source->id,
-                'name'             => $source->name,
-                'code'             => $source->code,
-                'type'             => $source->type,
-                'type_label'       => $source->type === 'api' ? 'API REST' : 'Web Scraping',
+            $allSources = $this->sourceRepo->getActive();
+
+            $mapSource = fn ($source) => [
+                'id'                => $source->id,
+                'name'              => $source->name,
+                'code'              => $source->code,
+                'type'              => $source->type,
+                'type_label'        => $source->type === 'api' ? 'API REST' : 'Web Scraping',
                 'is_global_default' => $source->is_global_default,
-                'success_rate'     => $source->getSuccessRate(),
-                'last_tested_at'   => $source->last_tested_at?->diffForHumans(),
+                'success_rate'      => $source->getSuccessRate(),
+                'last_tested_at'    => $source->last_tested_at?->diffForHumans(),
                 'last_test_success' => $source->last_test_success,
-            ]);
+                'supported_currencies' => $source->supported_currencies ?? [],
+            ];
+
+            // Fuentes que soportan CUP (ElToque, BCC)
+            $cupSources = $allSources
+                ->filter(fn ($s) => in_array('CUP', $s->supported_currencies ?? []))
+                ->map($mapSource)
+                ->values();
+
+            // Fuentes para divisas extranjeras (NO soportan CUP - o solo divisas)
+            $foreignSources = $allSources
+                ->filter(fn ($s) => !in_array('CUP', $s->supported_currencies ?? []))
+                ->map($mapSource)
+                ->values();
 
             return Inertia::render('Business/Index', [
                 'activeTab'    => 'settings',
                 'translations' => TranslationHelper::forPreset('settings'),
                 'settings'     => [
                     'currency' => [
-                        'sources'                  => $sources,
-                        'preferred_cuba_source_id' => $config->preferred_cuba_source_id,
-                        'default_currency'         => $config->default_currency,
-                        'display_currencies'       => $config->display_currencies ?? [],
-                        'auto_update_rates'        => $config->auto_update_rates,
+                        'cup_sources'               => $cupSources,
+                        'foreign_sources'           => $foreignSources,
+                        'preferred_cuba_source_id'  => $config->preferred_cuba_source_id,
+                        'preferred_foreign_source_id' => $config->preferred_foreign_source_id,
+                        'default_currency'          => $config->default_currency,
+                        'display_currencies'        => $config->display_currencies ?? [],
+                        'auto_update_rates'       => $config->auto_update_rates,
                     ],
                 ],
             ]);
@@ -61,7 +78,7 @@ class SettingsController extends Controller
     }
 
     /**
-     * Update the preferred CUP rate source for the store.
+     * Update the preferred rate sources for the store.
      */
     public function updateCurrencySource(Request $request): JsonResponse
     {
@@ -69,13 +86,24 @@ class SettingsController extends Controller
             $store = $this->validateStore();
 
             $validated = $request->validate([
-                'preferred_cuba_source_id' => 'nullable|uuid|exists:currency_sources,id',
+                'preferred_cuba_source_id'    => 'nullable|uuid|exists:currency_sources,id',
+                'preferred_foreign_source_id' => 'nullable|uuid|exists:currency_sources,id',
+                'type'                        => 'required|in:cup,foreign',
             ]);
 
-            $this->configRepo->updateBy(
-                ['store_id' => $store->id],
-                ['preferred_cuba_source_id' => $validated['preferred_cuba_source_id']]
-            );
+            $updateData = [];
+
+            if ($validated['type'] === 'cup' && isset($validated['preferred_cuba_source_id'])) {
+                $updateData['preferred_cuba_source_id'] = $validated['preferred_cuba_source_id'];
+            }
+
+            if ($validated['type'] === 'foreign' && isset($validated['preferred_foreign_source_id'])) {
+                $updateData['preferred_foreign_source_id'] = $validated['preferred_foreign_source_id'];
+            }
+
+            if (!empty($updateData)) {
+                $this->configRepo->updateBy(['store_id' => $store->id], $updateData);
+            }
 
             return $this->success([], 'Currency source updated');
 

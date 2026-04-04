@@ -31,10 +31,12 @@ class CurrencySource extends Model
         'last_test_message',
         'success_count',
         'failure_count',
+        'supported_currencies',
     ];
 
     protected $casts = [
         'config' => 'array',
+        'supported_currencies' => 'array',
         'is_active' => 'boolean',
         'is_global_default' => 'boolean',
         'last_tested_at' => 'datetime',
