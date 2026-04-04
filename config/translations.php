@@ -11,5 +11,6 @@ return [
         'storefront' => ['storefront', 'common', 'errors', 'products', 'currency'],
         'profile' => ['common', 'auth', 'errors', 'dashboard_nav'],
         'welcome' => ['welcome', 'common', 'auth'],
+        'settings' => ['settings', 'common', 'errors', 'dashboard_nav'],
     ],
 ];

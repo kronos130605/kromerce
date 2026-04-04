@@ -1,0 +1,60 @@
+{
+    "settings": {
+        "title": "Settings",
+        "subtitle": "Manage your store configuration",
+        "save": "Save changes",
+        "saving": "Saving...",
+        "saved": "Saved",
+        "cancel": "Cancel",
+        "tabs": {
+            "general": "General",
+            "currency": "Currencies",
+            "store": "Store",
+            "notifications": "Notifications"
+        },
+        "general": {
+            "title": "General Settings",
+            "subtitle": "Basic information and preferences for your business",
+            "coming_soon": "Coming soon"
+        },
+        "store": {
+            "title": "Store Settings",
+            "subtitle": "Customize the appearance and details of your store",
+            "coming_soon": "Coming soon"
+        },
+        "notifications": {
+            "title": "Notifications",
+            "subtitle": "Manage how and when you receive notifications",
+            "coming_soon": "Coming soon"
+        },
+        "currency": {
+            "title": "Currency Settings",
+            "subtitle": "Manage currencies and exchange rate sources",
+            "cup_rate_source_title": "CUP Rate Source",
+            "cup_rate_source_subtitle": "Select the exchange rate provider for the Cuban Peso (CUP). This applies to all products that accept CUP payments.",
+            "cup_rate_source_label": "CUP Rate Provider",
+            "source_type_api": "REST API",
+            "source_type_web": "Web Scraping",
+            "global_default": "Global default",
+            "success_rate": "Reliability",
+            "last_tested": "Last checked",
+            "never_tested": "Not tested",
+            "use_global_default": "Use system global default",
+            "use_global_description": "The system will use the global source configured by the administrator",
+            "select_source": "Select custom source",
+            "select_source_description": "Manually choose which provider your store will use",
+            "test_connection": "Test connection",
+            "testing": "Testing...",
+            "connection_ok": "Connection successful",
+            "connection_failed": "Connection failed",
+            "currencies_found": "currencies found",
+            "source_saved": "Rate source updated successfully",
+            "source_save_error": "Error updating rate source",
+            "info_box_title": "How do CUP rates work?",
+            "info_box_body": "Rates are updated daily. When a customer purchases in CUP, the system converts the product's base price using the current rate from the selected source.",
+            "eltoque_description": "Cuban informal market rate. Reflects the real buy/sell price in the market.",
+            "bcc_description": "Official rate from Cuba's Central Bank. Government-set price.",
+            "no_sources_available": "No sources available at this time"
+        }
+    }
+}

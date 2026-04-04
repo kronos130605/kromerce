@@ -1,0 +1,60 @@
+{
+    "settings": {
+        "title": "Configuración",
+        "subtitle": "Administra la configuración de tu tienda",
+        "save": "Guardar cambios",
+        "saving": "Guardando...",
+        "saved": "Guardado",
+        "cancel": "Cancelar",
+        "tabs": {
+            "general": "General",
+            "currency": "Monedas",
+            "store": "Tienda",
+            "notifications": "Notificaciones"
+        },
+        "general": {
+            "title": "Configuración General",
+            "subtitle": "Información básica y preferencias de tu negocio",
+            "coming_soon": "Próximamente"
+        },
+        "store": {
+            "title": "Configuración de Tienda",
+            "subtitle": "Personaliza la apariencia y datos de tu tienda",
+            "coming_soon": "Próximamente"
+        },
+        "notifications": {
+            "title": "Notificaciones",
+            "subtitle": "Gestiona cómo y cuándo recibes notificaciones",
+            "coming_soon": "Próximamente"
+        },
+        "currency": {
+            "title": "Configuración de Monedas",
+            "subtitle": "Gestiona las monedas y fuentes de tasas de cambio",
+            "cup_rate_source_title": "Fuente de Tasas CUP",
+            "cup_rate_source_subtitle": "Selecciona el proveedor de tasas de cambio para el Peso Cubano (CUP). Esto aplica a todos los productos que acepten pagos en CUP.",
+            "cup_rate_source_label": "Proveedor de Tasa CUP",
+            "source_type_api": "API REST",
+            "source_type_web": "Web Scraping",
+            "global_default": "Predeterminado global",
+            "success_rate": "Confiabilidad",
+            "last_tested": "Última verificación",
+            "never_tested": "No verificado",
+            "use_global_default": "Usar predeterminado global del sistema",
+            "use_global_description": "El sistema usará la fuente global configurada por el administrador",
+            "select_source": "Seleccionar fuente personalizada",
+            "select_source_description": "Elige manualmente qué proveedor usará tu tienda",
+            "test_connection": "Probar conexión",
+            "testing": "Probando...",
+            "connection_ok": "Conexión exitosa",
+            "connection_failed": "Falló la conexión",
+            "currencies_found": "divisas encontradas",
+            "source_saved": "Fuente de tasas actualizada correctamente",
+            "source_save_error": "Error al actualizar la fuente de tasas",
+            "info_box_title": "¿Cómo funcionan las tasas CUP?",
+            "info_box_body": "Las tasas se actualizan diariamente. Cuando un cliente compra en CUP, el sistema convierte el precio base del producto usando la tasa vigente de la fuente seleccionada.",
+            "eltoque_description": "Tasa del mercado informal cubano. Refleja el precio real de compra/venta en el mercado.",
+            "bcc_description": "Tasa oficial del Banco Central de Cuba. Precio fijado por el gobierno.",
+            "no_sources_available": "No hay fuentes disponibles en este momento"
+        }
+    }
+}

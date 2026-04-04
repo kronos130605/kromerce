@@ -47,6 +47,7 @@ import BusinessDashboardContent from '@/modules/business/components/BusinessDash
 import BusinessProductsContent from '@/modules/business/components/BusinessProductsContent.vue';
 import BusinessOrdersContent from '@/modules/business/components/BusinessOrdersContent.vue';
 import BusinessAnalyticsContent from '@/modules/business/components/BusinessAnalyticsContent.vue';
+import BusinessSettingsContent from '@/modules/business/components/BusinessSettingsContent.vue';
 
 const page = usePage();
 const { t } = useTranslations();
@@ -76,7 +77,7 @@ const contentComponents = {
     orders: BusinessOrdersContent,
     analytics: BusinessAnalyticsContent,
     marketing: BusinessAnalyticsContent, // Temporal, luego crear MarketingContent
-    settings: BusinessAnalyticsContent, // Temporal, luego crear SettingsContent
+    settings: BusinessSettingsContent,
 };
 
 // Get current component based on active tab
