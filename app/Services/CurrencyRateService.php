@@ -30,42 +30,35 @@ class CurrencyRateService
         $this->updateRepo = $updateRepo;
     }
     /**
-     * Update daily currency rates.
+     * Update daily currency rates from ALL active sources.
+     * Only updates currency_rates_global - the single source of truth.
      */
     public function updateDailyRates(): array
     {
         $today = now()->format('Y-m-d');
-        $results = [];
-        $totalUpdated = 0;
 
         try {
-            // Update global rates using default source
-            $globalSource = $this->sourceRepo->getGlobalDefault();
-            if ($globalSource) {
-                $globalResults = $this->updateGlobalRatesFromSource($globalSource, $today);
-                $results['global'] = $globalResults;
-                $totalUpdated += $globalResults['updated'];
-            }
-
-            // Update business rates for each store using their configured source
-            $businessResults = $this->updateBusinessRatesFromSources($today);
-            $results['business'] = $businessResults;
-            $totalUpdated += $businessResults['updated'];
+            // Update rates from ALL active sources (BCC, ElToque, OpenExchangeRates)
+            $results = $this->updateAllSources($today);
 
             // Log successful update
+            $allCurrencies = [];
+            foreach ($results['results'] as $sourceResult) {
+                if (isset($sourceResult['currencies'])) {
+                    $allCurrencies = array_merge($allCurrencies, $sourceResult['currencies']);
+                }
+            }
+
             $this->updateRepo->createSuccess(
-                array_merge(
-                    $globalResults['currencies'] ?? [],
-                    $businessResults['currencies'] ?? []
-                ),
-                'provider_sources',
-                $totalUpdated
+                $allCurrencies,
+                'all_sources',
+                $results['total_updated']
             );
 
             return [
                 'success' => true,
-                'total_updated' => $totalUpdated,
-                'results' => $results,
+                'total_updated' => $results['total_updated'],
+                'results' => $results['results'],
             ];
 
         } catch (\Exception $e) {
@@ -76,20 +69,50 @@ class CurrencyRateService
 
             // Log failed update
             $this->updateRepo->createFailure(
-                array_merge(
-                    $globalResults['currencies'] ?? [],
-                    $businessResults['currencies'] ?? []
-                ),
-                'provider_sources',
+                [],
+                'all_sources',
                 $e->getMessage()
             );
 
             return [
                 'success' => false,
                 'error' => $e->getMessage(),
-                'results' => $results ?? [],
+                'results' => [],
             ];
         }
+    }
+
+    /**
+     * Update rates from a specific source to currency_rates_global.
+     * Public method for updating a single source on demand.
+     */
+    public function updateSourceRates(string $sourceId, ?string $date = null): array
+    {
+        $date = $date ?? now()->format('Y-m-d');
+        $source = $this->sourceRepo->getFirstBy(['id' => $sourceId]);
+
+        if (!$source) {
+            return [
+                'success' => false,
+                'error' => 'Source not found',
+            ];
+        }
+
+        if (!$source->is_active) {
+            return [
+                'success' => false,
+                'error' => 'Source is not active',
+            ];
+        }
+
+        $result = $this->updateGlobalRatesFromSource($source, $date);
+
+        return [
+            'success' => $result['updated'] > 0,
+            'source' => $source->name,
+            'updated' => $result['updated'],
+            'currencies' => $result['currencies'],
+        ];
     }
 
     /**
@@ -121,17 +144,9 @@ class CurrencyRateService
             // Fetch rates from provider
             $rates = $provider->fetchRates($pairs);
 
-            Log::debug('Rates fetched from provider', [
-                'source' => $source->name,
-                'pairs_requested' => count($pairs),
-                'rates_received' => count($rates),
-                'sample_rates' => array_slice(array_keys($rates), 0, 3),
-            ]);
-
             // Save rates
             foreach ($rates as $from => $tos) {
                 foreach ($tos as $to => $rate) {
-                    Log::debug('Saving rate', ['from' => $from, 'to' => $to, 'rate' => $rate]);
                     $this->globalRateRepo->updateOrCreateRate($from, $to, $rate, $date, $source->name);
                     $updated++;
                     $currencyPairs[] = "{$from}-{$to}";
@@ -173,7 +188,7 @@ class CurrencyRateService
 
         foreach ($sources as $source) {
             try {
-                $result = $this->updateAllSources($date);
+                $result = $this->updateGlobalRatesFromSource($source, $date);
                 $totalUpdated += $result['updated'];
                 $results[$source->name] = $result;
             } catch (\Exception $e) {
@@ -195,181 +210,6 @@ class CurrencyRateService
     }
 
     /**
-     * Update business rates from each store's configured source.
-     */
-    private function updateBusinessRatesFromSources(string $date): array
-    {
-        $updated = 0;
-        $currencyPairs = [];
-
-        $businesses = $this->configRepo->getNeedingRateUpdate();
-
-        foreach ($businesses as $config) {
-            try {
-                if ($config->source_id) {
-                    // Use store's custom source
-                    $result = $this->updateStoreRatesFromSource($config, $date);
-                } else {
-                    // Use global rates (copy to business rates)
-                    $result = $this->updateStoreRatesFromGlobal($config, $date);
-                }
-
-                $updated += $result['updated'];
-                $currencyPairs = array_merge($currencyPairs, $result['currencies']);
-
-                // Update last rate update date
-                $this->configRepo->updateBy(['store_id' => $config->store_id], ['last_rate_update' => $date]);
-
-            } catch (\Exception $e) {
-                Log::error('Failed to update business rates', [
-                    'store_id' => $config->store_id,
-                    'error' => $e->getMessage(),
-                ]);
-            }
-        }
-
-        return [
-            'updated' => $updated,
-            'currencies' => $currencyPairs,
-        ];
-    }
-
-    /**
-     * Update store rates from its configured source.
-     */
-    private function updateStoreRatesFromSource($config, string $date): array
-    {
-        $source = $this->sourceRepo->getFirstBy(['id' => $config->source_id]);
-
-        if (!$source || !$source->is_active) {
-            // Fallback to global
-            return $this->updateStoreRatesFromGlobal($config, $date);
-        }
-
-        $updated = 0;
-        $currencyPairs = [];
-        $baseCurrency = $config->default_currency;
-        $targetCurrencies = $config->display_currencies;
-
-        try {
-            $provider = CurrencyProviderFactory::make($source, $config->source_config_override);
-
-            // Prepare pairs
-            $pairs = [];
-            foreach ($targetCurrencies as $target) {
-                if ($target !== $baseCurrency) {
-                    $pairs[] = ['from' => $baseCurrency, 'to' => $target];
-                }
-            }
-
-            if (empty($pairs)) {
-                return ['updated' => 0, 'currencies' => []];
-            }
-
-            // Fetch rates
-            $rates = $provider->fetchRates($pairs);
-
-            // Save rates to global table
-            foreach ($rates as $from => $tos) {
-                foreach ($tos as $to => $rate) {
-                    $this->globalRateRepo->updateOrCreateRate($from, $to, $rate, $date, $source->name);
-                    $updated++;
-                    $currencyPairs[] = "{$from}-{$to}";
-                }
-            }
-
-            $source->recordSuccess();
-
-        } catch (\Exception $e) {
-            Log::error('Provider failed for store, falling back to global', [
-                'store_id' => $config->store_id,
-                'source' => $source->name,
-                'error' => $e->getMessage(),
-            ]);
-
-            $source->recordFailure($e->getMessage());
-
-            // Fallback to global rates
-            return $this->updateStoreRatesFromGlobal($config, $date);
-        }
-
-        return [
-            'updated' => $updated,
-            'currencies' => $currencyPairs,
-        ];
-    }
-
-    /**
-     * Update store rates from global rates (fallback).
-     */
-    private function updateStoreRatesFromGlobal($config, string $date): array
-    {
-        $updated = 0;
-        $currencyPairs = [];
-        $baseCurrency = $config->default_currency;
-        $targetCurrencies = $config->display_currencies;
-
-        foreach ($targetCurrencies as $targetCurrency) {
-            if ($targetCurrency === $baseCurrency) {
-                continue;
-            }
-
-            $globalRate = $this->globalRateRepo->getRateForDate($baseCurrency, $targetCurrency, $date);
-
-            if ($globalRate) {
-                // Rate already exists in global table, no need to duplicate
-                $updated++;
-                $currencyPairs[] = "{$baseCurrency}-{$targetCurrency}";
-            }
-        }
-
-        return [
-            'updated' => $updated,
-            'currencies' => $currencyPairs,
-        ];
-    }
-
-    /**
-     * Update global currency rates.
-     */
-    private function updateGlobalRates(array $currencies, string $date): array
-    {
-        $updated = 0;
-        $currencyPairs = [];
-
-        foreach ($currencies as $fromCurrency) {
-            foreach ($currencies as $toCurrency) {
-                if ($fromCurrency === $toCurrency) {
-                    continue;
-                }
-
-                try {
-                    $rate = $this->fetchRateFromAPI($fromCurrency, $toCurrency);
-
-                    if ($rate) {
-                        $this->globalRateRepo->updateOrCreateRate($fromCurrency, $toCurrency, $rate, $date, 'api');
-                        $updated++;
-                        $currencyPairs[] = "{$fromCurrency}-{$toCurrency}";
-                    }
-                } catch (\Exception $e) {
-                    // Try to use previous day's rate as fallback
-                    $previousRate = $this->getPreviousDayRate($fromCurrency, $toCurrency, $date);
-                    if ($previousRate) {
-                        $this->globalRateRepo->updateOrCreateRate($fromCurrency, $toCurrency, $previousRate, $date, 'previous_day');
-                        $updated++;
-                        $currencyPairs[] = "{$fromCurrency}-{$toCurrency}";
-                    }
-                }
-            }
-        }
-
-        return [
-            'updated' => $updated,
-            'currencies' => $currencyPairs,
-        ];
-    }
-
-    /**
      * Test a currency source connection.
      */
     public function testSourceConnection(string $sourceId, ?array $configOverride = null): array
@@ -384,18 +224,6 @@ class CurrencyRateService
         }
 
         return CurrencyProviderFactory::testSource($source, $configOverride);
-    }
-
-    /**
-     * Get previous day's rate as fallback.
-     */
-    private function getPreviousDayRate(string $fromCurrency, string $toCurrency, string $date): ?float
-    {
-        $previousDate = Carbon::parse($date)->subDay()->format('Y-m-d');
-
-        $rate = $this->globalRateRepo->getRateForDate($fromCurrency, $toCurrency, $previousDate);
-
-        return $rate ? $rate->rate : null;
     }
 
     /**

@@ -31,7 +31,7 @@ class ElToqueProvider extends BaseCurrencyProvider
     {
         try {
             $html = $this->fetchPage();
-            
+
             if (empty($html)) {
                 $this->logError('Empty page content from ElToque');
                 return [];
@@ -39,28 +39,27 @@ class ElToqueProvider extends BaseCurrencyProvider
 
             $crawler = new Crawler($html);
             $scrapedRates = $this->extractRates($crawler);
-            
+
             if (empty($scrapedRates)) {
                 $this->logError('Could not extract rates from ElToque page');
                 return [];
             }
 
+            // ElToque rates are always relative to CUP
+            // Return rates as X->CUP (e.g., USD->CUP = 518.0)
             $rates = [];
-            $pairs = $this->normalizePairs($currencyPairs);
+            $baseCurrency = 'CUP';
 
-            foreach ($pairs as $pair) {
-                $from = strtoupper($pair['from']);
-                $to = strtoupper($pair['to']);
-
-                // CLA (Tarjeta Clasica) equals USD
-                if ($from === 'CLA') $from = 'USD';
-                if ($to === 'CLA') $to = 'USD';
-
-                $rate = $this->calculateRate($from, $to, $scrapedRates);
-                
-                if ($rate !== null) {
-                    $rates[$pair['from']][$pair['to']] = $rate;
+            foreach ($scrapedRates as $currency => $rate) {
+                if ($currency === $baseCurrency) {
+                    continue; // Skip CUP->CUP (would be 1.0)
                 }
+
+                // Convert CLA to USD
+                $fromCurrency = ($currency === 'CLA') ? 'USD' : $currency;
+
+                // Rate is: 1 foreign currency = X CUP
+                $rates[$fromCurrency][$baseCurrency] = $rate;
             }
 
             return $rates;
@@ -113,34 +112,133 @@ class ElToqueProvider extends BaseCurrencyProvider
 
     /**
      * Extract rates from the HTML.
-     * ElToque structure typically has rate cards or tables.
+     * ElToque structure: table rows with currency in cell-title-v2-X and rate in font-extrabold spans
      */
     protected function extractRates(Crawler $crawler): array
     {
         $rates = [];
         $selectors = $this->config['selectors'] ?? [];
 
-        // Try to extract each currency rate
-        $currencies = ['USD', 'EUR', 'MLC'];
-        
-        foreach ($currencies as $currency) {
-            $selector = $selectors[strtolower($currency)] ?? null;
-            
-            if ($selector) {
-                $value = $this->extractWithSelector($crawler, $selector);
-                if ($value !== null) {
-                    $rates[$currency] = $value;
+        Log::debug('ElToque extractRates started', [
+            'configured_selectors' => $selectors,
+            'has_selectors_config' => !empty($selectors),
+        ]);
+
+        // If selectors are configured, try them first
+        if (!empty($selectors)) {
+            $currencies = ['USD', 'EUR', 'MLC'];
+
+            foreach ($currencies as $currency) {
+                $selector = $selectors[strtolower($currency)] ?? null;
+
+                if ($selector) {
+                    $value = $this->extractWithSelector($crawler, $selector);
+
+                    if ($value !== null) {
+                        $rates[$currency] = $value;
+                    }
                 }
             }
         }
 
-        // If no rates found with specific selectors, try generic patterns
+        // If no rates found with specific selectors, use table-based extraction
         if (empty($rates)) {
-            $rates = $this->extractGenericRates($crawler);
+            $rates = $this->extractFromTable($crawler);
         }
 
         // CUP is always 1 (base currency)
         $rates['CUP'] = 1.0;
+
+        Log::debug('ElToque extractRates completed', ['rates' => $rates]);
+
+        return $rates;
+    }
+
+    /**
+     * Extract rates from the ElToque table structure.
+     * Parses the table row by row, looking for currency codes and rate values.
+     */
+    protected function extractFromTable(Crawler $crawler): array
+    {
+        $rates = [];
+
+        try {
+            // Try to find the rates table - it has specific structure
+            // First, try to find by the specific table class pattern
+            $table = $crawler->filter('table.border-collapse');
+
+            if ($table->count() === 0) {
+                // Fallback: find any table with the cell-title spans
+                $table = $crawler->filter('table:has(span[id^="cell-title-v2-"])');
+            }
+
+            if ($table->count() === 0) {
+                Log::debug('ElToque no rates table found');
+                return $rates;
+            }
+
+            // Get all rows from the table body
+            $rows = $table->first()->filter('tbody tr, tr');
+
+            Log::debug('ElToque table extraction', [
+                'table_found' => true,
+                'rows_found' => $rows->count(),
+            ]);
+
+            $rows->each(function (Crawler $row, $i) use (&$rates) {
+                // Find currency span in this row (1st td)
+                $currencySpan = $row->filter('span[id^="cell-title-v2-"]');
+
+                if ($currencySpan->count() === 0) {
+                    return; // Skip rows without currency
+                }
+
+                $currencyText = $currencySpan->text();
+
+                // Parse currency code: "1 USD", "1 EUR", etc.
+                // Handle non-breaking space (&nbsp;)
+                if (!preg_match('/1\s*([A-Z]{3})/u', $currencyText, $currencyMatch)) {
+                    Log::debug('ElToque currency regex failed', ['text' => $currencyText, 'row' => $i]);
+                    return;
+                }
+
+                $currency = $currencyMatch[1];
+
+                // Find rate value in this row (3rd td contains div with the rate span)
+                $rateSpan = $row->filter('td:nth-child(3) span.font-extrabold.text-lg');
+
+                if ($rateSpan->count() === 0) {
+                    // Try alternative: any font-extrabold in the row
+                    $rateSpan = $row->filter('span.font-extrabold.text-lg');
+                }
+
+                if ($rateSpan->count() === 0) {
+                    Log::debug('ElToque no rate span found', ['row' => $i, 'currency' => $currency]);
+                    return;
+                }
+
+                $rateText = $rateSpan->first()->text();
+
+                // Parse rate value: "518.00 CUP" (handle &nbsp;)
+                if (!preg_match('/([\d.,]+)\s*CUP/u', $rateText, $rateMatch)) {
+                    Log::debug('ElToque rate regex failed', ['text' => $rateText, 'currency' => $currency]);
+                    return;
+                }
+
+                $value = str_replace(',', '', $rateMatch[1]);
+                $floatValue = (float) $value;
+
+                // Validate reasonable rate for Cuban informal market
+                if ($floatValue > 10 && $floatValue < 10000) {
+                    $rates[$currency] = $floatValue;
+                }
+            });
+
+        } catch (\Exception $e) {
+            Log::warning('ElToque table extraction failed', ['error' => $e->getMessage()]);
+        }
+
+        Log::debug('ElToque extracted rates from table', ['rates' => $rates]);
 
         return $rates;
     }
@@ -152,7 +250,7 @@ class ElToqueProvider extends BaseCurrencyProvider
     {
         try {
             $element = $crawler->filter($selector);
-            
+
             if ($element->count() === 0) {
                 return null;
             }
@@ -166,103 +264,25 @@ class ElToqueProvider extends BaseCurrencyProvider
     }
 
     /**
-     * Extract rates using generic patterns when specific selectors fail.
-     */
-    protected function extractGenericRates(Crawler $crawler): array
-    {
-        $rates = [];
-        
-        try {
-            // Look for patterns like "USD: 350 CUP" or similar
-            $currencies = ['USD', 'EUR', 'MLC'];
-            
-            foreach ($currencies as $currency) {
-                // Try multiple patterns
-                $patterns = [
-                    // Pattern: currency code followed by number
-                    "//text()[contains(., '{$currency}') and contains(., 'CUP')]",
-                    "//div[contains(@class, '{$currency}')]",
-                    "//span[contains(text(), '{$currency}')]",
-                ];
-                
-                foreach ($patterns as $pattern) {
-                    try {
-                        $elements = $crawler->filterXPath($pattern);
-                        if ($elements->count() > 0) {
-                            $text = $elements->first()->text();
-                            $value = $this->parseRateValue($text);
-                            if ($value !== null) {
-                                $rates[$currency] = $value;
-                                break;
-                            }
-                        }
-                    } catch (\Exception $e) {
-                        continue;
-                    }
-                }
-            }
-
-        } catch (\Exception $e) {
-            Log::warning('ElToque generic extraction failed', ['error' => $e->getMessage()]);
-        }
-
-        return $rates;
-    }
-
-    /**
      * Parse rate value from text.
      */
     protected function parseRateValue(string $text): ?float
     {
         $text = trim($text);
-        
+
         // Clean common prefixes/suffixes
         $text = str_replace(['$', '€', '£', 'CUP', 'MLC', ','], ['', '', '', '', '', ''], $text);
-        
+
         // Extract numeric value
         // Patterns: "350", "350.50", "350,50", "1:350", "350 CUP"
         if (preg_match('/(\d+[.,]?\d*)/', $text, $matches)) {
             $value = str_replace(',', '.', $matches[1]);
             $float = (float) $value;
-            
+
             // Validate reasonable rate (10 to 10000 for informal market)
             if ($float > 10 && $float < 10000) {
                 return $float;
             }
-        }
-
-        return null;
-    }
-
-    /**
-     * Calculate rate between two currencies.
-     * ElToque rates are relative to CUP.
-     */
-    protected function calculateRate(string $from, string $to, array $scrapedRates): ?float
-    {
-        $baseCurrency = strtoupper($this->config['base_currency'] ?? 'CUP');
-
-        if ($from === $to) {
-            return 1.0;
-        }
-
-        // Get rates
-        $fromRate = $scrapedRates[$from] ?? null;
-        $toRate = $scrapedRates[$to] ?? null;
-
-        if ($from === $baseCurrency && $toRate) {
-            // CUP to X
-            return $toRate;
-        }
-
-        if ($to === $baseCurrency && $fromRate) {
-            // X to CUP
-            return 1 / $fromRate;
-        }
-
-        if ($fromRate && $toRate) {
-            // X to Y via CUP
-            return $toRate / $fromRate;
         }
 
         return null;
@@ -275,7 +295,7 @@ class ElToqueProvider extends BaseCurrencyProvider
     {
         try {
             $html = $this->fetchPage();
-            
+
             if (empty($html)) {
                 return [
                     'success' => false,

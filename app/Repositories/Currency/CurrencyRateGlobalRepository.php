@@ -84,21 +84,17 @@ class CurrencyRateGlobalRepository extends BaseRepository
      */
     public function updateOrCreateRate(string $fromCurrency, string $toCurrency, float $rate, string $date, string $source = 'api'): CurrencyRateGlobal
     {
-        Log::debug('Repository: Looking for existing rate', ['from' => $fromCurrency, 'to' => $toCurrency, 'date' => $date]);
-
         $existing = $this->model
             ->where('from_currency', $fromCurrency)
             ->where('to_currency', $toCurrency)
             ->where('effective_date', $date)
+            ->where('source', $source)
             ->first();
 
         if ($existing) {
-            Log::debug('Repository: Updating existing rate', ['id' => $existing->id]);
-            $existing->update(['rate' => $rate, 'source' => $source]);
+            $existing->update(['rate' => $rate]);
             return $existing;
         }
-
-        Log::debug('Repository: Creating new rate with UUID');
 
         try {
             // Use new instance + save instead of create() for proper persistence
@@ -110,8 +106,6 @@ class CurrencyRateGlobalRepository extends BaseRepository
             $newRate->rate = $rate;
             $newRate->source = $source;
             $newRate->save();
-
-            Log::debug('Repository: Created rate with save()', ['id' => $newRate->id, 'from' => $newRate->from_currency, 'to' => $newRate->to_currency, 'exists' => $newRate->exists]);
 
             return $newRate;
         } catch (\Exception $e) {

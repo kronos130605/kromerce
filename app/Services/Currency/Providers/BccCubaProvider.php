@@ -67,34 +67,34 @@ class BccCubaProvider extends BaseCurrencyProvider
     protected function parseBccRates(array $data, array $pairs): array
     {
         $rates = [];
-        
-        // BCC uses "venta" (sell) rate for conversions
+
+        // BCC API returns "tasas" array with fields: codigoMoneda, tasaEspecial, tasaPublica, tasaOficial
         $bccRates = [];
-        $rateList = $data['data'] ?? $data['tasas'] ?? $data['rates'] ?? [];
-        
+        $rateList = $data['tasas'] ?? $data['data'] ?? $data['rates'] ?? [];
+
         foreach ($rateList as $rateData) {
-            $currency = strtoupper($rateData['moneda'] ?? $rateData['currency'] ?? '');
-            $value = $rateData['venta'] ?? $rateData['sell'] ?? $rateData['rate'] ?? null;
-            
+            $currency = strtoupper($rateData['codigoMoneda'] ?? $rateData['moneda'] ?? $rateData['currency'] ?? '');
+            $value = $rateData['tasaEspecial'] ?? $rateData['tasaPublica'] ?? $rateData['tasaOficial'] ?? $rateData['rate'] ?? null;
+
             if ($currency && $value) {
                 $bccRates[$currency] = (float) $value;
             }
         }
 
-        // Process each pair
-        foreach ($pairs as $pair) {
-            $from = strtoupper($pair['from']);
-            $to = strtoupper($pair['to']);
-
-            // CLA (Tarjeta Clasica) equals USD
-            if ($from === 'CLA') $from = 'USD';
-            if ($to === 'CLA') $to = 'USD';
-
-            $rate = $this->calculateRate($from, $to, $bccRates);
-            
-            if ($rate !== null) {
-                $rates[$pair['from']][$pair['to']] = $rate;
+        // BCC rates are always relative to CUP
+        // Return rates as X->CUP (e.g., USD->CUP = 331.896)
+        $baseCurrency = 'CUP';
+        
+        foreach ($bccRates as $currency => $rate) {
+            if ($currency === $baseCurrency) {
+                continue; // Skip CUP->CUP
             }
+            
+            // Convert CLA to USD
+            $fromCurrency = ($currency === 'CLA') ? 'USD' : $currency;
+            
+            // Rate is: 1 foreign currency = X CUP
+            $rates[$fromCurrency][$baseCurrency] = $rate;
         }
 
         return $rates;
@@ -149,7 +149,7 @@ class BccCubaProvider extends BaseCurrencyProvider
         try {
             $endpoint = $this->config['test_endpoint'] ?? '/v1/tasas-de-cambio/activas';
             $url = rtrim($this->baseUrl, '/') . $endpoint;
-            
+
             $response = $this->httpClient()->get($url);
 
             if (!$response->successful()) {
