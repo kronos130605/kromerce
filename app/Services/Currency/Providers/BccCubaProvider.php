@@ -90,11 +90,13 @@ class BccCubaProvider extends BaseCurrencyProvider
                 continue; // Skip CUP->CUP
             }
             
-            // Convert CLA to USD
-            $fromCurrency = ($currency === 'CLA') ? 'USD' : $currency;
-            
             // Rate is: 1 foreign currency = X CUP
-            $rates[$fromCurrency][$baseCurrency] = $rate;
+            $rates[$currency][$baseCurrency] = $rate;
+        }
+
+        // Add CLA->CUP pair using USD->CUP rate (CLA is equivalent to USD in official Cuban market)
+        if (isset($rates['USD'][$baseCurrency])) {
+            $rates['CLA'][$baseCurrency] = $rates['USD'][$baseCurrency];
         }
 
         return $rates;

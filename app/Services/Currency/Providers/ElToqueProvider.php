@@ -55,11 +55,8 @@ class ElToqueProvider extends BaseCurrencyProvider
                     continue; // Skip CUP->CUP (would be 1.0)
                 }
 
-                // Convert CLA to USD
-                $fromCurrency = ($currency === 'CLA') ? 'USD' : $currency;
-
                 // Rate is: 1 foreign currency = X CUP
-                $rates[$fromCurrency][$baseCurrency] = $rate;
+                $rates[$currency][$baseCurrency] = $rate;
             }
 
             return $rates;
@@ -118,11 +115,6 @@ class ElToqueProvider extends BaseCurrencyProvider
     {
         $rates = [];
         $selectors = $this->config['selectors'] ?? [];
-
-        Log::debug('ElToque extractRates started', [
-            'configured_selectors' => $selectors,
-            'has_selectors_config' => !empty($selectors),
-        ]);
 
         // If selectors are configured, try them first
         if (!empty($selectors)) {
