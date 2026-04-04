@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Business;
 
 use App\Helpers\TranslationHelper;
 use App\Http\Controllers\Controller;
+use App\Repositories\Store\StoreActiveCurrencyRepository;
 use App\Repositories\Store\StoreCurrencyConfigRepository;
 use App\Repositories\Store\CurrencySourceRepository;
 use Illuminate\Http\JsonResponse;
@@ -17,6 +18,7 @@ class SettingsController extends Controller
     public function __construct(
         private CurrencySourceRepository $sourceRepo,
         private StoreCurrencyConfigRepository $configRepo,
+        private StoreActiveCurrencyRepository $activeCurrencyRepo,
     ) {}
 
     /**
@@ -55,6 +57,8 @@ class SettingsController extends Controller
                 ->map($mapSource)
                 ->values();
 
+            $activeCurrencyCodes = $this->activeCurrencyRepo->getActiveCodesForStore($store->id);
+
             return Inertia::render('Business/Index', [
                 'activeTab'    => 'settings',
                 'translations' => TranslationHelper::forPreset('settings'),
@@ -68,6 +72,7 @@ class SettingsController extends Controller
                         'display_currencies'         => $config->display_currencies ?? [],
                         'dashboard_pairs'            => $config->dashboard_pairs ?? [],
                         'auto_update_rates'          => $config->auto_update_rates,
+                        'active_currency_codes'      => $activeCurrencyCodes,
                     ],
                 ],
             ]);

@@ -1,5 +1,7 @@
 {
     "storefront": {
-
+        "product": {
+            "select_currency": "Pay in"
+        }
     }
 }

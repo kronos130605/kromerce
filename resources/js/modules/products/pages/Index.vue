@@ -26,6 +26,7 @@ const props = defineProps({
     categories: Array,
     filters: Object,
     statistics: Object,
+    active_currencies: { type: Array, default: () => [] },
 });
 
 // Product Manager (Modal CRUD)
@@ -308,6 +309,7 @@ const getStatusColor = (status) => ({
             :errors="errors"
             :loading="loading"
             :categories="categories"
+            :active-currencies="active_currencies"
             @close="closeModal"
             @save="save"
             @next-step="nextStep"

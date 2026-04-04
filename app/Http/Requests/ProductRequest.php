@@ -2,8 +2,9 @@
 
 namespace App\Http\Requests;
 
-use App\Models\Currency;
 use Illuminate\Foundation\Http\FormRequest;
+use App\Repositories\Store\StoreActiveCurrencyRepository;
+use App\Services\StoreService;
 
 class ProductRequest extends FormRequest
 {
@@ -50,12 +51,19 @@ class ProductRequest extends FormRequest
                 'string',
                 'size:3',
                 function (string $attribute, mixed $value, \Closure $fail) {
-                    $exists = Currency::where('code', strtoupper($value))->where('is_active', true)->exists();
-                    if (!$exists) {
-                        $fail('Selected currency is not supported');
+                    $store = app(StoreService::class)->resolveCurrentStoreForRequest($this);
+                    if (!$store) return;
+                    $active = app(StoreActiveCurrencyRepository::class)->getActiveCodesForStore($store->id);
+                    if ($active && !in_array(strtoupper($value), $active)) {
+                        $fail('The selected currency is not active for your store.');
                     }
                 },
             ],
+            'sale_currencies'   => 'nullable|array',
+            'sale_currencies.*' => 'string|size:3',
+            // CUP/CLA cost overrides (optional manual input)
+            'cost_cup_amount'   => 'nullable|numeric|min:0',
+            'cost_cla_amount'   => 'nullable|numeric|min:0',
             
             // Stock management
             'manage_stock' => 'sometimes|boolean',

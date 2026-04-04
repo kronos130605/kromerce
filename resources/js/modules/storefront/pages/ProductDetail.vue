@@ -19,11 +19,22 @@ const props = defineProps({
     product: { type: Object, required: true },
     related_products: { type: Array, default: () => [] },
     store_products: { type: Array, default: () => [] },
+    sale_currencies: { type: Array, default: () => [] },
     breadcrumb_context: { type: String, default: 'default' },
     breadcrumb_store: { type: Object, default: null },
 });
 
+const hasMultipleCurrencies = computed(() => props.sale_currencies.length > 1);
+const selectedCurrency = ref(props.sale_currencies[0]?.code ?? props.product.base_currency ?? 'USD');
+
+const selectedCurrencyMeta = computed(() =>
+    props.sale_currencies.find(c => c.code === selectedCurrency.value) ??
+    { code: selectedCurrency.value, symbol: props.product.base_currency, flag: '' }
+);
+
 const quantity = ref(1);
+const quickViewProduct = ref(null);
+const showQuickView = ref(false);
 
 const productRef = computed(() => props.product);
 const {
@@ -50,9 +61,13 @@ const {
 // Create the add to cart handler with visual feedback
 const { handleAddToCart, added } = createAddToCartHandler();
 
-// Wrapper to call with proper arguments
+// Wrapper to call with proper arguments — passes selected currency
 const onAddToCart = () => {
-    handleAddToCart(props.product, quantity.value, { isOutOfStock: isOutOfStock.value, validateProduct: false });
+    handleAddToCart(
+        { ...props.product, selected_currency: selectedCurrency.value },
+        quantity.value,
+        { isOutOfStock: isOutOfStock.value, validateProduct: false }
+    );
 };
 
 const openQuickView = (product) => {
@@ -157,10 +172,33 @@ const closeQuickView = () => {
                         <span>{{ product.sales_count || 0 }} {{ t('storefront.product.sold') }}</span>
                     </div>
 
+                    <!-- Currency selector (when product has multiple sale currencies) -->
+                    <div v-if="hasMultipleCurrencies" class="space-y-2">
+                        <p class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ t('storefront.product.select_currency') }}</p>
+                        <div class="flex flex-wrap gap-2">
+                            <button
+                                v-for="cur in sale_currencies"
+                                :key="cur.code"
+                                type="button"
+                                @click="selectedCurrency = cur.code"
+                                :class="[
+                                    'flex items-center gap-1.5 rounded-xl border-2 px-4 py-2 text-sm font-semibold transition-all duration-150',
+                                    selectedCurrency === cur.code
+                                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300'
+                                        : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600'
+                                ]"
+                            >
+                                <span v-if="cur.flag">{{ cur.flag }}</span>
+                                <span>{{ cur.code }}</span>
+                            </button>
+                        </div>
+                    </div>
+
                     <!-- Price -->
                     <div class="rounded-3xl border border-gray-100 bg-gray-50 p-5 dark:border-gray-700 dark:bg-gray-800/80">
                         <div class="flex flex-wrap items-end gap-3">
                             <span class="text-4xl font-bold tracking-tight text-gray-900 dark:text-white">{{ formatPrice(displayPrice) }}</span>
+                            <span v-if="hasMultipleCurrencies" class="text-base font-semibold text-gray-400 dark:text-gray-500">{{ selectedCurrency }}</span>
                             <span v-if="hasDiscount" class="text-xl text-gray-400 line-through dark:text-gray-500">{{ formatPrice(product.base_price) }}</span>
                         </div>
                         <p v-if="hasDiscount" class="mt-2 text-sm font-medium text-emerald-600 dark:text-emerald-400">

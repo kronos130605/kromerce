@@ -30,16 +30,25 @@ export function useCart() {
         cartItems.value.reduce((sum, item) => sum + item.price * item.quantity, 0)
     );
 
-    const isInCart = (productId) =>
-        cartItems.value.some((item) => item.id === productId);
+    const cartKey = (productId, currency) => `${productId}::${currency}`;
 
-    const getItemQuantity = (productId) => {
-        const item = cartItems.value.find((i) => i.id === productId);
+    const isInCart = (productId, currency = null) =>
+        cartItems.value.some((item) =>
+            item.id === productId && (currency === null || item.currency === currency)
+        );
+
+    const getItemQuantity = (productId, currency = null) => {
+        const item = cartItems.value.find((i) =>
+            i.id === productId && (currency === null || i.currency === currency)
+        );
         return item ? item.quantity : 0;
     };
 
     const addToCart = (product, quantity = 1) => {
-        const existing = cartItems.value.find((i) => i.id === product.id);
+        const currency = product.selected_currency || product.base_currency || 'USD';
+        const existing = cartItems.value.find(
+            (i) => i.id === product.id && i.currency === currency
+        );
         const price = product.sale_price && product.sale_price < product.base_price
             ? product.sale_price
             : product.base_price;
@@ -49,12 +58,13 @@ export function useCart() {
         } else {
             cartItems.value.push({
                 id: product.id,
+                cart_key: cartKey(product.id, currency),
                 name: product.name,
                 slug: product.slug,
                 price,
                 base_price: product.base_price,
                 sale_price: product.sale_price,
-                currency: product.base_currency || 'USD',
+                currency,
                 image: product.images?.[0]?.url || product.images?.[0]?.thumbnail_url || null,
                 store: product.store ? { id: product.store.id, name: product.store.name, slug: product.store.slug } : null,
                 stock_quantity: product.stock_quantity,
@@ -62,6 +72,15 @@ export function useCart() {
             });
         }
     };
+
+    const cartByCurrency = computed(() => {
+        const groups = {};
+        for (const item of cartItems.value) {
+            if (!groups[item.currency]) groups[item.currency] = [];
+            groups[item.currency].push(item);
+        }
+        return groups;
+    });
 
     /**
      * Create a reactive handler for adding products to cart with visual feedback.
@@ -84,19 +103,19 @@ export function useCart() {
         return { handleAddToCart, added };
     };
 
-    const updateQuantity = (productId, quantity) => {
-        const item = cartItems.value.find((i) => i.id === productId);
+    const updateQuantity = (key, quantity) => {
+        const item = cartItems.value.find((i) => i.cart_key === key || i.id === key);
         if (item) {
             if (quantity <= 0) {
-                removeFromCart(productId);
+                removeFromCart(key);
             } else {
                 item.quantity = quantity;
             }
         }
     };
 
-    const removeFromCart = (productId) => {
-        cartItems.value = cartItems.value.filter((i) => i.id !== productId);
+    const removeFromCart = (key) => {
+        cartItems.value = cartItems.value.filter((i) => i.cart_key !== key && i.id !== key);
     };
 
     const clearCart = () => {
@@ -107,6 +126,7 @@ export function useCart() {
         cartItems,
         cartCount,
         cartTotal,
+        cartByCurrency,
         isInCart,
         getItemQuantity,
         addToCart,

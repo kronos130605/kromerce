@@ -24,6 +24,12 @@ class ProductResource extends JsonResource
             'base_price' => $this->base_price,
             'base_sale_price' => $this->base_sale_price,
             'cost_price' => $this->cost_price,
+            'cost_cup_amount' => $this->cost_cup_amount,
+            'cost_cla_amount' => $this->cost_cla_amount,
+            'sale_currencies' => $this->whenLoaded('saleCurrencies',
+                fn () => $this->saleCurrencies->where('is_enabled', true)->pluck('currency_code')->values()->toArray(),
+                []
+            ),
             'is_on_sale' => $this->is_on_sale,
             'sku' => $this->sku,
             'barcode' => $this->barcode,

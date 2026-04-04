@@ -70,7 +70,8 @@
             "availability_label": "Disponibilidad",
             "units_available": "unidades disponibles",
             "store_label": "Tienda",
-            "taxes_notice": "Impuestos y envío calculados al finalizar la compra."
+            "taxes_notice": "Impuestos y envío calculados al finalizar la compra.",
+            "select_currency": "Pagar en"
         },
         "store": {
             "verified": "Verificado",

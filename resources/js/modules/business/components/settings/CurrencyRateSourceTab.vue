@@ -262,6 +262,7 @@ const props = defineProps({
     preferredCubaSourceId: { type: String, default: null },
     preferredForeignSourceId: { type: String, default: null },
     dashboardPairs: { type: Array, default: () => [] },
+    activeCurrencyCodes: { type: Array, default: () => [] },
 });
 
 const emit = defineEmits(['updated']);
@@ -278,8 +279,8 @@ const savedFeedback = ref({ cup: false, foreign: false, pairs: false });
 const testing = ref({ cup: false, foreign: false });
 const testResults = ref({ cup: null, foreign: null });
 
-// Dashboard pairs state
-const ALL_PAIRS = [
+// All possible pairs (base catalog)
+const BASE_PAIRS = [
     { from: 'USD', to: 'CUP' },
     { from: 'EUR', to: 'CUP' },
     { from: 'MLC', to: 'CUP' },
@@ -291,6 +292,15 @@ const ALL_PAIRS = [
     { from: 'USD', to: 'BRL' },
     { from: 'USD', to: 'CAD' },
 ];
+
+// Only show pairs where both currencies are active for this store
+const ALL_PAIRS = computed(() => {
+    if (!props.activeCurrencyCodes.length) return BASE_PAIRS;
+    return BASE_PAIRS.filter(p =>
+        props.activeCurrencyCodes.includes(p.from) &&
+        props.activeCurrencyCodes.includes(p.to)
+    );
+});
 
 const pairKey = (p) => `${p.from}-${p.to}`;
 

@@ -1,5 +1,5 @@
 <script setup>
-import { watch } from 'vue';
+import { watch, computed } from 'vue';
 import { useTranslations } from '@/composables/useTranslations';
 import ImageUploader from './ImageUploader.vue';
 import CategorySelector from './CategorySelector.vue';
@@ -15,7 +15,21 @@ const props = defineProps({
     errors: { type: Object, default: () => ({}) },
     loading: { type: Boolean, default: false },
     categories: { type: Array, default: () => [] },
+    activeCurrencies: { type: Array, default: () => [] },
 });
+
+const hasCup = computed(() => props.activeCurrencies.some(c => c.code === 'CUP'));
+const hasCla = computed(() => props.activeCurrencies.some(c => c.code === 'CLA'));
+const hasCubanCurrencies = computed(() => hasCup.value || hasCla.value);
+
+const toggleSaleCurrency = (code) => {
+    const current = props.form.sale_currencies || [];
+    const idx = current.indexOf(code);
+    const updated = idx >= 0
+        ? current.filter(c => c !== code)
+        : [...current, code];
+    updateForm('sale_currencies', updated);
+};
 
 const emit = defineEmits([
     'close',
@@ -277,23 +291,97 @@ const currentStepData = props.steps[props.currentStep];
                                 </div>
                             </div>
 
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <!-- Base currency + Sale currencies -->
+                            <div class="space-y-4">
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                        {{ t('products.labels.currency') }}
+                                        {{ t('products.labels.currency') }} *
                                     </label>
                                     <select
                                         :value="form.base_currency"
                                         @change="updateForm('base_currency', $event.target.value)"
                                         class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        :class="{ 'border-red-500': errors.base_currency }"
                                     >
-                                        <option value="USD">USD - US Dollar</option>
-                                        <option value="EUR">EUR - Euro</option>
-                                        <option value="GBP">GBP - British Pound</option>
-                                        <option value="JPY">JPY - Japanese Yen</option>
-                                        <option value="CAD">CAD - Canadian Dollar</option>
-                                        <option value="AUD">AUD - Australian Dollar</option>
+                                        <option v-if="!activeCurrencies.length" value="USD">USD</option>
+                                        <option
+                                            v-for="cur in activeCurrencies"
+                                            :key="cur.code"
+                                            :value="cur.code"
+                                        >
+                                            {{ cur.flag }} {{ cur.code }} - {{ cur.name }}
+                                        </option>
                                     </select>
+                                    <p v-if="errors.base_currency" class="mt-1 text-sm text-red-600">{{ errors.base_currency }}</p>
+                                </div>
+
+                                <!-- Sale currencies (monedas adicionales para venta) -->
+                                <div v-if="activeCurrencies.length > 1">
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                        {{ t('products.labels.sale_currencies') }}
+                                    </label>
+                                    <div class="flex flex-wrap gap-2">
+                                        <label
+                                            v-for="cur in activeCurrencies"
+                                            :key="cur.code"
+                                            class="flex items-center gap-2 cursor-pointer rounded-lg border px-3 py-2 text-sm transition-colors"
+                                            :class="(form.sale_currencies || []).includes(cur.code)
+                                                ? 'border-blue-500 bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300'
+                                                : 'border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:border-gray-300'"
+                                        >
+                                            <input
+                                                type="checkbox"
+                                                :value="cur.code"
+                                                :checked="(form.sale_currencies || []).includes(cur.code)"
+                                                @change="toggleSaleCurrency(cur.code)"
+                                                class="w-3.5 h-3.5 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                                            />
+                                            <span>{{ cur.flag }} {{ cur.code }}</span>
+                                        </label>
+                                    </div>
+                                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ t('products.labels.sale_currencies_hint') }}</p>
+                                </div>
+
+                                <!-- CUP / CLA cost overrides (only when those currencies are active) -->
+                                <div v-if="hasCubanCurrencies" class="rounded-lg border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/20 p-4 space-y-3">
+                                    <p class="text-sm font-medium text-amber-800 dark:text-amber-300">🇨🇺 {{ t('products.labels.cuban_costs_section') }}</p>
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                        <div v-if="hasCup">
+                                            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                {{ t('products.labels.cost_cup') }}
+                                            </label>
+                                            <div class="relative">
+                                                <span class="absolute left-3 top-2 text-xs text-gray-500">CUP</span>
+                                                <input
+                                                    :value="form.cost_cup_amount"
+                                                    @input="updateForm('cost_cup_amount', $event.target.value)"
+                                                    type="number"
+                                                    step="0.01"
+                                                    min="0"
+                                                    class="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                                                    :placeholder="t('products.placeholders.auto_calculated')"
+                                                />
+                                            </div>
+                                        </div>
+                                        <div v-if="hasCla">
+                                            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                {{ t('products.labels.cost_cla') }}
+                                            </label>
+                                            <div class="relative">
+                                                <span class="absolute left-3 top-2 text-xs text-gray-500">CLA</span>
+                                                <input
+                                                    :value="form.cost_cla_amount"
+                                                    @input="updateForm('cost_cla_amount', $event.target.value)"
+                                                    type="number"
+                                                    step="0.01"
+                                                    min="0"
+                                                    class="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                                                    :placeholder="t('products.placeholders.auto_calculated')"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <p class="text-xs text-amber-700 dark:text-amber-400">{{ t('products.labels.cuban_costs_hint') }}</p>
                                 </div>
                             </div>
 

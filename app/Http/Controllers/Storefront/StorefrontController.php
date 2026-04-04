@@ -9,6 +9,7 @@ use App\Http\Resources\Storefront\ProductCardResource;
 use App\Http\Resources\Storefront\ProductResource;
 use App\Http\Resources\Storefront\StoreCardResource;
 use App\Models\Product;
+use App\Repositories\Product\ProductSaleCurrencyRepository;
 use App\Services\StorefrontService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -17,7 +18,8 @@ use Inertia\Response;
 class StorefrontController extends Controller
 {
     public function __construct(
-        private StorefrontService $storefrontService
+        private StorefrontService $storefrontService,
+        private ProductSaleCurrencyRepository $saleCurrencyRepo,
     ) {}
 
     /**
@@ -64,6 +66,14 @@ class StorefrontController extends Controller
         $product = Product::findOrFail($productId);
         $product->load(['images', 'variants', 'categories', 'store']);
 
+        $enabledSaleCurrencies = $this->saleCurrencyRepo->getEnabledForProduct($product->id)
+            ->map(fn ($sc) => [
+                'code'   => $sc->currency_code,
+                'name'   => config("currencies.supported.{$sc->currency_code}.name", $sc->currency_code),
+                'symbol' => config("currencies.supported.{$sc->currency_code}.symbol", $sc->currency_code),
+                'flag'   => config("currencies.supported.{$sc->currency_code}.flag", ''),
+            ])->values()->toArray();
+
         // Load related and store products with optimized relationships
         $relatedProducts = $this->storefrontService->getRelatedProducts($product->id);
         $relatedProducts->load(['images', 'store']);
@@ -93,12 +103,13 @@ class StorefrontController extends Controller
         }
 
         return Inertia::render('storefront/ProductDetail', [
-            'product' => (new ProductResource($product))->resolve(),
-            'related_products' => ProductCardResource::collection($relatedProducts)->resolve(),
-            'store_products' => ProductCardResource::collection($storeProducts)->resolve(),
-            'translations' => TranslationHelper::forPreset('storefront'),
-            'breadcrumb_context' => $breadcrumbContext,
-            'breadcrumb_store' => $breadcrumbStore ? (new StoreCardResource($breadcrumbStore))->resolve() : null,
+            'product'               => (new ProductResource($product))->resolve(),
+            'related_products'      => ProductCardResource::collection($relatedProducts)->resolve(),
+            'store_products'        => ProductCardResource::collection($storeProducts)->resolve(),
+            'translations'          => TranslationHelper::forPreset('storefront'),
+            'breadcrumb_context'    => $breadcrumbContext,
+            'breadcrumb_store'      => $breadcrumbStore ? (new StoreCardResource($breadcrumbStore))->resolve() : null,
+            'sale_currencies'       => $enabledSaleCurrencies,
         ]);
     }
 

@@ -10,6 +10,7 @@ use App\Http\Requests\ProductImageRequest;
 use App\Http\Requests\ProductRequest;
 use App\Models\Product;
 use App\Services\ProductService;
+use App\Services\StoreCurrencyService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -20,9 +21,9 @@ use Inertia\Response;
 class ProductController extends Controller
 {
     public function __construct(
-        private ProductService $productService
+        private ProductService $productService,
+        private StoreCurrencyService $currencyService,
     ) {
-        // Apply business role middleware to all product methods
         $this->middleware('role:business_owner');
     }
 
@@ -40,13 +41,15 @@ class ProductController extends Controller
             $categories = $this->productService->getCategories();
             $statistics = $this->productService->getStatisticsForStore($store);
 
-            // Return products page with SPA structure
+            $activeCurrencies = $this->currencyService->getSupportedCurrenciesWithStatus($store->id);
+
             return Inertia::render('products/Index', [
-                'products' => $products,
-                'categories' => $categories,
-                'filters' => $filters,
-                'statistics' => $statistics,
-                'translations' => TranslationHelper::forPreset('products'),
+                'products'          => $products,
+                'categories'        => $categories,
+                'filters'           => $filters,
+                'statistics'        => $statistics,
+                'active_currencies' => collect($activeCurrencies)->where('is_active', true)->values(),
+                'translations'      => TranslationHelper::forPreset('products'),
             ]);
 
         } catch (\Exception $e) {

@@ -82,6 +82,7 @@ class ProductRepository extends BaseRepository
                 'images' => function ($query) {
                     $query->orderBy('order');
                 },
+                'saleCurrencies',
             ]);
 
         $this->applyProductFilters($query, $filters);
