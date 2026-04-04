@@ -181,7 +181,8 @@ class ProductController extends Controller
                 return $this->notFound('Product not found');
             }
 
-            return $this->noContent('Product deleted successfully');
+            // Return redirect for Inertia, not 204
+            return redirect()->route('products.index')->with('success', 'Product deleted successfully');
 
         } catch (\Exception $e) {
             Log::error('ProductController::destroy - ERROR', [

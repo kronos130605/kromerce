@@ -50,6 +50,10 @@ const uploadTemporaryImages = async (productId, images) => {
 export function useProductManager(options = {}) {
     const { t } = useTranslations();
     const { success: toastSuccess, error: toastError } = useToast();
+
+    // Store default currency from options
+    const defaultCurrency = options.defaultCurrency || 'USD';
+
     // Estado de la lista
     const products = ref(options.initialProducts || []);
     const filters = ref(options.initialFilters || {});
@@ -71,8 +75,8 @@ export function useProductManager(options = {}) {
         cost: '',
         sku: '',
         barcode: '',
-        base_currency: 'USD',
-        sale_currencies: [],
+        base_currency: defaultCurrency,
+        sale_currencies: [defaultCurrency],
         cost_cup_amount: '',
         cost_cla_amount: '',
         stock_quantity: 0,
@@ -319,8 +323,8 @@ export function useProductManager(options = {}) {
             cost: '',
             sku: '',
             barcode: '',
-            base_currency: 'USD',
-            sale_currencies: [],
+            base_currency: defaultCurrency,
+            sale_currencies: [defaultCurrency],
             cost_cup_amount: '',
             cost_cla_amount: '',
             stock_quantity: 0,
@@ -386,6 +390,7 @@ export function useProductManager(options = {}) {
             status: form.value.status,
             category_ids: form.value.category_ids,
             tags: form.value.tags,
+            images: form.value.images,
             seo_title: form.value.seo_title,
             seo_description: form.value.seo_description,
             seo_keywords: form.value.seo_keywords,

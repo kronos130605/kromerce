@@ -68,7 +68,7 @@
                     />
 
                     <!-- Active Currencies Tab -->
-                    <ActiveCurrenciesTab v-else-if="activeTab === 'active_currencies'" />
+                    <ActiveCurrenciesTab v-else-if="activeTab === 'active_currencies'" @updated="reloadSettings" />
 
                     <!-- Placeholder tabs -->
                     <PlaceholderTab
@@ -86,7 +86,7 @@
 
 <script setup>
 import { ref, computed, defineComponent, h } from 'vue';
-import { usePage } from '@inertiajs/vue3';
+import { usePage, router } from '@inertiajs/vue3';
 import { useTranslations } from '@/composables/useTranslations';
 import CurrencyRateSourceTab from '@/modules/business/components/settings/CurrencyRateSourceTab.vue';
 import ActiveCurrenciesTab from '@/modules/business/components/settings/ActiveCurrenciesTab.vue';
@@ -202,7 +202,13 @@ const onCurrencyUpdated = (data) => {
             page.props.settings.currency.preferred_cuba_source_id = data.preferred_cuba_source_id;
         } else if (data.type === 'foreign') {
             page.props.settings.currency.preferred_foreign_source_id = data.preferred_foreign_source_id;
+        } else if (data.type === 'pairs') {
+            page.props.settings.currency.dashboard_pairs = data.dashboard_pairs;
         }
     }
+};
+
+const reloadSettings = () => {
+    router.reload({ only: ['settings'] });
 };
 </script>

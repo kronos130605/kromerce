@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Store;
 use App\Models\User;
 use App\Repositories\Currency\CurrencyRateGlobalRepository;
+use App\Repositories\Store\StoreActiveCurrencyRepository;
 use App\Repositories\Store\StoreCurrencyConfigRepository;
 use App\Repositories\Store\StoreStatisticsRepository;
 use Illuminate\Support\Facades\Log;
@@ -17,6 +18,7 @@ class DashboardRoutingService
         private StoreStatisticsRepository $statisticsRepo,
         private CurrencyRateGlobalRepository $rateRepo,
         private StoreCurrencyConfigRepository $configRepo,
+        private StoreActiveCurrencyRepository $activeCurrencyRepo,
     ) {}
 
     /**
@@ -284,6 +286,10 @@ class DashboardRoutingService
                 return [];
             }
 
+            // Get active currency codes for this store
+            $activeCodes = $this->activeCurrencyRepo->getActiveCodesForStore($storeId);
+            $activeCodes = array_map('strtoupper', $activeCodes);
+
             // Load preferred source codes via relationships
             $cubaSource   = $config->preferredCubaSource;
             $foreignSource = $config->preferredForeignSource;
@@ -293,12 +299,19 @@ class DashboardRoutingService
             $foreignSourceName = $foreignSource?->name;
 
             // Get pairs to display, or use default pairs
-            $pairs = $config->dashboard_pairs ?? [
+            $allPairs = $config->dashboard_pairs ?? [
                 ['from' => 'USD', 'to' => 'CUP'],
                 ['from' => 'EUR', 'to' => 'CUP'],
                 ['from' => 'MLC', 'to' => 'CUP'],
                 ['from' => 'USD', 'to' => 'EUR'],
             ];
+
+            // Filter pairs to only include active currencies
+            $pairs = array_filter($allPairs, function ($pair) use ($activeCodes) {
+                $from = strtoupper($pair['from'] ?? '');
+                $to   = strtoupper($pair['to'] ?? '');
+                return in_array($from, $activeCodes) && in_array($to, $activeCodes);
+            });
 
             $rates = [];
             $lastUpdated = null;
@@ -334,7 +347,7 @@ class DashboardRoutingService
                 'last_updated' => $lastUpdated?->toDateTimeString(),
                 'cuba_source'  => $cubaSource?->name,
                 'foreign_source' => $foreignSource?->name,
-                'configured_pairs' => $pairs,
+                'configured_pairs' => array_values($pairs),
             ];
 
         } catch (\Exception $e) {

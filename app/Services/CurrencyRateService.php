@@ -318,7 +318,7 @@ class CurrencyRateService
         }
 
         // Fallback to any available Cuba rate in global table
-        $globalRate = $this->globalRateRepo->getRateForDate($from, $to, $date);
+        $globalRate = $this->globalRateRepo->getRateForDate($from, $to, $date ?? now()->format('Y-m-d'));
 
         if ($globalRate) {
             return [
@@ -353,7 +353,7 @@ class CurrencyRateService
 
         if (!$globalSource || !$globalSource->is_active) {
             // Fallback to any global rate
-            $globalRate = $this->globalRateRepo->getRateForDate($from, $to, $date);
+            $globalRate = $this->globalRateRepo->getRateForDate($from, $to, $date ?? now()->format('Y-m-d'));
 
             if ($globalRate) {
                 return [
@@ -368,7 +368,7 @@ class CurrencyRateService
         }
 
         // Get rate from global rates
-        $globalRate = $this->globalRateRepo->getRateForDate($from, $to, $date);
+        $globalRate = $this->globalRateRepo->getRateForDate($from, $to, $date ?? now()->format('Y-m-d'));
 
         if ($globalRate) {
             return [

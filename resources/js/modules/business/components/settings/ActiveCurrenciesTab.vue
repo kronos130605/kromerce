@@ -219,6 +219,7 @@ import axios from 'axios';
 import { useTranslations } from '@/composables/useTranslations';
 
 const { t } = useTranslations();
+const emit = defineEmits(['updated']);
 
 const currencies = ref([]);
 const loading = ref(true);
@@ -250,8 +251,11 @@ const activate = async (code) => {
     processing.value = code;
     try {
         await axios.post('/business/currencies/activate', { currency_code: code });
-        const found = currencies.value.find(c => c.code === code);
-        if (found) found.is_active = true;
+        const idx = currencies.value.findIndex(c => c.code === code);
+        if (idx >= 0) {
+            currencies.value[idx] = { ...currencies.value[idx], is_active: true };
+        }
+        emit('updated');
     } catch (err) {
         console.error('Failed to activate currency', err);
     } finally {
@@ -266,9 +270,12 @@ const initiateDeactivate = async (currency) => {
             currency_code: currency.code,
         });
 
-        if (data.success) {
-            const found = currencies.value.find(c => c.code === currency.code);
-            if (found) found.is_active = false;
+        if (data.status === 'success') {
+            const idx = currencies.value.findIndex(c => c.code === currency.code);
+            if (idx >= 0) {
+                currencies.value[idx] = { ...currencies.value[idx], is_active: false };
+            }
+            emit('updated');
         } else if (data.requires_action) {
             deactivateModal.value = {
                 open: true,
@@ -309,8 +316,11 @@ const confirmDeactivate = async () => {
             await axios.post('/business/currencies/deactivate', { currency_code: code, force: true });
         }
 
-        const found = currencies.value.find(c => c.code === code);
-        if (found) found.is_active = false;
+        const idx = currencies.value.findIndex(c => c.code === code);
+        if (idx >= 0) {
+            currencies.value[idx] = { ...currencies.value[idx], is_active: false };
+        }
+        emit('updated');
         closeModal();
     } catch (err) {
         console.error('Failed to confirm deactivation', err);

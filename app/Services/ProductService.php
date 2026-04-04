@@ -12,6 +12,8 @@ use App\Services\StoreCurrencyService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class ProductService
 {
@@ -81,7 +83,8 @@ class ProductService
 
                 $categoryIds   = $data['category_ids'] ?? [];
                 $saleCurrencies = $data['sale_currencies'] ?? [];
-                unset($data['category_ids'], $data['sale_currencies']);
+                $images         = $data['images'] ?? [];
+                unset($data['category_ids'], $data['sale_currencies'], $data['images']);
 
                 // Auto-compute CUP/CLA cost conversions if cost_price is provided
                 if (!empty($data['cost_price']) && !empty($data['base_currency'])) {
@@ -114,6 +117,11 @@ class ProductService
                     $this->saleCurrencyRepository->syncForProduct($product->id, $saleCurrencies);
                 }
 
+                // Sync product images
+                if (!empty($images)) {
+                    $this->syncProductImages($product, $images);
+                }
+
                 return $product;
             });
         } catch (\Exception $e) {
@@ -143,7 +151,8 @@ class ProductService
             return \DB::transaction(function () use ($store, $productId, $data) {
                 $categoryIds    = $data['category_ids'] ?? null;
                 $saleCurrencies = $data['sale_currencies'] ?? null;
-                unset($data['category_ids'], $data['sale_currencies']);
+                $images         = $data['images'] ?? null;
+                unset($data['category_ids'], $data['sale_currencies'], $data['images']);
 
                 $data['updated_by'] = auth()->id();
 
@@ -179,6 +188,9 @@ class ProductService
                         }
                         if ($saleCurrencies !== null) {
                             $this->saleCurrencyRepository->syncForProduct($product->id, $saleCurrencies);
+                        }
+                        if ($images !== null) {
+                            $this->syncProductImages($product, $images);
                         }
                     }
                 }
@@ -399,5 +411,78 @@ class ProductService
 
             fclose($handle);
         }, 200, $headers);
+    }
+
+    /**
+     * Sync product images.
+     * Handles both existing images (with id) and new images (base64 or url).
+     */
+    private function syncProductImages(Model $product, array $images): void
+    {
+        $existingIds = [];
+        $order = 0;
+
+        foreach ($images as $image) {
+            // Existing image with ID
+            if (!empty($image['id'])) {
+                $existingIds[] = $image['id'];
+                // Update order if needed
+                $product->images()->where('id', $image['id'])->update([
+                    'order' => $order,
+                    'is_primary' => $order === 0,
+                ]);
+            } else {
+                // New image (base64 or URL)
+                $imageData = [
+                    'product_id' => $product->id,
+                    'order' => $order,
+                    'is_primary' => $order === 0,
+                ];
+
+                if (!empty($image['file']) && str_starts_with($image['file'], 'data:image')) {
+                    // Base64 image - save to storage
+                    $path = $this->saveBase64Image($image['file'], $product->id);
+                    $imageData['url'] = $path;
+                    $imageData['alt_text'] = $image['alt_text'] ?? $product->name;
+                } elseif (!empty($image['url'])) {
+                    // URL image
+                    $imageData['url'] = $image['url'];
+                    $imageData['alt_text'] = $image['alt_text'] ?? $product->name;
+                }
+
+                if (!empty($imageData['url'])) {
+                    $newImage = $product->images()->create($imageData);
+                    $existingIds[] = $newImage->id;
+                }
+            }
+            $order++;
+        }
+
+        // Delete images not in the list
+        $product->images()->whereNotIn('id', $existingIds)->delete();
+    }
+
+    /**
+     * Save base64 image to storage.
+     */
+    private function saveBase64Image(string $base64, string $productId): string
+    {
+        // Remove data:image/xxx;base64, prefix
+        $base64 = preg_replace('/^data:image\/\w+;base64,/', '', $base64);
+        $data = base64_decode($base64);
+
+        $extension = 'png';
+        if (str_contains($base64, 'data:image/jpeg') || str_contains($base64, 'data:image/jpg')) {
+            $extension = 'jpg';
+        } elseif (str_contains($base64, 'data:image/webp')) {
+            $extension = 'webp';
+        }
+
+        $filename = Str::uuid() . '.' . $extension;
+        $path = "products/{$productId}/{$filename}";
+
+        Storage::disk('public')->put($path, $data);
+
+        return Storage::disk('public')->url($path);
     }
 }

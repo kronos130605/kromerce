@@ -30,8 +30,9 @@ export function useTranslations() {
 
         // Reemplazos tipo {name} o :name
         Object.keys(replacements).forEach(k => {
-            value = value.replace(new RegExp(`{${k}}`, 'g'), replacements[k])
-            value = value.replace(new RegExp(`:${k}`, 'g'), replacements[k])
+            // Use split/join instead of regex to avoid issues with special characters
+            value = value.split(`{${k}}`).join(replacements[k])
+            value = value.split(`:${k}`).join(replacements[k])
         })
 
         return value

@@ -522,9 +522,10 @@ class ProductRepository extends BaseRepository
     public function getStatistics(int $storeId): array
     {
         try {
-            // Single optimized query for main stats
+            // Single optimized query for main stats (excluding soft-deleted)
             $mainStats = \DB::table('products')
                 ->where('store_id', $storeId)
+                ->whereNull('deleted_at')
                 ->selectRaw('
                     COUNT(*) as total_products,
                     SUM(CASE WHEN status = "active" THEN 1 ELSE 0 END) as active_products,
@@ -542,12 +543,13 @@ class ProductRepository extends BaseRepository
                 'average_price' => (float) $mainStats->average_price,
             ];
 
-            // Get products by category using many-to-many relationship
+            // Get products by category using many-to-many relationship (excluding soft-deleted)
             try {
                 $categoryStats = \DB::table('product_category_product')
                     ->join('product_categories', 'product_category_product.category_id', '=', 'product_categories.id')
                     ->join('products', 'product_category_product.product_id', '=', 'products.id')
                     ->where('products.store_id', $storeId)
+                    ->whereNull('products.deleted_at')
                     ->groupBy('product_categories.id', 'product_categories.name')
                     ->selectRaw('product_categories.name as category, COUNT(DISTINCT products.id) as count')
                     ->get()

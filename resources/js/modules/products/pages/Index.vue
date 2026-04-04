@@ -56,6 +56,7 @@ const {
 } = useProductManager({
     initialProducts: props.products?.data || [],
     initialFilters: props.filters,
+    defaultCurrency: props.active_currencies?.find(c => c.is_default)?.code || props.active_currencies?.[0]?.code || 'USD',
 });
 
 // Filters

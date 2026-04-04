@@ -327,7 +327,7 @@ const savePairs = async () => {
     saving.value.pairs = true;
     savedFeedback.value.pairs = false;
     try {
-        const pairs = ALL_PAIRS.filter(p => selectedPairKeys.value.includes(pairKey(p)));
+        const pairs = ALL_PAIRS.value.filter(p => selectedPairKeys.value.includes(pairKey(p)));
         await axios.put('/settings/currency-source', { type: 'dashboard_pairs', dashboard_pairs: pairs });
         originalPairKeys.value = [...selectedPairKeys.value];
         emit('updated', { type: 'dashboard_pairs', dashboard_pairs: pairs });
