@@ -241,6 +241,16 @@ watch(images, (newValue) => {
     emit('update:modelValue', newValue)
 }, { deep: true })
 
+// Sync local images when parent updates modelValue (e.g. when edit modal opens with existing images)
+watch(() => props.modelValue, (newValue) => {
+    if (!newValue) return
+    const incomingJson = JSON.stringify(newValue)
+    const localJson    = JSON.stringify(images.value)
+    if (incomingJson !== localJson) {
+        images.value = [...newValue]
+    }
+})
+
 // Methods
 const triggerFileInput = () => {
     if (images.value.length >= props.maxImages) return
