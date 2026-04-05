@@ -28,7 +28,7 @@ class ProductRequest extends FormRequest
                 'nullable',
                 'string',
                 'max:100',
-                'regex:/^[A-Z0-9\-_]+$/',
+                'regex:/^[a-zA-Z0-9\-_]+$/',
                 \Illuminate\Validation\Rule::unique('products', 'sku')
                     ->where('store_id', $storeId)
                     ->ignore($this->route('product')?->id ?? null)
@@ -76,8 +76,17 @@ class ProductRequest extends FormRequest
             'is_on_sale' => 'sometimes|boolean',
             
             // Organization
-            'category_ids' => 'nullable|array',
+            'category_ids'   => 'nullable|array',
             'category_ids.*' => 'exists:product_categories,id',
+
+            // Images (existing images only, new uploads handled via separate endpoint)
+            'images'            => 'nullable|array',
+            'images.*.id'       => 'nullable',
+            'images.*.url'      => 'nullable|string',
+            'images.*.order'    => 'nullable|integer',
+            'images.*.is_primary' => 'nullable|boolean',
+            'images.*.alt'      => 'nullable|string|max:255',
+            'images.*.title'    => 'nullable|string|max:255',
             
             // Filters for listing
             'min_price' => 'sometimes|numeric|min:0',

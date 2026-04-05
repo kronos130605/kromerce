@@ -195,22 +195,14 @@ export function useProductManager(options = {}) {
 
         loading.value = true;
         const payload = buildPayload();
-        // Remove temporary images from payload - they'll be uploaded separately
-        const temporaryImages = form.value.images.filter(img => img.isTemporary);
-        payload.images = form.value.images.filter(img => !img.isTemporary).map(img => ({
-            id: img.id,
-            url: img.url,
-            alt: img.alt,
-            title: img.title,
-            order: img.order,
-            is_primary: img.is_primary
-        }));
+        
+        // Get temporary images for separate upload
+        const temporaryImages = form.value.images.filter(img => img.isTemporary && img.file);
 
         if (isEditing.value && selectedProduct.value?.id) {
-            // Handle new images for existing product first
-            const newImages = temporaryImages;
-            if (newImages.length > 0) {
-                await uploadTemporaryImages(selectedProduct.value.id, newImages);
+            // Upload new images for existing product first
+            if (temporaryImages.length > 0) {
+                await uploadTemporaryImages(selectedProduct.value.id, temporaryImages);
             }
 
             // Use form method spoofing for PUT request
@@ -237,20 +229,11 @@ export function useProductManager(options = {}) {
             router.post('/products', payload, {
                 preserveScroll: true,
                 onSuccess: async (page) => {
-                    console.log('Product created, page props:', page.props);
-
-                    // Find the newly created product by matching name and sku
-                    const newProduct = page.props?.products?.data?.find(p =>
-                        p.name === payload.name && p.sku === payload.sku
-                    );
-                    const newProductId = newProduct?.id;
+                    // Get the new product ID from flash (set by store() controller)
+                    const newProductId = page.props?.flash?.product_id;
 
                     if (newProductId && temporaryImages.length > 0) {
-                        console.log('Uploading temporary images...');
-                        const results = await uploadTemporaryImages(newProductId, temporaryImages);
-                        console.log('Upload results:', results);
-                    } else {
-                        console.log('No product ID or no temporary images');
+                        await uploadTemporaryImages(newProductId, temporaryImages);
                     }
                     closeModal();
                     refreshProducts();
@@ -286,8 +269,8 @@ export function useProductManager(options = {}) {
         router.delete(`/products/${product.id}`, {
             preserveScroll: true,
             onSuccess: () => {
-                refreshProducts();
                 toastSuccess(t('products.messages.deleted'));
+                refreshProducts();
             },
             onError: (err) => {
                 console.error('Delete error:', err);
@@ -371,6 +354,18 @@ export function useProductManager(options = {}) {
     };
 
     const buildPayload = () => {
+        // Filter out temporary images (they contain File objects that can't be serialized)
+        const existingImages = (form.value.images || [])
+            .filter(img => !img.isTemporary)
+            .map(img => ({
+                id: img.id,
+                url: img.url,
+                alt: img.alt,
+                title: img.title,
+                order: img.order,
+                is_primary: img.is_primary
+            }));
+
         return {
             name: form.value.name,
             description: form.value.description,
@@ -390,7 +385,7 @@ export function useProductManager(options = {}) {
             status: form.value.status,
             category_ids: form.value.category_ids,
             tags: form.value.tags,
-            images: form.value.images,
+            images: existingImages,
             seo_title: form.value.seo_title,
             seo_description: form.value.seo_description,
             seo_keywords: form.value.seo_keywords,

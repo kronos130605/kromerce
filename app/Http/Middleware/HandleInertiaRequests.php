@@ -48,6 +48,12 @@ class HandleInertiaRequests extends Middleware
             'location' => $request->url(),
         ]);
 
+        $shared['flash'] = [
+            'product_id' => $request->session()->get('product_id'),
+            'success'    => $request->session()->get('success'),
+            'error'      => $request->session()->get('error'),
+        ];
+
         return $shared;
     }
 }

@@ -15,6 +15,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -145,22 +146,24 @@ class ProductController extends Controller
                 abort(404);
             }
 
-            // Inertia expects a redirect response, not JSON
-            return redirect()->route('products.index')->with('success', 'Product updated successfully');
+            // Return back for Inertia
+            return back()->with('success', 'Product updated successfully');
 
         } catch (\Exception $e) {
-            if ($request->wantsJson()) {
-                return $this->error('Failed to update product', 500);
-            }
+            Log::error('ProductController::update - ERROR', [
+                'error'      => $e->getMessage(),
+                'product_id' => $product->id ?? null,
+                'user_id'    => auth()->id(),
+            ]);
 
-            throw $e;
+            return back()->withErrors(['error' => 'Failed to update product.']);
         }
     }
 
     /**
      * Remove the specified product.
      */
-    public function destroy(Request $request, Product $product): JsonResponse
+    public function destroy(Request $request, Product $product): JsonResponse|\Illuminate\Http\RedirectResponse
     {
         try {
             $store = $this->validateStore();
@@ -181,8 +184,7 @@ class ProductController extends Controller
                 return $this->notFound('Product not found');
             }
 
-            // Return redirect for Inertia, not 204
-            return redirect()->route('products.index')->with('success', 'Product deleted successfully');
+            return back()->with('success', 'Product deleted successfully');
 
         } catch (\Exception $e) {
             Log::error('ProductController::destroy - ERROR', [
@@ -196,7 +198,7 @@ class ProductController extends Controller
     }
 
     /**
-     * Upload image for a product with async thumbnail generation.
+     * Upload image for a product - synchronous processing with thumbnails.
      */
     public function uploadImage(ProductImageRequest $request, Product $product): JsonResponse
     {
@@ -210,29 +212,66 @@ class ProductController extends Controller
 
             $file = $request->file('image');
             $filename = uniqid() . '.' . $file->getClientOriginalExtension();
+            $directory = 'products/' . $product->id;
 
-            // Store temp file for job processing
-            $tempPath = $file->store('temp/uploads', 'local');
-            $fullTempPath = storage_path('app/' . $tempPath);
+            // Store original image
+            $originalPath = $file->storeAs($directory, $filename, 'public');
 
-            // Prepare metadata
-            $metadata = [
+            // Create thumbnail (300x300, cropped)
+            $thumbnailFilename = 'thumb_' . $filename;
+            $thumbnailPath = storage_path('app/public/' . $directory . '/' . $thumbnailFilename);
+
+            $image = \Intervention\Image\Laravel\Facades\Image::read($file->getRealPath());
+            $image->cover(300, 300);
+            $image->save($thumbnailPath, quality: 80);
+
+            // Create medium size (800x800, fitted)
+            $mediumFilename = 'medium_' . $filename;
+            $mediumPath = storage_path('app/public/' . $directory . '/' . $mediumFilename);
+
+            $mediumImage = \Intervention\Image\Laravel\Facades\Image::read($file->getRealPath());
+            $mediumImage->scaleDown(800, 800);
+            $mediumImage->save($mediumPath, quality: 85);
+
+            // Parse values from request
+            $isPrimary = $request->booleanIsPrimary();
+            $order = $request->integerOrder($product->images()->count());
+
+            // Create image record with relative paths (not full URLs)
+            $imageRecord = $product->images()->create([
+                'url' => 'storage/' . $originalPath,
                 'alt' => $request->input('alt', $product->name),
                 'title' => $request->input('title'),
-                'is_primary' => $request->booleanIsPrimary(),
-                'order' => $request->integerOrder($product->images()->count()),
-            ];
+                'is_primary' => $isPrimary,
+                'order' => $order,
+                'metadata' => [
+                    'thumbnail' => 'storage/' . $directory . '/' . $thumbnailFilename,
+                    'medium' => 'storage/' . $directory . '/' . $mediumFilename,
+                    'sizes' => [
+                        'original' => $originalPath,
+                        'thumbnail' => $directory . '/' . $thumbnailFilename,
+                        'medium' => $directory . '/' . $mediumFilename,
+                    ],
+                ],
+            ]);
 
-            // Dispatch job for async processing
-            ProcessProductImage::dispatch($product, [
-                'temp_path' => $fullTempPath,
-                'filename' => $filename,
-            ], $metadata);
+            // If this is the first image or is_primary is true, set as primary
+            if ($isPrimary || $product->images()->count() === 1) {
+                $product->images()->where('id', '!=', $imageRecord->id)->update(['is_primary' => false]);
+                $imageRecord->update(['is_primary' => true]);
+            }
 
             return $this->success([
-                'processing' => true,
-                'message' => 'Image upload started. It will be available shortly.',
-            ], 'Image processing started', 202);
+                'id' => $imageRecord->id,
+                'url' => asset($imageRecord->url),
+                'full_url' => asset($imageRecord->url),
+                'thumbnail_url' => asset($imageRecord->metadata['thumbnail'] ?? $imageRecord->url),
+                'medium_url' => asset($imageRecord->metadata['medium'] ?? $imageRecord->url),
+                'alt' => $imageRecord->alt,
+                'title' => $imageRecord->title,
+                'is_primary' => $imageRecord->is_primary,
+                'order' => $imageRecord->order,
+            ], 'Image uploaded successfully', 201);
 
         } catch (\Exception $e) {
             Log::error('ProductController::uploadImage - ERROR', [
