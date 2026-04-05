@@ -202,13 +202,39 @@ export function useProductManager(options = {}) {
         if (isEditing.value && selectedProduct.value?.id) {
             // Upload new images for existing product first
             if (temporaryImages.length > 0) {
-                await uploadTemporaryImages(selectedProduct.value.id, temporaryImages);
+                const uploadedResults = await uploadTemporaryImages(selectedProduct.value.id, temporaryImages);
+                
+                // Replace temporary images with uploaded ones (with real IDs from server)
+                if (uploadedResults.length > 0) {
+                    form.value.images = form.value.images.map(img => {
+                        if (img.isTemporary && img.file) {
+                            // Find matching uploaded result by order
+                            const uploaded = uploadedResults.find(u => u.order === img.order);
+                            if (uploaded) {
+                                return {
+                                    id: uploaded.id,
+                                    url: uploaded.thumbnail_url || uploaded.url,
+                                    full_url: uploaded.full_url || uploaded.url,
+                                    alt: uploaded.alt || img.alt || '',
+                                    title: uploaded.title || img.title || '',
+                                    order: uploaded.order,
+                                    is_primary: uploaded.is_primary,
+                                    isTemporary: false
+                                };
+                            }
+                        }
+                        return img;
+                    }).filter(img => !img.isTemporary); // Remove any remaining temporaries that failed to upload
+                }
             }
+
+            // Rebuild payload after updating images with server IDs
+            const updatedPayload = buildPayload();
 
             // Use form method spoofing for PUT request
             router.post(`/products/${selectedProduct.value.id}`, {
                 _method: 'PUT',
-                ...payload
+                ...updatedPayload
             }, {
                 preserveScroll: true,
                 onSuccess: () => {

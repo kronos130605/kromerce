@@ -305,28 +305,23 @@ const processFiles = async (files) => {
             continue
         }
 
-        // If no productId yet, just store preview temporarily
-        if (!props.productId) {
-            const reader = new FileReader()
-            reader.onload = (e) => {
-                const newImage = {
-                    id: null,
-                    file: file, // Keep file reference for later upload
-                    url: e.target.result,
-                    preview: e.target.result,
-                    alt: '',
-                    title: '',
-                    order: images.value.length,
-                    is_primary: images.value.length === 0,
-                    isTemporary: true
-                }
-                images.value.push(newImage)
+        // Always create temporary image - upload happens during product save
+        const reader = new FileReader()
+        reader.onload = (e) => {
+            const newImage = {
+                id: null,
+                file: file, // Keep file reference for later upload
+                url: e.target.result,
+                preview: e.target.result,
+                alt: '',
+                title: '',
+                order: images.value.length,
+                is_primary: images.value.length === 0,
+                isTemporary: true
             }
-            reader.readAsDataURL(file)
-        } else {
-            // Upload immediately to server
-            await uploadImage(file)
+            images.value.push(newImage)
         }
+        reader.readAsDataURL(file)
     }
 }
 
@@ -376,26 +371,12 @@ const uploadImage = async (file, isPrimary = false) => {
     }
 }
 
-const removeImage = async (index) => {
+const removeImage = (index) => {
     const removedImage = images.value[index]
     
-    // If image is saved on server, delete it
-    if (removedImage.id && props.productId && !removedImage.isTemporary) {
-        try {
-            const response = await fetch(`/products/${props.productId}/images/${removedImage.id}`, {
-                method: 'DELETE',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
-                }
-            })
-            
-            if (!response.ok) {
-                console.error('Failed to delete image from server')
-            }
-        } catch (error) {
-            console.error('Delete error:', error)
-        }
-    }
+    // If image is saved on server (has id and not temporary), mark for deletion
+    // The actual deletion happens when product is saved
+    // Temporary images are just removed from the local array
     
     images.value.splice(index, 1)
     
@@ -404,27 +385,36 @@ const removeImage = async (index) => {
         images.value[0].is_primary = true
     }
     
-    // Update order
+    // Update order for remaining images
     images.value.forEach((img, idx) => {
         img.order = idx
     })
 }
 
 const setAsPrimary = (index) => {
-    // Remove primary from all images
+    // Remove primary from all images (both existing and temporary)
     images.value.forEach(img => {
         img.is_primary = false
     })
     
     // Set new primary
     images.value[index].is_primary = true
+    
+    // Reorder: move primary to index 0
+    const primaryImage = images.value.splice(index, 1)[0]
+    images.value.unshift(primaryImage)
+    
+    // Update order for all
+    images.value.forEach((img, idx) => {
+        img.order = idx
+    })
 }
 
 const moveImage = (fromIndex, toIndex) => {
     const image = images.value.splice(fromIndex, 1)[0]
     images.value.splice(toIndex, 0, image)
     
-    // Update order
+    // Update order for all images
     images.value.forEach((img, idx) => {
         img.order = idx
     })
